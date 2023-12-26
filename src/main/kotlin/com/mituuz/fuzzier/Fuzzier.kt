@@ -18,6 +18,7 @@ import java.awt.event.MouseEvent
 import javax.swing.AbstractAction
 import javax.swing.DefaultListModel
 import javax.swing.KeyStroke
+import javax.swing.SwingUtilities
 
 class Fuzzier : AnAction() {
     private var component = FuzzyFinder()
@@ -26,7 +27,6 @@ class Fuzzier : AnAction() {
     override fun actionPerformed(p0: AnActionEvent) {
         // Indicate that we are loading the data
         component.fileList.setPaintBusy(true)
-        component.searchField.isFocusable = true
 
         p0.project?.let { project ->
             val listModel = DefaultListModel<String>()
@@ -81,6 +81,22 @@ class Fuzzier : AnAction() {
                 }
             })
 
+            // Add listener that opens the currently selected file when pressing enter (focus on the text box)
+            val enterKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)
+            val enterActionKey = "openFile"
+            component.searchField.inputMap.put(enterKeyStroke, enterActionKey)
+            component.searchField.actionMap.put(enterActionKey, object : AbstractAction() {
+                override fun actionPerformed(e: ActionEvent?) {
+                    println("Calling $e")
+                    val selectedValue = component.fileList.selectedValue
+                    val virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
+
+                    virtualFile?.let {
+                        popup?.cancel()
+                        FileEditorManager.getInstance(project).openFile(it, true)
+                    }
+                }
+            })
         }
 
         val mainWindow = WindowManager.getInstance().getIdeFrame(p0.project)?.component
@@ -88,8 +104,14 @@ class Fuzzier : AnAction() {
             popup = JBPopupFactory
                     .getInstance()
                     .createComponentPopupBuilder(component, component.searchField)
-                    .createPopup();
+                    .createPopup()
             popup!!.showInCenterOf(it)
+            SwingUtilities.invokeLater {
+                val asd = component.searchField.requestFocusInWindow()
+                if (asd) {
+                    println("Should happen")
+                }
+            }
         }
     }
 }
