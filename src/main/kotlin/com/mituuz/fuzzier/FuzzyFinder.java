@@ -11,7 +11,7 @@ import java.awt.*;
 
 public class FuzzyFinder extends JPanel {
     private JTextPane textPane1;
-    private JBList<?> fileList;
+    private JBList<String> fileList;
     private EditorTextField searchField;
     private JPanel fuzzyPanel;
 
@@ -19,7 +19,7 @@ public class FuzzyFinder extends JPanel {
         return textPane1;
     }
 
-    public JBList<?> getFileList() {
+    public JBList<String> getFileList() {
         return fileList;
     }
 
