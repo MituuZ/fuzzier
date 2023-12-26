@@ -1,5 +1,6 @@
 package com.mituuz.fuzzier
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
@@ -13,7 +14,6 @@ import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
-import java.awt.KeyboardFocusManager
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
@@ -21,12 +21,15 @@ import java.awt.event.MouseEvent
 import javax.swing.AbstractAction
 import javax.swing.DefaultListModel
 import javax.swing.KeyStroke
-import javax.swing.SwingUtilities
 
 class Fuzzier : AnAction() {
     private var component = FuzzyFinder()
     private var popup: JBPopup? = null
     private var editor: Editor? = null
+
+    override fun getActionUpdateThread(): ActionUpdateThread {
+        return super.getActionUpdateThread()
+    }
 
     override fun update(e: AnActionEvent) {
         editor = e.getData(CommonDataKeys.EDITOR)
@@ -93,6 +96,7 @@ class Fuzzier : AnAction() {
             })
 
             // Add listener that opens the currently selected file when pressing enter (focus on the text box)
+            // ToDo: This is not working at the moment
             val enterKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)
             val enterActionKey = "openFile"
             component.searchField.inputMap.put(enterKeyStroke, enterActionKey)
@@ -115,12 +119,10 @@ class Fuzzier : AnAction() {
             popup = JBPopupFactory
                     .getInstance()
                     .createComponentPopupBuilder(component, component.searchField)
+                    .setFocusable(true)
                     .setRequestFocus(true)
                     .createPopup()
             popup!!.showInCenterOf(it)
-            SwingUtilities.invokeLater {
-                component.searchField.requestFocusInWindow()
-            }
         }
     }
 }
