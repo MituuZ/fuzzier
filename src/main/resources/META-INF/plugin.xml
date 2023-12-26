@@ -27,4 +27,19 @@
   <extensions defaultExtensionNs="com.intellij">
 
   </extensions>
+
+  <actions>
+    <action
+            id="com.mituuz.fuzzier.Fuzzier"
+            class="com.mituuz.fuzzier.Fuzzier"
+            text="Fuzzy File Search"
+            description="Search files using a basic fuzzy search">
+      <override-text place="MainMenu" text="Fuzzy file search"/>
+      <keyboard-shortcut
+              keymap="$default"
+              first-keystroke="control alt A"
+              second-keystroke="C"/>
+      <add-to-group group-id="ToolsMenu" anchor="first"/>
+    </action>
+  </actions>
 </idea-plugin>
