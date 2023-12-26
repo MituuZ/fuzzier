@@ -9,10 +9,6 @@ class Fuzzier : AnAction() {
     private var component = FuzzyFinder()
 
     override fun actionPerformed(p0: AnActionEvent) {
-        component.textPane1.text = "asdqwieqwjeqduwu ";
-        component.setSize(500, 500)
-        component.fuzzyPanel.setSize(500, 500)
-
         val mainWindow = WindowManager.getInstance().getIdeFrame(p0.project)?.component
         mainWindow?.let {
             JBPopupFactory
