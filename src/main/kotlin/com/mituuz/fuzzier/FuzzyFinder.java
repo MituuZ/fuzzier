@@ -64,8 +64,8 @@ public class FuzzyFinder extends JPanel {
         fuzzyPanel.add(scrollPane1, new GridConstraints(0, 0, 2, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         fileList = new JBList();
         scrollPane1.setViewportView(fileList);
-        previewPane = new JTextPane();
-        previewPane.setText("This is a text");
+        previewPane = new JEditorPane();
+        previewPane.setText("");
         fuzzyPanel.add(previewPane, new GridConstraints(0, 1, 3, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(50, 50), new Dimension(150, 50), null, 0, false));
     }
 
