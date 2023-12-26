@@ -7,7 +7,6 @@ import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.WindowManager
-import java.awt.Dimension
 import javax.swing.DefaultListModel
 
 class Fuzzier : AnAction() {
@@ -37,7 +36,6 @@ class Fuzzier : AnAction() {
         }
 
         component.fileList.setPaintBusy(false)
-        component.fileList.preferredSize = Dimension(500, 500)
 
         val mainWindow = WindowManager.getInstance().getIdeFrame(p0.project)?.component
         mainWindow?.let {
