@@ -2,6 +2,8 @@ package com.mituuz.fuzzier
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.roots.ContentIterator
@@ -11,6 +13,7 @@ import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
+import java.awt.KeyboardFocusManager
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
@@ -23,10 +26,18 @@ import javax.swing.SwingUtilities
 class Fuzzier : AnAction() {
     private var component = FuzzyFinder()
     private var popup: JBPopup? = null
+    private var editor: Editor? = null
+
+    override fun update(e: AnActionEvent) {
+        editor = e.getData(CommonDataKeys.EDITOR)
+        super.update(e)
+    }
 
     override fun actionPerformed(p0: AnActionEvent) {
         // Indicate that we are loading the data
         component.fileList.setPaintBusy(true)
+        component.searchField.isEnabled = true
+        component.searchField.isVisible = true
 
         p0.project?.let { project ->
             val listModel = DefaultListModel<String>()
@@ -104,13 +115,11 @@ class Fuzzier : AnAction() {
             popup = JBPopupFactory
                     .getInstance()
                     .createComponentPopupBuilder(component, component.searchField)
+                    .setRequestFocus(true)
                     .createPopup()
             popup!!.showInCenterOf(it)
             SwingUtilities.invokeLater {
-                val asd = component.searchField.requestFocusInWindow()
-                if (asd) {
-                    println("Should happen")
-                }
+                component.searchField.requestFocusInWindow()
             }
         }
     }
