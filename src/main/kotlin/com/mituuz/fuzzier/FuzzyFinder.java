@@ -9,13 +9,13 @@ import javax.swing.*;
 import java.awt.*;
 
 public class FuzzyFinder extends JPanel {
-    private JTextPane textPane1;
+    private JEditorPane previewPane;
     private JBList<String> fileList;
     private EditorTextField searchField;
     private JPanel fuzzyPanel;
 
-    public JTextPane getTextPane1() {
-        return textPane1;
+    public JEditorPane getPreviewPane() {
+        return previewPane;
     }
 
     public JBList<String> getFileList() {
@@ -64,9 +64,9 @@ public class FuzzyFinder extends JPanel {
         fuzzyPanel.add(scrollPane1, new GridConstraints(0, 0, 2, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         fileList = new JBList();
         scrollPane1.setViewportView(fileList);
-        textPane1 = new JTextPane();
-        textPane1.setText("This is a text");
-        fuzzyPanel.add(textPane1, new GridConstraints(0, 1, 3, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(50, 50), new Dimension(150, 50), null, 0, false));
+        previewPane = new JTextPane();
+        previewPane.setText("This is a text");
+        fuzzyPanel.add(previewPane, new GridConstraints(0, 1, 3, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(50, 50), new Dimension(150, 50), null, 0, false));
     }
 
     /**
