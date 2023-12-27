@@ -15,10 +15,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
 import org.apache.commons.lang3.StringUtils
-import java.awt.event.ActionEvent
-import java.awt.event.KeyEvent
-import java.awt.event.MouseAdapter
-import java.awt.event.MouseEvent
+import java.awt.event.*
 import javax.swing.AbstractAction
 import javax.swing.DefaultListModel
 import javax.swing.JComponent
@@ -29,9 +26,10 @@ class Fuzzier : AnAction() {
     private var popup: JBPopup? = null
 
     override fun actionPerformed(p0: AnActionEvent) {
-        // Indicate that we are loading the data
         component.searchField.isEnabled = true
         component.searchField.isVisible = true
+
+        component.searchField.text = ""
 
         p0.project?.let { project ->
             val projectBasePath = project.basePath
@@ -58,6 +56,12 @@ class Fuzzier : AnAction() {
     }
 
     fun updateListContents(project: Project, searchString: String) {
+        if (StringUtils.isBlank(searchString)) {
+            component.fileList.model = DefaultListModel();
+            component.previewPane.text = ""
+            return
+        }
+
         component.fileList.setPaintBusy(true)
         val listModel = DefaultListModel<String>()
         val projectFileIndex = ProjectFileIndex.getInstance(project)
@@ -76,12 +80,33 @@ class Fuzzier : AnAction() {
         projectFileIndex.iterateContent(contentIterator)
         component.fileList?.model = listModel
 
-        // Data has been loaded
         component.fileList.setPaintBusy(false)
+
+        if (!component.fileList.isEmpty) {
+            component.fileList.setSelectedValue(listModel[0], true)
+        }
     }
 
     private fun fuzzyContains(filePath: String, searchString: String): Boolean {
         return StringUtils.contains(filePath, searchString)
+    }
+
+    private fun openFile(project: Project, virtualFile: VirtualFile) {
+        val fileEditorManager = FileEditorManager.getInstance(project)
+
+        val currentEditor = fileEditorManager.selectedTextEditor
+
+        // Either open the file if there is already a tab for it or close current tab and open the file in a new one
+        if (fileEditorManager.isFileOpen(virtualFile)) {
+            fileEditorManager.openFile(virtualFile, true)
+        } else {
+            if (currentEditor != null) {
+                fileEditorManager.selectedEditor?.let { fileEditorManager.closeFile(it.file) }
+                fileEditorManager.openFile(virtualFile, true)
+            }
+        }
+
+        popup?.cancel()
     }
 
     private fun createListeners(project: Project, projectBasePath: String) {
@@ -89,6 +114,10 @@ class Fuzzier : AnAction() {
         component.fileList.addListSelectionListener { event ->
             run {
                 if (!event.valueIsAdjusting) {
+                    if (component.fileList.isEmpty) {
+                        component.previewPane.text = ""
+                        return@run
+                    }
                     val selectedValue = component.fileList.selectedValue
                     val file =
                         VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
@@ -108,11 +137,9 @@ class Fuzzier : AnAction() {
                 if (e.clickCount == 2) {
                     val selectedValue = component.fileList.selectedValue
                     val virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
-
                     // Open the file in the editor
                     virtualFile?.let {
-                        popup?.cancel()
-                        FileEditorManager.getInstance(project).openFile(it, true)
+                        openFile(project, it)
                     }
                 }
             }
@@ -127,10 +154,8 @@ class Fuzzier : AnAction() {
             override fun actionPerformed(e: ActionEvent?) {
                 val selectedValue = component.fileList.selectedValue
                 val virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
-
                 virtualFile?.let {
-                    popup?.cancel()
-                    FileEditorManager.getInstance(project).openFile(it, true)
+                    openFile(project, it)
                 }
             }
         })
