@@ -38,21 +38,22 @@ class Fuzzier : AnAction() {
             if (projectBasePath != null) {
                 createListeners(project, projectBasePath)
             }
-        }
 
-        val mainWindow = WindowManager.getInstance().getIdeFrame(p0.project)?.component
-        mainWindow?.let {
-            popup = JBPopupFactory
-                .getInstance()
-                .createComponentPopupBuilder(component, component.searchField)
-                .setFocusable(true)
-                .setRequestFocus(true)
-                .setResizable(true)
-                .setTitle("Fuzzy Search")
-                .setMovable(true)
-                .setShowBorder(true)
-                .createPopup()
-            popup!!.showInCenterOf(it)
+            val mainWindow = WindowManager.getInstance().getIdeFrame(p0.project)?.component
+            mainWindow?.let {
+                popup = JBPopupFactory
+                    .getInstance()
+                    .createComponentPopupBuilder(component, component.searchField)
+                    .setFocusable(true)
+                    .setRequestFocus(true)
+                    .setResizable(true)
+                    .setDimensionServiceKey(project, "FuzzySearchPopup", true)
+                    .setTitle("Fuzzy Search")
+                    .setMovable(true)
+                    .setShowBorder(true)
+                    .createPopup()
+                popup!!.showInCenterOf(it)
+            }
         }
     }
 
