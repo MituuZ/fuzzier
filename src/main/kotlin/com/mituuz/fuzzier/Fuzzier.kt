@@ -96,6 +96,7 @@ class Fuzzier : AnAction() {
                     file?.let {
                         val document = FileDocumentManager.getInstance().getDocument(it)
                         component.previewPane.text = document?.text ?: "Cannot read file"
+                        component.previewPane.caretPosition = 0
                     }
                 }
             }
