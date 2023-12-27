@@ -5,6 +5,8 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.event.DocumentEvent
+import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
@@ -15,7 +17,9 @@ import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
+import org.apache.commons.lang3.StringUtils
 import java.awt.event.ActionEvent
+import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
@@ -82,13 +86,14 @@ class Fuzzier : AnAction() {
         }
     }
 
-    fun updateListContents(project: Project) {
+    fun updateListContents(project: Project, searchString: String) {
+        component.fileList.setPaintBusy(true)
         val listModel = DefaultListModel<String>()
         val projectFileIndex = ProjectFileIndex.getInstance(project)
         val projectBasePath = project.basePath
 
         val contentIterator = ContentIterator { file: VirtualFile ->
-            if (!file.isDirectory) {
+            if (!file.isDirectory && StringUtils.contains(file.path, searchString)) {
                 val filePath = projectBasePath?.let { it1 -> file.path.removePrefix(it1) }
                 if (!filePath.isNullOrBlank()) {
                     listModel.addElement(filePath)
@@ -151,6 +156,14 @@ class Fuzzier : AnAction() {
                     popup?.cancel()
                     FileEditorManager.getInstance(project).openFile(it, true)
                 }
+            }
+        })
+
+        // Add a listener that updates the search list every time a change is made
+        val document = component.searchField.document
+        document.addDocumentListener(object : DocumentListener {
+            override fun documentChanged(event: DocumentEvent) {
+                updateListContents(project, component.searchField.text)
             }
         })
     }
