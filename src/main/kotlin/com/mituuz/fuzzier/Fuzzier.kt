@@ -99,7 +99,9 @@ class Fuzzier : AnAction() {
     }
 
     private fun fuzzyContains(filePath: String, searchString: String): Boolean {
-        return StringUtils.contains(filePath, searchString)
+        val lowerFilePath: String = filePath.lowercase()
+        val lowerSearchString: String = searchString.lowercase()
+        return StringUtils.contains(lowerFilePath, lowerSearchString)
     }
 
     private fun openFile(project: Project, virtualFile: VirtualFile) {
@@ -113,8 +115,8 @@ class Fuzzier : AnAction() {
         } else {
             if (currentEditor != null) {
                 fileEditorManager.selectedEditor?.let { fileEditorManager.closeFile(it.file) }
-                fileEditorManager.openFile(virtualFile, true)
             }
+            fileEditorManager.openFile(virtualFile, true)
         }
 
         popup?.cancel()
