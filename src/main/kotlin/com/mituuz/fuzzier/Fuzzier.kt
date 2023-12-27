@@ -1,10 +1,7 @@
 package com.mituuz.fuzzier
 
-import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.fileEditor.FileDocumentManager
@@ -19,7 +16,6 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.ActionEvent
-import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
@@ -31,44 +27,14 @@ import javax.swing.KeyStroke
 class Fuzzier : AnAction() {
     private var component = FuzzyFinder()
     private var popup: JBPopup? = null
-    private var editor: Editor? = null
-
-    override fun getActionUpdateThread(): ActionUpdateThread {
-        return super.getActionUpdateThread()
-    }
-
-    override fun update(e: AnActionEvent) {
-        editor = e.getData(CommonDataKeys.EDITOR)
-        super.update(e)
-    }
 
     override fun actionPerformed(p0: AnActionEvent) {
         // Indicate that we are loading the data
-        component.fileList.setPaintBusy(true)
         component.searchField.isEnabled = true
         component.searchField.isVisible = true
 
         p0.project?.let { project ->
-            val listModel = DefaultListModel<String>()
-            val projectFileIndex = ProjectFileIndex.getInstance(project)
             val projectBasePath = project.basePath
-
-            val contentIterator = ContentIterator { file: VirtualFile ->
-                if (!file.isDirectory) {
-                    val filePath = projectBasePath?.let { it1 -> file.path.removePrefix(it1) }
-                    if (!filePath.isNullOrBlank()) {
-                        listModel.addElement(filePath)
-                    }
-                }
-                true
-            }
-
-            projectFileIndex.iterateContent(contentIterator)
-            component.fileList?.model = listModel
-
-            // Data has been loaded
-            component.fileList.setPaintBusy(false)
-
             if (projectBasePath != null) {
                 createListeners(project, projectBasePath)
             }
@@ -93,9 +59,9 @@ class Fuzzier : AnAction() {
         val projectBasePath = project.basePath
 
         val contentIterator = ContentIterator { file: VirtualFile ->
-            if (!file.isDirectory && StringUtils.contains(file.path, searchString)) {
+            if (!file.isDirectory) {
                 val filePath = projectBasePath?.let { it1 -> file.path.removePrefix(it1) }
-                if (!filePath.isNullOrBlank()) {
+                if (!filePath.isNullOrBlank() && fuzzyContains(filePath, searchString)) {
                     listModel.addElement(filePath)
                 }
             }
@@ -107,6 +73,10 @@ class Fuzzier : AnAction() {
 
         // Data has been loaded
         component.fileList.setPaintBusy(false)
+    }
+
+    private fun fuzzyContains(filePath: String, searchString: String): Boolean {
+        return StringUtils.contains(filePath, searchString)
     }
 
     private fun createListeners(project: Project, projectBasePath: String) {
