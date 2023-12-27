@@ -20,11 +20,7 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
-import javax.swing.AbstractAction
-import javax.swing.DefaultListModel
-import javax.swing.JComponent
-import javax.swing.KeyStroke
-import javax.swing.SwingUtilities
+import javax.swing.*
 
 class Fuzzier : AnAction() {
     private lateinit var component: FuzzyFinder
@@ -36,6 +32,8 @@ class Fuzzier : AnAction() {
             component.searchField.isEnabled = true
             component.searchField.isVisible = true
             component.searchField.text = ""
+            // ToDo: Quick fix
+            component.splitPane.setDividerLocation(500)
 
             p0.project?.let { project ->
                 val projectBasePath = project.basePath

@@ -13,6 +13,7 @@ public class FuzzyFinder extends JPanel {
     private JBList<String> fileList;
     private EditorTextField searchField;
     private JPanel fuzzyPanel;
+    private JSplitPane splitPane;
 
     public JEditorPane getPreviewPane() {
         return previewPane;
@@ -26,12 +27,8 @@ public class FuzzyFinder extends JPanel {
         return searchField;
     }
 
-    public JPanel getFuzzyPanel() {
-        return fuzzyPanel;
-    }
-
-    public void setFuzzyPanel(JPanel fuzzyPanel) {
-        this.fuzzyPanel = fuzzyPanel;
+    public JSplitPane getSplitPane() {
+        return splitPane;
     }
 
     private void createUIComponents() {
@@ -57,11 +54,11 @@ public class FuzzyFinder extends JPanel {
     private void $$$setupUI$$$() {
         createUIComponents();
         fuzzyPanel.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
-        final JSplitPane splitPane1 = new JSplitPane();
-        fuzzyPanel.add(splitPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(200, 200), null, 0, false));
+        splitPane = new JSplitPane();
+        fuzzyPanel.add(splitPane, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(200, 200), null, 0, false));
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
-        splitPane1.setLeftComponent(panel1);
+        splitPane.setLeftComponent(panel1);
         searchField = new EditorTextField();
         searchField.setText("");
         panel1.add(searchField, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
@@ -72,7 +69,7 @@ public class FuzzyFinder extends JPanel {
         scrollPane1.setViewportView(fileList);
         final JScrollPane scrollPane2 = new JScrollPane();
         scrollPane2.setVerticalScrollBarPolicy(21);
-        splitPane1.setRightComponent(scrollPane2);
+        splitPane.setRightComponent(scrollPane2);
         previewPane = new JEditorPane();
         previewPane.setEditable(false);
         previewPane.setText("");
