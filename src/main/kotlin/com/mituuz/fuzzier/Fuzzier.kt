@@ -2,10 +2,14 @@ package com.mituuz.fuzzier
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ContentIterator
 import com.intellij.openapi.roots.ProjectFileIndex
@@ -119,22 +123,26 @@ class Fuzzier : AnAction() {
     private fun createListeners(project: Project, projectBasePath: String) {
         // Add listener that updates the contents of the preview pane
         component.fileList.addListSelectionListener { event ->
-            run {
-                if (!event.valueIsAdjusting) {
-                    if (component.fileList.isEmpty) {
-                        component.previewPane.text = ""
-                        return@run
-                    }
-                    val selectedValue = component.fileList.selectedValue
-                    val file =
-                        VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
-
-                    file?.let {
-                        val document = FileDocumentManager.getInstance().getDocument(it)
-                        component.previewPane.text = document?.text ?: "Cannot read file"
-                        component.previewPane.caretPosition = 0
-                    }
+            if (!event.valueIsAdjusting) {
+                if (component.fileList.isEmpty) {
+                    component.previewPane.text = ""
+                    return@addListSelectionListener
                 }
+                val selectedValue = component.fileList.selectedValue
+
+                ProgressManager.getInstance().run(object : Task.Backgroundable(null, "Loading File", false) {
+                    override fun run(indicator: ProgressIndicator) {
+                        val file = VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
+
+                        ApplicationManager.getApplication().invokeLater {
+                            file?.let {
+                                val document = FileDocumentManager.getInstance().getDocument(it)
+                                component.previewPane.text = document?.text ?: "Cannot read file"
+                                component.previewPane.caretPosition = 0
+                            }
+                        }
+                    }
+                })
             }
         }
 
