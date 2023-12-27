@@ -25,6 +25,16 @@
             <properties/>
             <border type="none"/>
             <children>
+              <component id="cfe21" class="com.intellij.ui.EditorTextField" binding="searchField">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                    <preferred-size width="150" height="-1"/>
+                  </grid>
+                </constraints>
+                <properties>
+                  <text value=""/>
+                </properties>
+              </component>
               <scrollpane id="b54d9">
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
@@ -36,20 +46,12 @@
                 <children>
                   <component id="d4bce" class="com.intellij.ui.components.JBList" binding="fileList">
                     <constraints/>
-                    <properties/>
+                    <properties>
+                      <selectionMode value="0"/>
+                    </properties>
                   </component>
                 </children>
               </scrollpane>
-              <component id="cfe21" class="com.intellij.ui.EditorTextField" binding="searchField">
-                <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-                    <preferred-size width="150" height="-1"/>
-                  </grid>
-                </constraints>
-                <properties>
-                  <text value=""/>
-                </properties>
-              </component>
             </children>
           </grid>
           <scrollpane id="5763f">
