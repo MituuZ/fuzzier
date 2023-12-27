@@ -185,6 +185,32 @@ class Fuzzier : AnAction() {
             }
         })
 
+        // Add a listener to move fileList up and down by using CTRL + K/J
+        val upKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_K, InputEvent.CTRL_DOWN_MASK)
+        val downKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_J, InputEvent.CTRL_DOWN_MASK)
+        inputMap.put(upKeyStroke, "moveUp")
+        component.searchField.actionMap.put("moveUp", object : AbstractAction() {
+            override fun actionPerformed(e: ActionEvent?) {
+                val selectedIndex = component.fileList.selectedIndex
+                if (selectedIndex > 0) {
+                    component.fileList.selectedIndex = selectedIndex - 1
+                    component.fileList.ensureIndexIsVisible(selectedIndex - 1)
+                }
+            }
+        })
+
+        inputMap.put(downKeyStroke, "moveDown")
+        component.searchField.actionMap.put("moveDown", object : AbstractAction() {
+            override fun actionPerformed(e: ActionEvent?) {
+                val selectedIndex = component.fileList.selectedIndex
+                val length = component.fileList.model.size
+                if (selectedIndex < length - 1) {
+                    component.fileList.selectedIndex = selectedIndex + 1
+                    component.fileList.ensureIndexIsVisible(selectedIndex + 1)
+                }
+            }
+        })
+
         // Add a listener that updates the search list every time a change is made
         val document = component.searchField.document
         document.addDocumentListener(object : DocumentListener {
