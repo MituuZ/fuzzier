@@ -20,45 +20,50 @@ import javax.swing.AbstractAction
 import javax.swing.DefaultListModel
 import javax.swing.JComponent
 import javax.swing.KeyStroke
+import javax.swing.SwingUtilities
 
 class Fuzzier : AnAction() {
-    private var component = FuzzyFinder()
+    private lateinit var component: FuzzyFinder
     private var popup: JBPopup? = null
 
     override fun actionPerformed(p0: AnActionEvent) {
-        component.searchField.isEnabled = true
-        component.searchField.isVisible = true
+        SwingUtilities.invokeLater {
+            component = FuzzyFinder()
+            component.searchField.isEnabled = true
+            component.searchField.isVisible = true
+            component.searchField.text = ""
 
-        component.searchField.text = ""
+            p0.project?.let { project ->
+                val projectBasePath = project.basePath
+                if (projectBasePath != null) {
+                    createListeners(project, projectBasePath)
+                }
 
-        p0.project?.let { project ->
-            val projectBasePath = project.basePath
-            if (projectBasePath != null) {
-                createListeners(project, projectBasePath)
-            }
-
-            val mainWindow = WindowManager.getInstance().getIdeFrame(p0.project)?.component
-            mainWindow?.let {
-                popup = JBPopupFactory
-                    .getInstance()
-                    .createComponentPopupBuilder(component, component.searchField)
-                    .setFocusable(true)
-                    .setRequestFocus(true)
-                    .setResizable(true)
-                    .setDimensionServiceKey(project, "FuzzySearchPopup", true)
-                    .setTitle("Fuzzy Search")
-                    .setMovable(true)
-                    .setShowBorder(true)
-                    .createPopup()
-                popup!!.showInCenterOf(it)
+                val mainWindow = WindowManager.getInstance().getIdeFrame(p0.project)?.component
+                mainWindow?.let {
+                    popup = JBPopupFactory
+                        .getInstance()
+                        .createComponentPopupBuilder(component, component.searchField)
+                        .setFocusable(true)
+                        .setRequestFocus(true)
+                        .setResizable(true)
+                        .setDimensionServiceKey(project, "FuzzySearchPopup", true)
+                        .setTitle("Fuzzy Search")
+                        .setMovable(true)
+                        .setShowBorder(true)
+                        .createPopup()
+                    popup!!.showInCenterOf(it)
+                }
             }
         }
     }
 
     fun updateListContents(project: Project, searchString: String) {
         if (StringUtils.isBlank(searchString)) {
-            component.fileList.model = DefaultListModel();
-            component.previewPane.text = ""
+            SwingUtilities.invokeLater {
+                component.fileList.model = DefaultListModel();
+                component.previewPane.text = ""
+            }
             return
         }
 
@@ -78,12 +83,14 @@ class Fuzzier : AnAction() {
         }
 
         projectFileIndex.iterateContent(contentIterator)
-        component.fileList?.model = listModel
+        SwingUtilities.invokeLater {
+            component.fileList?.model = listModel
 
-        component.fileList.setPaintBusy(false)
+            component.fileList.setPaintBusy(false)
 
-        if (!component.fileList.isEmpty) {
-            component.fileList.setSelectedValue(listModel[0], true)
+            if (!component.fileList.isEmpty) {
+                component.fileList.setSelectedValue(listModel[0], true)
+            }
         }
     }
 
