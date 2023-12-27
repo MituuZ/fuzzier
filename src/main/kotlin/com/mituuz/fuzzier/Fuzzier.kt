@@ -75,6 +75,7 @@ class Fuzzier : AnAction() {
         val projectBasePath = project.basePath
 
         val contentIterator = ContentIterator { file: VirtualFile ->
+            // ToDo; Option to only show git tracked files (apparently requires git4idea plugin as a dependency
             if (!file.isDirectory) {
                 val filePath = projectBasePath?.let { it1 -> file.path.removePrefix(it1) }
                 if (!filePath.isNullOrBlank() && fuzzyContains(filePath, searchString)) {
@@ -85,6 +86,7 @@ class Fuzzier : AnAction() {
         }
 
         projectFileIndex.iterateContent(contentIterator)
+        sortListModel(listModel, searchString)
         SwingUtilities.invokeLater {
             component.fileList?.model = listModel
 
@@ -96,10 +98,38 @@ class Fuzzier : AnAction() {
         }
     }
 
+    private fun sortListModel(model: DefaultListModel<String>, searchString: String) {
+        val elements = mutableListOf<String>()
+        for (i in 0 until model.size()) {
+            model.getElementAt(i)?.let { elements.add(it) }
+        }
+
+        val comparator = Comparator<String> { o1, o2 ->
+            when {
+                o1.contains(searchString) && !o2.contains(searchString) -> -1
+                !o1.contains(searchString) && o2.contains(searchString) -> 1
+                else -> o1.compareTo(o2) // Default comparison if both have or don't have the searchString
+            }
+        }
+
+        elements.sortWith(comparator)
+        model.clear()
+        elements.forEach { model.addElement(it) }
+    }
+
     private fun fuzzyContains(filePath: String, searchString: String): Boolean {
         val lowerFilePath: String = filePath.lowercase()
         val lowerSearchString: String = searchString.lowercase()
-        return StringUtils.contains(lowerFilePath, lowerSearchString)
+
+        var searchPos = 0
+
+        for (char in lowerFilePath) {
+            if (searchPos < lowerSearchString.length && char == lowerSearchString[searchPos]) {
+                searchPos++
+            }
+        }
+
+        return searchPos == searchString.length
     }
 
     private fun openFile(project: Project, virtualFile: VirtualFile) {
