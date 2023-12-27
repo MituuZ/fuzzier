@@ -63,7 +63,7 @@ class Fuzzier : AnAction() {
     fun updateListContents(project: Project, searchString: String) {
         if (StringUtils.isBlank(searchString)) {
             SwingUtilities.invokeLater {
-                component.fileList.model = DefaultListModel();
+                component.fileList.model = DefaultListModel()
                 component.previewPane.text = ""
             }
             return
@@ -121,7 +121,7 @@ class Fuzzier : AnAction() {
     }
 
     private fun createListeners(project: Project, projectBasePath: String) {
-        // Add listener that updates the contents of the preview pane
+        // Add a listener that updates the contents of the preview pane
         component.fileList.addListSelectionListener { event ->
             if (!event.valueIsAdjusting) {
                 if (component.fileList.isEmpty) {
@@ -156,7 +156,7 @@ class Fuzzier : AnAction() {
             }
         }
 
-        // Add MouseListener for double-click
+        // Add a mouse listener for double-click
         component.fileList.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent) {
                 if (e.clickCount == 2) {
@@ -170,7 +170,7 @@ class Fuzzier : AnAction() {
             }
         })
 
-        // Add listener that opens the currently selected file when pressing enter (focus on the text box)
+        // Add a listener that opens the currently selected file when pressing enter (focus on the text box)
         val enterKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)
         val enterActionKey = "openFile"
         val inputMap = component.searchField.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
