@@ -131,16 +131,26 @@ class Fuzzier : AnAction() {
                     return@addListSelectionListener
                 }
                 val selectedValue = component.fileList.selectedValue
+                val fileUrl = "file://$projectBasePath$selectedValue"
 
-                ProgressManager.getInstance().run(object : Task.Backgroundable(null, "Loading File", false) {
+                ProgressManager.getInstance().run(object : Task.Backgroundable(null, "Loading file", false) {
                     override fun run(indicator: ProgressIndicator) {
-                        val file = VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
+                        val file = VirtualFileManager.getInstance().findFileByUrl(fileUrl)
+                        file?.let {
+                            var fileContent = ""
+                            var caretPos = 0
 
-                        ApplicationManager.getApplication().invokeLater {
-                            file?.let {
+                            // Run read action to get document content
+                            ApplicationManager.getApplication().runReadAction {
                                 val document = FileDocumentManager.getInstance().getDocument(it)
-                                component.previewPane.text = document?.text ?: "Cannot read file"
-                                component.previewPane.caretPosition = 0
+                                fileContent = document?.text ?: "Cannot read file"
+                                // caretPos = document?.text?.length?.div(2) ?: 0
+                                caretPos = 0
+                            }
+
+                            ApplicationManager.getApplication().invokeLater {
+                                component.previewPane.text = fileContent
+                                component.previewPane.caretPosition = caretPos
                             }
                         }
                     }
