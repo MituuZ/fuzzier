@@ -59,7 +59,8 @@
               <splitpane position="right"/>
             </constraints>
             <properties>
-              <verticalScrollBarPolicy value="21"/>
+              <horizontalScrollBarPolicy value="30"/>
+              <verticalScrollBarPolicy value="20"/>
             </properties>
             <border type="none"/>
             <children>

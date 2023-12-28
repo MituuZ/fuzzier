@@ -68,7 +68,8 @@ public class FuzzyFinder extends JPanel {
         fileList.setSelectionMode(0);
         scrollPane1.setViewportView(fileList);
         final JScrollPane scrollPane2 = new JScrollPane();
-        scrollPane2.setVerticalScrollBarPolicy(21);
+        scrollPane2.setHorizontalScrollBarPolicy(30);
+        scrollPane2.setVerticalScrollBarPolicy(20);
         splitPane.setRightComponent(scrollPane2);
         previewPane = new JEditorPane();
         previewPane.setEditable(false);
