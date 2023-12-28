@@ -5,9 +5,11 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
-import com.intellij.openapi.editor.ex.ScrollingModelEx
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.fileTypes.FileTypeManager
+import com.intellij.openapi.fileTypes.StdFileTypes
+import com.intellij.openapi.fileTypes.StdFileTypes.JAVA
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -19,6 +21,7 @@ import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
+import com.intellij.ui.EditorTextField
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
 import javax.swing.*
@@ -194,10 +197,9 @@ class Fuzzier : AnAction() {
                             }
 
                             ApplicationManager.getApplication().invokeLater {
-                                component.previewPane.getEditor(true)?.settings?.isLineNumbersShown = true // Show line numbers in the preview
-                                component.previewPane.getEditor(true)?.setVerticalScrollbarVisible(true)
-                                component.previewPane.getEditor(true)?.isOneLineMode = false
-                                component.previewPane.text = fileContent
+                                val editorTextField = PreviewEditor(fileContent, project, FileTypeManager.getInstance().getFileTypeByFile(file))
+                                component.splitPane.rightComponent = editorTextField
+                                //component.previewPane.text = fileContent
                             }
                         }
                     }

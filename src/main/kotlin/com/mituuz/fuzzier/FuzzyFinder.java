@@ -69,6 +69,7 @@ public class FuzzyFinder extends JPanel {
         scrollPane1.setViewportView(fileList);
         previewPane = new EditorTextField();
         previewPane.setText("");
+        previewPane.setViewer(true);
         splitPane.setRightComponent(previewPane);
     }
 
