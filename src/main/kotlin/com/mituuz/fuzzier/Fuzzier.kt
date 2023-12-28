@@ -75,10 +75,12 @@ class Fuzzier : AnAction() {
         val projectBasePath = project.basePath
 
         val contentIterator = ContentIterator { file: VirtualFile ->
-            // ToDo; Option to only show git tracked files (apparently requires git4idea plugin as a dependency
             if (!file.isDirectory) {
                 val filePath = projectBasePath?.let { it1 -> file.path.removePrefix(it1) }
-                if (!filePath.isNullOrBlank() && fuzzyContains(filePath, searchString)) {
+                // ToDo: This can be handled better and made configurable
+                if (StringUtils.contains(file.path, ".git/") || StringUtils.contains(file.path, ".idea/") || StringUtils.contains(file.path, "build/")) {
+                    // Skip these files
+                } else if (!filePath.isNullOrBlank() && fuzzyContains(filePath, searchString)) {
                     listModel.addElement(filePath)
                 }
             }
