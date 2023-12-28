@@ -69,37 +69,39 @@ class Fuzzier : AnAction() {
             return
         }
 
-        component.fileList.setPaintBusy(true)
-        val listModel = DefaultListModel<String>()
-        val projectFileIndex = ProjectFileIndex.getInstance(project)
-        val projectBasePath = project.basePath
+        ApplicationManager.getApplication().executeOnPooledThread {
+            component.fileList.setPaintBusy(true)
+            val listModel = DefaultListModel<String>()
+            val projectFileIndex = ProjectFileIndex.getInstance(project)
+            val projectBasePath = project.basePath
 
-        val contentIterator = ContentIterator { file: VirtualFile ->
-            if (!file.isDirectory) {
-                val filePath = projectBasePath?.let { it1 -> file.path.removePrefix(it1) }
+            val contentIterator = ContentIterator { file: VirtualFile ->
+                if (!file.isDirectory) {
+                    val filePath = projectBasePath?.let { it1 -> file.path.removePrefix(it1) }
 
-                // ToDo: This can be handled better and made configurable
-                if (StringUtils.contains(file.path, ".git/")
-                    || StringUtils.contains(file.path, ".idea/")
-                    || StringUtils.contains(file.path, "build/")) {
-                    // Skip these files
+                    // ToDo: This can be handled better and made configurable
+                    if (StringUtils.contains(file.path, ".git/")
+                        || StringUtils.contains(file.path, ".idea/")
+                        || StringUtils.contains(file.path, "build/")
+                    ) {
+                        // Skip these files
 
-                } else if (!filePath.isNullOrBlank() && fuzzyContains(filePath, searchString)) {
-                    listModel.addElement(filePath)
+                    } else if (!filePath.isNullOrBlank() && fuzzyContains(filePath, searchString)) {
+                        listModel.addElement(filePath)
+                    }
                 }
+                true
             }
-            true
-        }
 
-        projectFileIndex.iterateContent(contentIterator)
-        sortListModel(listModel, searchString)
-        SwingUtilities.invokeLater {
-            component.fileList?.model = listModel
+            projectFileIndex.iterateContent(contentIterator)
+            sortListModel(listModel, searchString)
 
-            component.fileList.setPaintBusy(false)
-
-            if (!component.fileList.isEmpty) {
-                component.fileList.setSelectedValue(listModel[0], true)
+            SwingUtilities.invokeLater {
+                component.fileList?.model = listModel
+                component.fileList.setPaintBusy(false)
+                if (!component.fileList.isEmpty) {
+                    component.fileList.setSelectedValue(listModel[0], true)
+                }
             }
         }
     }
@@ -238,8 +240,12 @@ class Fuzzier : AnAction() {
         })
 
         // Add a listener to move fileList up and down by using CTRL + k/j
-        val upKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_K, InputEvent.CTRL_DOWN_MASK)
-        val downKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_J, InputEvent.CTRL_DOWN_MASK)
+        val kShiftKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_K, InputEvent.CTRL_DOWN_MASK)
+        val jShiftKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_J, InputEvent.CTRL_DOWN_MASK)
+        val upKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.CTRL_DOWN_MASK)
+        val downKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.CTRL_DOWN_MASK)
+
+        inputMap.put(kShiftKeyStroke, "moveUp")
         inputMap.put(upKeyStroke, "moveUp")
         component.searchField.actionMap.put("moveUp", object : AbstractAction() {
             override fun actionPerformed(e: ActionEvent?) {
@@ -250,6 +256,7 @@ class Fuzzier : AnAction() {
                 }
             }
         })
+        inputMap.put(jShiftKeyStroke, "moveDown")
         inputMap.put(downKeyStroke, "moveDown")
         component.searchField.actionMap.put("moveDown", object : AbstractAction() {
             override fun actionPerformed(e: ActionEvent?) {
