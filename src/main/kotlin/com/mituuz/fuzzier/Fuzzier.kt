@@ -105,9 +105,11 @@ class Fuzzier : AnAction() {
         }
 
         val comparator = Comparator<String> { o1, o2 ->
+            val count1 = countSequentialChars(o1, searchString)
+            val count2 = countSequentialChars(o2, searchString)
             when {
-                o1.contains(searchString) && !o2.contains(searchString) -> -1
-                !o1.contains(searchString) && o2.contains(searchString) -> 1
+                count1 > count2 -> 1
+                count2 > count1 -> -1
                 else -> o1.compareTo(o2) // Default comparison if both have or don't have the searchString
             }
         }
@@ -115,6 +117,20 @@ class Fuzzier : AnAction() {
         elements.sortWith(comparator)
         model.clear()
         elements.forEach { model.addElement(it) }
+    }
+
+    private fun countSequentialChars(filePath: String, searchString: String): Int {
+        var count = 0
+        var searchIndex = 0
+        for (char in filePath) {
+            if (char == searchString[searchIndex]) {
+                count++
+                searchIndex++
+                if (searchIndex == searchString.length) break
+            }
+        }
+
+        return count
     }
 
     private fun fuzzyContains(filePath: String, searchString: String): Boolean {
@@ -215,7 +231,7 @@ class Fuzzier : AnAction() {
             }
         })
 
-        // Add a listener to move fileList up and down by using CTRL + K/J
+        // Add a listener to move fileList up and down by using CTRL + k/j
         val upKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_K, InputEvent.CTRL_DOWN_MASK)
         val downKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_J, InputEvent.CTRL_DOWN_MASK)
         inputMap.put(upKeyStroke, "moveUp")
@@ -228,7 +244,6 @@ class Fuzzier : AnAction() {
                 }
             }
         })
-
         inputMap.put(downKeyStroke, "moveDown")
         component.searchField.actionMap.put("moveDown", object : AbstractAction() {
             override fun actionPerformed(e: ActionEvent?) {
