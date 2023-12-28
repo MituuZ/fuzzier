@@ -5,6 +5,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
+import com.intellij.openapi.editor.ex.ScrollingModelEx
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.progress.ProgressIndicator
@@ -185,19 +186,18 @@ class Fuzzier : AnAction() {
                         val file = VirtualFileManager.getInstance().findFileByUrl(fileUrl)
                         file?.let {
                             var fileContent = ""
-                            var caretPos = 0
 
                             // Run read action to get document content
                             ApplicationManager.getApplication().runReadAction {
                                 val document = FileDocumentManager.getInstance().getDocument(it)
                                 fileContent = document?.text ?: "Cannot read file"
-                                // caretPos = document?.text?.length?.div(2) ?: 0
-                                caretPos = 0
                             }
 
                             ApplicationManager.getApplication().invokeLater {
+                                component.previewPane.getEditor(true)?.settings?.isLineNumbersShown = true // Show line numbers in the preview
+                                component.previewPane.getEditor(true)?.setVerticalScrollbarVisible(true)
+                                component.previewPane.getEditor(true)?.isOneLineMode = false
                                 component.previewPane.text = fileContent
-                                component.previewPane.caretPosition = caretPos
                             }
                         }
                     }

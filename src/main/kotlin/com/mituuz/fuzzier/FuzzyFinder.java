@@ -9,13 +9,13 @@ import javax.swing.*;
 import java.awt.*;
 
 public class FuzzyFinder extends JPanel {
-    private JEditorPane previewPane;
+    private EditorTextField previewPane;
     private JBList<String> fileList;
     private EditorTextField searchField;
     private JPanel fuzzyPanel;
     private JSplitPane splitPane;
 
-    public JEditorPane getPreviewPane() {
+    public EditorTextField getPreviewPane() {
         return previewPane;
     }
 
@@ -67,14 +67,9 @@ public class FuzzyFinder extends JPanel {
         fileList = new JBList();
         fileList.setSelectionMode(0);
         scrollPane1.setViewportView(fileList);
-        final JScrollPane scrollPane2 = new JScrollPane();
-        scrollPane2.setHorizontalScrollBarPolicy(30);
-        scrollPane2.setVerticalScrollBarPolicy(20);
-        splitPane.setRightComponent(scrollPane2);
-        previewPane = new JEditorPane();
-        previewPane.setEditable(false);
+        previewPane = new EditorTextField();
         previewPane.setText("");
-        scrollPane2.setViewportView(previewPane);
+        splitPane.setRightComponent(previewPane);
     }
 
     /**

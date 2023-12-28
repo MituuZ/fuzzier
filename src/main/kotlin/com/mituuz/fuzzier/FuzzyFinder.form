@@ -54,25 +54,15 @@
               </scrollpane>
             </children>
           </grid>
-          <scrollpane id="5763f">
+          <component id="5254e" class="com.intellij.ui.EditorTextField" binding="previewPane">
             <constraints>
               <splitpane position="right"/>
             </constraints>
             <properties>
-              <horizontalScrollBarPolicy value="30"/>
-              <verticalScrollBarPolicy value="20"/>
+              <text value=""/>
+              <viewer value="true"/>
             </properties>
-            <border type="none"/>
-            <children>
-              <component id="ab21" class="javax.swing.JEditorPane" binding="previewPane">
-                <constraints/>
-                <properties>
-                  <editable value="false"/>
-                  <text value=""/>
-                </properties>
-              </component>
-            </children>
-          </scrollpane>
+          </component>
         </children>
       </splitpane>
     </children>
