@@ -1,14 +1,16 @@
 package com.mituuz.fuzzier
 
 import com.intellij.openapi.editor.ex.EditorEx
-import com.intellij.openapi.fileTypes.FileType
+import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.EditorTextField
 
-class PreviewEditor(string: String, project: Project?, fileType: FileType?) : EditorTextField(
-    string,
+class PreviewEditor(project: Project?, virtualFile: VirtualFile?) : EditorTextField(
+    virtualFile?.let { FileDocumentManager.getInstance().getDocument(it) },
     project,
-    fileType,
+    virtualFile?.let { FileTypeManager.getInstance().getFileTypeByFile(it) }
 ) {
 
     override fun createEditor(): EditorEx {
@@ -18,5 +20,12 @@ class PreviewEditor(string: String, project: Project?, fileType: FileType?) : Ed
         editor.isOneLineMode = false
         editor.isViewer = true
         return editor
+    }
+
+    fun updateFile(virtualFile: VirtualFile?) {
+        if (virtualFile != null) {
+            this.document = virtualFile.let { FileDocumentManager.getInstance().getDocument(it) }!!
+        }
+        this.fileType = virtualFile?.let { FileTypeManager.getInstance().getFileTypeByFile(it) };
     }
 }

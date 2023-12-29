@@ -21,7 +21,6 @@ import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
-import com.intellij.ui.EditorTextField
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
 import javax.swing.*
