@@ -86,7 +86,7 @@ class Fuzzier : AnAction() {
                     ) {
                         // Skip these files
 
-                    } else if (!filePath.isNullOrBlank() && fuzzyContains(filePath, searchString)) {
+                    } else if (!filePath.isNullOrBlank() && fuzzyContainsCaseInsensitive(filePath, searchString)) {
                         listModel.addElement(filePath)
                     }
                 }
@@ -141,19 +141,33 @@ class Fuzzier : AnAction() {
         return count
     }
 
-    private fun fuzzyContains(filePath: String, searchString: String): Boolean {
+    private fun fuzzyContainsCaseInsensitive(filePath: String, searchString: String): Boolean {
+        if (searchString.isBlank()) {
+            return true
+        }
+        if (searchString.length > filePath.length) {
+            return false
+        }
+
         val lowerFilePath: String = filePath.lowercase()
         val lowerSearchString: String = searchString.lowercase()
 
-        var searchPos = 0
+        var searchIndex = 0
 
-        for (char in lowerFilePath) {
-            if (searchPos < lowerSearchString.length && char == lowerSearchString[searchPos]) {
-                searchPos++
+        for (i in lowerFilePath.indices) {
+            if (lowerFilePath.length - i < lowerSearchString.length - searchIndex) {
+                return false
+            }
+
+            val char = lowerFilePath[i]
+            if (char == lowerSearchString[searchIndex]) {
+                searchIndex++
+                if (searchIndex == lowerSearchString.length) {
+                    return true
+                }
             }
         }
-
-        return searchPos == searchString.length
+        return false
     }
 
     private fun openFile(project: Project, virtualFile: VirtualFile) {
