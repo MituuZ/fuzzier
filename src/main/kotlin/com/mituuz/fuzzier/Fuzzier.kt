@@ -71,7 +71,7 @@ class Fuzzier : AnAction() {
 
         ApplicationManager.getApplication().executeOnPooledThread {
             component.fileList.setPaintBusy(true)
-            val listModel = DefaultListModel<String>()
+            val listModel = DefaultListModel<FuzzyMatchContainer>()
             val projectFileIndex = ProjectFileIndex.getInstance(project)
             val projectBasePath = project.basePath
 
@@ -86,18 +86,23 @@ class Fuzzier : AnAction() {
                     ) {
                         // Skip these files
 
-                    } else if (!filePath.isNullOrBlank() && fuzzyContainsCaseInsensitive(filePath, searchString)) {
-                        listModel.addElement(filePath)
+                    } else if (!filePath.isNullOrBlank()) {
+                        val fuzzyMatchContainer = fuzzyContainsCaseInsensitive(filePath, searchString)
+                        if (fuzzyMatchContainer != null) {
+                            listModel.addElement(fuzzyMatchContainer)
+                        }
                     }
                 }
                 true
             }
 
             projectFileIndex.iterateContent(contentIterator)
-            sortListModel(listModel, searchString)
+            val sortedList = listModel.elements().toList().sortedByDescending { it.score }
+            val valModel = DefaultListModel<String>()
+            sortedList.forEach { valModel.addElement(it.string) }
 
             SwingUtilities.invokeLater {
-                component.fileList?.model = listModel
+                component.fileList?.model = valModel
                 component.fileList.setPaintBusy(false)
                 if (!component.fileList.isEmpty) {
                     component.fileList.setSelectedValue(listModel[0], true)
@@ -106,69 +111,49 @@ class Fuzzier : AnAction() {
         }
     }
 
-    private fun sortListModel(model: DefaultListModel<String>, searchString: String) {
-        val elements = mutableListOf<String>()
-        for (i in 0 until model.size()) {
-            model.getElementAt(i)?.let { elements.add(it) }
-        }
-
-        val comparator = Comparator<String> { o1, o2 ->
-            val count1 = countSequentialChars(o1, searchString)
-            val count2 = countSequentialChars(o2, searchString)
-            when {
-                count1 > count2 -> 1
-                count2 > count1 -> -1
-                else -> o1.compareTo(o2) // Default comparison if both have or don't have the searchString
-            }
-        }
-
-        elements.sortWith(comparator)
-        model.clear()
-        elements.forEach { model.addElement(it) }
-    }
-
-    private fun countSequentialChars(filePath: String, searchString: String): Int {
-        var count = 0
-        var searchIndex = 0
-        for (char in filePath) {
-            if (char == searchString[searchIndex]) {
-                count++
-                searchIndex++
-                if (searchIndex == searchString.length) break
-            }
-        }
-
-        return count
-    }
-
-    private fun fuzzyContainsCaseInsensitive(filePath: String, searchString: String): Boolean {
+    fun fuzzyContainsCaseInsensitive(filePath: String, searchString: String): FuzzyMatchContainer? {
         if (searchString.isBlank()) {
-            return true
+            return FuzzyMatchContainer(0, filePath)
         }
         if (searchString.length > filePath.length) {
-            return false
+            return null
         }
 
         val lowerFilePath: String = filePath.lowercase()
         val lowerSearchString: String = searchString.lowercase()
 
         var searchIndex = 0
+        var longestStreak = 0
+        var matchSum = 0
+        var streak = 0
 
         for (i in lowerFilePath.indices) {
             if (lowerFilePath.length - i < lowerSearchString.length - searchIndex) {
-                return false
+                return null
             }
 
             val char = lowerFilePath[i]
             if (char == lowerSearchString[searchIndex]) {
+                matchSum++
+                streak++
                 searchIndex++
                 if (searchIndex == lowerSearchString.length) {
-                    return true
+                    if (streak > longestStreak) {
+                        longestStreak = streak
+                    }
+                    return FuzzyMatchContainer(longestStreak * 2 + matchSum, filePath)
                 }
+            } else {
+                if (streak > longestStreak) {
+                    longestStreak = streak
+                }
+                streak = 0
             }
         }
-        return false
+        return null
     }
+
+    data class FuzzyMatchContainer(val score: Int, val string: String)
 
     private fun openFile(project: Project, virtualFile: VirtualFile) {
         val fileEditorManager = FileEditorManager.getInstance(project)
