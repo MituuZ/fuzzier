@@ -124,7 +124,6 @@ class Fuzzier : AnAction() {
 
         var searchIndex = 0
         var longestStreak = 0
-        var matchSum = 0
         var streak = 0
 
         for (i in lowerFilePath.indices) {
@@ -134,14 +133,13 @@ class Fuzzier : AnAction() {
 
             val char = lowerFilePath[i]
             if (char == lowerSearchString[searchIndex]) {
-                matchSum++
                 streak++
                 searchIndex++
                 if (searchIndex == lowerSearchString.length) {
                     if (streak > longestStreak) {
                         longestStreak = streak
                     }
-                    return FuzzyMatchContainer(longestStreak * 2 + matchSum, filePath)
+                    return FuzzyMatchContainer(longestStreak, filePath)
                 }
             } else {
                 if (streak > longestStreak) {
