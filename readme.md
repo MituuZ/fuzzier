@@ -3,7 +3,7 @@ A simple plugin to allow "fuzzy" file search with the UI inspired by [telescope.
 
 Does **not** support true fuzzy finding. All search characters must be present and in correct order in the file path, but do not need to be sequential.
 
-![The UI consist of three parts. A file list on the top left, search field on the bottom left and the preview pane on the right](assets\FuzzierUI.png "An image of the plugin UI")
+![The UI consist of three parts. A file list on the top left, search field on the bottom left and the preview pane on the right](assets/FuzzierUI.png "An image of the plugin UI")
 
 ## Usage
 When focused in search field, you can use:
