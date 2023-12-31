@@ -156,7 +156,6 @@ class Fuzzier : AnAction() {
 
     private fun openFile(project: Project, virtualFile: VirtualFile) {
         val fileEditorManager = FileEditorManager.getInstance(project)
-
         val currentEditor = fileEditorManager.selectedTextEditor
 
         // Either open the file if there is already a tab for it or close current tab and open the file in a new one
@@ -168,7 +167,6 @@ class Fuzzier : AnAction() {
             }
             fileEditorManager.openFile(virtualFile, true)
         }
-
         popup?.cancel()
     }
 
