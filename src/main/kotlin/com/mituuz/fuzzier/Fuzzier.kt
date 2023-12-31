@@ -185,18 +185,11 @@ class Fuzzier : AnAction() {
                     override fun run(indicator: ProgressIndicator) {
                         val file = VirtualFileManager.getInstance().findFileByUrl(fileUrl)
                         file?.let {
-                            var fileContent = ""
-
-                            // Run read action to get document content
-                            ApplicationManager.getApplication().runReadAction {
-                                val document = FileDocumentManager.getInstance().getDocument(it)
-                                fileContent = document?.text ?: "Cannot read file"
-                            }
-
                             ApplicationManager.getApplication().invokeLater {
-                                val editorTextField = PreviewEditor(fileContent, project, FileTypeManager.getInstance().getFileTypeByFile(file))
+                                val editorTextField = PreviewEditor(project, file)
                                 component.splitPane.rightComponent = editorTextField
-                                //component.previewPane.text = fileContent
+                                // ToDo: Quick fix for current preview
+                                component.splitPane.setDividerLocation(500)
                             }
                         }
                     }
