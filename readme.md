@@ -7,9 +7,9 @@ Does **not** support true fuzzy finding. All search characters must be present a
 
 ## Usage
 When focused in search field, you can use:
-CTRL + j to move down
-CTRL + k to move up
-Enter to open the currently selected file (opens in current tab)
+- CTRL + j to move down
+- CTRL + k to move up
+- Enter to open the currently selected file (opens in current tab)
 
 ## Adding ideavim mapping for the plugin
 Example of a .ideavimrc-row to add a vim keybinding for the plugin
