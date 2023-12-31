@@ -29,10 +29,8 @@ class Fuzzier : AnAction() {
     override fun actionPerformed(p0: AnActionEvent) {
         SwingUtilities.invokeLater {
             component = FuzzyFinder()
-            component.searchField.isEnabled = true
-            component.searchField.isVisible = true
             component.searchField.text = ""
-            // ToDo: Quick fix
+            // ToDo: Quick fix for initial divider location
             component.splitPane.setDividerLocation(500)
 
             p0.project?.let { project ->
