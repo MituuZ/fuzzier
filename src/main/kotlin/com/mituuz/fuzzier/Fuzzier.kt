@@ -105,7 +105,7 @@ class Fuzzier : AnAction() {
                 component.fileList?.model = valModel
                 component.fileList.setPaintBusy(false)
                 if (!component.fileList.isEmpty) {
-                    component.fileList.setSelectedValue(listModel[0], true)
+                    component.fileList.setSelectedValue(valModel[0], true)
                 }
             }
         }
