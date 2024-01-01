@@ -30,26 +30,11 @@ class FuzzyFinder(project: Project) : JPanel(
         add(fuzzyPanel)
         previewPane.fileType = PlainTextFileType.INSTANCE
         previewPane.isViewer = true
+
+        splitPane.preferredSize = Dimension(700, 400)
         splitPane.rightComponent = previewPane
+
         fuzzyPanel.layout = GridLayoutManager(1, 1, JBUI.emptyInsets(), -1, -1)
-        fuzzyPanel.add(
-            splitPane,
-            GridConstraints(
-                0,
-                0,
-                1,
-                1,
-                GridConstraints.ANCHOR_CENTER,
-                GridConstraints.FILL_BOTH,
-                GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_CAN_GROW,
-                GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_CAN_GROW,
-                null,
-                Dimension(200, 200),
-                null,
-                0,
-                false
-            )
-        )
         val panel1 = JPanel()
         panel1.layout = GridLayoutManager(2, 1, JBUI.emptyInsets(), -1, -1)
         splitPane.leftComponent = panel1
@@ -66,13 +51,36 @@ class FuzzyFinder(project: Project) : JPanel(
                 GridConstraints.SIZEPOLICY_WANT_GROW,
                 GridConstraints.SIZEPOLICY_FIXED,
                 null,
-                Dimension(150, -1),
+                Dimension(-1, -1),
                 null,
                 0,
                 false
             )
         )
         val scrollPane1 = JBScrollPane()
+
+        splitPane.dividerLocation = 300
+        splitPane.dividerSize = 10
+
+        fuzzyPanel.add(
+            splitPane,
+            GridConstraints(
+                0,
+                0,
+                1,
+                1,
+                GridConstraints.ANCHOR_CENTER,
+                GridConstraints.FILL_BOTH,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_CAN_GROW,
+                GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_CAN_GROW,
+                null,
+                Dimension(-1, -1),
+                null,
+                0,
+                false
+            )
+        )
+
         panel1.add(
             scrollPane1,
             GridConstraints(
@@ -85,7 +93,7 @@ class FuzzyFinder(project: Project) : JPanel(
                 GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_WANT_GROW,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_WANT_GROW,
                 null,
-                Dimension(150, -1),
+                Dimension(-1, -1),
                 null,
                 0,
                 false
@@ -94,8 +102,5 @@ class FuzzyFinder(project: Project) : JPanel(
         fileList = JBList<String?>()
         fileList.selectionMode = 0
         scrollPane1.setViewportView(fileList)
-        splitPane.rightComponent = previewPane
-        splitPane.dividerLocation = 300
-        splitPane.dividerSize = 10
     }
 }

@@ -7,7 +7,6 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
-import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
@@ -34,9 +33,6 @@ class Fuzzier : AnAction() {
             defaultDoc = EditorFactory.getInstance().createDocument("")
             p0.project?.let { project ->
                 component = FuzzyFinder(project)
-                component.searchField.text = ""
-                // ToDo: Quick fix for initial divider location
-                component.splitPane.setDividerLocation(500)
 
                 val projectBasePath = project.basePath
                 if (projectBasePath != null) {
@@ -187,17 +183,8 @@ class Fuzzier : AnAction() {
                 ProgressManager.getInstance().run(object : Task.Backgroundable(null, "Loading file", false) {
                     override fun run(indicator: ProgressIndicator) {
                         val file = VirtualFileManager.getInstance().findFileByUrl(fileUrl)
-
-                        val document = ApplicationManager.getApplication().runReadAction<Document?> {
-                            file?.let { FileDocumentManager.getInstance().getDocument(file) }
-                        }
-
                         file?.let {
-                            ApplicationManager.getApplication().invokeLater {
-                                if (document != null) {
-                                    component.previewPane.updateFile(document, file)
-                                }
-                            }
+                            component.previewPane.updateFile(file)
                         }
                     }
                 })

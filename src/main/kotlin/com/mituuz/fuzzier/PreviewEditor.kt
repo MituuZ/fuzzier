@@ -1,8 +1,10 @@
 package com.mituuz.fuzzier
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.ex.EditorEx
+import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.fileTypes.PlainTextFileType
@@ -39,9 +41,20 @@ class PreviewEditor(project: Project?) : EditorTextField(
         this.fileType = PlainTextFileType.INSTANCE
     }
 
-    fun updateFile(document: Document, virtualFile: VirtualFile?) {
-        this.document = document
-        this.fileType = virtualFile?.let { FileTypeManager.getInstance().getFileTypeByFile(it) }
-        this.editor?.scrollingModel?.scrollHorizontally(0)
+    fun updateFile(virtualFile: VirtualFile?) {
+        ApplicationManager.getApplication().executeOnPooledThread {
+            val document = ApplicationManager.getApplication().runReadAction<Document?> {
+                virtualFile?.let { FileDocumentManager.getInstance().getDocument(virtualFile) }
+            }
+            val fileType = virtualFile?.let { FileTypeManager.getInstance().getFileTypeByFile(virtualFile) }
+
+            ApplicationManager.getApplication().invokeLater {
+                if (document != null) {
+                    this.document = document
+                }
+                this.fileType = fileType
+                this.editor?.scrollingModel?.scrollHorizontally(0)
+            }
+        }
     }
 }
