@@ -8,7 +8,7 @@ Does **not** support true fuzzy finding. All search characters must be present a
 ![The UI consist of three parts. A file list on the top left, search field on the bottom left and the preview pane on the right](assets/FuzzierUI.png "An image of the plugin UI")
 
 ## Usage
-When focused in search field, you can use:
+When focused on the search field, you can use:
 - CTRL + j to move down
 - CTRL + k to move up
 - Enter to open the currently selected file (opens in current tab)
@@ -27,7 +27,6 @@ Must be done manually by building the plugin and selecting the jar from the "Ins
 IntelliJ IDEA 2023.3.2
 
 ## Potential improvements
-- Actual editor preview with highlighting
 - Smarter popup location handling
 - Persistent split location
 - Configurable exclusion list
