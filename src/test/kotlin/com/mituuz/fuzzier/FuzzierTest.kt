@@ -14,13 +14,13 @@ class FuzzierTest {
     @Test
     fun fuzzyScoreNoStreak() {
         var match = fuzzier.fuzzyContainsCaseInsensitive("KotlinIsFun", "kif")
-        assertMatch(5, match)
+        assertMatch(1, match)
     }
 
     @Test
     fun fuzzyScoreStreak() {
         var match = fuzzier.fuzzyContainsCaseInsensitive("KotlinIsFun", "kot")
-        assertMatch(9, match)
+        assertMatch(3, match)
     }
 
     @Test

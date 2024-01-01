@@ -16,12 +16,8 @@ dependencies {
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.1")
 }
 
-sourceSets {
-  main {
-    java {
-      srcDirs("src/main/kotlin")
-    }
-  }
+tasks.test {
+  useJUnitPlatform()
 }
 
 // Configure Gradle IntelliJ Plugin
