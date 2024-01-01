@@ -3,7 +3,6 @@ package com.mituuz.fuzzier
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.ex.EditorEx
-import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.fileTypes.PlainTextFileType
@@ -11,8 +10,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.EditorTextField
 
-class PreviewEditor(project: Project?, virtualFile: VirtualFile?) : EditorTextField(
-    virtualFile?.let { FileDocumentManager.getInstance().getDocument(it) },
+class PreviewEditor(project: Project?) : EditorTextField(
     project,
     getDefaultFileType()
 ) {

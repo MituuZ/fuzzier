@@ -33,7 +33,7 @@ class Fuzzier : AnAction() {
         SwingUtilities.invokeLater {
             defaultDoc = EditorFactory.getInstance().createDocument("")
             p0.project?.let { project ->
-                component = FuzzyFinder().createPreviewPane(project)
+                component = FuzzyFinder(project).createPreviewPane(project)
                 component.searchField.text = ""
                 // ToDo: Quick fix for initial divider location
                 component.splitPane.setDividerLocation(500)
