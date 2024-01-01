@@ -3,6 +3,7 @@ package com.mituuz.fuzzier
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.event.DocumentEvent
@@ -16,6 +17,8 @@ import com.intellij.openapi.roots.ContentIterator
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
+import com.intellij.openapi.ui.popup.JBPopupListener
+import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
@@ -52,7 +55,15 @@ class Fuzzier : AnAction() {
                         .setMovable(true)
                         .setShowBorder(true)
                         .createPopup()
+
+                    popup?.addListener(object : JBPopupListener {
+                        override fun onClosed(event: LightweightWindowEvent) {
+                            service<FuzzierSettingsService>().state.splitPosition = component.splitPane.dividerLocation
+                            super.onClosed(event)
+                        }
+                    })
                     popup!!.showInCenterOf(it)
+                    component.splitPane.dividerLocation = service<FuzzierSettingsService>().state.splitPosition
                 }
             }
         }

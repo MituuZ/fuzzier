@@ -59,7 +59,6 @@ class FuzzyFinder(project: Project) : JPanel(
         )
         val scrollPane1 = JBScrollPane()
 
-        splitPane.dividerLocation = 300
         splitPane.dividerSize = 10
 
         fuzzyPanel.add(
