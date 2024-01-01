@@ -33,7 +33,7 @@ class Fuzzier : AnAction() {
         SwingUtilities.invokeLater {
             defaultDoc = EditorFactory.getInstance().createDocument("")
             p0.project?.let { project ->
-                component = FuzzyFinder(project).createPreviewPane(project)
+                component = FuzzyFinder(project)
                 component.searchField.text = ""
                 // ToDo: Quick fix for initial divider location
                 component.splitPane.setDividerLocation(500)
@@ -104,7 +104,7 @@ class Fuzzier : AnAction() {
             sortedList.forEach { valModel.addElement(it.string) }
 
             SwingUtilities.invokeLater {
-                component.fileList?.model = valModel
+                component.fileList.model = valModel
                 component.fileList.setPaintBusy(false)
                 if (!component.fileList.isEmpty) {
                     component.fileList.setSelectedValue(valModel[0], true)

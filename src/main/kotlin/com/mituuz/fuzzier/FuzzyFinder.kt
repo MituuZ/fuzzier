@@ -4,13 +4,13 @@ import com.intellij.openapi.fileTypes.PlainTextFileType
 import com.intellij.openapi.project.Project
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBList
+import com.intellij.ui.components.JBScrollPane
 import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
+import com.intellij.util.ui.JBUI
 import java.awt.BorderLayout
 import java.awt.Dimension
-import java.awt.Insets
 import javax.swing.JPanel
-import javax.swing.JScrollPane
 import javax.swing.JSplitPane
 
 class FuzzyFinder(project: Project) : JPanel(
@@ -25,28 +25,13 @@ class FuzzyFinder(project: Project) : JPanel(
     var splitPane: JSplitPane = JSplitPane()
         private set
 
-    fun createPreviewPane(project: Project?): FuzzyFinder {
-        this.previewPane = PreviewEditor(project)
+    init {
+        layout = BorderLayout()
+        add(fuzzyPanel)
         previewPane.fileType = PlainTextFileType.INSTANCE
         previewPane.isViewer = true
         splitPane.rightComponent = previewPane
-        return this
-    }
-
-    private fun createUIComponents() {
-        this.layout = BorderLayout()
-        this.add(fuzzyPanel)
-    }
-
-    init {
-        setUp()
-    }
-
-    private fun setUp() {
-        createUIComponents()
-        fuzzyPanel.layout = GridLayoutManager(1, 1, Insets(0, 0, 0, 0), -1, -1)
-        splitPane.dividerLocation = 300
-        splitPane.dividerSize = 10
+        fuzzyPanel.layout = GridLayoutManager(1, 1, JBUI.emptyInsets(), -1, -1)
         fuzzyPanel.add(
             splitPane,
             GridConstraints(
@@ -66,7 +51,7 @@ class FuzzyFinder(project: Project) : JPanel(
             )
         )
         val panel1 = JPanel()
-        panel1.layout = GridLayoutManager(2, 1, Insets(0, 0, 0, 0), -1, -1)
+        panel1.layout = GridLayoutManager(2, 1, JBUI.emptyInsets(), -1, -1)
         splitPane.leftComponent = panel1
         searchField.text = ""
         panel1.add(
@@ -87,7 +72,7 @@ class FuzzyFinder(project: Project) : JPanel(
                 false
             )
         )
-        val scrollPane1 = JScrollPane()
+        val scrollPane1 = JBScrollPane()
         panel1.add(
             scrollPane1,
             GridConstraints(
@@ -110,5 +95,7 @@ class FuzzyFinder(project: Project) : JPanel(
         fileList.selectionMode = 0
         scrollPane1.setViewportView(fileList)
         splitPane.rightComponent = previewPane
+        splitPane.dividerLocation = 300
+        splitPane.dividerSize = 10
     }
 }
