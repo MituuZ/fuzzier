@@ -25,8 +25,8 @@ class PreviewEditor(project: Project?, virtualFile: VirtualFile?) : EditorTextFi
 
     override fun createEditor(): EditorEx {
         val editor = super.createEditor()
-        editor.settings.isLineNumbersShown = true
         editor.setVerticalScrollbarVisible(true)
+        editor.setHorizontalScrollbarVisible(true)
         editor.isOneLineMode = false
         editor.isViewer = true
         editor.foldingModel.isFoldingEnabled = false
@@ -43,6 +43,7 @@ class PreviewEditor(project: Project?, virtualFile: VirtualFile?) : EditorTextFi
 
     fun updateFile(document: Document, virtualFile: VirtualFile?) {
         this.document = document
-        this.fileType = virtualFile?.let { FileTypeManager.getInstance().getFileTypeByFile(it) };
+        this.fileType = virtualFile?.let { FileTypeManager.getInstance().getFileTypeByFile(it) }
+        this.editor?.scrollingModel?.scrollHorizontally(0)
     }
 }
