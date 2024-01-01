@@ -1,5 +1,7 @@
 package com.mituuz.fuzzier;
 
+import com.intellij.openapi.fileTypes.PlainTextFileType;
+import com.intellij.openapi.project.Project;
 import com.intellij.ui.EditorTextField;
 import com.intellij.ui.components.JBList;
 import com.intellij.uiDesigner.core.GridConstraints;
@@ -9,14 +11,22 @@ import javax.swing.*;
 import java.awt.*;
 
 public class FuzzyFinder extends JPanel {
-    private JEditorPane previewPane;
+    private PreviewEditor previewPane;
     private JBList<String> fileList;
     private EditorTextField searchField;
     private JPanel fuzzyPanel;
     private JSplitPane splitPane;
 
-    public JEditorPane getPreviewPane() {
+    public PreviewEditor getPreviewPane() {
         return previewPane;
+    }
+
+    public FuzzyFinder createPreviewPane(Project project) {
+        this.previewPane = new PreviewEditor(project, null);
+        previewPane.setFileType(PlainTextFileType.INSTANCE);
+        previewPane.setViewer(true);
+        splitPane.setRightComponent(previewPane);
+        return this;
     }
 
     public JBList<String> getFileList() {
@@ -35,6 +45,7 @@ public class FuzzyFinder extends JPanel {
         this.setLayout(new BorderLayout());
         fuzzyPanel = new JPanel();
         this.add(fuzzyPanel);
+        this.previewPane = null;
     }
 
     {
@@ -55,6 +66,8 @@ public class FuzzyFinder extends JPanel {
         createUIComponents();
         fuzzyPanel.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         splitPane = new JSplitPane();
+        splitPane.setDividerLocation(300);
+        splitPane.setDividerSize(10);
         fuzzyPanel.add(splitPane, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(200, 200), null, 0, false));
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
@@ -67,14 +80,7 @@ public class FuzzyFinder extends JPanel {
         fileList = new JBList();
         fileList.setSelectionMode(0);
         scrollPane1.setViewportView(fileList);
-        final JScrollPane scrollPane2 = new JScrollPane();
-        scrollPane2.setHorizontalScrollBarPolicy(30);
-        scrollPane2.setVerticalScrollBarPolicy(20);
-        splitPane.setRightComponent(scrollPane2);
-        previewPane = new JEditorPane();
-        previewPane.setEditable(false);
-        previewPane.setText("");
-        scrollPane2.setViewportView(previewPane);
+        splitPane.setRightComponent(previewPane);
     }
 
     /**

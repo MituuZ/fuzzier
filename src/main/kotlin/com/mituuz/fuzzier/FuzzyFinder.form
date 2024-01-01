@@ -14,7 +14,10 @@
             <preferred-size width="200" height="200"/>
           </grid>
         </constraints>
-        <properties/>
+        <properties>
+          <dividerLocation value="300"/>
+          <dividerSize value="10"/>
+        </properties>
         <border type="none"/>
         <children>
           <grid id="725b" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
@@ -54,25 +57,12 @@
               </scrollpane>
             </children>
           </grid>
-          <scrollpane id="5763f">
+          <component id="b5367" class="com.mituuz.fuzzier.PreviewEditor" binding="previewPane" custom-create="true">
             <constraints>
               <splitpane position="right"/>
             </constraints>
-            <properties>
-              <horizontalScrollBarPolicy value="30"/>
-              <verticalScrollBarPolicy value="20"/>
-            </properties>
-            <border type="none"/>
-            <children>
-              <component id="ab21" class="javax.swing.JEditorPane" binding="previewPane">
-                <constraints/>
-                <properties>
-                  <editable value="false"/>
-                  <text value=""/>
-                </properties>
-              </component>
-            </children>
-          </scrollpane>
+            <properties/>
+          </component>
         </children>
       </splitpane>
     </children>

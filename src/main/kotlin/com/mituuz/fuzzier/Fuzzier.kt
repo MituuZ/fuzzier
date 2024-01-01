@@ -3,6 +3,8 @@ package com.mituuz.fuzzier
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.editor.Document
+import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.fileEditor.FileDocumentManager
@@ -25,15 +27,17 @@ import javax.swing.*
 class Fuzzier : AnAction() {
     private lateinit var component: FuzzyFinder
     private var popup: JBPopup? = null
+    private var defaultDoc: Document? = null
 
     override fun actionPerformed(p0: AnActionEvent) {
         SwingUtilities.invokeLater {
-            component = FuzzyFinder()
-            component.searchField.text = ""
-            // ToDo: Quick fix for initial divider location
-            component.splitPane.setDividerLocation(500)
-
+            defaultDoc = EditorFactory.getInstance().createDocument("")
             p0.project?.let { project ->
+                component = FuzzyFinder().createPreviewPane(project)
+                component.searchField.text = ""
+                // ToDo: Quick fix for initial divider location
+                component.splitPane.setDividerLocation(500)
+
                 val projectBasePath = project.basePath
                 if (projectBasePath != null) {
                     createListeners(project, projectBasePath)
@@ -62,7 +66,7 @@ class Fuzzier : AnAction() {
         if (StringUtils.isBlank(searchString)) {
             SwingUtilities.invokeLater {
                 component.fileList.model = DefaultListModel()
-                component.previewPane.text = ""
+                defaultDoc?.let { component.previewPane.updateFile(it) }
             }
             return
         }
@@ -153,7 +157,6 @@ class Fuzzier : AnAction() {
 
     private fun openFile(project: Project, virtualFile: VirtualFile) {
         val fileEditorManager = FileEditorManager.getInstance(project)
-
         val currentEditor = fileEditorManager.selectedTextEditor
 
         // Either open the file if there is already a tab for it or close current tab and open the file in a new one
@@ -165,7 +168,6 @@ class Fuzzier : AnAction() {
             }
             fileEditorManager.openFile(virtualFile, true)
         }
-
         popup?.cancel()
     }
 
@@ -174,7 +176,9 @@ class Fuzzier : AnAction() {
         component.fileList.addListSelectionListener { event ->
             if (!event.valueIsAdjusting) {
                 if (component.fileList.isEmpty) {
-                    component.previewPane.text = ""
+                    ApplicationManager.getApplication().invokeLater {
+                        defaultDoc?.let { component.previewPane.updateFile(it) }
+                    }
                     return@addListSelectionListener
                 }
                 val selectedValue = component.fileList.selectedValue
@@ -183,21 +187,16 @@ class Fuzzier : AnAction() {
                 ProgressManager.getInstance().run(object : Task.Backgroundable(null, "Loading file", false) {
                     override fun run(indicator: ProgressIndicator) {
                         val file = VirtualFileManager.getInstance().findFileByUrl(fileUrl)
+
+                        val document = ApplicationManager.getApplication().runReadAction<Document?> {
+                            file?.let { FileDocumentManager.getInstance().getDocument(file) }
+                        }
+
                         file?.let {
-                            var fileContent = ""
-                            var caretPos = 0
-
-                            // Run read action to get document content
-                            ApplicationManager.getApplication().runReadAction {
-                                val document = FileDocumentManager.getInstance().getDocument(it)
-                                fileContent = document?.text ?: "Cannot read file"
-                                // caretPos = document?.text?.length?.div(2) ?: 0
-                                caretPos = 0
-                            }
-
                             ApplicationManager.getApplication().invokeLater {
-                                component.previewPane.text = fileContent
-                                component.previewPane.caretPosition = caretPos
+                                if (document != null) {
+                                    component.previewPane.updateFile(document, file)
+                                }
                             }
                         }
                     }
