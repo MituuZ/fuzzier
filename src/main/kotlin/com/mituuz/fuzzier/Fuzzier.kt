@@ -3,13 +3,12 @@ package com.mituuz.fuzzier
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.editor.Document
+import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
-import com.intellij.openapi.fileTypes.FileTypeManager
-import com.intellij.openapi.fileTypes.StdFileTypes
-import com.intellij.openapi.fileTypes.StdFileTypes.JAVA
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -28,15 +27,17 @@ import javax.swing.*
 class Fuzzier : AnAction() {
     private lateinit var component: FuzzyFinder
     private var popup: JBPopup? = null
+    private var defaultDoc: Document? = null
 
     override fun actionPerformed(p0: AnActionEvent) {
         SwingUtilities.invokeLater {
-            component = FuzzyFinder()
-            component.searchField.text = ""
-            // ToDo: Quick fix for initial divider location
-            component.splitPane.setDividerLocation(500)
-
+            defaultDoc = EditorFactory.getInstance().createDocument("")
             p0.project?.let { project ->
+                component = FuzzyFinder().createPreviewPane(project)
+                component.searchField.text = ""
+                // ToDo: Quick fix for initial divider location
+                component.splitPane.setDividerLocation(500)
+
                 val projectBasePath = project.basePath
                 if (projectBasePath != null) {
                     createListeners(project, projectBasePath)
@@ -65,7 +66,7 @@ class Fuzzier : AnAction() {
         if (StringUtils.isBlank(searchString)) {
             SwingUtilities.invokeLater {
                 component.fileList.model = DefaultListModel()
-                component.previewPane.text = ""
+                defaultDoc?.let { component.previewPane.updateFile(it) }
             }
             return
         }
@@ -175,7 +176,9 @@ class Fuzzier : AnAction() {
         component.fileList.addListSelectionListener { event ->
             if (!event.valueIsAdjusting) {
                 if (component.fileList.isEmpty) {
-                    component.previewPane.text = ""
+                    ApplicationManager.getApplication().invokeLater {
+                        defaultDoc?.let { component.previewPane.updateFile(it) }
+                    }
                     return@addListSelectionListener
                 }
                 val selectedValue = component.fileList.selectedValue
@@ -184,12 +187,16 @@ class Fuzzier : AnAction() {
                 ProgressManager.getInstance().run(object : Task.Backgroundable(null, "Loading file", false) {
                     override fun run(indicator: ProgressIndicator) {
                         val file = VirtualFileManager.getInstance().findFileByUrl(fileUrl)
+
+                        val document = ApplicationManager.getApplication().runReadAction<Document?> {
+                            file?.let { FileDocumentManager.getInstance().getDocument(file) }
+                        }
+
                         file?.let {
                             ApplicationManager.getApplication().invokeLater {
-                                val editorTextField = PreviewEditor(project, file)
-                                component.splitPane.rightComponent = editorTextField
-                                // ToDo: Quick fix for current preview
-                                component.splitPane.setDividerLocation(500)
+                                if (document != null) {
+                                    component.previewPane.updateFile(document, file)
+                                }
                             }
                         }
                     }

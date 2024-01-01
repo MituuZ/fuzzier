@@ -1,8 +1,12 @@
 package com.mituuz.fuzzier
 
+import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.ex.EditorEx
+import com.intellij.openapi.editor.ex.util.EditorUtil
 import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.fileTypes.FileTypeManager
+import com.intellij.openapi.fileTypes.PlainTextFileType
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.EditorTextField
@@ -10,8 +14,14 @@ import com.intellij.ui.EditorTextField
 class PreviewEditor(project: Project?, virtualFile: VirtualFile?) : EditorTextField(
     virtualFile?.let { FileDocumentManager.getInstance().getDocument(it) },
     project,
-    virtualFile?.let { FileTypeManager.getInstance().getFileTypeByFile(it) }
+    getDefaultFileType()
 ) {
+
+    companion object {
+        fun getDefaultFileType(): FileType {
+            return PlainTextFileType.INSTANCE
+        }
+    }
 
     override fun createEditor(): EditorEx {
         val editor = super.createEditor()
@@ -22,10 +32,13 @@ class PreviewEditor(project: Project?, virtualFile: VirtualFile?) : EditorTextFi
         return editor
     }
 
-    fun updateFile(virtualFile: VirtualFile?) {
-        if (virtualFile != null) {
-            this.document = virtualFile.let { FileDocumentManager.getInstance().getDocument(it) }!!
-        }
+    fun updateFile(document: Document) {
+        this.document = document
+        this.fileType = PlainTextFileType.INSTANCE
+    }
+
+    fun updateFile(document: Document, virtualFile: VirtualFile?) {
+        this.document = document
         this.fileType = virtualFile?.let { FileTypeManager.getInstance().getFileTypeByFile(it) };
     }
 }
