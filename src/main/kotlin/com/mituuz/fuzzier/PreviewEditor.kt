@@ -1,8 +1,8 @@
 package com.mituuz.fuzzier
 
 import com.intellij.openapi.editor.Document
+import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.ex.EditorEx
-import com.intellij.openapi.editor.ex.util.EditorUtil
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.fileTypes.FileTypeManager
@@ -29,6 +29,10 @@ class PreviewEditor(project: Project?, virtualFile: VirtualFile?) : EditorTextFi
         editor.setVerticalScrollbarVisible(true)
         editor.isOneLineMode = false
         editor.isViewer = true
+        editor.foldingModel.isFoldingEnabled = false
+
+        val globalScheme = EditorColorsManager.getInstance().globalScheme
+        this.font = globalScheme.getFont(null)
         return editor
     }
 
