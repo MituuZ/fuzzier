@@ -28,7 +28,6 @@ IntelliJ IDEA 2023.3.2
 
 ## Potential improvements
 - Smarter popup location handling
-- Persistent split location
 - Configurable exclusion list
 - Configurable search weights with a test bench
 
