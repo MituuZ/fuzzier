@@ -148,7 +148,16 @@ class Fuzzier : AnAction() {
                     if (streak > longestStreak) {
                         longestStreak = streak
                     }
-                    return FuzzyMatchContainer(longestStreak, filePath)
+
+                    var score = longestStreak
+
+                    StringUtils.split(lowerFilePath, "/.").forEach {
+                        if (it == lowerSearchString) {
+                            score += 10
+                        }
+                    }
+
+                    return FuzzyMatchContainer(score, filePath)
                 }
             } else {
                 if (streak > longestStreak) {
