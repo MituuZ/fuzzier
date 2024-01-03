@@ -13,23 +13,29 @@ When focused on the search field, you can use:
 - CTRL + k to move up
 - Enter to open the currently selected file (opens in current tab)
 
-## Adding ideavim mapping for the plugin
+## Shortcuts
+### Adding ideavim mapping for the plugin
 Example of a .ideavimrc-row to add a vim keybinding for the plugin
 ```
 map <Leader>pf <action>(com.mituuz.fuzzier.Fuzzier)
 ```
 
+### Adding a shortcut for the plugin
+![A picture of the IntelliJ IDEA settings, showing where to set the shortcut](assets/Shortcut.png "An image of the IntelliJ IDEA settings")
+
 ## Installation
-Must be done manually by building the plugin and selecting the jar from the "Install Plugin From Disk"-option in the plugin menu
+I'll work on getting the plugin to the JetBrains marketplace.
+
+For now, the installation must be done manually by building the plugin and selecting the jar from the "Install Plugin From Disk"-option in the plugin menu
 ![A picture of the IntelliJ IDEA settings, showing where to install a plugin from disk](assets/Install.png "An image of the IntelliJ IDEA settings")
 
 ## Requirements (tested on)
-IntelliJ IDEA 2023.3.2
+IntelliJ IDEA version 2023.1.5 or later
 
 ## Potential improvements
-- Smarter popup location handling
 - Configurable exclusion list
 - Configurable search weights with a test bench
+- Arrow key movement
 
 ## Contact
 I can be reached from <mituuuuz@hotmail.com>
