@@ -2,10 +2,12 @@ package com.mituuz.fuzzier
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.EditorFactory
+import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.fileEditor.FileEditorManager
@@ -32,6 +34,10 @@ class Fuzzier : AnAction() {
     private var defaultDoc: Document? = null
 
     override fun actionPerformed(p0: AnActionEvent) {
+        val actionManager = EditorActionManager.getInstance()
+        actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN, FuzzyListActionHandler(this, false))
+        actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_UP, FuzzyListActionHandler(this, true))
+
         SwingUtilities.invokeLater {
             defaultDoc = EditorFactory.getInstance().createDocument("")
             p0.project?.let { project ->
@@ -66,6 +72,23 @@ class Fuzzier : AnAction() {
                     component.splitPane.dividerLocation = service<FuzzierSettingsService>().state.splitPosition
                 }
             }
+        }
+    }
+
+    fun moveListUp() {
+        val selectedIndex = component.fileList.selectedIndex
+        if (selectedIndex > 0) {
+            component.fileList.selectedIndex = selectedIndex - 1
+            component.fileList.ensureIndexIsVisible(selectedIndex - 1)
+        }
+    }
+
+    fun moveListDown() {
+        val selectedIndex = component.fileList.selectedIndex
+        val length = component.fileList.model.size
+        if (selectedIndex < length - 1) {
+            component.fileList.selectedIndex = selectedIndex + 1
+            component.fileList.ensureIndexIsVisible(selectedIndex + 1)
         }
     }
 
@@ -243,30 +266,16 @@ class Fuzzier : AnAction() {
         // Add a listener to move fileList up and down by using CTRL + k/j
         val kShiftKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_K, InputEvent.CTRL_DOWN_MASK)
         val jShiftKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_J, InputEvent.CTRL_DOWN_MASK)
-        val upKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.CTRL_DOWN_MASK)
-        val downKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.CTRL_DOWN_MASK)
-
         inputMap.put(kShiftKeyStroke, "moveUp")
-        inputMap.put(upKeyStroke, "moveUp")
         component.searchField.actionMap.put("moveUp", object : AbstractAction() {
             override fun actionPerformed(e: ActionEvent?) {
-                val selectedIndex = component.fileList.selectedIndex
-                if (selectedIndex > 0) {
-                    component.fileList.selectedIndex = selectedIndex - 1
-                    component.fileList.ensureIndexIsVisible(selectedIndex - 1)
-                }
+                moveListUp()
             }
         })
         inputMap.put(jShiftKeyStroke, "moveDown")
-        inputMap.put(downKeyStroke, "moveDown")
         component.searchField.actionMap.put("moveDown", object : AbstractAction() {
             override fun actionPerformed(e: ActionEvent?) {
-                val selectedIndex = component.fileList.selectedIndex
-                val length = component.fileList.model.size
-                if (selectedIndex < length - 1) {
-                    component.fileList.selectedIndex = selectedIndex + 1
-                    component.fileList.ensureIndexIsVisible(selectedIndex + 1)
-                }
+                moveListDown()
             }
         })
 
