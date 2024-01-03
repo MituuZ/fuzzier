@@ -8,7 +8,12 @@ Does **not** support true fuzzy finding. All search characters must be present a
 ![The UI consist of three parts. A file list on the top left, search field on the bottom left and the preview pane on the right](assets/FuzzierUI.png "An image of the plugin UI")
 
 ## Usage
+You can open Fuzzier with a shortcut or from the Tools menu
+
+Double-clicking a list item opens the file
+
 When focused on the search field, you can use:
+- Arrow keys to move up and down
 - CTRL + j to move down
 - CTRL + k to move up
 - Enter to open the currently selected file (opens in current tab)
@@ -35,7 +40,6 @@ IntelliJ IDEA version 2023.1.5 or later
 ## Potential improvements
 - Configurable exclusion list
 - Configurable search weights with a test bench
-- Arrow key movement
 
 ## Contact
 I can be reached from <mituuuuz@hotmail.com>
