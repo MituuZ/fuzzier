@@ -107,26 +107,7 @@ class Fuzzier : AnAction() {
             val projectFileIndex = ProjectFileIndex.getInstance(project)
             val projectBasePath = project.basePath
 
-            val contentIterator = ContentIterator { file: VirtualFile ->
-                if (!file.isDirectory) {
-                    val filePath = projectBasePath?.let { it1 -> file.path.removePrefix(it1) }
-
-                    // ToDo: This can be handled better and made configurable
-                    if (StringUtils.contains(file.path, ".git/")
-                        || StringUtils.contains(file.path, ".idea/")
-                        || StringUtils.contains(file.path, "build/")
-                    ) {
-                        // Skip these files
-
-                    } else if (!filePath.isNullOrBlank()) {
-                        val fuzzyMatchContainer = fuzzyContainsCaseInsensitive(filePath, searchString)
-                        if (fuzzyMatchContainer != null) {
-                            listModel.addElement(fuzzyMatchContainer)
-                        }
-                    }
-                }
-                true
-            }
+            val contentIterator = projectBasePath?.let { getContentIterator(it, searchString, listModel) }
 
             projectFileIndex.iterateContent(contentIterator)
             val sortedList = listModel.elements().toList().sortedByDescending { it.score }
@@ -141,6 +122,29 @@ class Fuzzier : AnAction() {
                 }
             }
         }
+    }
+
+    private fun getContentIterator(projectBasePath: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
+       return ContentIterator { file: VirtualFile ->
+           if (!file.isDirectory) {
+               val filePath = projectBasePath?.let { it1 -> file.path.removePrefix(it1) }
+
+               // ToDo: This can be handled better and made configurable
+               if (StringUtils.contains(file.path, ".git/")
+                   || StringUtils.contains(file.path, ".idea/")
+                   || StringUtils.contains(file.path, "build/")
+               ) {
+                   // Skip these files
+
+               } else if (!filePath.isNullOrBlank()) {
+                   val fuzzyMatchContainer = fuzzyContainsCaseInsensitive(filePath, searchString)
+                   if (fuzzyMatchContainer != null) {
+                       listModel.addElement(fuzzyMatchContainer)
+                   }
+               }
+           }
+           true
+       }
     }
 
     fun fuzzyContainsCaseInsensitive(filePath: String, searchString: String): FuzzyMatchContainer? {
