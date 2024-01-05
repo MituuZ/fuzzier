@@ -127,7 +127,7 @@ class Fuzzier : AnAction() {
     private fun getContentIterator(projectBasePath: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
        return ContentIterator { file: VirtualFile ->
            if (!file.isDirectory) {
-               val filePath = projectBasePath?.let { it1 -> file.path.removePrefix(it1) }
+               val filePath = projectBasePath.let { it1 -> file.path.removePrefix(it1) }
 
                // ToDo: This can be handled better and made configurable
                if (StringUtils.contains(file.path, ".git/")
@@ -136,7 +136,7 @@ class Fuzzier : AnAction() {
                ) {
                    // Skip these files
 
-               } else if (!filePath.isNullOrBlank()) {
+               } else if (filePath.isNotBlank()) {
                    val fuzzyMatchContainer = fuzzyContainsCaseInsensitive(filePath, searchString)
                    if (fuzzyMatchContainer != null) {
                        listModel.addElement(fuzzyMatchContainer)
