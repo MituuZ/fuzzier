@@ -109,7 +109,9 @@ class Fuzzier : AnAction() {
 
             val contentIterator = projectBasePath?.let { getContentIterator(it, searchString, listModel) }
 
-            projectFileIndex.iterateContent(contentIterator)
+            if (contentIterator != null) {
+                projectFileIndex.iterateContent(contentIterator)
+            }
             val sortedList = listModel.elements().toList().sortedByDescending { it.score }
             val valModel = DefaultListModel<String>()
             sortedList.forEach { valModel.addElement(it.string) }
