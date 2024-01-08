@@ -22,7 +22,12 @@
   <!-- Extension points defined by the plugin.
        Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
   <extensions defaultExtensionNs="com.intellij">
-    <applicationService serviceImplementation="com.mituuz.fuzzier.FuzzierSettingsService"/>
+    <applicationService serviceImplementation="com.mituuz.fuzzier.settings.FuzzierSettingsService"/>
+    <projectConfigurable
+      parentId="tools"
+      instance="com.mituuz.fuzzier.settings.FuzzierSettingsConfigurable"
+      id="com.mituuz.fuzzier.settings.FuzzierSettingsConfigurable"
+      displayName="Fuzzier Settings"/>
   </extensions>
 
   <change-notes>
