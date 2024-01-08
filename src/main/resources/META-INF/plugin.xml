@@ -25,6 +25,10 @@
     <applicationService serviceImplementation="com.mituuz.fuzzier.FuzzierSettingsService"/>
   </extensions>
 
+  <change-notes>
+    Fixed up/down key override after running Fuzzier
+  </change-notes>
+
   <actions>
     <action
             id="com.mituuz.fuzzier.Fuzzier"
