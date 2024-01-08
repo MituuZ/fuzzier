@@ -29,10 +29,7 @@ map <Leader>pf <action>(com.mituuz.fuzzier.Fuzzier)
 ![A picture of the IntelliJ IDEA settings, showing where to set the shortcut](assets/Shortcut.png "An image of the IntelliJ IDEA settings")
 
 ## Installation
-I'll work on getting the plugin to the JetBrains marketplace.
-
-For now, the installation must be done manually by building the plugin and selecting the jar from the "Install Plugin From Disk"-option in the plugin menu
-![A picture of the IntelliJ IDEA settings, showing where to install a plugin from disk](assets/Install.png "An image of the IntelliJ IDEA settings")
+The plugin can be installed from the [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/23451-fuzzier)
 
 ## Requirements (tested on)
 IntelliJ IDEA version 2023.1.5 or later
@@ -40,6 +37,7 @@ IntelliJ IDEA version 2023.1.5 or later
 ## Potential improvements
 - Configurable exclusion list
 - Configurable search weights with a test bench
+- Optimizing the file path handling
 
 ## Contact
 I can be reached from <mituuuuz@hotmail.com>
