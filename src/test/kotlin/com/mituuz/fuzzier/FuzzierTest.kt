@@ -1,10 +1,70 @@
 package com.mituuz.fuzzier
 
+import com.intellij.openapi.components.service
+import com.intellij.openapi.project.DumbService
+import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.PsiDocumentManager
+import com.intellij.testFramework.TestApplicationManager
+import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
+import com.intellij.testFramework.runInEdtAndWait
+import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import javax.swing.DefaultListModel
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 class FuzzierTest {
-    private val fuzzier = Fuzzier()
+    private var fuzzier: Fuzzier
+    private var testApplicationManager: TestApplicationManager
+
+    init {
+        testApplicationManager = TestApplicationManager.getInstance()
+        fuzzier = Fuzzier()
+    }
+
+    @Test
+    fun exc() {
+        val filePathContainer = DefaultListModel<Fuzzier.FuzzyMatchContainer>()
+        val list = ArrayList<String>()
+        list.add("ASD")
+        val projectBasePath = "basepath"
+        val searchString = "b"
+
+        val contentIterator = fuzzier.getContentIterator(projectBasePath, searchString, filePathContainer)
+
+        service<FuzzierSettingsService>().state.exclusionList = list
+
+
+        val mockFile = mock<VirtualFile>()
+        whenever(mockFile.path).thenReturn("some/path/ASD")
+        whenever(mockFile.isDirectory).thenReturn(false)
+
+        val factory = IdeaTestFixtureFactory.getFixtureFactory()
+        val fixtureBuilder = factory.createLightFixtureBuilder(null, "Test")
+        val fixture = fixtureBuilder.fixture
+
+        val myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture)
+        myFixture.setUp()
+        myFixture.addFileToProject("/src/main.kt", "file content")
+        myFixture.addFileToProject("/main.kt", "file content")
+        myFixture.addFileToProject("main.kt", "file content")
+
+        runInEdtAndWait {
+            PsiDocumentManager.getInstance(fixture.project).commitAllDocuments()
+        }
+
+        DumbService.getInstance(fixture.project).waitForSmartMode()
+
+        println(myFixture.findFileInTempDir("src/main.kt"))
+
+        val index = ProjectFileIndex.getInstance(fixture.project)
+        runInEdtAndWait {
+            index.iterateContent(contentIterator)
+        }
+    }
+
     @Test
     fun fuzzyScoreEmptyString() {
         val match = fuzzier.fuzzyContainsCaseInsensitive("", "")
