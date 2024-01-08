@@ -36,6 +36,7 @@ class Fuzzier : AnAction() {
     private var defaultDoc: Document? = null
     private lateinit var originalDownHandler: EditorActionHandler
     private lateinit var originalUpHandler: EditorActionHandler
+    private var fuzzierSettingsService = service<FuzzierSettingsService>()
 
     override fun actionPerformed(p0: AnActionEvent) {
         setCustomHandlers()
@@ -65,13 +66,13 @@ class Fuzzier : AnAction() {
 
                     popup?.addListener(object : JBPopupListener {
                         override fun onClosed(event: LightweightWindowEvent) {
-                            service<FuzzierSettingsService>().state.splitPosition = component.splitPane.dividerLocation
+                            fuzzierSettingsService.state.splitPosition = component.splitPane.dividerLocation
                             resetOriginalHandlers()
                             super.onClosed(event)
                         }
                     })
                     popup!!.showInCenterOf(it)
-                    component.splitPane.dividerLocation = service<FuzzierSettingsService>().state.splitPosition
+                    component.splitPane.dividerLocation = fuzzierSettingsService.state.splitPosition
                 }
             }
         }
