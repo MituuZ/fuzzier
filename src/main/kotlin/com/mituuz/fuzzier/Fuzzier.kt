@@ -7,6 +7,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.EditorFactory
+import com.intellij.openapi.editor.actionSystem.EditorActionHandler
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
@@ -32,12 +33,11 @@ class Fuzzier : AnAction() {
     private lateinit var component: FuzzyFinder
     private var popup: JBPopup? = null
     private var defaultDoc: Document? = null
+    private lateinit var originalDownHandler: EditorActionHandler
+    private lateinit var originalUpHandler: EditorActionHandler
 
     override fun actionPerformed(p0: AnActionEvent) {
-        val actionManager = EditorActionManager.getInstance()
-        actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN, FuzzyListActionHandler(this, false))
-        actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_UP, FuzzyListActionHandler(this, true))
-
+        setCustomHandlers()
         SwingUtilities.invokeLater {
             defaultDoc = EditorFactory.getInstance().createDocument("")
             p0.project?.let { project ->
@@ -65,6 +65,7 @@ class Fuzzier : AnAction() {
                     popup?.addListener(object : JBPopupListener {
                         override fun onClosed(event: LightweightWindowEvent) {
                             service<FuzzierSettingsService>().state.splitPosition = component.splitPane.dividerLocation
+                            resetOriginalHandlers()
                             super.onClosed(event)
                         }
                     })
@@ -73,6 +74,21 @@ class Fuzzier : AnAction() {
                 }
             }
         }
+    }
+
+    private fun setCustomHandlers() {
+        val actionManager = EditorActionManager.getInstance()
+        originalDownHandler = actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN)
+        originalUpHandler = actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_UP)
+
+        actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN, FuzzyListActionHandler(this, false))
+        actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_UP, FuzzyListActionHandler(this, true))
+    }
+
+    fun resetOriginalHandlers() {
+        val actionManager = EditorActionManager.getInstance()
+        actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN, originalDownHandler)
+        actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_UP, originalUpHandler)
     }
 
     fun moveListUp() {
