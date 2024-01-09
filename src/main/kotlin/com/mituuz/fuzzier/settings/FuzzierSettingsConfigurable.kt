@@ -27,7 +27,10 @@ class FuzzierSettingsConfigurable : Configurable {
     }
 
     override fun apply() {
-        val newList = fuzzierSettingsComponent.exclusionList.text.split("\n")
+        val newList = fuzzierSettingsComponent.exclusionList.text
+            .split("\n")
+            .filter { it.isNotBlank() }
+            .ifEmpty { listOf() }
         fuzzierSettingsService.state.exclusionList = newList
     }
 }
