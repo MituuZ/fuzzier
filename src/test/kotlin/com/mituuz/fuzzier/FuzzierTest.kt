@@ -24,11 +24,15 @@ class FuzzierTest {
 
     @Test
     fun excludeListTest() {
-        val filePathContainer = DefaultListModel<Fuzzier.FuzzyMatchContainer>()
-        val list = ArrayList<String>()
-        list.add("asd")
+        service<FuzzierSettingsService>().state.exclusionList = listOf("asd")
+        val filePaths = listOf("src/main.kt", "src/asd/main.kt", "src/asd/asd.kt", "src/not/asd.kt")
+        val filePathContainer = setUpProjectFileIndex(filePaths)
+        assertEquals(1, filePathContainer.size())
+        assertEquals("/main.kt", filePathContainer.get(0).string)
+    }
 
-        service<FuzzierSettingsService>().state.exclusionList = list
+    private fun setUpProjectFileIndex(filesToAdd: List<String>) : DefaultListModel<Fuzzier.FuzzyMatchContainer> {
+        val filePathContainer = DefaultListModel<Fuzzier.FuzzyMatchContainer>()
 
         val factory = IdeaTestFixtureFactory.getFixtureFactory()
         val fixtureBuilder = factory.createLightFixtureBuilder(null, "Test")
@@ -37,10 +41,9 @@ class FuzzierTest {
         val myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture)
         myFixture.setUp()
 
-        myFixture.addFileToProject("src/main.kt", "")
-        myFixture.addFileToProject("src/asd/main.kt", "")
-        myFixture.addFileToProject("src/asd/asd.kt", "")
-        myFixture.addFileToProject("src/not/asd.kt", "")
+        filesToAdd.forEach {
+            myFixture.addFileToProject(it, "")
+        }
 
         // Add source and wait for indexing
         val dir = myFixture.findFileInTempDir("src")
@@ -58,7 +61,8 @@ class FuzzierTest {
                 index.iterateContent(contentIterator)
             }
         }
-        assertEquals(1, filePathContainer.size())
+
+        return filePathContainer
     }
 
     @Test
