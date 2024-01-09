@@ -26,11 +26,7 @@ class FuzzierTest {
     fun excludeListTest() {
         val filePathContainer = DefaultListModel<Fuzzier.FuzzyMatchContainer>()
         val list = ArrayList<String>()
-        list.add("ASD")
-        val projectBasePath = "basepath"
-        val searchString = "b"
-
-        val contentIterator = fuzzier.getContentIterator(projectBasePath, searchString, filePathContainer)
+        list.add("asd")
 
         service<FuzzierSettingsService>().state.exclusionList = list
 
@@ -46,22 +42,22 @@ class FuzzierTest {
         myFixture.addFileToProject("src/asd/asd.kt", "file content")
         myFixture.addFileToProject("src/not/asd.kt", "file content")
 
+        // Add source and wait for indexing
         val dir = myFixture.findFileInTempDir("src")
-        println("File 1: " + myFixture.findFileInTempDir("src/main.kt"))
-        println("File 2: " + myFixture.findFileInTempDir("src"))
-
         PsiTestUtil.addSourceRoot(fixture.module, dir)
-
         runInEdtAndWait {
             PsiDocumentManager.getInstance(fixture.project).commitAllDocuments()
         }
-
         DumbService.getInstance(fixture.project).waitForSmartMode()
 
+        val contentIterator = fixture.project.basePath?.let { fuzzier.getContentIterator(it, "", filePathContainer) }
         val index = ProjectFileIndex.getInstance(fixture.project)
         runInEdtAndWait {
-            index.iterateContent(contentIterator)
+            if (contentIterator != null) {
+                index.iterateContent(contentIterator)
+            }
         }
+        assertEquals(1, filePathContainer.size())
     }
 
     @Test
