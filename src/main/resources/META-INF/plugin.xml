@@ -31,7 +31,7 @@
   </extensions>
 
   <change-notes>
-    Fixed up/down key override after running Fuzzier
+    Add a configurable exclusion list to Settings → Tools → Fuzzier Settings. Only supports contains checking for now.
   </change-notes>
 
   <actions>
