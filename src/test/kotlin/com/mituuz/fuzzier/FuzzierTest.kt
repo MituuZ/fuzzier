@@ -42,10 +42,11 @@ class FuzzierTest {
         myFixture.setUp()
 
         myFixture.addFileToProject("src/main.kt", "file content")
-        myFixture.addFileToProject("main.kt", "file content")
+        myFixture.addFileToProject("src/asd/main.kt", "file content")
+        myFixture.addFileToProject("src/asd/asd.kt", "file content")
+        myFixture.addFileToProject("src/not/asd.kt", "file content")
 
-
-        val dir = myFixture.findFileInTempDir("src/main.kt")
+        val dir = myFixture.findFileInTempDir("src")
         println("File 1: " + myFixture.findFileInTempDir("src/main.kt"))
         println("File 2: " + myFixture.findFileInTempDir("src"))
 
