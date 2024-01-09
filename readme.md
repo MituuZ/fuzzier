@@ -18,6 +18,13 @@ When focused on the search field, you can use:
 - CTRL + k to move up
 - Enter to open the currently selected file (opens in current tab)
 
+## Settings
+### Excluding files from the search
+You exclude files and file paths by adding them to the file exclusion list in Settings → Tools → Fuzzier Settings.
+
+Only supports contains for now. Identifiers are separated by newlines and empty strings are ignored.
+![A picture of the IntelliJ IDEA settings, showing the exclusion list](assets/FileExclusion.png "An image of the IntelliJ IDEA settings")
+
 ## Shortcuts
 ### Adding ideavim mapping for the plugin
 Example of a .ideavimrc-row to add a vim keybinding for the plugin
