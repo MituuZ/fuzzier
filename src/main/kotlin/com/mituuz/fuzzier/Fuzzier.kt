@@ -148,7 +148,6 @@ class Fuzzier : AnAction() {
        return ContentIterator { file: VirtualFile ->
            if (!file.isDirectory) {
                val filePath = projectBasePath.let { it1 -> file.path.removePrefix(it1) }
-               println(filePath)
                val exclusionList = fuzzierSettingsService.state.exclusionList
 
                if (exclusionList.any { StringUtils.contains(filePath, it) }) {

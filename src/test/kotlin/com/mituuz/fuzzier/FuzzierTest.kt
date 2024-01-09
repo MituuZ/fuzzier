@@ -24,12 +24,35 @@ class FuzzierTest {
 
     @Test
     fun excludeListTest() {
-        service<FuzzierSettingsService>().state.exclusionList = listOf("asd")
-        val filePaths = listOf("src/main.kt", "src/asd/main.kt", "src/asd/asd.kt", "src/not/asd.kt")
+        service<FuzzierSettingsService>().state.exclusionList = listOf("asd", "nope")
+        val filePaths = listOf("src/main.kt", "src/asd/main.kt", "src/asd/asd.kt", "src/not/asd.kt", "src/nope")
         val filePathContainer = setUpProjectFileIndex(filePaths)
         assertEquals(1, filePathContainer.size())
         assertEquals("/main.kt", filePathContainer.get(0).string)
     }
+
+    @Test
+    fun excludeListTestNoMatches() {
+        service<FuzzierSettingsService>().state.exclusionList = listOf("asd")
+        val filePaths = listOf("src/main.kt", "src/not.kt", "src/dsa/not.kt")
+        val filePathContainer = setUpProjectFileIndex(filePaths)
+        assertEquals(3, filePathContainer.size())
+        assertEquals("/main.kt", filePathContainer.get(2).string)
+        assertEquals("/not.kt", filePathContainer.get(1).string)
+        assertEquals("/dsa/not.kt", filePathContainer.get(0).string)
+       }
+
+    @Test
+    fun excludeListTestEmptyList() {
+        service<FuzzierSettingsService>().state.exclusionList = ArrayList()
+        val filePaths = listOf("src/main.kt", "src/not.kt", "src/dsa/not.kt")
+        val filePathContainer = setUpProjectFileIndex(filePaths)
+        assertEquals(3, filePathContainer.size())
+        assertEquals("/main.kt", filePathContainer.get(2).string)
+        assertEquals("/not.kt", filePathContainer.get(1).string)
+        assertEquals("/dsa/not.kt", filePathContainer.get(0).string)
+    }
+
 
     private fun setUpProjectFileIndex(filesToAdd: List<String>) : DefaultListModel<Fuzzier.FuzzyMatchContainer> {
         val filePathContainer = DefaultListModel<Fuzzier.FuzzyMatchContainer>()
@@ -61,6 +84,8 @@ class FuzzierTest {
                 index.iterateContent(contentIterator)
             }
         }
+        // Handle clearing ProjectFileIndex between tests
+        myFixture.tearDown()
 
         return filePathContainer
     }
