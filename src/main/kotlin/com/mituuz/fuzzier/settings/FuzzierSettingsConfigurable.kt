@@ -11,7 +11,7 @@ class FuzzierSettingsConfigurable : Configurable {
         return "Fuzzy File Finder Settings"
     }
 
-    override fun createComponent(): JComponent? {
+    override fun createComponent(): JComponent {
         fuzzierSettingsComponent = FuzzierSettingsComponent()
 
         val list = fuzzierSettingsService.state.exclusionList
