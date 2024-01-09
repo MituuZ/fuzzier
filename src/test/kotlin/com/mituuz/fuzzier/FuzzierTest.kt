@@ -37,20 +37,21 @@ class FuzzierTest {
         val myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture)
         myFixture.setUp()
 
-        myFixture.addFileToProject("src/main.kt", "file content")
-        myFixture.addFileToProject("src/asd/main.kt", "file content")
-        myFixture.addFileToProject("src/asd/asd.kt", "file content")
-        myFixture.addFileToProject("src/not/asd.kt", "file content")
+        myFixture.addFileToProject("src/main.kt", "")
+        myFixture.addFileToProject("src/asd/main.kt", "")
+        myFixture.addFileToProject("src/asd/asd.kt", "")
+        myFixture.addFileToProject("src/not/asd.kt", "")
 
         // Add source and wait for indexing
         val dir = myFixture.findFileInTempDir("src")
+        val basePath = dir.canonicalPath
         PsiTestUtil.addSourceRoot(fixture.module, dir)
         runInEdtAndWait {
             PsiDocumentManager.getInstance(fixture.project).commitAllDocuments()
         }
         DumbService.getInstance(fixture.project).waitForSmartMode()
 
-        val contentIterator = fixture.project.basePath?.let { fuzzier.getContentIterator(it, "", filePathContainer) }
+        val contentIterator = basePath?.let { fuzzier.getContentIterator(it, "", filePathContainer) }
         val index = ProjectFileIndex.getInstance(fixture.project)
         runInEdtAndWait {
             if (contentIterator != null) {
