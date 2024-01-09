@@ -25,6 +25,7 @@ import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
+import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
 import javax.swing.*
@@ -35,6 +36,7 @@ class Fuzzier : AnAction() {
     private var defaultDoc: Document? = null
     private lateinit var originalDownHandler: EditorActionHandler
     private lateinit var originalUpHandler: EditorActionHandler
+    private var fuzzierSettingsService = service<FuzzierSettingsService>()
 
     override fun actionPerformed(p0: AnActionEvent) {
         setCustomHandlers()
@@ -64,13 +66,13 @@ class Fuzzier : AnAction() {
 
                     popup?.addListener(object : JBPopupListener {
                         override fun onClosed(event: LightweightWindowEvent) {
-                            service<FuzzierSettingsService>().state.splitPosition = component.splitPane.dividerLocation
+                            fuzzierSettingsService.state.splitPosition = component.splitPane.dividerLocation
                             resetOriginalHandlers()
                             super.onClosed(event)
                         }
                     })
                     popup!!.showInCenterOf(it)
-                    component.splitPane.dividerLocation = service<FuzzierSettingsService>().state.splitPosition
+                    component.splitPane.dividerLocation = fuzzierSettingsService.state.splitPosition
                 }
             }
         }
@@ -142,19 +144,17 @@ class Fuzzier : AnAction() {
         }
     }
 
-    private fun getContentIterator(projectBasePath: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
+    fun getContentIterator(projectBasePath: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
        return ContentIterator { file: VirtualFile ->
            if (!file.isDirectory) {
                val filePath = projectBasePath.let { it1 -> file.path.removePrefix(it1) }
+               val exclusionList = fuzzierSettingsService.state.exclusionList
 
-               // ToDo: This can be handled better and made configurable
-               if (StringUtils.contains(file.path, ".git/")
-                   || StringUtils.contains(file.path, ".idea/")
-                   || StringUtils.contains(file.path, "build/")
-               ) {
-                   // Skip these files
+               if (exclusionList.any { StringUtils.contains(filePath, it) }) {
+                   return@ContentIterator true
+               }
 
-               } else if (filePath.isNotBlank()) {
+               if (filePath.isNotBlank()) {
                    val fuzzyMatchContainer = fuzzyContainsCaseInsensitive(filePath, searchString)
                    if (fuzzyMatchContainer != null) {
                        listModel.addElement(fuzzyMatchContainer)
