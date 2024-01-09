@@ -5,6 +5,7 @@ import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiDocumentManager
+import com.intellij.testFramework.PsiTestUtil
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.runInEdtAndWait
@@ -36,20 +37,22 @@ class FuzzierTest {
 
         service<FuzzierSettingsService>().state.exclusionList = list
 
-
-        val mockFile = mock<VirtualFile>()
-        whenever(mockFile.path).thenReturn("some/path/ASD")
-        whenever(mockFile.isDirectory).thenReturn(false)
-
         val factory = IdeaTestFixtureFactory.getFixtureFactory()
         val fixtureBuilder = factory.createLightFixtureBuilder(null, "Test")
         val fixture = fixtureBuilder.fixture
 
         val myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture)
         myFixture.setUp()
-        myFixture.addFileToProject("/src/main.kt", "file content")
-        myFixture.addFileToProject("/main.kt", "file content")
+
+        myFixture.addFileToProject("src/main.kt", "file content")
         myFixture.addFileToProject("main.kt", "file content")
+
+
+        val dir = myFixture.findFileInTempDir("src/main.kt")
+        println("File 1: " + myFixture.findFileInTempDir("src/main.kt"))
+        println("File 2: " + myFixture.findFileInTempDir("src"))
+
+        PsiTestUtil.addSourceRoot(fixture.module, dir)
 
         runInEdtAndWait {
             PsiDocumentManager.getInstance(fixture.project).commitAllDocuments()
@@ -57,12 +60,19 @@ class FuzzierTest {
 
         DumbService.getInstance(fixture.project).waitForSmartMode()
 
-        println(myFixture.findFileInTempDir("src/main.kt"))
-
         val index = ProjectFileIndex.getInstance(fixture.project)
         runInEdtAndWait {
             index.iterateContent(contentIterator)
         }
+    }
+
+    @Test
+    fun exclusionListIterator() {
+        val result = DefaultListModel<Fuzzier.FuzzyMatchContainer>()
+        val iterator = fuzzier.getContentIterator("", "", result);
+
+
+        assertEquals(0, result.size)
     }
 
     @Test
