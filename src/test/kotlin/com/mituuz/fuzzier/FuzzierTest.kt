@@ -3,7 +3,6 @@ package com.mituuz.fuzzier
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.roots.ProjectFileIndex
-import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.testFramework.PsiTestUtil
 import com.intellij.testFramework.TestApplicationManager
@@ -13,8 +12,6 @@ import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import javax.swing.DefaultListModel
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 class FuzzierTest {
     private var fuzzier: Fuzzier
@@ -26,7 +23,7 @@ class FuzzierTest {
     }
 
     @Test
-    fun exc() {
+    fun excludeListTest() {
         val filePathContainer = DefaultListModel<Fuzzier.FuzzyMatchContainer>()
         val list = ArrayList<String>()
         list.add("ASD")
@@ -64,15 +61,6 @@ class FuzzierTest {
         runInEdtAndWait {
             index.iterateContent(contentIterator)
         }
-    }
-
-    @Test
-    fun exclusionListIterator() {
-        val result = DefaultListModel<Fuzzier.FuzzyMatchContainer>()
-        val iterator = fuzzier.getContentIterator("", "", result);
-
-
-        assertEquals(0, result.size)
     }
 
     @Test
