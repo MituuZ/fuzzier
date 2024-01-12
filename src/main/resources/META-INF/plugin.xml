@@ -31,7 +31,11 @@
   </extensions>
 
   <change-notes>
-    Add a configurable exclusion list to Settings → Tools → Fuzzier Settings. Only supports contains checking for now.
+    <![CDATA[
+    <h3>Add support for multipart search string</h3>
+    <p>Using spaces in the search string splits it and searches for both parts separately.</p>
+    <p>e.g. parts do not need to be in the correct order, as long as both succeed on their own.</p>
+    ]]>
   </change-notes>
 
   <actions>

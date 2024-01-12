@@ -179,22 +179,28 @@ class Fuzzier : AnAction() {
     }
 
     private fun getFuzzyMatch(lowerFilePath: String, lowerSearchString: String, filePath: String): FuzzyMatchContainer? {
+        var score = 0
+        for (s in StringUtils.split(lowerSearchString, " ")) {
+            score += processSearchString(s, lowerFilePath) ?: return null
+        }
+        return FuzzyMatchContainer(score, filePath)
+    }
+
+    private fun processSearchString(s: String, lowerFilePath: String): Int? {
         var searchIndex = 0
         var longestStreak = 0
         var streak = 0
-
         for (i in lowerFilePath.indices) {
-            if (lowerFilePath.length - i < lowerSearchString.length - searchIndex) {
+            if (lowerFilePath.length - i < s.length - searchIndex) {
                 return null
             }
 
             val char = lowerFilePath[i]
-            if (char == lowerSearchString[searchIndex]) {
+            if (char == s[searchIndex]) {
                 streak++
                 searchIndex++
-                if (searchIndex == lowerSearchString.length) {
-                    val score = calculateScore(streak, longestStreak, lowerFilePath, lowerSearchString)
-                    return FuzzyMatchContainer(score, filePath)
+                if (searchIndex == s.length) {
+                    return calculateScore(streak, longestStreak, lowerFilePath, s)
                 }
             } else {
                 if (streak > longestStreak) {
@@ -203,7 +209,6 @@ class Fuzzier : AnAction() {
                 streak = 0
             }
         }
-
         return null
     }
 
