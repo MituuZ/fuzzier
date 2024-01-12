@@ -109,8 +109,26 @@ class FuzzierTest {
     }
 
     @Test
-    fun fuzzyScoreNoPossibleMatch() {
+    fun fuzzyScoreLongSearchString() {
         val match = fuzzier.fuzzyContainsCaseInsensitive("KIF", "TooLongSearchString")
+        assertNull(match)
+    }
+
+    @Test
+    fun fuzzyScoreNoPossibleMatch() {
+        val match = fuzzier.fuzzyContainsCaseInsensitive("KIF", "A")
+        assertNull(match)
+    }
+
+    @Test
+    fun fuzzyScoreNoPossibleMatchSplit() {
+        val match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "A A B")
+        assertNull(match)
+    }
+
+    @Test
+    fun fuzzyScorePartialMatchSplit() {
+        val match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "A A K")
         assertNull(match)
     }
 
@@ -130,6 +148,18 @@ class FuzzierTest {
 
         match = fuzzier.fuzzyContainsCaseInsensitive("Kif/Is/Fun/kif.kt", "kif")
         assertMatch(23, match)
+
+        match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "kif fun kotlin")
+        assertMatch(40, match)
+
+        match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "is kt")
+        assertMatch(22, match)
+    }
+
+    @Test
+    fun fuzzyScoreSpaceMatch() {
+        val match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "fun kotlin")
+        assertMatch(29, match)
     }
 
     private fun assertMatch(score: Int, container: Fuzzier.FuzzyMatchContainer?) {
