@@ -23,8 +23,23 @@ When focused on the search field, you can use:
 ## Settings
 ### Excluding files from the search
 You exclude files and file paths by adding them to the file exclusion list in Settings → Tools → Fuzzier Settings.
+No empty strings or comments are supported.
 
-Only supports contains for now. Identifiers are separated by newlines and empty strings are ignored.
+All files in the project root have `/` at the start of the file path.
+
+#### Options for exclusions are as follows:
+- Ends with
+  - e.g. `*.log`
+  - excludes all files that end with `.log`
+- Starts with
+  - e.g. `/build*`
+  - excludes all files from the project root that start with `build`
+  - excludes all files under folders that start with `build`
+  - to exclude only folders do append `/` at the end. e.g. `/build/*`
+- Contains
+  - e.g. `ee`
+  - excludes all files and folders that have the string `ee` in them
+
 ![A picture of the IntelliJ IDEA settings, showing the exclusion list](assets/FileExclusion.png "An image of the IntelliJ IDEA settings")
 
 ## Shortcuts
