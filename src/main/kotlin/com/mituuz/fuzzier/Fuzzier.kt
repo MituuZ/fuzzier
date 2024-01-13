@@ -148,12 +148,9 @@ class Fuzzier : AnAction() {
        return ContentIterator { file: VirtualFile ->
            if (!file.isDirectory) {
                val filePath = projectBasePath.let { it1 -> file.path.removePrefix(it1) }
-               val exclusionList = fuzzierSettingsService.state.exclusionList
-
-               if (exclusionList.any { StringUtils.contains(filePath, it) }) {
+               if (isExcluded(filePath)) {
                    return@ContentIterator true
                }
-
                if (filePath.isNotBlank()) {
                    val fuzzyMatchContainer = fuzzyContainsCaseInsensitive(filePath, searchString)
                    if (fuzzyMatchContainer != null) {
@@ -163,6 +160,28 @@ class Fuzzier : AnAction() {
            }
            true
        }
+    }
+
+    private fun isExcluded(filePath: String): Boolean {
+        val exclusionList = fuzzierSettingsService.state.exclusionList
+        for (e in exclusionList) {
+            when {
+                e.startsWith("*") -> {
+                    if (filePath.endsWith(e.substring(1))) {
+                        return true
+                    }
+                }
+                e.endsWith("*") -> {
+                    if (filePath.startsWith(e.substring(0, e.length - 1))) {
+                        return true
+                    }
+                }
+                filePath.contains(e) -> {
+                    return true
+                }
+            }
+        }
+        return false
     }
 
     fun fuzzyContainsCaseInsensitive(filePath: String, searchString: String): FuzzyMatchContainer? {

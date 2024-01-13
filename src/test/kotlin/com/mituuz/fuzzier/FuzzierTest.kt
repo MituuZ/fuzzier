@@ -53,6 +53,23 @@ class FuzzierTest {
         assertEquals("/dsa/not.kt", filePathContainer.get(0).string)
     }
 
+    @Test
+    fun excludeListTestStartsWith() {
+        service<FuzzierSettingsService>().state.exclusionList = listOf("/asd*")
+        val filePaths = listOf("src/main.kt", "src/asd/main.kt", "src/asd/asd.kt", "src/not/asd.kt")
+        val filePathContainer = setUpProjectFileIndex(filePaths)
+        assertEquals(2, filePathContainer.size())
+        assertEquals("/not/asd.kt", filePathContainer.get(0).string)
+    }
+
+    @Test
+    fun excludeListTestEndsWith() {
+        service<FuzzierSettingsService>().state.exclusionList = listOf("*.log")
+        val filePaths = listOf("src/main.log", "src/asd/main.log", "src/asd/asd.kt", "src/not/asd.kt", "src/nope")
+        val filePathContainer = setUpProjectFileIndex(filePaths)
+        assertEquals(3, filePathContainer.size())
+        assertEquals("/asd/asd.kt", filePathContainer.get(0).string)
+    }
 
     private fun setUpProjectFileIndex(filesToAdd: List<String>) : DefaultListModel<Fuzzier.FuzzyMatchContainer> {
         val filePathContainer = DefaultListModel<Fuzzier.FuzzyMatchContainer>()
