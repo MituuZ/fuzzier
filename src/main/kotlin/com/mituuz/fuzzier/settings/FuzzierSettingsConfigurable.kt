@@ -19,11 +19,13 @@ class FuzzierSettingsConfigurable : Configurable {
             list[index]
         }
         fuzzierSettingsComponent.exclusionList.text = combinedString
+        fuzzierSettingsComponent.newTabSelect.isSelected = fuzzierSettingsService.state.newTab
         return fuzzierSettingsComponent.jPanel
     }
 
     override fun isModified(): Boolean {
         return fuzzierSettingsService.state.exclusionList != fuzzierSettingsComponent.exclusionList.text.split("\n")
+                || fuzzierSettingsService.state.newTab != fuzzierSettingsComponent.newTabSelect.isSelected
     }
 
     override fun apply() {
@@ -31,6 +33,8 @@ class FuzzierSettingsConfigurable : Configurable {
             .split("\n")
             .filter { it.isNotBlank() }
             .ifEmpty { listOf() }
+
         fuzzierSettingsService.state.exclusionList = newList
+        fuzzierSettingsService.state.newTab = fuzzierSettingsComponent.newTabSelect.isSelected
     }
 }

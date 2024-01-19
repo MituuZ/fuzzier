@@ -1,6 +1,5 @@
 package com.mituuz.fuzzier
 
-import com.intellij.injected.editor.EditorWindow
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.IdeActions
@@ -12,9 +11,7 @@ import com.intellij.openapi.editor.actionSystem.EditorActionHandler
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
-import com.intellij.openapi.editor.impl.EditorFactoryImpl
 import com.intellij.openapi.fileEditor.FileEditorManager
-import com.intellij.openapi.fileEditor.impl.EditorWindowHolder
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -28,7 +25,6 @@ import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
-import com.intellij.ui.GuiUtils
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
@@ -263,7 +259,7 @@ class Fuzzier : AnAction() {
             fileEditorManager.openFile(virtualFile, true)
         } else {
             fileEditorManager.openFile(virtualFile, true)
-            if (currentEditor != null) {
+            if (currentEditor != null && !fuzzierSettingsService.state.newTab) {
                 fileEditorManager.selectedEditor?.let {
                     if (previousFile != null) {
                         fileEditorManager.closeFile(previousFile)

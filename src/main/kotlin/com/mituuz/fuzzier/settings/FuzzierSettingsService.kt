@@ -12,6 +12,7 @@ class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.S
     class State {
         var splitPosition: Int = 300
         var exclusionList: List<String> = listOf("/.idea/", "/.git/", "/target/", "/build/", "/.gradle/", "/.run/")
+        var newTab: Boolean = false;
     }
 
     private var state = State()

@@ -1,5 +1,6 @@
 package com.mituuz.fuzzier.settings
 
+import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.FormBuilder
@@ -8,6 +9,7 @@ import javax.swing.JPanel
 class FuzzierSettingsComponent {
     var jPanel: JPanel
     var exclusionList = JBTextArea()
+    var newTabSelect = JBCheckBox()
     private var exclusionInstructions = JBLabel("<html><strong>File path exclusions:</strong><br>" +
             "One line per one exclusion from the Fuzzier results.<br>" +
             "Empty lines are skipped and all files in the project root start with \"/\"<br>" +
@@ -18,6 +20,8 @@ class FuzzierSettingsComponent {
         jPanel = FormBuilder.createFormBuilder()
             .addComponent(exclusionInstructions)
             .addComponent(exclusionList)
+            .addSeparator()
+            .addLabeledComponent("<html><strong>Open files in a new tab</strong></html>", newTabSelect)
             .addComponentFillVertically(JPanel(), 0)
             .panel;
     }
