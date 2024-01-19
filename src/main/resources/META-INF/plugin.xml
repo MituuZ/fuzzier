@@ -31,11 +31,7 @@
   </extensions>
 
   <change-notes>
-    <![CDATA[
-    <h3>Add wildcard support to exclusions</h3>
-    <p>Exclusion settings now support wildcards for starts with and ends with patterns.<br>
-    The default remains as contains, if no wildcards are present.</p>
-    ]]>
+    Improve split handling and add an option to open files in a new tab
   </change-notes>
 
   <actions>
