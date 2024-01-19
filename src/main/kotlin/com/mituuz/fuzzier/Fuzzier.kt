@@ -254,7 +254,6 @@ class Fuzzier : AnAction() {
         val currentEditor = fileEditorManager.selectedTextEditor
         val previousFile = currentEditor?.virtualFile
 
-        // Either open the file if there is already a tab for it or close current tab and open the file in a new one
         if (fileEditorManager.isFileOpen(virtualFile)) {
             fileEditorManager.openFile(virtualFile, true)
         } else {
