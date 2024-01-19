@@ -63,7 +63,7 @@ class PreviewEditor(project: Project?) : EditorTextField(
                     val stringBuilder = StringBuilder()
                     var lineNumber = 0
 
-                    while (line != null && lineNumber < 200) {
+                    while (line != null && lineNumber < 100) {
                         stringBuilder.append(line).append("\n")
                         lineNumber++
                         line = reader.readLine()
@@ -82,6 +82,7 @@ class PreviewEditor(project: Project?) : EditorTextField(
                 ApplicationManager.getApplication().invokeLater {
                     this.fileType = fileType
                     this.editor?.scrollingModel?.scrollHorizontally(0)
+                    this.editor?.scrollingModel?.scrollVertically(0)
                 }
             }
         }
