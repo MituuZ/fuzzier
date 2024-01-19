@@ -46,6 +46,12 @@ class PreviewEditor(project: Project?) : EditorTextField(
     }
 
     fun updateFile(virtualFile: VirtualFile?) {
+        WriteCommandAction.runWriteCommandAction(project) {
+            if (this.document.isWritable) {
+                this.document.setText("")
+            }
+        }
+
         ApplicationManager.getApplication().executeOnPooledThread {
             val sourceDocument = ApplicationManager.getApplication().runReadAction<Document?> {
                 virtualFile?.let { FileDocumentManager.getInstance().getDocument(virtualFile) }
@@ -56,13 +62,16 @@ class PreviewEditor(project: Project?) : EditorTextField(
                 var lineNumber = 0
                 var line = reader.readLine()
                 while (line != null && lineNumber < 2000) {
+                    val finalLine = line
                     ApplicationManager.getApplication().invokeLater {
                         WriteCommandAction.runWriteCommandAction(project) {
-                            this.document.insertString(this.document.text.length, line + "\n")
-                            line = reader.readLine()
-                            lineNumber++
+                            if (this.document.isWritable) {
+                                this.document.insertString(this.document.text.length, finalLine + "\n")
+                            }
                         }
                     }
+                    line = reader.readLine()
+                    lineNumber++
                 }
 
                 ApplicationManager.getApplication().invokeLater {
