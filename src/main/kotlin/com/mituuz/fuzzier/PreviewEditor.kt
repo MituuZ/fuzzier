@@ -45,44 +45,56 @@ class PreviewEditor(project: Project?) : EditorTextField(
     }
 
     fun updateFile(virtualFile: VirtualFile?) {
-        WriteCommandAction.runWriteCommandAction(project) {
-            if (this.document.isWritable) {
-                this.document.setText("")
-            }
-        }
-
         ApplicationManager.getApplication().executeOnPooledThread {
             val sourceDocument = ApplicationManager.getApplication().runReadAction<Document?> {
                 virtualFile?.let { FileDocumentManager.getInstance().getDocument(virtualFile) }
             }
             val fileType = virtualFile?.let { FileTypeManager.getInstance().getFileTypeByFile(virtualFile) }
             if (sourceDocument != null) {
-            val reader = BufferedReader(StringReader(sourceDocument.text))
-                var line = reader.readLine()
-                while (line != null) {
-                    val stringBuilder = StringBuilder()
-                    var lineNumber = 0
-
-                    while (line != null && lineNumber < 100) {
-                        stringBuilder.append(line).append("\n")
-                        lineNumber++
-                        line = reader.readLine()
+                if (sourceDocument.text.length > 40000) {
+                    WriteCommandAction.runWriteCommandAction(project) {
+                        if (this.document.isWritable) {
+                            this.document.setText("")
+                        }
                     }
 
-                    val chunk = stringBuilder.toString()
-                    ApplicationManager.getApplication().invokeLater {
-                        WriteCommandAction.runWriteCommandAction(project) {
-                            if (this.document.isWritable) {
-                                this.document.insertString(this.document.text.length, chunk + "\n")
+                    val reader = BufferedReader(StringReader(sourceDocument.text))
+                    var line = reader.readLine()
+                    while (line != null) {
+                        val stringBuilder = StringBuilder()
+                        var lineNumber = 0
+
+                        while (line != null && lineNumber < 100) {
+                            stringBuilder.append(line).append("\n")
+                            lineNumber++
+                            line = reader.readLine()
+                        }
+
+                        val chunk = stringBuilder.toString()
+                        ApplicationManager.getApplication().invokeLater {
+                            WriteCommandAction.runWriteCommandAction(project) {
+                                if (this.document.isWritable) {
+                                    this.document.insertString(this.document.text.length, chunk + "\n")
+                                }
                             }
                         }
                     }
-                }
 
-                ApplicationManager.getApplication().invokeLater {
-                    this.fileType = fileType
-                    this.editor?.scrollingModel?.scrollHorizontally(0)
-                    this.editor?.scrollingModel?.scrollVertically(0)
+                    ApplicationManager.getApplication().invokeLater {
+                        this.fileType = fileType
+                        this.editor?.scrollingModel?.scrollHorizontally(0)
+                        this.editor?.scrollingModel?.scrollVertically(0)
+                    }
+                } else {
+                    ApplicationManager.getApplication().invokeLater {
+                        this.document = sourceDocument
+                        this.fileType = fileType
+                    }
+
+                    ApplicationManager.getApplication().invokeLater {
+                        this.editor?.scrollingModel?.scrollHorizontally(0)
+                        this.editor?.scrollingModel?.scrollVertically(0)
+                    }
                 }
             }
         }
