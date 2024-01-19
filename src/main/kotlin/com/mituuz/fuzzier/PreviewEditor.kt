@@ -1,7 +1,6 @@
 package com.mituuz.fuzzier
 
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.application.runWriteAction
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.colors.EditorColorsManager
@@ -59,19 +58,25 @@ class PreviewEditor(project: Project?) : EditorTextField(
             val fileType = virtualFile?.let { FileTypeManager.getInstance().getFileTypeByFile(virtualFile) }
             if (sourceDocument != null) {
             val reader = BufferedReader(StringReader(sourceDocument.text))
-                var lineNumber = 0
                 var line = reader.readLine()
-                while (line != null && lineNumber < 2000) {
-                    val finalLine = line
+                while (line != null) {
+                    val stringBuilder = StringBuilder()
+                    var lineNumber = 0
+
+                    while (line != null && lineNumber < 200) {
+                        stringBuilder.append(line).append("\n")
+                        lineNumber++
+                        line = reader.readLine()
+                    }
+
+                    val chunk = stringBuilder.toString()
                     ApplicationManager.getApplication().invokeLater {
                         WriteCommandAction.runWriteCommandAction(project) {
                             if (this.document.isWritable) {
-                                this.document.insertString(this.document.text.length, finalLine + "\n")
+                                this.document.insertString(this.document.text.length, chunk + "\n")
                             }
                         }
                     }
-                    line = reader.readLine()
-                    lineNumber++
                 }
 
                 ApplicationManager.getApplication().invokeLater {
