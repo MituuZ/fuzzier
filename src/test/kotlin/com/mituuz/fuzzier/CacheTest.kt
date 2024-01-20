@@ -71,6 +71,35 @@ class CacheTest {
     }
 
     @Test
+    fun `Basic functionality test for the cache windows style`() {
+        val filePaths = listOf("src\\main.kt", "src\\asd\\main.kt", "src\\asd\\asd.kt", "src\\not\\asd.kt", "src\\nope")
+        testUtil.addFilesToProject(filePaths, myFixture, fixture)
+
+        val projectBasePath = myFixture.findFileInTempDir("src").canonicalPath
+        if (projectBasePath != null) {
+            var searchString = "a"
+            fuzzier.processFiles(searchString, fixture.project, projectBasePath, filePathContainer)
+            Assertions.assertEquals(4, fuzzier.filePathCacheTemp.size)
+            Assertions.assertFalse(fuzzier.usedCache)
+
+            searchString = "as"
+            fuzzier.processFiles(searchString, fixture.project, projectBasePath, filePathContainer)
+            Assertions.assertEquals(3, fuzzier.filePathCacheTemp.size)
+            Assertions.assertTrue(fuzzier.usedCache)
+
+            searchString = "asd"
+            fuzzier.processFiles(searchString, fixture.project, projectBasePath, filePathContainer)
+            Assertions.assertEquals(3, fuzzier.filePathCacheTemp.size)
+            Assertions.assertTrue(fuzzier.usedCache)
+
+            searchString = "as"
+            fuzzier.processFiles(searchString, fixture.project, projectBasePath, filePathContainer)
+            Assertions.assertEquals(3, fuzzier.filePathCacheTemp.size)
+            Assertions.assertFalse(fuzzier.usedCache)
+        }
+    }
+
+    @Test
     fun `Test cache reset when changing the search string`() {
         val filePaths = listOf("src/main.kt", "src/asd/main.kt", "src/asd/asd.kt", "src/not/asd.kt", "src/nope")
         testUtil.addFilesToProject(filePaths, myFixture, fixture)
@@ -116,5 +145,23 @@ class CacheTest {
             Assertions.assertEquals(0, fuzzier.filePathCacheTemp.size)
             Assertions.assertFalse(fuzzier.usedCache)
         }
+    }
+
+    @Test
+    fun `Test cache functionality when no files present`() {
+        var searchString = "a"
+        fuzzier.processFiles(searchString, fixture.project, "/", filePathContainer)
+        Assertions.assertEquals(0, fuzzier.filePathCacheTemp.size)
+        Assertions.assertFalse(fuzzier.usedCache)
+
+        searchString = "as"
+        fuzzier.processFiles(searchString, fixture.project, "/", filePathContainer)
+        Assertions.assertEquals(0, fuzzier.filePathCacheTemp.size)
+        Assertions.assertTrue(fuzzier.usedCache)
+
+        searchString = "b"
+        fuzzier.processFiles(searchString, fixture.project, "/", filePathContainer)
+        Assertions.assertEquals(0, fuzzier.filePathCacheTemp.size)
+        Assertions.assertFalse(fuzzier.usedCache)
     }
 }
