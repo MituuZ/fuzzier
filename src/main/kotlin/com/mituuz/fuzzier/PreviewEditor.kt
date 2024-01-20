@@ -52,51 +52,56 @@ class PreviewEditor(project: Project?) : EditorTextField(
             val fileType = virtualFile?.let { FileTypeManager.getInstance().getFileTypeByFile(virtualFile) }
             if (sourceDocument != null) {
                 if (sourceDocument.text.length > 40000) {
-                    WriteCommandAction.runWriteCommandAction(project) {
-                        if (this.document.isWritable) {
-                            this.document.setText("")
-                        }
-                    }
-
-                    val reader = BufferedReader(StringReader(sourceDocument.text))
-                    var line = reader.readLine()
-                    while (line != null) {
-                        val stringBuilder = StringBuilder()
-                        var lineNumber = 0
-
-                        while (line != null && lineNumber < 100) {
-                            stringBuilder.append(line).append("\n")
-                            lineNumber++
-                            line = reader.readLine()
-                        }
-
-                        val chunk = stringBuilder.toString()
-                        ApplicationManager.getApplication().invokeLater {
-                            WriteCommandAction.runWriteCommandAction(project) {
-                                if (this.document.isWritable) {
-                                    this.document.insertString(this.document.text.length, chunk + "\n")
-                                }
-                            }
-                        }
-                    }
-
-                    ApplicationManager.getApplication().invokeLater {
-                        this.fileType = fileType
-                        this.editor?.scrollingModel?.scrollHorizontally(0)
-                        this.editor?.scrollingModel?.scrollVertically(0)
-                    }
+                    loadDocumentInChunks(sourceDocument);
                 } else {
+                    val length = sourceDocument.textLength
+                    println("Handling document with length: $length")
                     ApplicationManager.getApplication().invokeLater {
                         this.document = sourceDocument
                         this.fileType = fileType
-                    }
-
-                    ApplicationManager.getApplication().invokeLater {
                         this.editor?.scrollingModel?.scrollHorizontally(0)
                         this.editor?.scrollingModel?.scrollVertically(0)
                     }
                 }
             }
+        }
+    }
+
+    private fun loadDocumentInChunks(sourceDocument: Document) {
+        val length = sourceDocument.textLength
+        println("Loading document in chunks with length: $length")
+        WriteCommandAction.runWriteCommandAction(project) {
+            if (this.document.isWritable) {
+                this.document.setText("")
+            }
+        }
+
+        val reader = BufferedReader(StringReader(sourceDocument.text))
+        var line = reader.readLine()
+        while (line != null) {
+            val stringBuilder = StringBuilder()
+            var lineNumber = 0
+
+            while (line != null && lineNumber < 100) {
+                stringBuilder.append(line).append("\n")
+                lineNumber++
+                line = reader.readLine()
+            }
+
+            val chunk = stringBuilder.toString()
+            ApplicationManager.getApplication().invokeLater {
+                WriteCommandAction.runWriteCommandAction(project) {
+                    if (this.document.isWritable) {
+                        this.document.insertString(this.document.text.length, chunk + "\n")
+                    }
+                }
+            }
+        }
+
+        ApplicationManager.getApplication().invokeLater {
+            this.fileType = fileType
+            this.editor?.scrollingModel?.scrollHorizontally(0)
+            this.editor?.scrollingModel?.scrollVertically(0)
         }
     }
 }
