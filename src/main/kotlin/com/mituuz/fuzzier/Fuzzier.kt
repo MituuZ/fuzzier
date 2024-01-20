@@ -32,15 +32,16 @@ import java.awt.event.*
 import javax.swing.*
 
 class Fuzzier : AnAction() {
-    private var filePathCacheTemp = ArrayList<VirtualFile>()
+    var filePathCacheTemp = ArrayList<VirtualFile>()
     lateinit var component: FuzzyFinder
     private var popup: JBPopup? = null
     private var defaultDoc: Document? = null
     private lateinit var originalDownHandler: EditorActionHandler
     private lateinit var originalUpHandler: EditorActionHandler
     private var fuzzierSettingsService = service<FuzzierSettingsService>()
-    private var previousSearchString: String = ""
+    var previousSearchString: String = ""
     private var filePathCache = ArrayList<VirtualFile>()
+    var usedCache: Boolean = false
 
     fun setUp(project: Project) {
         component = FuzzyFinder(project)
@@ -136,11 +137,9 @@ class Fuzzier : AnAction() {
         component.fileList.setPaintBusy(true)
         val listModel = DefaultListModel<FuzzyMatchContainer>()
         val projectBasePath = project.basePath
-        val contentIterator = projectBasePath?.let { getContentIterator(it, searchString, listModel) }
-        if (contentIterator != null) {
-            processFiles(searchString, contentIterator, project)
+        if (projectBasePath != null) {
+            processFiles(searchString, project, projectBasePath, listModel)
         }
-        previousSearchString = searchString
         val sortedList = listModel.elements().toList().sortedByDescending { it.score }
         val valModel = DefaultListModel<String>()
         sortedList.forEach { valModel.addElement(it.string) }
@@ -153,17 +152,22 @@ class Fuzzier : AnAction() {
         }
     }
 
-    fun processFiles(searchString: String, contentIterator: ContentIterator, project: Project) {
+    fun processFiles(searchString: String, project: Project, projectBasePath: String,
+                     listModel: DefaultListModel<FuzzyMatchContainer>) {
+        val contentIterator = getContentIterator(projectBasePath, searchString, listModel)
         val compare = searchString.substring(0, searchString.length - 1)
         println("searchString: $searchString, previousSearchString: $previousSearchString, compare: $compare")
 
         val startTime = currentTimeMillis()
         if (searchString.substring(0, searchString.length - 1) == previousSearchString
             && previousSearchString != "") {
+            usedCache = true
             processCache(contentIterator)
         } else {
+            usedCache = false
             processIndex(project, contentIterator)
         }
+        previousSearchString = searchString
         val endTime = currentTimeMillis()
         val totalTime = endTime - startTime
         println("Processed files in: $totalTime ms")
@@ -197,6 +201,7 @@ class Fuzzier : AnAction() {
 
     fun getContentIterator(projectBasePath: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
        return ContentIterator { file: VirtualFile ->
+           println(file.path)
            if (!file.isDirectory) {
                val filePath = projectBasePath.let { it1 -> file.path.removePrefix(it1) }
                if (isExcluded(filePath)) {

@@ -25,8 +25,7 @@ class FuzzierTest {
     }
 
     @Test
-    fun cacheTest() {
-        val searchString = "a"
+    fun cacheTestBase() {
         val filePathContainer = DefaultListModel<Fuzzier.FuzzyMatchContainer>()
         val factory = IdeaTestFixtureFactory.getFixtureFactory()
         val fixtureBuilder = factory.createLightFixtureBuilder(null, "Test")
@@ -37,11 +36,27 @@ class FuzzierTest {
         myFixture.setUp()
         addFilesToProject(filePaths, myFixture, fixture)
 
-        val basePath = myFixture.findFileInTempDir("src").canonicalPath
-        val contentIterator = basePath?.let { fuzzier.getContentIterator(it, searchString, filePathContainer) }
+        val projectBasePath = myFixture.findFileInTempDir("src").canonicalPath
+        if (projectBasePath != null) {
+            var searchString = "a"
+            fuzzier.processFiles(searchString, fixture.project, projectBasePath, filePathContainer)
+            assertEquals(4, fuzzier.filePathCacheTemp.size)
+            assertFalse(fuzzier.usedCache)
 
-        if (contentIterator != null) {
-            fuzzier.processFiles(searchString, contentIterator, fixture.project)
+            searchString = "as"
+            fuzzier.processFiles(searchString, fixture.project, projectBasePath, filePathContainer)
+            assertEquals(3, fuzzier.filePathCacheTemp.size)
+            assertTrue(fuzzier.usedCache)
+
+            searchString = "asd"
+            fuzzier.processFiles(searchString, fixture.project, projectBasePath, filePathContainer)
+            assertEquals(3, fuzzier.filePathCacheTemp.size)
+            assertTrue(fuzzier.usedCache)
+
+            searchString = "as"
+            fuzzier.processFiles(searchString, fixture.project, projectBasePath, filePathContainer)
+            assertEquals(3, fuzzier.filePathCacheTemp.size)
+            assertFalse(fuzzier.usedCache)
         }
     }
 
