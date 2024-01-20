@@ -37,6 +37,9 @@ class Fuzzier : AnAction() {
     private lateinit var originalDownHandler: EditorActionHandler
     private lateinit var originalUpHandler: EditorActionHandler
     private var fuzzierSettingsService = service<FuzzierSettingsService>()
+    private var filePathCache = ArrayList<VirtualFile>()
+    private var filePathCacheTemp = ArrayList<VirtualFile>()
+    private var previousSearchString: String = ""
 
     override fun actionPerformed(p0: AnActionEvent) {
         setCustomHandlers()
@@ -134,6 +137,27 @@ class Fuzzier : AnAction() {
             val valModel = DefaultListModel<String>()
             sortedList.forEach { valModel.addElement(it.string) }
 
+            val compare = searchString.substring(0, searchString.length - 1)
+            println("searchString: $searchString, previousSearchString: $previousSearchString, compare: $compare")
+
+            if (searchString.substring(0, searchString.length - 1) == previousSearchString
+                && previousSearchString != "") {
+
+                filePathCache = ArrayList(filePathCacheTemp)
+                var i = 0
+
+                for (virtualFile in filePathCache) {
+                    val fileName = virtualFile.name
+                    i++
+                    //println("Cached file: $fileName")
+                    contentIterator?.processFile(virtualFile)
+                }
+
+                println("Processed $i files")
+            }
+            previousSearchString = searchString
+            filePathCacheTemp = ArrayList()
+
             SwingUtilities.invokeLater {
                 component.fileList.model = valModel
                 component.fileList.setPaintBusy(false)
@@ -154,6 +178,7 @@ class Fuzzier : AnAction() {
                if (filePath.isNotBlank()) {
                    val fuzzyMatchContainer = fuzzyContainsCaseInsensitive(filePath, searchString)
                    if (fuzzyMatchContainer != null) {
+                       filePathCacheTemp.add(file)
                        listModel.addElement(fuzzyMatchContainer)
                    }
                }
