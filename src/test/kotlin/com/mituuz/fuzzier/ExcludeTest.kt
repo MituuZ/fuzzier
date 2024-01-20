@@ -1,17 +1,11 @@
 package com.mituuz.fuzzier
 
 import com.intellij.openapi.components.service
-import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.roots.ProjectFileIndex
-import com.intellij.psi.PsiDocumentManager
-import com.intellij.testFramework.PsiTestUtil
 import com.intellij.testFramework.TestApplicationManager
-import com.intellij.testFramework.fixtures.CodeInsightTestFixture
-import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.runInEdtAndWait
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import javax.swing.DefaultListModel
@@ -20,18 +14,11 @@ class ExcludeTest {
     private var fuzzier: Fuzzier
     private var testApplicationManager: TestApplicationManager
     private var testUtil = TestUtil()
-    private lateinit var myFixture: CodeInsightTestFixture
 
     init {
         testApplicationManager = TestApplicationManager.getInstance()
         fuzzier = Fuzzier()
     }
-
-    @AfterAll
-    fun tearDown() {
-        myFixture.tearDown()
-    }
-
 
     @Test
     fun excludeListTest() {
@@ -87,7 +74,7 @@ class ExcludeTest {
         val factory = IdeaTestFixtureFactory.getFixtureFactory()
         val fixtureBuilder = factory.createLightFixtureBuilder(null, "Test")
         val fixture = fixtureBuilder.fixture
-        myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture)
+        val myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture)
 
         myFixture.setUp()
         testUtil.addFilesToProject(filesToAdd, myFixture, fixture)
