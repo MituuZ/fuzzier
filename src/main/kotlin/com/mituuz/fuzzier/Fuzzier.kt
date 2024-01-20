@@ -26,7 +26,6 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
-import kotlinx.html.currentTimeMillis
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
 import javax.swing.*
@@ -39,7 +38,7 @@ class Fuzzier : AnAction() {
     private lateinit var originalDownHandler: EditorActionHandler
     private lateinit var originalUpHandler: EditorActionHandler
     private var fuzzierSettingsService = service<FuzzierSettingsService>()
-    var previousSearchString: String = ""
+    private var previousSearchString: String = ""
     private var filePathCache = ArrayList<VirtualFile>()
     var usedCache: Boolean = false
 
@@ -155,10 +154,6 @@ class Fuzzier : AnAction() {
     fun processFiles(searchString: String, project: Project, projectBasePath: String,
                      listModel: DefaultListModel<FuzzyMatchContainer>) {
         val contentIterator = getContentIterator(projectBasePath, searchString, listModel)
-        val compare = searchString.substring(0, searchString.length - 1)
-        println("searchString: $searchString, previousSearchString: $previousSearchString, compare: $compare")
-
-        val startTime = currentTimeMillis()
         if (searchString.substring(0, searchString.length - 1) == previousSearchString
             && previousSearchString != "") {
             usedCache = true
@@ -168,33 +163,19 @@ class Fuzzier : AnAction() {
             processIndex(project, contentIterator)
         }
         previousSearchString = searchString
-        val endTime = currentTimeMillis()
-        val totalTime = endTime - startTime
-        println("Processed files in: $totalTime ms")
     }
 
     private fun processCache(contentIterator: ContentIterator) {
         filePathCache = ArrayList(filePathCacheTemp)
-
-        // Empty cache
         filePathCacheTemp = ArrayList()
-        var i = 0
-
         for (virtualFile in filePathCache) {
             // Tmp cache needs to be filled here | So it needs to empty before this
             contentIterator.processFile(virtualFile)
-            i++
         }
-
-        println("Processed $i cached files")
     }
 
     private fun processIndex(project: Project, contentIterator: ContentIterator) {
-        println("Process project files")
-        // Empty cache before filling it again
         filePathCacheTemp = ArrayList()
-
-        // Process project files, fill cache
         val projectFileIndex = ProjectFileIndex.getInstance(project)
         projectFileIndex.iterateContent(contentIterator)
     }
