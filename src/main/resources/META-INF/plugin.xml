@@ -31,7 +31,7 @@
   </extensions>
 
   <change-notes>
-    Improve split handling and add an option to open files in a new tab
+    Improve split handling and add an option to open files in a new tab. Only show certain amount of file content in the preview
   </change-notes>
 
   <actions>
