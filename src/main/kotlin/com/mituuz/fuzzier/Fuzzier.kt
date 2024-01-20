@@ -167,22 +167,20 @@ class Fuzzier : AnAction() {
 
     private fun processCache(contentIterator: ContentIterator) {
         filePathCache = ArrayList(filePathCacheTemp)
-        filePathCacheTemp = ArrayList()
+        filePathCacheTemp.clear()
         for (virtualFile in filePathCache) {
-            // Tmp cache needs to be filled here | So it needs to empty before this
             contentIterator.processFile(virtualFile)
         }
     }
 
     private fun processIndex(project: Project, contentIterator: ContentIterator) {
-        filePathCacheTemp = ArrayList()
+        filePathCacheTemp.clear()
         val projectFileIndex = ProjectFileIndex.getInstance(project)
         projectFileIndex.iterateContent(contentIterator)
     }
 
     fun getContentIterator(projectBasePath: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
        return ContentIterator { file: VirtualFile ->
-           println(file.path)
            if (!file.isDirectory) {
                val filePath = projectBasePath.let { it1 -> file.path.removePrefix(it1) }
                if (isExcluded(filePath)) {
