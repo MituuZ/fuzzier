@@ -3,6 +3,7 @@ package com.mituuz.fuzzier
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.editor.Document
+import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.fileEditor.FileDocumentManager
@@ -10,15 +11,17 @@ import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.fileTypes.PlainTextFileType
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.EditorTextField
-import java.io.BufferedReader
-import java.io.StringReader
+import kotlin.math.min
 
 class PreviewEditor(project: Project?) : EditorTextField(
     project,
     getDefaultFileType()
 ) {
+    private val toBeContinued: String = "\n\n\n--- End of Fuzzier Preview ---\n--- Open file to see full content ---\n\n\n"
+    private val fileCutOff: Int = 100000
 
     companion object {
         fun getDefaultFileType(): FileType {
@@ -50,58 +53,29 @@ class PreviewEditor(project: Project?) : EditorTextField(
                 virtualFile?.let { FileDocumentManager.getInstance().getDocument(virtualFile) }
             }
             val fileType = virtualFile?.let { FileTypeManager.getInstance().getFileTypeByFile(virtualFile) }
-            if (sourceDocument != null) {
-                if (sourceDocument.text.length > 40000) {
-                    loadDocumentInChunks(sourceDocument);
-                } else {
-                    val length = sourceDocument.textLength
-                    println("Handling document with length: $length")
-                    ApplicationManager.getApplication().invokeLater {
-                        this.document = sourceDocument
-                        this.fileType = fileType
-                        this.editor?.scrollingModel?.scrollHorizontally(0)
-                        this.editor?.scrollingModel?.scrollVertically(0)
-                    }
-                }
-            }
-        }
-    }
 
-    private fun loadDocumentInChunks(sourceDocument: Document) {
-        val length = sourceDocument.textLength
-        println("Loading document in chunks with length: $length")
-        WriteCommandAction.runWriteCommandAction(project) {
-            if (this.document.isWritable) {
-                this.document.setText("")
-            }
-        }
-
-        val reader = BufferedReader(StringReader(sourceDocument.text))
-        var line = reader.readLine()
-        while (line != null) {
-            val stringBuilder = StringBuilder()
-            var lineNumber = 0
-
-            while (line != null && lineNumber < 100) {
-                stringBuilder.append(line).append("\n")
-                lineNumber++
-                line = reader.readLine()
-            }
-
-            val chunk = stringBuilder.toString()
             ApplicationManager.getApplication().invokeLater {
-                WriteCommandAction.runWriteCommandAction(project) {
-                    if (this.document.isWritable) {
-                        this.document.insertString(this.document.text.length, chunk + "\n")
+                if (sourceDocument != null) {
+                    val endIndex = min(sourceDocument.textLength, fileCutOff)
+                    val previewText = sourceDocument.getText(TextRange(0, endIndex))
+                    WriteCommandAction.runWriteCommandAction(project) {
+                        if (endIndex > fileCutOff) {
+                            // Create a new document which can be modified without changing the original file
+                            // Only gets partial highlighting
+                            this.document = EditorFactory.getInstance().createDocument(previewText)
+                            this.document.insertString(endIndex, toBeContinued)
+                        } else {
+                            // Use the actual document to enable full highlighting in the preview
+                            this.document = sourceDocument
+                        }
                     }
                 }
+                this.fileType = fileType
+                this.editor?.scrollingModel?.run {
+                    scrollHorizontally(0)
+                    scrollVertically(0)
+                }
             }
-        }
-
-        ApplicationManager.getApplication().invokeLater {
-            this.fileType = fileType
-            this.editor?.scrollingModel?.scrollHorizontally(0)
-            this.editor?.scrollingModel?.scrollVertically(0)
         }
     }
 }
