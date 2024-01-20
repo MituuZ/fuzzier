@@ -21,7 +21,7 @@ class PreviewEditor(project: Project?) : EditorTextField(
     getDefaultFileType()
 ) {
     private val toBeContinued: String = "\n\n\n--- End of Fuzzier Preview ---\n--- Open file to see full content ---\n\n\n"
-    private val fileCutOff: Int = 80000
+    private val fileCutOff: Int = 70000
 
     companion object {
         fun getDefaultFileType(): FileType {
@@ -59,7 +59,7 @@ class PreviewEditor(project: Project?) : EditorTextField(
                     val endIndex = min(sourceDocument.textLength, fileCutOff)
                     val previewText = sourceDocument.getText(TextRange(0, endIndex))
                     WriteCommandAction.runWriteCommandAction(project) {
-                        if (endIndex > fileCutOff) {
+                        if (endIndex >= fileCutOff) {
                             // Create a new document which can be modified without changing the original file
                             // Only gets partial highlighting
                             this.document = EditorFactory.getInstance().createDocument(previewText)
