@@ -18,6 +18,7 @@ import javax.swing.DefaultListModel
 class ExcludeTest {
     private var fuzzier: Fuzzier
     private var testApplicationManager: TestApplicationManager
+    private var testUtil = TestUtil()
 
     init {
         testApplicationManager = TestApplicationManager.getInstance()
@@ -81,7 +82,7 @@ class ExcludeTest {
         val myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture)
 
         myFixture.setUp()
-        addFilesToProject(filesToAdd, myFixture, fixture)
+        testUtil.addFilesToProject(filesToAdd, myFixture, fixture)
 
         val basePath = myFixture.findFileInTempDir("src").canonicalPath
         val contentIterator = basePath?.let { fuzzier.getContentIterator(it, "", filePathContainer) }
@@ -95,19 +96,5 @@ class ExcludeTest {
         myFixture.tearDown()
 
         return filePathContainer
-    }
-
-    private fun addFilesToProject(filesToAdd: List<String>, myFixture: CodeInsightTestFixture, fixture: IdeaProjectTestFixture) {
-        filesToAdd.forEach {
-            myFixture.addFileToProject(it, "")
-        }
-
-        // Add source and wait for indexing
-        val dir = myFixture.findFileInTempDir("src")
-        PsiTestUtil.addSourceRoot(fixture.module, dir)
-        runInEdtAndWait {
-            PsiDocumentManager.getInstance(fixture.project).commitAllDocuments()
-        }
-        DumbService.getInstance(fixture.project).waitForSmartMode()
     }
 }

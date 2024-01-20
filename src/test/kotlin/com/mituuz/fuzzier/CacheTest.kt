@@ -1,14 +1,10 @@
 package com.mituuz.fuzzier
 
 import com.intellij.openapi.components.service
-import com.intellij.openapi.project.DumbService
-import com.intellij.psi.PsiDocumentManager
-import com.intellij.testFramework.PsiTestUtil
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
-import com.intellij.testFramework.runInEdtAndWait
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -22,6 +18,7 @@ class CacheTest {
     private lateinit var filePathContainer: DefaultListModel<Fuzzier.FuzzyMatchContainer>
     private lateinit var fixture: IdeaProjectTestFixture
     private lateinit var myFixture: CodeInsightTestFixture
+    private var testUtil = TestUtil()
 
     init {
         testApplicationManager = TestApplicationManager.getInstance()
@@ -47,7 +44,7 @@ class CacheTest {
     @Test
     fun `Basic functionality test for the cache`() {
         val filePaths = listOf("src/main.kt", "src/asd/main.kt", "src/asd/asd.kt", "src/not/asd.kt", "src/nope")
-        addFilesToProject(filePaths, myFixture, fixture)
+        testUtil.addFilesToProject(filePaths, myFixture, fixture)
 
         val projectBasePath = myFixture.findFileInTempDir("src").canonicalPath
         if (projectBasePath != null) {
@@ -76,7 +73,7 @@ class CacheTest {
     @Test
     fun `Test cache reset when changing the search string`() {
         val filePaths = listOf("src/main.kt", "src/asd/main.kt", "src/asd/asd.kt", "src/not/asd.kt", "src/nope")
-        addFilesToProject(filePaths, myFixture, fixture)
+        testUtil.addFilesToProject(filePaths, myFixture, fixture)
 
         val projectBasePath = myFixture.findFileInTempDir("src").canonicalPath
         if (projectBasePath != null) {
@@ -100,7 +97,7 @@ class CacheTest {
     @Test
     fun `Test cache functionality when changing string and no results found`() {
         val filePaths = listOf("src/main.kt", "src/asd/main.kt", "src/asd/asd.kt", "src/not/asd.kt", "src/nope")
-        addFilesToProject(filePaths, myFixture, fixture)
+        testUtil.addFilesToProject(filePaths, myFixture, fixture)
 
         val projectBasePath = myFixture.findFileInTempDir("src").canonicalPath
         if (projectBasePath != null) {
@@ -119,19 +116,5 @@ class CacheTest {
             Assertions.assertEquals(0, fuzzier.filePathCacheTemp.size)
             Assertions.assertFalse(fuzzier.usedCache)
         }
-    }
-
-    private fun addFilesToProject(filesToAdd: List<String>, myFixture: CodeInsightTestFixture, fixture: IdeaProjectTestFixture) {
-        filesToAdd.forEach {
-            myFixture.addFileToProject(it, "")
-        }
-
-        // Add source and wait for indexing
-        val dir = myFixture.findFileInTempDir("src")
-        PsiTestUtil.addSourceRoot(fixture.module, dir)
-        runInEdtAndWait {
-            PsiDocumentManager.getInstance(fixture.project).commitAllDocuments()
-        }
-        DumbService.getInstance(fixture.project).waitForSmartMode()
     }
 }
