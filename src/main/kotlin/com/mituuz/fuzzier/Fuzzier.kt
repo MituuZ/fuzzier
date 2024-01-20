@@ -26,20 +26,25 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
+import kotlinx.html.currentTimeMillis
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
 import javax.swing.*
 
 class Fuzzier : AnAction() {
-    private lateinit var component: FuzzyFinder
+    private var filePathCacheTemp = ArrayList<VirtualFile>()
+    lateinit var component: FuzzyFinder
     private var popup: JBPopup? = null
     private var defaultDoc: Document? = null
     private lateinit var originalDownHandler: EditorActionHandler
     private lateinit var originalUpHandler: EditorActionHandler
     private var fuzzierSettingsService = service<FuzzierSettingsService>()
-    private var filePathCache = ArrayList<VirtualFile>()
-    private var filePathCacheTemp = ArrayList<VirtualFile>()
     private var previousSearchString: String = ""
+    private var filePathCache = ArrayList<VirtualFile>()
+
+    fun setUp(project: Project) {
+        component = FuzzyFinder(project)
+    }
 
     override fun actionPerformed(p0: AnActionEvent) {
         setCustomHandlers()
@@ -123,57 +128,71 @@ class Fuzzier : AnAction() {
         }
 
         ApplicationManager.getApplication().executeOnPooledThread {
-            component.fileList.setPaintBusy(true)
-            val listModel = DefaultListModel<FuzzyMatchContainer>()
-            val projectBasePath = project.basePath
+            handleListCache(project, searchString)
+        }
+    }
 
-            val contentIterator = projectBasePath?.let { getContentIterator(it, searchString, listModel) }
-
-            val compare = searchString.substring(0, searchString.length - 1)
-            println("searchString: $searchString, previousSearchString: $previousSearchString, compare: $compare")
-
-            // TODO: If this is true, only iterate the filePathCache | Else iterate over the ProjectFileIndex
-            if (searchString.substring(0, searchString.length - 1) == previousSearchString
-                && previousSearchString != "") {
-
-                filePathCache = ArrayList(filePathCacheTemp)
-
-                // Empty cache
-                filePathCacheTemp = ArrayList()
-                var i = 0
-
-                for (virtualFile in filePathCache) {
-                    // TODO: Tmp cache needs to be filled here | So it needs to empty before this
-                    contentIterator?.processFile(virtualFile)
-                    i++
-                }
-
-                println("Processed $i cached files")
-            } else {
-                println("Process project files")
-                // Empty cache before filling it again
-                filePathCacheTemp = ArrayList()
-
-                // Process project files, fill cache
-                val projectFileIndex = ProjectFileIndex.getInstance(project)
-                if (contentIterator != null) {
-                    projectFileIndex.iterateContent(contentIterator)
-                }
-            }
-            previousSearchString = searchString
-
-            val sortedList = listModel.elements().toList().sortedByDescending { it.score }
-            val valModel = DefaultListModel<String>()
-            sortedList.forEach { valModel.addElement(it.string) }
-
-            SwingUtilities.invokeLater {
-                component.fileList.model = valModel
-                component.fileList.setPaintBusy(false)
-                if (!component.fileList.isEmpty) {
-                    component.fileList.setSelectedValue(valModel[0], true)
-                }
+    private fun handleListCache(project: Project, searchString: String) {
+        component.fileList.setPaintBusy(true)
+        val listModel = DefaultListModel<FuzzyMatchContainer>()
+        val projectBasePath = project.basePath
+        val contentIterator = projectBasePath?.let { getContentIterator(it, searchString, listModel) }
+        if (contentIterator != null) {
+            processFiles(searchString, contentIterator, project)
+        }
+        previousSearchString = searchString
+        val sortedList = listModel.elements().toList().sortedByDescending { it.score }
+        val valModel = DefaultListModel<String>()
+        sortedList.forEach { valModel.addElement(it.string) }
+        SwingUtilities.invokeLater {
+            component.fileList.model = valModel
+            component.fileList.setPaintBusy(false)
+            if (!component.fileList.isEmpty) {
+                component.fileList.setSelectedValue(valModel[0], true)
             }
         }
+    }
+
+    fun processFiles(searchString: String, contentIterator: ContentIterator, project: Project) {
+        val compare = searchString.substring(0, searchString.length - 1)
+        println("searchString: $searchString, previousSearchString: $previousSearchString, compare: $compare")
+
+        val startTime = currentTimeMillis()
+        if (searchString.substring(0, searchString.length - 1) == previousSearchString
+            && previousSearchString != "") {
+            processCache(contentIterator)
+        } else {
+            processIndex(project, contentIterator)
+        }
+        val endTime = currentTimeMillis()
+        val totalTime = endTime - startTime
+        println("Processed files in: $totalTime ms")
+    }
+
+    private fun processCache(contentIterator: ContentIterator) {
+        filePathCache = ArrayList(filePathCacheTemp)
+
+        // Empty cache
+        filePathCacheTemp = ArrayList()
+        var i = 0
+
+        for (virtualFile in filePathCache) {
+            // Tmp cache needs to be filled here | So it needs to empty before this
+            contentIterator.processFile(virtualFile)
+            i++
+        }
+
+        println("Processed $i cached files")
+    }
+
+    private fun processIndex(project: Project, contentIterator: ContentIterator) {
+        println("Process project files")
+        // Empty cache before filling it again
+        filePathCacheTemp = ArrayList()
+
+        // Process project files, fill cache
+        val projectFileIndex = ProjectFileIndex.getInstance(project)
+        projectFileIndex.iterateContent(contentIterator)
     }
 
     fun getContentIterator(projectBasePath: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
