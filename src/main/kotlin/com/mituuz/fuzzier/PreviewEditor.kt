@@ -21,7 +21,7 @@ class PreviewEditor(project: Project?) : EditorTextField(
     getDefaultFileType()
 ) {
     private val toBeContinued: String = "\n\n\n--- End of Fuzzier Preview ---\n--- Open file to see full content ---\n\n\n"
-    private val fileCutOff: Int = 100000
+    private val fileCutOff: Int = 80000
 
     companion object {
         fun getDefaultFileType(): FileType {
@@ -68,13 +68,15 @@ class PreviewEditor(project: Project?) : EditorTextField(
                             // Use the actual document to enable full highlighting in the preview
                             this.document = sourceDocument
                         }
+                        ApplicationManager.getApplication().invokeLater {
+                            editor?.scrollingModel?.run {
+                                scrollHorizontally(0)
+                                scrollVertically(0)
+                            }
+                        }
                     }
                 }
                 this.fileType = fileType
-                this.editor?.scrollingModel?.run {
-                    scrollHorizontally(0)
-                    scrollVertically(0)
-                }
             }
         }
     }
