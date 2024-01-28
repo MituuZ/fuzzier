@@ -21,6 +21,8 @@ When focused on the search field, you can use:
 - Enter to open the currently selected file (opens in current tab)
 
 ## Settings
+![A picture of the IntelliJ IDEA settings, showing Fuzzier settings](assets/FuzzierSettings.png "An image of the IntelliJ IDEA settings")
+
 ### Excluding files from the search
 You exclude files and file paths by adding them to the file exclusion list in Settings → Tools → Fuzzier Settings.
 No empty strings or comments are supported.
@@ -40,17 +42,15 @@ All files in the project root have `/` at the start of the file path.
   - e.g. `ee`
   - excludes all files and folders that have the string `ee` in them
 
-![A picture of the IntelliJ IDEA settings, showing the exclusion list](assets/FileExclusion.png "An image of the IntelliJ IDEA settings")
-
-### New tab
+### Open files in a new tab
 Decides whether Fuzzier opens a file to a new tab or not.
 
 #### Tip
 Can be combined with the editors tab amount limit. e.g. set the limit to 1 and open files in a new tab to allow splitting and changing files with vim commands (:sp and :vs)
 
-### Debouncing
-You can manually set a time after which the search processes the current search string, 
-allowing inserting multiple characters before starting the process.
+### Debounce period
+You can manually set a time after which the search processes the current search string. 
+This allows inserting multiple characters before starting the process.
 
 Defaults to 150 and can be set from 0 to 2000.
 

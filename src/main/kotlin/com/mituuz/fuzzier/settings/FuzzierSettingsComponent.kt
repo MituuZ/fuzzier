@@ -1,11 +1,14 @@
 package com.mituuz.fuzzier.settings
 
+import com.intellij.ui.JBColor
 import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.FormBuilder
+import java.awt.Color
 import javax.swing.JPanel
+import javax.swing.border.LineBorder
 
 class FuzzierSettingsComponent {
     var jPanel: JPanel
@@ -19,6 +22,7 @@ class FuzzierSettingsComponent {
     var debounceTimerValue = JBIntSpinner(150, 0, 2000)
 
     init {
+        exclusionList.border = LineBorder(JBColor.BLACK, 1)
         jPanel = FormBuilder.createFormBuilder()
             .addComponent(exclusionInstructions)
             .addComponent(exclusionList)
