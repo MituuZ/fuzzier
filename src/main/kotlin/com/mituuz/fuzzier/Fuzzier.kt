@@ -28,7 +28,11 @@ import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
+import java.util.Timer
+import java.util.TimerTask
+import java.util.concurrent.Future
 import javax.swing.*
+import kotlin.concurrent.schedule
 
 class Fuzzier : AnAction() {
     private lateinit var component: FuzzyFinder
@@ -37,6 +41,9 @@ class Fuzzier : AnAction() {
     private lateinit var originalDownHandler: EditorActionHandler
     private lateinit var originalUpHandler: EditorActionHandler
     private var fuzzierSettingsService = service<FuzzierSettingsService>()
+    private var debounceTimer: TimerTask? = null
+    @Volatile
+    var currentTask: Future<*>? = null
 
     override fun actionPerformed(p0: AnActionEvent) {
         setCustomHandlers()
@@ -119,7 +126,9 @@ class Fuzzier : AnAction() {
             return
         }
 
-        ApplicationManager.getApplication().executeOnPooledThread {
+        currentTask?.takeIf { !it.isDone }?.cancel(true)
+
+        currentTask = ApplicationManager.getApplication().executeOnPooledThread {
             component.fileList.setPaintBusy(true)
             val listModel = DefaultListModel<FuzzyMatchContainer>()
             val projectFileIndex = ProjectFileIndex.getInstance(project)
@@ -342,7 +351,11 @@ class Fuzzier : AnAction() {
         val document = component.searchField.document
         document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
-                updateListContents(project, component.searchField.text)
+                debounceTimer?.cancel()
+                val debouncePeriod = fuzzierSettingsService.state.debouncePeriod
+                debounceTimer = Timer().schedule(debouncePeriod.toLong()) {
+                    updateListContents(project, component.searchField.text)
+                }
             }
         })
     }

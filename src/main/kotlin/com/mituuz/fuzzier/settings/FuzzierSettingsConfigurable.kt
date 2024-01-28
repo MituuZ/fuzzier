@@ -20,12 +20,14 @@ class FuzzierSettingsConfigurable : Configurable {
         }
         fuzzierSettingsComponent.exclusionList.text = combinedString
         fuzzierSettingsComponent.newTabSelect.isSelected = fuzzierSettingsService.state.newTab
+        fuzzierSettingsComponent.debounceTimerValue.value = fuzzierSettingsService.state.debouncePeriod
         return fuzzierSettingsComponent.jPanel
     }
 
     override fun isModified(): Boolean {
         return fuzzierSettingsService.state.exclusionList != fuzzierSettingsComponent.exclusionList.text.split("\n")
                 || fuzzierSettingsService.state.newTab != fuzzierSettingsComponent.newTabSelect.isSelected
+                || fuzzierSettingsService.state.debouncePeriod != fuzzierSettingsComponent.debounceTimerValue.value
     }
 
     override fun apply() {
@@ -36,5 +38,6 @@ class FuzzierSettingsConfigurable : Configurable {
 
         fuzzierSettingsService.state.exclusionList = newList
         fuzzierSettingsService.state.newTab = fuzzierSettingsComponent.newTabSelect.isSelected
+        fuzzierSettingsService.state.debouncePeriod = fuzzierSettingsComponent.debounceTimerValue.value as Int
     }
 }

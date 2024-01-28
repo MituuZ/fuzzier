@@ -42,6 +42,18 @@ All files in the project root have `/` at the start of the file path.
 
 ![A picture of the IntelliJ IDEA settings, showing the exclusion list](assets/FileExclusion.png "An image of the IntelliJ IDEA settings")
 
+### New tab
+Decides whether Fuzzier opens a file to a new tab or not.
+
+#### Tip
+Can be combined with the editors tab amount limit. e.g. set the limit to 1 and open files in a new tab to allow splitting and changing files with vim commands (:sp and :vs)
+
+### Debouncing
+You can manually set a time after which the search processes the current search string, 
+allowing inserting multiple characters before starting the process.
+
+Defaults to 150 and can be set from 0 to 2000.
+
 ## Shortcuts
 ### Adding ideavim mapping for the plugin
 Example of a .ideavimrc-row to add a vim keybinding for the plugin
