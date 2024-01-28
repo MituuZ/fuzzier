@@ -21,13 +21,15 @@ When focused on the search field, you can use:
 - Enter to open the currently selected file (opens in current tab)
 
 ## Settings
+Settings → Tools → Fuzzier Settings
+
 ![A picture of the IntelliJ IDEA settings, showing Fuzzier settings](assets/FuzzierSettings.png "An image of the IntelliJ IDEA settings")
 
 ### Excluding files from the search
-You exclude files and file paths by adding them to the file exclusion list in Settings → Tools → Fuzzier Settings.
+You exclude files and file paths by adding them to the file exclusion list.
 No empty strings or comments are supported.
 
-All files in the project root have `/` at the start of the file path.
+All files in the project begin with `/` at the start of the file path.
 
 #### Options for exclusions are as follows:
 - Ends with
