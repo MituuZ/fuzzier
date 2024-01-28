@@ -353,7 +353,7 @@ class Fuzzier : AnAction() {
             override fun documentChanged(event: DocumentEvent) {
                 debounceTimer?.cancel()
                 val debouncePeriod = fuzzierSettingsService.state.debouncePeriod
-                debounceTimer = Timer().schedule(debouncePeriod) {
+                debounceTimer = Timer().schedule(debouncePeriod.toLong()) {
                     updateListContents(project, component.searchField.text)
                 }
             }
