@@ -78,7 +78,12 @@ class Fuzzier : AnAction() {
                             super.onClosed(event)
                         }
                     })
-                    popup!!.showInCenterOf(it)
+                    val position = fuzzierSettingsService.getPosition()
+                    if (position.x != -1 && position.y != -1) {
+                        popup!!.showInScreenCoordinates(mainWindow, position)
+                    } else {
+                        popup!!.showInCenterOf(mainWindow)
+                    }
                     component.splitPane.dividerLocation = fuzzierSettingsService.state.splitPosition
                 }
             }
@@ -275,6 +280,8 @@ class Fuzzier : AnAction() {
                 }
             }
         }
+
+        fuzzierSettingsService.setPosition(popup!!.locationOnScreen)
         popup?.cancel()
     }
 
