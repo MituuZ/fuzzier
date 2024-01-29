@@ -3,6 +3,8 @@ package com.mituuz.fuzzier.settings
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
+import java.awt.GraphicsDevice
+import java.awt.GraphicsEnvironment
 import java.awt.Point
 
 @State(
@@ -15,9 +17,9 @@ class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.S
         var exclusionList: List<String> = listOf("/.idea/", "/.git/", "/target/", "/build/", "/.gradle/", "/.run/")
         var newTab: Boolean = false
         var debouncePeriod: Int = 150
-        var position: Point? = null
         var posX: Int = -1
         var posY: Int = -1
+        var graphicsDevices: Array<out GraphicsDevice>? = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
     }
 
     fun setPosition(p: Point) {

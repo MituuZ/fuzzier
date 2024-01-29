@@ -27,6 +27,7 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.apache.commons.lang3.StringUtils
+import java.awt.GraphicsEnvironment
 import java.awt.event.*
 import java.util.Timer
 import java.util.TimerTask
@@ -79,7 +80,14 @@ class Fuzzier : AnAction() {
                         }
                     })
                     val position = fuzzierSettingsService.getPosition()
-                    if (position.x != -1 && position.y != -1) {
+                    val newDevice = GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
+                    var changedScreen = false
+                    if (!newDevice.contentEquals(fuzzierSettingsService.state.graphicsDevices)) {
+                        fuzzierSettingsService.state.graphicsDevices = newDevice
+                        changedScreen = true
+                    }
+
+                    if (position.x != -1 && position.y != -1 && !changedScreen) {
                         popup!!.showInScreenCoordinates(mainWindow, position)
                     } else {
                         popup!!.showInCenterOf(mainWindow)
