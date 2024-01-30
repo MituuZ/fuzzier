@@ -1,12 +1,13 @@
 package com.mituuz.fuzzier.settings
 
+import com.intellij.openapi.components.service
 import com.intellij.ui.JBColor
 import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.FormBuilder
-import java.awt.Color
+import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.border.LineBorder
 
@@ -20,15 +21,21 @@ class FuzzierSettingsComponent {
             "Supports wildcards (*) for starts and ends with. Defaults to contains if no wildcards are present.<br>" +
             "e.g. \"kt\" excludes all files/file paths that contain the \"kt\" string. (main.<strong>kt</strong>, <strong>kt</strong>lin.java)<html>")
     var debounceTimerValue = JBIntSpinner(150, 0, 2000)
+    private var resetWindowDimension = JButton("Reset popup location")
 
     init {
         exclusionList.border = LineBorder(JBColor.BLACK, 1)
+        resetWindowDimension.addActionListener {
+            service<FuzzierSettingsService>().state.resetWindow = true
+        }
+
         jPanel = FormBuilder.createFormBuilder()
             .addComponent(exclusionInstructions)
             .addComponent(exclusionList)
             .addSeparator()
             .addLabeledComponent("<html><strong>Open files in a new tab</strong></html>", newTabSelect)
             .addLabeledComponent("<html><strong>Debounce period</strong></html>", debounceTimerValue)
+            .addComponent(resetWindowDimension)
             .addComponentFillVertically(JPanel(), 0)
             .panel
     }
