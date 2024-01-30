@@ -21,9 +21,13 @@ class FuzzierSettingsComponent {
             "Supports wildcards (*) for starts and ends with. Defaults to contains if no wildcards are present.<br>" +
             "e.g. \"kt\" excludes all files/file paths that contain the \"kt\" string. (main.<strong>kt</strong>, <strong>kt</strong>lin.java)<html>")
     var debounceTimerValue = JBIntSpinner(150, 0, 2000)
+    private var resetWindowDimension = JButton("Reset popup location")
 
     init {
         exclusionList.border = LineBorder(JBColor.BLACK, 1)
+        resetWindowDimension.addActionListener {
+            service<FuzzierSettingsService>().state.resetWindow = true
+        }
 
         jPanel = FormBuilder.createFormBuilder()
             .addComponent(exclusionInstructions)
@@ -31,6 +35,7 @@ class FuzzierSettingsComponent {
             .addSeparator()
             .addLabeledComponent("<html><strong>Open files in a new tab</strong></html>", newTabSelect)
             .addLabeledComponent("<html><strong>Debounce period</strong></html>", debounceTimerValue)
+            .addComponent(resetWindowDimension)
             .addComponentFillVertically(JPanel(), 0)
             .panel
     }

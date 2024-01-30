@@ -22,6 +22,7 @@ import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
+import com.intellij.openapi.util.DimensionService
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
@@ -42,6 +43,7 @@ class Fuzzier : AnAction() {
     private lateinit var originalUpHandler: EditorActionHandler
     private var fuzzierSettingsService = service<FuzzierSettingsService>()
     private var debounceTimer: TimerTask? = null
+    private val fuzzyDimensionKey: String = "FuzzySearchPopup"
     @Volatile
     var currentTask: Future<*>? = null
 
@@ -65,7 +67,7 @@ class Fuzzier : AnAction() {
                         .setFocusable(true)
                         .setRequestFocus(true)
                         .setResizable(true)
-                        .setDimensionServiceKey(project, "FuzzySearchPopup", true)
+                        .setDimensionServiceKey(project, fuzzyDimensionKey, true)
                         .setTitle("Fuzzy Search")
                         .setMovable(true)
                         .setShowBorder(true)
@@ -78,6 +80,11 @@ class Fuzzier : AnAction() {
                             super.onClosed(event)
                         }
                     })
+                    if (fuzzierSettingsService.state.resetWindow) {
+                        DimensionService.getInstance().setSize(fuzzyDimensionKey, null, project)
+                        DimensionService.getInstance().setLocation(fuzzyDimensionKey, null, project)
+                        fuzzierSettingsService.state.resetWindow = false
+                    }
                     popup!!.showInCenterOf(it)
                     component.splitPane.dividerLocation = fuzzierSettingsService.state.splitPosition
                 }

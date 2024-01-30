@@ -3,7 +3,6 @@ package com.mituuz.fuzzier.settings
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
-import java.awt.Point
 
 @State(
     name = "com.mituuz.fuzzier.FuzzierSettings",
@@ -15,6 +14,7 @@ class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.S
         var exclusionList: List<String> = listOf("/.idea/", "/.git/", "/target/", "/build/", "/.gradle/", "/.run/")
         var newTab: Boolean = false
         var debouncePeriod: Int = 150
+        var resetWindow = false
     }
 
     private var state = State()
