@@ -1,12 +1,13 @@
 package com.mituuz.fuzzier.settings
 
+import com.intellij.openapi.components.service
 import com.intellij.ui.JBColor
 import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.FormBuilder
-import java.awt.Color
+import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.border.LineBorder
 
@@ -23,6 +24,7 @@ class FuzzierSettingsComponent {
 
     init {
         exclusionList.border = LineBorder(JBColor.BLACK, 1)
+
         jPanel = FormBuilder.createFormBuilder()
             .addComponent(exclusionInstructions)
             .addComponent(exclusionList)
