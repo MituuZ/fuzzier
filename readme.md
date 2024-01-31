@@ -69,8 +69,5 @@ map <Leader>pf <action>(com.mituuz.fuzzier.Fuzzier)
 ## Installation
 The plugin can be installed from the [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/23451-fuzzier)
 
-## Requirements (tested on)
-IntelliJ IDEA version 2023.1.5 or later
-
 ## Contact
 I can be reached from <mituuuuz@hotmail.com>
