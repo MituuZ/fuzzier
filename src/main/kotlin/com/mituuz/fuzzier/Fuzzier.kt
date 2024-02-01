@@ -258,7 +258,9 @@ class Fuzzier : AnAction() {
                             continue;
                         }
                     }
-                    found = j
+                    if (multiMatch) {
+                        found = j
+                    }
                 }
             }
 

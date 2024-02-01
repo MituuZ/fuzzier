@@ -35,8 +35,8 @@ class FuzzierSettingsComponent {
             .addSeparator()
             .addLabeledComponent("<html><strong>Open files in a new tab</strong></html>", newTabSelect)
             .addLabeledComponent("<html><strong>Debounce period</strong></html>", debounceTimerValue)
-            .addComponent(resetWindowDimension)
             .addComponentFillVertically(JPanel(), 0)
+            .addComponent(resetWindowDimension)
             .panel
     }
 }
