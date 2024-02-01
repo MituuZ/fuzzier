@@ -29,8 +29,8 @@ import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
+import java.util.*
 import java.util.Timer
-import java.util.TimerTask
 import java.util.concurrent.Future
 import javax.swing.*
 import kotlin.concurrent.schedule
@@ -222,36 +222,62 @@ class Fuzzier : AnAction() {
     }
 
     private fun processSearchString(s: String, lowerFilePath: String): Int? {
-        var searchIndex = 0
+        val multiMatch = false
         var longestStreak = 0
         var streak = 0
-        for (i in lowerFilePath.indices) {
-            if (lowerFilePath.length - i < s.length - searchIndex) {
+        var score = 0
+        var prevIndex = -10
+        for (i in s.indices) {
+            if (lowerFilePath.length - i < s.length - i) {
                 return null
             }
 
-            val char = lowerFilePath[i]
-            if (char == s[searchIndex]) {
-                streak++
-                searchIndex++
-                if (searchIndex == s.length) {
-                    return calculateScore(streak, longestStreak, lowerFilePath, s)
+            var found = -1
+            // Always process the whole file path for each character, assuming they're found
+            for (j in lowerFilePath.indices) {
+                if (s[i] == lowerFilePath[j]) {
+                    // Always increase score when finding a match
+                    if (multiMatch) {
+                        score++
+                    }
+                    // Only check streak and update the found variable, if the current match index is greater than the previous
+                    if (found == -1 && j > prevIndex) {
+                        // If the index is one greater than the previous chars increment streak and update the longest streak
+                        if (prevIndex + 1 == j) {
+                            streak++
+                            if (streak > longestStreak) {
+                                longestStreak = streak
+                            }
+                        } else {
+                            streak = 1
+                        }
+                        // Save the first found index of a new character
+                        prevIndex = j
+                        if (!multiMatch) {
+                            found = j
+                            continue;
+                        }
+                    }
+                    found = j
                 }
-            } else {
-                if (streak > longestStreak) {
-                    longestStreak = streak
-                }
-                streak = 0
+            }
+
+            // Check that the character was found and that it was found after the previous characters index
+            // Here we could skip once to broaden the search
+            if (found == -1 || prevIndex > found) {
+                return null
             }
         }
-        return null
+
+        // If we get to here, all characters were found and have been accounted for in the score
+        return calculateScore(streak, longestStreak, lowerFilePath, s, score)
     }
 
-    private fun calculateScore(streak: Int, longestStreak: Int, lowerFilePath: String, lowerSearchString: String): Int {
+    private fun calculateScore(streak: Int, longestStreak: Int, lowerFilePath: String, lowerSearchString: String, stringComparisonScore: Int): Int {
         var score: Int = if (streak > longestStreak) {
-            streak
+            streak + stringComparisonScore
         } else {
-            longestStreak
+            longestStreak + stringComparisonScore
         }
 
         StringUtils.split(lowerFilePath, "/.").forEach {
