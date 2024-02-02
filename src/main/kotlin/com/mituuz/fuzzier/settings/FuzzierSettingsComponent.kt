@@ -15,33 +15,48 @@ import javax.swing.border.LineBorder
 class FuzzierSettingsComponent {
     var jPanel: JPanel
     var exclusionList = JBTextArea()
-    var newTabSelect = JBCheckBox()
     private var exclusionInstructions = JBLabel("<html><strong>File path exclusions:</strong><br>", AllIcons.General.ContextHelp, JBLabel.LEFT)
+    var newTabSelect = JBCheckBox()
     var debounceTimerValue = JBIntSpinner(150, 0, 2000)
+    private var debounceInstructions = JBLabel("<html><strong>Debounce period (ms)</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
     private var resetWindowDimension = JButton("Reset popup location")
     var multiMatchActive = JBCheckBox()
+    private var multiMatchInstructions = JBLabel("<html><strong>Match characters multiple times</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
 
     init {
-        exclusionList.border = LineBorder(JBColor.BLACK, 1)
-        resetWindowDimension.addActionListener {
-            service<FuzzierSettingsService>().state.resetWindow = true
-        }
-        exclusionInstructions.toolTipText =
-            "One line per one exclusion from the Fuzzier results.<br><br>" +
-                    "Empty lines are skipped and all files in the project root start with \"/\"<br><br>" +
-                    "Supports wildcards (*) for starts with and ends with. Defaults to contains if no wildcards are present.<br><br>" +
-                    "e.g. \"kt\" excludes all files/file paths that contain the \"kt\" string. (main.<strong>kt</strong>, <strong>kt</strong>lin.java)<html>"
-
+        setupComponents()
         jPanel = FormBuilder.createFormBuilder()
             .addComponent(exclusionInstructions)
             .addComponent(exclusionList)
             .addSeparator()
             .addLabeledComponent("<html><strong>Open files in a new tab</strong></html>", newTabSelect)
-            .addLabeledComponent("<html><strong>Debounce period</strong></html>", debounceTimerValue)
+            .addLabeledComponent(debounceInstructions, debounceTimerValue)
             .addSeparator()
-            .addLabeledComponent("<html><strong>Match characters multiple times</strong></html>", multiMatchActive)
+            .addLabeledComponent(multiMatchInstructions, multiMatchActive)
             .addComponentFillVertically(JPanel(), 0)
             .addComponent(resetWindowDimension)
             .panel
+    }
+
+    private fun setupComponents() {
+        exclusionList.border = LineBorder(JBColor.BLACK, 1)
+        resetWindowDimension.addActionListener {
+            service<FuzzierSettingsService>().state.resetWindow = true
+        }
+        exclusionInstructions.toolTipText = """
+            One line per one exclusion from the Fuzzier results.<br><br>
+            Empty lines are skipped and all files in the project root start with "/"<br><br>
+            Supports wildcards (*) for starts with and ends with. Defaults to contains if no wildcards are present.<br><br>
+            e.g. "kt" excludes all files/file paths that contain the "kt" string. (main.<strong>kt</strong>, <strong>kt</strong>lin.java)
+        """.trimIndent()
+        multiMatchInstructions.toolTipText = """
+            Count score for each instance of a character in the search string.<br><br>
+            Normally file list sorting is done based on the longest streak,
+            but similar package or folder names might make finding correct files inconvenient.<br><br>
+            e.g. kotlin/is/fun contains "i" two times, so search "if" would score three points.
+        """.trimIndent()
+        debounceInstructions.toolTipText = """
+            Controls how long the search field must be idle before starting the search process.
+        """.trimIndent()
     }
 }
