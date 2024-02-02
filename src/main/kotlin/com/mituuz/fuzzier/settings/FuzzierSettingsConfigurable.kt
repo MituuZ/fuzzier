@@ -21,6 +21,7 @@ class FuzzierSettingsConfigurable : Configurable {
         fuzzierSettingsComponent.exclusionList.text = combinedString
         fuzzierSettingsComponent.newTabSelect.isSelected = fuzzierSettingsService.state.newTab
         fuzzierSettingsComponent.debounceTimerValue.value = fuzzierSettingsService.state.debouncePeriod
+        fuzzierSettingsComponent.multiMatchActive.isSelected = fuzzierSettingsService.state.multiMatch
         return fuzzierSettingsComponent.jPanel
     }
 
@@ -28,6 +29,7 @@ class FuzzierSettingsConfigurable : Configurable {
         return fuzzierSettingsService.state.exclusionList != fuzzierSettingsComponent.exclusionList.text.split("\n")
                 || fuzzierSettingsService.state.newTab != fuzzierSettingsComponent.newTabSelect.isSelected
                 || fuzzierSettingsService.state.debouncePeriod != fuzzierSettingsComponent.debounceTimerValue.value
+                || fuzzierSettingsService.state.multiMatch != fuzzierSettingsComponent.multiMatchActive.isSelected
     }
 
     override fun apply() {
@@ -39,5 +41,6 @@ class FuzzierSettingsConfigurable : Configurable {
         fuzzierSettingsService.state.exclusionList = newList
         fuzzierSettingsService.state.newTab = fuzzierSettingsComponent.newTabSelect.isSelected
         fuzzierSettingsService.state.debouncePeriod = fuzzierSettingsComponent.debounceTimerValue.value as Int
+        fuzzierSettingsService.state.multiMatch = fuzzierSettingsComponent.multiMatchActive.isSelected
     }
 }

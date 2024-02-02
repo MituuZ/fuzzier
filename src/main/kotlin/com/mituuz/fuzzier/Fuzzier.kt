@@ -140,8 +140,9 @@ class Fuzzier : AnAction() {
             val listModel = DefaultListModel<FuzzyMatchContainer>()
             val projectFileIndex = ProjectFileIndex.getInstance(project)
             val projectBasePath = project.basePath
+            val multiMatch = fuzzierSettingsService.state.multiMatch
 
-            val contentIterator = projectBasePath?.let { getContentIterator(it, searchString, listModel) }
+            val contentIterator = projectBasePath?.let { getContentIterator(it, searchString, listModel, multiMatch) }
 
             if (contentIterator != null) {
                 projectFileIndex.iterateContent(contentIterator)
@@ -160,7 +161,7 @@ class Fuzzier : AnAction() {
         }
     }
 
-    fun getContentIterator(projectBasePath: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
+    fun getContentIterator(projectBasePath: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>, multiMatch: Boolean): ContentIterator {
        return ContentIterator { file: VirtualFile ->
            if (!file.isDirectory) {
                val filePath = projectBasePath.let { it1 -> file.path.removePrefix(it1) }
@@ -168,7 +169,7 @@ class Fuzzier : AnAction() {
                    return@ContentIterator true
                }
                if (filePath.isNotBlank()) {
-                   val fuzzyMatchContainer = fuzzyContainsCaseInsensitive(filePath, searchString)
+                   val fuzzyMatchContainer = fuzzyContainsCaseInsensitive(filePath, searchString, multiMatch)
                    if (fuzzyMatchContainer != null) {
                        listModel.addElement(fuzzyMatchContainer)
                    }
@@ -200,7 +201,7 @@ class Fuzzier : AnAction() {
         return false
     }
 
-    fun fuzzyContainsCaseInsensitive(filePath: String, searchString: String): FuzzyMatchContainer? {
+    fun fuzzyContainsCaseInsensitive(filePath: String, searchString: String, multiMatch: Boolean): FuzzyMatchContainer? {
         if (searchString.isBlank()) {
             return FuzzyMatchContainer(0, filePath)
         }
@@ -210,19 +211,18 @@ class Fuzzier : AnAction() {
 
         val lowerFilePath: String = filePath.lowercase()
         val lowerSearchString: String = searchString.lowercase()
-        return getFuzzyMatch(lowerFilePath, lowerSearchString, filePath)
+        return getFuzzyMatch(lowerFilePath, lowerSearchString, filePath, multiMatch)
     }
 
-    private fun getFuzzyMatch(lowerFilePath: String, lowerSearchString: String, filePath: String): FuzzyMatchContainer? {
+    private fun getFuzzyMatch(lowerFilePath: String, lowerSearchString: String, filePath: String, multiMatch: Boolean): FuzzyMatchContainer? {
         var score = 0
         for (s in StringUtils.split(lowerSearchString, " ")) {
-            score += processSearchString(s, lowerFilePath) ?: return null
+            score += processSearchString(s, lowerFilePath, multiMatch) ?: return null
         }
         return FuzzyMatchContainer(score, filePath)
     }
 
-    private fun processSearchString(s: String, lowerFilePath: String): Int? {
-        val multiMatch = false
+    private fun processSearchString(s: String, lowerFilePath: String, multiMatch: Boolean): Int? {
         var longestStreak = 0
         var streak = 0
         var score = 0

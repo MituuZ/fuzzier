@@ -11,77 +11,78 @@ class FuzzierTest {
     init {
         testApplicationManager = TestApplicationManager.getInstance()
         fuzzier = Fuzzier()
+
     }
 
     @Test
     fun fuzzyScoreEmptyString() {
-        val match = fuzzier.fuzzyContainsCaseInsensitive("", "")
+        val match = fuzzier.fuzzyContainsCaseInsensitive("", "", false)
         assertMatch(0, match)
     }
 
     @Test
     fun fuzzyScoreNoStreak() {
-        val match = fuzzier.fuzzyContainsCaseInsensitive("KotlinIsFun", "kif")
+        val match = fuzzier.fuzzyContainsCaseInsensitive("KotlinIsFun", "kif", false)
         assertMatch(1, match)
     }
 
     @Test
     fun fuzzyScoreStreak() {
-        val match = fuzzier.fuzzyContainsCaseInsensitive("KotlinIsFun", "kot")
+        val match = fuzzier.fuzzyContainsCaseInsensitive("KotlinIsFun", "kot", false)
         assertMatch(3, match)
     }
 
     @Test
     fun fuzzyScoreLongSearchString() {
-        val match = fuzzier.fuzzyContainsCaseInsensitive("KIF", "TooLongSearchString")
+        val match = fuzzier.fuzzyContainsCaseInsensitive("KIF", "TooLongSearchString", false)
         assertNull(match)
     }
 
     @Test
     fun fuzzyScoreNoPossibleMatch() {
-        val match = fuzzier.fuzzyContainsCaseInsensitive("KIF", "A")
+        val match = fuzzier.fuzzyContainsCaseInsensitive("KIF", "A", false)
         assertNull(match)
     }
 
     @Test
     fun fuzzyScoreNoPossibleMatchSplit() {
-        val match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "A A B")
+        val match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "A A B", false)
         assertNull(match)
     }
 
     @Test
     fun fuzzyScorePartialMatchSplit() {
-        val match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "A A K")
+        val match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "A A K", false)
         assertNull(match)
     }
 
     @Test
     fun fuzzyScoreFilePathMatch() {
-        var match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "kif")
+        var match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "kif", false)
         assertMatch(11, match)
 
-        match = fuzzier.fuzzyContainsCaseInsensitive("Kiffer/Is/Fun/kif.kt", "kif")
+        match = fuzzier.fuzzyContainsCaseInsensitive("Kiffer/Is/Fun/kif.kt", "kif", false)
         assertMatch(13, match)
 
-        match = fuzzier.fuzzyContainsCaseInsensitive("Kiffer/Is/Fun/kiffer.kt", "kif")
+        match = fuzzier.fuzzyContainsCaseInsensitive("Kiffer/Is/Fun/kiffer.kt", "kif", false)
         assertMatch(3, match)
 
-        match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "kt")
+        match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "kt", false)
         assertMatch(11, match)
 
-        match = fuzzier.fuzzyContainsCaseInsensitive("Kif/Is/Fun/kif.kt", "kif")
+        match = fuzzier.fuzzyContainsCaseInsensitive("Kif/Is/Fun/kif.kt", "kif", false)
         assertMatch(23, match)
 
-        match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "kif fun kotlin")
+        match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "kif fun kotlin", false)
         assertMatch(40, match)
 
-        match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "is kt")
+        match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "is kt", false)
         assertMatch(22, match)
     }
 
     @Test
     fun fuzzyScoreSpaceMatch() {
-        val match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "fun kotlin")
+        val match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "fun kotlin", false)
         assertMatch(29, match)
     }
 

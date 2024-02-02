@@ -80,7 +80,7 @@ class ExcludeTest {
         testUtil.addFilesToProject(filesToAdd, myFixture, fixture)
 
         val basePath = myFixture.findFileInTempDir("src").canonicalPath
-        val contentIterator = basePath?.let { fuzzier.getContentIterator(it, "", filePathContainer) }
+        val contentIterator = basePath?.let { fuzzier.getContentIterator(it, "", filePathContainer, false) }
         val index = ProjectFileIndex.getInstance(fixture.project)
         runInEdtAndWait {
             if (contentIterator != null) {
