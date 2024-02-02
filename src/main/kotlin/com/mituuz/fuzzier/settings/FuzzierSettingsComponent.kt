@@ -22,6 +22,8 @@ class FuzzierSettingsComponent {
     private var resetWindowDimension = JButton("Reset popup location")
     var multiMatchActive = JBCheckBox()
     private var multiMatchInstructions = JBLabel("<html><strong>Match characters multiple times</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
+    var matchWeightPartialPath = JBIntSpinner(10, 0, 100)
+    private var partialPathInfo = JBLabel("<html><strong>Match weight: Partial path match</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
 
     init {
         setupComponents()
@@ -32,7 +34,9 @@ class FuzzierSettingsComponent {
             .addLabeledComponent("<html><strong>Open files in a new tab</strong></html>", newTabSelect)
             .addLabeledComponent(debounceInstructions, debounceTimerValue)
             .addSeparator()
+            .addComponent(JBLabel("Match settings"))
             .addLabeledComponent(multiMatchInstructions, multiMatchActive)
+            .addLabeledComponent(partialPathInfo, matchWeightPartialPath)
             .addComponentFillVertically(JPanel(), 0)
             .addComponent(resetWindowDimension)
             .panel
@@ -57,6 +61,11 @@ class FuzzierSettingsComponent {
         """.trimIndent()
         debounceInstructions.toolTipText = """
             Controls how long the search field must be idle before starting the search process.
+        """.trimIndent()
+        partialPathInfo.toolTipText = """
+            How much weight should a partial path match give.<br><br>
+            Partial matches are checked against file path parts, delimited by "/" and ".".<br><br>
+            e.g. search string "is" is a partial path match for kotlin/<strong>is</strong>/fun, where as "isf" is not.
         """.trimIndent()
     }
 }

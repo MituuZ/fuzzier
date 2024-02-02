@@ -16,6 +16,8 @@ class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.S
         var debouncePeriod: Int = 150
         var resetWindow = false
         var multiMatch = true
+
+        var matchWeightPartialPath = 10
     }
 
     private var state = State()

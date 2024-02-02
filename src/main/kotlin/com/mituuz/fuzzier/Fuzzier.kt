@@ -46,8 +46,13 @@ class Fuzzier : AnAction() {
     private val fuzzyDimensionKey: String = "FuzzySearchPopup"
     @Volatile
     var currentTask: Future<*>? = null
+    private var multiMatch = false
+
+    private var matchWeightPartialPath = 10
 
     override fun actionPerformed(p0: AnActionEvent) {
+        multiMatch = fuzzierSettingsService.state.multiMatch
+        matchWeightPartialPath = fuzzierSettingsService.state.matchWeightPartialPath
         setCustomHandlers()
         SwingUtilities.invokeLater {
             defaultDoc = EditorFactory.getInstance().createDocument("")
@@ -140,9 +145,8 @@ class Fuzzier : AnAction() {
             val listModel = DefaultListModel<FuzzyMatchContainer>()
             val projectFileIndex = ProjectFileIndex.getInstance(project)
             val projectBasePath = project.basePath
-            val multiMatch = fuzzierSettingsService.state.multiMatch
 
-            val contentIterator = projectBasePath?.let { getContentIterator(it, searchString, listModel, multiMatch) }
+            val contentIterator = projectBasePath?.let { getContentIterator(it, searchString, listModel) }
 
             if (contentIterator != null) {
                 projectFileIndex.iterateContent(contentIterator)
@@ -161,7 +165,7 @@ class Fuzzier : AnAction() {
         }
     }
 
-    fun getContentIterator(projectBasePath: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>, multiMatch: Boolean): ContentIterator {
+    fun getContentIterator(projectBasePath: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
        return ContentIterator { file: VirtualFile ->
            if (!file.isDirectory) {
                val filePath = projectBasePath.let { it1 -> file.path.removePrefix(it1) }
@@ -169,7 +173,7 @@ class Fuzzier : AnAction() {
                    return@ContentIterator true
                }
                if (filePath.isNotBlank()) {
-                   val fuzzyMatchContainer = fuzzyContainsCaseInsensitive(filePath, searchString, multiMatch)
+                   val fuzzyMatchContainer = fuzzyContainsCaseInsensitive(filePath, searchString)
                    if (fuzzyMatchContainer != null) {
                        listModel.addElement(fuzzyMatchContainer)
                    }
@@ -201,7 +205,7 @@ class Fuzzier : AnAction() {
         return false
     }
 
-    fun fuzzyContainsCaseInsensitive(filePath: String, searchString: String, multiMatch: Boolean): FuzzyMatchContainer? {
+    fun fuzzyContainsCaseInsensitive(filePath: String, searchString: String): FuzzyMatchContainer? {
         if (searchString.isBlank()) {
             return FuzzyMatchContainer(0, filePath)
         }
@@ -211,18 +215,18 @@ class Fuzzier : AnAction() {
 
         val lowerFilePath: String = filePath.lowercase()
         val lowerSearchString: String = searchString.lowercase()
-        return getFuzzyMatch(lowerFilePath, lowerSearchString, filePath, multiMatch)
+        return getFuzzyMatch(lowerFilePath, lowerSearchString, filePath)
     }
 
-    private fun getFuzzyMatch(lowerFilePath: String, lowerSearchString: String, filePath: String, multiMatch: Boolean): FuzzyMatchContainer? {
+    private fun getFuzzyMatch(lowerFilePath: String, lowerSearchString: String, filePath: String): FuzzyMatchContainer? {
         var score = 0
         for (s in StringUtils.split(lowerSearchString, " ")) {
-            score += processSearchString(s, lowerFilePath, multiMatch) ?: return null
+            score += processSearchString(s, lowerFilePath) ?: return null
         }
         return FuzzyMatchContainer(score, filePath)
     }
 
-    private fun processSearchString(s: String, lowerFilePath: String, multiMatch: Boolean): Int? {
+    private fun processSearchString(s: String, lowerFilePath: String): Int? {
         var longestStreak = 0
         var streak = 0
         var score = 0
@@ -286,7 +290,7 @@ class Fuzzier : AnAction() {
 
         StringUtils.split(lowerFilePath, "/.").forEach {
             if (it == lowerSearchString) {
-                score += 10
+                score += matchWeightPartialPath
             }
         }
 
