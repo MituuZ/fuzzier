@@ -11,7 +11,7 @@ import com.intellij.openapi.components.Storage
 class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.State> {
     class State {
         var splitPosition: Int = 300
-        var exclusionList: List<String> = listOf("/.idea/", "/.git/", "/target/", "/build/", "/.gradle/", "/.run/")
+        var exclusionList: List<String> = listOf("/.idea/*", "/.git/*", "/target/*", "/build/*", "/.gradle/*", "/.run/*")
         var newTab: Boolean = false
         var debouncePeriod: Int = 150
         var resetWindow = false
