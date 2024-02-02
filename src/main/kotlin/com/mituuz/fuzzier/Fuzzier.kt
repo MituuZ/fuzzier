@@ -227,23 +227,23 @@ class Fuzzier : AnAction() {
         var streak = 0
         var score = 0
         var prevIndex = -10
-        for (i in s.indices) {
-            if (lowerFilePath.length - i < s.length - i) {
+        for (searchStringIndex in s.indices) {
+            if (lowerFilePath.length - searchStringIndex < s.length - searchStringIndex) {
                 return null
             }
 
             var found = -1
             // Always process the whole file path for each character, assuming they're found
-            for (j in lowerFilePath.indices) {
-                if (s[i] == lowerFilePath[j]) {
+            for (filePathIndex in lowerFilePath.indices) {
+                if (s[searchStringIndex] == lowerFilePath[filePathIndex]) {
                     // Always increase score when finding a match
                     if (multiMatch) {
                         score++
                     }
                     // Only check streak and update the found variable, if the current match index is greater than the previous
-                    if (found == -1 && j > prevIndex) {
-                        // If the index is one greater than the previous chars increment streak and update the longest streak
-                        if (prevIndex + 1 == j) {
+                    if (found == -1 && filePathIndex > prevIndex) {
+                        // If the index is one greater than the previous chars, increment streak and update the longest streak
+                        if (prevIndex + 1 == filePathIndex) {
                             streak++
                             if (streak > longestStreak) {
                                 longestStreak = streak
@@ -252,14 +252,16 @@ class Fuzzier : AnAction() {
                             streak = 1
                         }
                         // Save the first found index of a new character
-                        prevIndex = j
+                        prevIndex = filePathIndex
                         if (!multiMatch) {
-                            found = j
+                            // Set found to verify a match and exit the loop
+                            found = filePathIndex
                             continue;
                         }
                     }
+                    // When multiMatch is disabled, setting found exists the loop. Only set found for multiMatch
                     if (multiMatch) {
-                        found = j
+                        found = filePathIndex
                     }
                 }
             }
