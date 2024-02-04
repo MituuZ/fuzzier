@@ -18,6 +18,7 @@ class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.S
         var multiMatch = true
 
         var matchWeightPartialPath = 10
+        var matchWeightSingleChar = 5
     }
 
     private var state = State()

@@ -49,10 +49,12 @@ class Fuzzier : AnAction() {
     private var multiMatch = false
 
     private var matchWeightPartialPath = 10
+    private var matchWeightSingleChar = 5
 
     override fun actionPerformed(p0: AnActionEvent) {
         multiMatch = fuzzierSettingsService.state.multiMatch
         matchWeightPartialPath = fuzzierSettingsService.state.matchWeightPartialPath
+        matchWeightSingleChar= fuzzierSettingsService.state.matchWeightSingleChar
         setCustomHandlers()
         SwingUtilities.invokeLater {
             defaultDoc = EditorFactory.getInstance().createDocument("")
@@ -229,7 +231,7 @@ class Fuzzier : AnAction() {
     private fun processSearchString(s: String, lowerFilePath: String): Int? {
         var longestStreak = 0
         var streak = 0
-        var score = 0
+        var score: Double = 0.0
         var prevIndex = -10
         for (searchStringIndex in s.indices) {
             if (lowerFilePath.length - searchStringIndex < s.length - searchStringIndex) {
@@ -242,7 +244,7 @@ class Fuzzier : AnAction() {
                 if (s[searchStringIndex] == lowerFilePath[filePathIndex]) {
                     // Always increase score when finding a match
                     if (multiMatch) {
-                        score++
+                        score += matchWeightSingleChar / 10
                     }
                     // Only check streak and update the found variable, if the current match index is greater than the previous
                     if (found == -1 && filePathIndex > prevIndex) {
@@ -281,8 +283,8 @@ class Fuzzier : AnAction() {
         return calculateScore(streak, longestStreak, lowerFilePath, s, score)
     }
 
-    private fun calculateScore(streak: Int, longestStreak: Int, lowerFilePath: String, lowerSearchString: String, stringComparisonScore: Int): Int {
-        var score: Int = if (streak > longestStreak) {
+    private fun calculateScore(streak: Int, longestStreak: Int, lowerFilePath: String, lowerSearchString: String, stringComparisonScore: Double): Int {
+        var score: Double = if (streak > longestStreak) {
             streak + stringComparisonScore
         } else {
             longestStreak + stringComparisonScore
@@ -294,7 +296,7 @@ class Fuzzier : AnAction() {
             }
         }
 
-        return score
+        return score.toInt()
     }
 
     data class FuzzyMatchContainer(val score: Int, val string: String)

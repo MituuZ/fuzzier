@@ -24,6 +24,8 @@ class FuzzierSettingsComponent {
     private var multiMatchInstructions = JBLabel("<html><strong>Match characters multiple times</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
     var matchWeightPartialPath = JBIntSpinner(10, 0, 100)
     private var partialPathInfo = JBLabel("<html><strong>Match weight: Partial path match</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
+    var matchWeightSingleChar = JBIntSpinner(10, 0, 100)
+    private var singleCharInfo = JBLabel("<html><strong>Match weight: Single char (* 0.1)</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
 
     init {
         setupComponents()
@@ -36,6 +38,7 @@ class FuzzierSettingsComponent {
             .addSeparator()
             .addComponent(JBLabel("Match settings"))
             .addLabeledComponent(multiMatchInstructions, multiMatchActive)
+            .addLabeledComponent(singleCharInfo, matchWeightSingleChar)
             .addLabeledComponent(partialPathInfo, matchWeightPartialPath)
             .addComponentFillVertically(JPanel(), 0)
             .addComponent(resetWindowDimension)
@@ -43,29 +46,41 @@ class FuzzierSettingsComponent {
     }
 
     private fun setupComponents() {
+        multiMatchActive.addChangeListener {
+            matchWeightSingleChar.isEnabled = multiMatchActive.isSelected
+        }
         exclusionList.border = LineBorder(JBColor.BLACK, 1)
         resetWindowDimension.addActionListener {
             service<FuzzierSettingsService>().state.resetWindow = true
         }
+
         exclusionInstructions.toolTipText = """
             One line per one exclusion from the Fuzzier results.<br><br>
             Empty lines are skipped and all files in the project root start with "/"<br><br>
             Supports wildcards (*) for starts with and ends with. Defaults to contains if no wildcards are present.<br><br>
             e.g. "kt" excludes all files/file paths that contain the "kt" string. (main.<strong>kt</strong>, <strong>kt</strong>lin.java)
         """.trimIndent()
+
         multiMatchInstructions.toolTipText = """
             Count score for each instance of a character in the search string.<br><br>
             Normally file list sorting is done based on the longest streak,
             but similar package or folder names might make finding correct files inconvenient.<br><br>
             e.g. kotlin/is/fun contains "i" two times, so search "if" would score three points.
+            
         """.trimIndent()
         debounceInstructions.toolTipText = """
             Controls how long the search field must be idle before starting the search process.
         """.trimIndent()
+
         partialPathInfo.toolTipText = """
-            How much weight should a partial path match give.<br><br>
+            How much score should a partial path match give.<br><br>
             Partial matches are checked against file path parts, delimited by "/" and ".".<br><br>
             e.g. search string "is" is a partial path match for kotlin/<strong>is</strong>/fun, where as "isf" is not.
+        """.trimIndent()
+
+        singleCharInfo.toolTipText = """
+            How much score should a single char give. Only applies when multi match is active.<br><br>
+            Is divided by 10 when calculating score.
         """.trimIndent()
     }
 }

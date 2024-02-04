@@ -23,6 +23,8 @@ class FuzzierSettingsConfigurable : Configurable {
         fuzzierSettingsComponent.debounceTimerValue.value = fuzzierSettingsService.state.debouncePeriod
         fuzzierSettingsComponent.multiMatchActive.isSelected = fuzzierSettingsService.state.multiMatch
         fuzzierSettingsComponent.matchWeightPartialPath.value = fuzzierSettingsService.state.matchWeightPartialPath
+        fuzzierSettingsComponent.matchWeightSingleChar.value = fuzzierSettingsService.state.matchWeightSingleChar
+        fuzzierSettingsComponent.matchWeightPartialPath.isEnabled = fuzzierSettingsService.state.multiMatch
         return fuzzierSettingsComponent.jPanel
     }
 
@@ -32,6 +34,7 @@ class FuzzierSettingsConfigurable : Configurable {
                 || fuzzierSettingsService.state.debouncePeriod != fuzzierSettingsComponent.debounceTimerValue.value
                 || fuzzierSettingsService.state.multiMatch != fuzzierSettingsComponent.multiMatchActive.isSelected
                 || fuzzierSettingsService.state.matchWeightPartialPath != fuzzierSettingsComponent.matchWeightPartialPath.value
+                || fuzzierSettingsService.state.matchWeightSingleChar != fuzzierSettingsComponent.matchWeightSingleChar.value
     }
 
     override fun apply() {
@@ -45,5 +48,6 @@ class FuzzierSettingsConfigurable : Configurable {
         fuzzierSettingsService.state.debouncePeriod = fuzzierSettingsComponent.debounceTimerValue.value as Int
         fuzzierSettingsService.state.multiMatch = fuzzierSettingsComponent.multiMatchActive.isSelected
         fuzzierSettingsService.state.matchWeightPartialPath = fuzzierSettingsComponent.matchWeightPartialPath.value as Int
+        fuzzierSettingsService.state.matchWeightSingleChar = fuzzierSettingsComponent.matchWeightSingleChar.value as Int
     }
 }
