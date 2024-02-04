@@ -25,7 +25,8 @@ class FuzzierTest {
             0,
             0,
             0,
-            0)
+            0
+        )
 
         runTests("", "")
     }
@@ -33,11 +34,12 @@ class FuzzierTest {
     @Test
     fun fuzzyScoreNoStreak() {
         results = listOf(
-            1,
+            1, // 1 streak
             3, // 1 streak + 4 chars (0.5)
             5, // 1 streak + 4 chars (1)
-            1,
-            5) // 1 streak (5)
+            1, // no partial path
+            5 // 1 streak (5)
+        )
 
         runTests("KotlinIsFun", "kif")
     }
@@ -45,11 +47,11 @@ class FuzzierTest {
     @Test
     fun fuzzyScoreStreak() {
         results = listOf(
-            3,
-            3,
-            3,
-            3,
-            3
+            3, // 3 streak
+            4, // 3 streak + 3 chars (0.5)
+            6, // 3 streak + 3 chars (1)
+            3, // no partial path
+            15 // 3 streak (5)
         )
 
         runTests("KotlinIsFun", "kot")
