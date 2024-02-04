@@ -19,56 +19,72 @@ class FuzzierTest {
 
     @Test
     fun fuzzyScoreEmptyString() {
-        defaultSettings()
-        val match = fuzzier.fuzzyContainsCaseInsensitive("", "")
-        assertMatch(0, match)
+        val results = listOf(0,
+            0, // 1 streak + 4 chars (0.5)
+            0, // 1 streak + 4 chars (1)
+            0,
+            0) // 1 streak (5)
+
+        for (i in 0..4) {
+            runSettings(i)
+            val match = fuzzier.fuzzyContainsCaseInsensitive("", "")
+            assertMatch(results[i], match)
+        }
     }
 
     @Test
     fun fuzzyScoreNoStreak() {
-        defaultSettings()
-        val match = fuzzier.fuzzyContainsCaseInsensitive("KotlinIsFun", "kif")
-        assertMatch(1, match)
+        val results = listOf(1,
+            3, // 1 streak + 4 chars (0.5)
+            5, // 1 streak + 4 chars (1)
+            1,
+            5) // 1 streak (5)
+
+        for (i in 0..4) {
+            runSettings(i)
+            val match = fuzzier.fuzzyContainsCaseInsensitive("KotlinIsFun", "kif")
+            assertMatch(results[i], match)
+        }
     }
 
     @Test
     fun fuzzyScoreStreak() {
-        defaultSettings()
+        default()
         val match = fuzzier.fuzzyContainsCaseInsensitive("KotlinIsFun", "kot")
         assertMatch(3, match)
     }
 
     @Test
     fun fuzzyScoreLongSearchString() {
-        defaultSettings()
+        default()
         val match = fuzzier.fuzzyContainsCaseInsensitive("KIF", "TooLongSearchString")
         assertNull(match)
     }
 
     @Test
     fun fuzzyScoreNoPossibleMatch() {
-        defaultSettings()
+        default()
         val match = fuzzier.fuzzyContainsCaseInsensitive("KIF", "A")
         assertNull(match)
     }
 
     @Test
     fun fuzzyScoreNoPossibleMatchSplit() {
-        defaultSettings()
+        default()
         val match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "A A B")
         assertNull(match)
     }
 
     @Test
     fun fuzzyScorePartialMatchSplit() {
-        defaultSettings()
+        default()
         val match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "A A K")
         assertNull(match)
     }
 
     @Test
     fun fuzzyScoreFilePathMatch() {
-        defaultSettings()
+        default()
         var match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "kif")
         assertMatch(11, match)
 
@@ -93,16 +109,59 @@ class FuzzierTest {
 
     @Test
     fun fuzzyScoreSpaceMatch() {
-        defaultSettings()
+        default()
         val match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "fun kotlin")
         assertMatch(29, match)
     }
 
-    private fun defaultSettings() {
+    private fun runSettings(selector: Int) {
+        print("Running with settings: $selector\n")
+        when (selector) {
+            0 -> default()
+            1 -> multiMatch()
+            2 -> multiMatchSingleCharScore()
+            3 -> partialPath()
+            4 -> streakModifier()
+        }
+    }
+
+    private fun default() {
         settings.multiMatch = false
         settings.matchWeightSingleChar = 5 // Not active because of multi match
         settings.matchWeightPartialPath = 10
         settings.matchWeightStreakModifier = 10
+        fuzzier.setSettings()
+    }
+
+    private fun multiMatch() {
+        settings.multiMatch = true
+        settings.matchWeightSingleChar = 5
+        settings.matchWeightPartialPath = 10
+        settings.matchWeightStreakModifier = 10
+        fuzzier.setSettings()
+    }
+
+    private fun multiMatchSingleCharScore() {
+        settings.multiMatch = true
+        settings.matchWeightSingleChar = 10
+        settings.matchWeightPartialPath = 10
+        settings.matchWeightStreakModifier = 10
+        fuzzier.setSettings()
+    }
+
+    private fun partialPath() {
+        settings.multiMatch = false
+        settings.matchWeightSingleChar = 5
+        settings.matchWeightPartialPath = 50
+        settings.matchWeightStreakModifier = 10
+        fuzzier.setSettings()
+    }
+
+    private fun streakModifier() {
+        settings.multiMatch = false
+        settings.matchWeightSingleChar = 5
+        settings.matchWeightPartialPath = 10
+        settings.matchWeightStreakModifier = 50
         fuzzier.setSettings()
     }
 

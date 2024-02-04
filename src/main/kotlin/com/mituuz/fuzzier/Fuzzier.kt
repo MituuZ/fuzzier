@@ -246,7 +246,7 @@ class Fuzzier : AnAction() {
                 if (s[searchStringIndex] == lowerFilePath[filePathIndex]) {
                     // Always increase score when finding a match
                     if (multiMatch) {
-                        score += matchWeightSingleChar / 10
+                        score += matchWeightSingleChar / 10.0
                     }
                     // Only check streak and update the found variable, if the current match index is greater than the previous
                     if (found == -1 && filePathIndex > prevIndex) {
@@ -287,9 +287,9 @@ class Fuzzier : AnAction() {
 
     private fun calculateScore(streak: Int, longestStreak: Int, lowerFilePath: String, lowerSearchString: String, stringComparisonScore: Double): Int {
         var score: Double = if (streak > longestStreak) {
-            (matchWeightStreakModifier / 10) * streak + stringComparisonScore
+            (matchWeightStreakModifier / 10.0) * streak + stringComparisonScore
         } else {
-            (matchWeightStreakModifier / 10) * longestStreak + stringComparisonScore
+            (matchWeightStreakModifier / 10.0) * longestStreak + stringComparisonScore
         }
 
         StringUtils.split(lowerFilePath, "/.").forEach {
