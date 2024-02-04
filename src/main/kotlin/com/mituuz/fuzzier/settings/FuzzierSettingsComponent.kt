@@ -24,8 +24,10 @@ class FuzzierSettingsComponent {
     private var multiMatchInstructions = JBLabel("<html><strong>Match characters multiple times</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
     var matchWeightPartialPath = JBIntSpinner(10, 0, 100)
     private var partialPathInfo = JBLabel("<html><strong>Match weight: Partial path match</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
-    var matchWeightSingleChar = JBIntSpinner(10, 0, 100)
+    var matchWeightSingleChar = JBIntSpinner(5, 0, 50)
     private var singleCharInfo = JBLabel("<html><strong>Match weight: Single char (* 0.1)</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
+    var matchWeightStreakModifier = JBIntSpinner(10, 0, 100)
+    private var streakModifierInfo = JBLabel("<html><strong>Match weight: Streak modifier (* 0.1)</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
 
     init {
         setupComponents()
@@ -40,6 +42,7 @@ class FuzzierSettingsComponent {
             .addLabeledComponent(multiMatchInstructions, multiMatchActive)
             .addLabeledComponent(singleCharInfo, matchWeightSingleChar)
             .addLabeledComponent(partialPathInfo, matchWeightPartialPath)
+            .addLabeledComponent(streakModifierInfo, matchWeightStreakModifier)
             .addComponentFillVertically(JPanel(), 0)
             .addComponent(resetWindowDimension)
             .panel
@@ -81,6 +84,11 @@ class FuzzierSettingsComponent {
         singleCharInfo.toolTipText = """
             How much score should a single char give. Only applies when multi match is active.<br><br>
             Is divided by 10 when calculating score.
+        """.trimIndent()
+
+        streakModifierInfo.toolTipText = """
+            Longest streak score is multiplied by this amount (divided by 10).<br><br>
+            e.g. 10 = 1, so highest streak is added as the number of matched letters.
         """.trimIndent()
     }
 }

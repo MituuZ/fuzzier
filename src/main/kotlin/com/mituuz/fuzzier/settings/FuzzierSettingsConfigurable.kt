@@ -24,7 +24,8 @@ class FuzzierSettingsConfigurable : Configurable {
         fuzzierSettingsComponent.multiMatchActive.isSelected = fuzzierSettingsService.state.multiMatch
         fuzzierSettingsComponent.matchWeightPartialPath.value = fuzzierSettingsService.state.matchWeightPartialPath
         fuzzierSettingsComponent.matchWeightSingleChar.value = fuzzierSettingsService.state.matchWeightSingleChar
-        fuzzierSettingsComponent.matchWeightPartialPath.isEnabled = fuzzierSettingsService.state.multiMatch
+        fuzzierSettingsComponent.matchWeightSingleChar.isEnabled = fuzzierSettingsService.state.multiMatch
+        fuzzierSettingsComponent.matchWeightStreakModifier.value = fuzzierSettingsService.state.matchWeightStreakModifier
         return fuzzierSettingsComponent.jPanel
     }
 
@@ -35,6 +36,7 @@ class FuzzierSettingsConfigurable : Configurable {
                 || fuzzierSettingsService.state.multiMatch != fuzzierSettingsComponent.multiMatchActive.isSelected
                 || fuzzierSettingsService.state.matchWeightPartialPath != fuzzierSettingsComponent.matchWeightPartialPath.value
                 || fuzzierSettingsService.state.matchWeightSingleChar != fuzzierSettingsComponent.matchWeightSingleChar.value
+                || fuzzierSettingsService.state.matchWeightStreakModifier != fuzzierSettingsComponent.matchWeightStreakModifier.value
     }
 
     override fun apply() {
@@ -49,5 +51,6 @@ class FuzzierSettingsConfigurable : Configurable {
         fuzzierSettingsService.state.multiMatch = fuzzierSettingsComponent.multiMatchActive.isSelected
         fuzzierSettingsService.state.matchWeightPartialPath = fuzzierSettingsComponent.matchWeightPartialPath.value as Int
         fuzzierSettingsService.state.matchWeightSingleChar = fuzzierSettingsComponent.matchWeightSingleChar.value as Int
+        fuzzierSettingsService.state.matchWeightStreakModifier = fuzzierSettingsComponent.matchWeightStreakModifier.value as Int
     }
 }

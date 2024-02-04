@@ -50,11 +50,13 @@ class Fuzzier : AnAction() {
 
     private var matchWeightPartialPath = 10
     private var matchWeightSingleChar = 5
+    private var matchWeightStreakModifier = 10
 
     override fun actionPerformed(p0: AnActionEvent) {
         multiMatch = fuzzierSettingsService.state.multiMatch
         matchWeightPartialPath = fuzzierSettingsService.state.matchWeightPartialPath
-        matchWeightSingleChar= fuzzierSettingsService.state.matchWeightSingleChar
+        matchWeightSingleChar = fuzzierSettingsService.state.matchWeightSingleChar
+        matchWeightStreakModifier = fuzzierSettingsService.state.matchWeightStreakModifier
         setCustomHandlers()
         SwingUtilities.invokeLater {
             defaultDoc = EditorFactory.getInstance().createDocument("")
@@ -285,9 +287,9 @@ class Fuzzier : AnAction() {
 
     private fun calculateScore(streak: Int, longestStreak: Int, lowerFilePath: String, lowerSearchString: String, stringComparisonScore: Double): Int {
         var score: Double = if (streak > longestStreak) {
-            streak + stringComparisonScore
+            (matchWeightStreakModifier / 10) * streak + stringComparisonScore
         } else {
-            longestStreak + stringComparisonScore
+            (matchWeightStreakModifier / 10) * longestStreak + stringComparisonScore
         }
 
         StringUtils.split(lowerFilePath, "/.").forEach {
