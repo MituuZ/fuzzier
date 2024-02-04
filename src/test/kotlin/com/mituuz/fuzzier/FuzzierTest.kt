@@ -10,6 +10,7 @@ class FuzzierTest {
     private var fuzzier: Fuzzier
     private var testApplicationManager: TestApplicationManager
     private var settings: FuzzierSettingsService.State
+    private lateinit var results: List<Int>
 
     init {
         testApplicationManager = TestApplicationManager.getInstance()
@@ -19,33 +20,39 @@ class FuzzierTest {
 
     @Test
     fun fuzzyScoreEmptyString() {
-        val results = listOf(
+        results = listOf(
             0,
             0,
             0,
             0,
             0)
 
-        runTests(results, "", "")
+        runTests("", "")
     }
 
     @Test
     fun fuzzyScoreNoStreak() {
-        val results = listOf(
+        results = listOf(
             1,
             3, // 1 streak + 4 chars (0.5)
             5, // 1 streak + 4 chars (1)
             1,
             5) // 1 streak (5)
 
-        runTests(results, "KotlinIsFun", "kif")
+        runTests("KotlinIsFun", "kif")
     }
 
     @Test
     fun fuzzyScoreStreak() {
-        default()
-        val match = fuzzier.fuzzyContainsCaseInsensitive("KotlinIsFun", "kot")
-        assertMatch(3, match)
+        results = listOf(
+            3,
+            3,
+            3,
+            3,
+            3
+        )
+
+        runTests("KotlinIsFun", "kot")
     }
 
     @Test
@@ -108,7 +115,7 @@ class FuzzierTest {
         assertMatch(29, match)
     }
 
-    private fun runTests(results: List<Int>, filePath: String, searchString: String) {
+    private fun runTests(filePath: String, searchString: String) {
         for (i in 0..4) {
             runSettings(i)
             val match = fuzzier.fuzzyContainsCaseInsensitive(filePath, searchString)
@@ -117,7 +124,7 @@ class FuzzierTest {
     }
 
     private fun runSettings(selector: Int) {
-        print("Running with settings: $selector\n")
+        print("Running with settings: $selector: ")
         when (selector) {
             0 -> default()
             1 -> multiMatch()
@@ -128,6 +135,7 @@ class FuzzierTest {
     }
 
     private fun default() {
+        print("Default\n")
         settings.multiMatch = false
         settings.matchWeightSingleChar = 5 // Not active because of multi match
         settings.matchWeightPartialPath = 10
@@ -136,6 +144,7 @@ class FuzzierTest {
     }
 
     private fun multiMatch() {
+        print("MultiMatch\n")
         settings.multiMatch = true
         settings.matchWeightSingleChar = 5
         settings.matchWeightPartialPath = 10
@@ -144,6 +153,7 @@ class FuzzierTest {
     }
 
     private fun multiMatchSingleCharScore() {
+        print("MultiMatchSingleCharScore\n")
         settings.multiMatch = true
         settings.matchWeightSingleChar = 10
         settings.matchWeightPartialPath = 10
@@ -152,6 +162,7 @@ class FuzzierTest {
     }
 
     private fun partialPath() {
+        print("PartialPath\n")
         settings.multiMatch = false
         settings.matchWeightSingleChar = 5
         settings.matchWeightPartialPath = 50
@@ -160,6 +171,7 @@ class FuzzierTest {
     }
 
     private fun streakModifier() {
+        print("StreakModifier\n")
         settings.multiMatch = false
         settings.matchWeightSingleChar = 5
         settings.matchWeightPartialPath = 10
