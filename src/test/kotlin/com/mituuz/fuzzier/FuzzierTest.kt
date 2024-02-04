@@ -19,32 +19,26 @@ class FuzzierTest {
 
     @Test
     fun fuzzyScoreEmptyString() {
-        val results = listOf(0,
-            0, // 1 streak + 4 chars (0.5)
-            0, // 1 streak + 4 chars (1)
+        val results = listOf(
             0,
-            0) // 1 streak (5)
+            0,
+            0,
+            0,
+            0)
 
-        for (i in 0..4) {
-            runSettings(i)
-            val match = fuzzier.fuzzyContainsCaseInsensitive("", "")
-            assertMatch(results[i], match)
-        }
+        runTests(results, "", "")
     }
 
     @Test
     fun fuzzyScoreNoStreak() {
-        val results = listOf(1,
+        val results = listOf(
+            1,
             3, // 1 streak + 4 chars (0.5)
             5, // 1 streak + 4 chars (1)
             1,
             5) // 1 streak (5)
 
-        for (i in 0..4) {
-            runSettings(i)
-            val match = fuzzier.fuzzyContainsCaseInsensitive("KotlinIsFun", "kif")
-            assertMatch(results[i], match)
-        }
+        runTests(results, "KotlinIsFun", "kif")
     }
 
     @Test
@@ -112,6 +106,14 @@ class FuzzierTest {
         default()
         val match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "fun kotlin")
         assertMatch(29, match)
+    }
+
+    private fun runTests(results: List<Int>, filePath: String, searchString: String) {
+        for (i in 0..4) {
+            runSettings(i)
+            val match = fuzzier.fuzzyContainsCaseInsensitive(filePath, searchString)
+            assertMatch(results[i], match)
+        }
     }
 
     private fun runSettings(selector: Int) {
