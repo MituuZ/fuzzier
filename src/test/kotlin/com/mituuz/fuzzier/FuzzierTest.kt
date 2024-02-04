@@ -9,64 +9,66 @@ import org.junit.jupiter.api.Test
 class FuzzierTest {
     private var fuzzier: Fuzzier
     private var testApplicationManager: TestApplicationManager
+    private var settings: FuzzierSettingsService.State
 
     init {
         testApplicationManager = TestApplicationManager.getInstance()
         fuzzier = Fuzzier()
+        settings  = service<FuzzierSettingsService>().state
     }
 
     @Test
     fun fuzzyScoreEmptyString() {
-        service<FuzzierSettingsService>().state.multiMatch = false
+        defaultSettings()
         val match = fuzzier.fuzzyContainsCaseInsensitive("", "")
         assertMatch(0, match)
     }
 
     @Test
     fun fuzzyScoreNoStreak() {
-        service<FuzzierSettingsService>().state.multiMatch = false
+        defaultSettings()
         val match = fuzzier.fuzzyContainsCaseInsensitive("KotlinIsFun", "kif")
         assertMatch(1, match)
     }
 
     @Test
     fun fuzzyScoreStreak() {
-        service<FuzzierSettingsService>().state.multiMatch = false
+        defaultSettings()
         val match = fuzzier.fuzzyContainsCaseInsensitive("KotlinIsFun", "kot")
         assertMatch(3, match)
     }
 
     @Test
     fun fuzzyScoreLongSearchString() {
-        service<FuzzierSettingsService>().state.multiMatch = false
+        defaultSettings()
         val match = fuzzier.fuzzyContainsCaseInsensitive("KIF", "TooLongSearchString")
         assertNull(match)
     }
 
     @Test
     fun fuzzyScoreNoPossibleMatch() {
-        service<FuzzierSettingsService>().state.multiMatch = false
+        defaultSettings()
         val match = fuzzier.fuzzyContainsCaseInsensitive("KIF", "A")
         assertNull(match)
     }
 
     @Test
     fun fuzzyScoreNoPossibleMatchSplit() {
-        service<FuzzierSettingsService>().state.multiMatch = false
+        defaultSettings()
         val match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "A A B")
         assertNull(match)
     }
 
     @Test
     fun fuzzyScorePartialMatchSplit() {
-        service<FuzzierSettingsService>().state.multiMatch = false
+        defaultSettings()
         val match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "A A K")
         assertNull(match)
     }
 
     @Test
     fun fuzzyScoreFilePathMatch() {
-        service<FuzzierSettingsService>().state.multiMatch = false
+        defaultSettings()
         var match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "kif")
         assertMatch(11, match)
 
@@ -91,9 +93,17 @@ class FuzzierTest {
 
     @Test
     fun fuzzyScoreSpaceMatch() {
-        service<FuzzierSettingsService>().state.multiMatch = false
+        defaultSettings()
         val match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "fun kotlin")
         assertMatch(29, match)
+    }
+
+    private fun defaultSettings() {
+        settings.multiMatch = false
+        settings.matchWeightSingleChar = 5 // Not active because of multi match
+        settings.matchWeightPartialPath = 10
+        settings.matchWeightStreakModifier = 10
+        fuzzier.setSettings()
     }
 
     private fun assertMatch(score: Int, container: Fuzzier.FuzzyMatchContainer?) {

@@ -404,4 +404,11 @@ class Fuzzier : AnAction() {
             }
         })
     }
+
+    fun setSettings() {
+        multiMatch = fuzzierSettingsService.state.multiMatch
+        matchWeightPartialPath = fuzzierSettingsService.state.matchWeightPartialPath
+        matchWeightSingleChar = fuzzierSettingsService.state.matchWeightSingleChar
+        matchWeightStreakModifier = fuzzierSettingsService.state.matchWeightStreakModifier
+    }
 }
