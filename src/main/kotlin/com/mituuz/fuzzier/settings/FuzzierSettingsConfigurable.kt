@@ -21,6 +21,11 @@ class FuzzierSettingsConfigurable : Configurable {
         fuzzierSettingsComponent.exclusionList.text = combinedString
         fuzzierSettingsComponent.newTabSelect.isSelected = fuzzierSettingsService.state.newTab
         fuzzierSettingsComponent.debounceTimerValue.value = fuzzierSettingsService.state.debouncePeriod
+        fuzzierSettingsComponent.multiMatchActive.isSelected = fuzzierSettingsService.state.multiMatch
+        fuzzierSettingsComponent.matchWeightPartialPath.value = fuzzierSettingsService.state.matchWeightPartialPath
+        fuzzierSettingsComponent.matchWeightSingleChar.value = fuzzierSettingsService.state.matchWeightSingleChar
+        fuzzierSettingsComponent.matchWeightSingleChar.isEnabled = fuzzierSettingsService.state.multiMatch
+        fuzzierSettingsComponent.matchWeightStreakModifier.value = fuzzierSettingsService.state.matchWeightStreakModifier
         return fuzzierSettingsComponent.jPanel
     }
 
@@ -28,6 +33,10 @@ class FuzzierSettingsConfigurable : Configurable {
         return fuzzierSettingsService.state.exclusionList != fuzzierSettingsComponent.exclusionList.text.split("\n")
                 || fuzzierSettingsService.state.newTab != fuzzierSettingsComponent.newTabSelect.isSelected
                 || fuzzierSettingsService.state.debouncePeriod != fuzzierSettingsComponent.debounceTimerValue.value
+                || fuzzierSettingsService.state.multiMatch != fuzzierSettingsComponent.multiMatchActive.isSelected
+                || fuzzierSettingsService.state.matchWeightPartialPath != fuzzierSettingsComponent.matchWeightPartialPath.value
+                || fuzzierSettingsService.state.matchWeightSingleChar != fuzzierSettingsComponent.matchWeightSingleChar.value
+                || fuzzierSettingsService.state.matchWeightStreakModifier != fuzzierSettingsComponent.matchWeightStreakModifier.value
     }
 
     override fun apply() {
@@ -39,5 +48,9 @@ class FuzzierSettingsConfigurable : Configurable {
         fuzzierSettingsService.state.exclusionList = newList
         fuzzierSettingsService.state.newTab = fuzzierSettingsComponent.newTabSelect.isSelected
         fuzzierSettingsService.state.debouncePeriod = fuzzierSettingsComponent.debounceTimerValue.value as Int
+        fuzzierSettingsService.state.multiMatch = fuzzierSettingsComponent.multiMatchActive.isSelected
+        fuzzierSettingsService.state.matchWeightPartialPath = fuzzierSettingsComponent.matchWeightPartialPath.value as Int
+        fuzzierSettingsService.state.matchWeightSingleChar = fuzzierSettingsComponent.matchWeightSingleChar.value as Int
+        fuzzierSettingsService.state.matchWeightStreakModifier = fuzzierSettingsComponent.matchWeightStreakModifier.value as Int
     }
 }
