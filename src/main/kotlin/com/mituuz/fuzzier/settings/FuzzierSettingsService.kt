@@ -15,7 +15,7 @@ class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.S
         var newTab: Boolean = false
         var debouncePeriod: Int = 150
         var resetWindow = false
-        var multiMatch = true
+        var multiMatch = false
 
         var matchWeightPartialPath = 10
         var matchWeightSingleChar = 5

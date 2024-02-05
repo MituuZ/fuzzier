@@ -284,28 +284,22 @@ class Fuzzier : AnAction() {
             }
         }
 
-        println("Match: $match")
-
         // If we get to here, all characters were found and have been accounted for in the score
         return calculateScore(streak, longestStreak, lowerFilePath, s, score)
     }
 
     private fun calculateScore(streak: Int, longestStreak: Int, lowerFilePath: String, lowerSearchString: String, stringComparisonScore: Double): Int {
         var score: Double = if (streak > longestStreak) {
-            println("longestStreak: $streak")
             (matchWeightStreakModifier / 10.0) * streak + stringComparisonScore
         } else {
-            println("longestStreak: $longestStreak")
             (matchWeightStreakModifier / 10.0) * longestStreak + stringComparisonScore
         }
 
-        println("Score before partial path: $score")
         StringUtils.split(lowerFilePath, "/.").forEach {
             if (it == lowerSearchString) {
                 score += matchWeightPartialPath
             }
         }
-        println("Score after partial path: $score")
 
         return score.toInt()
     }
