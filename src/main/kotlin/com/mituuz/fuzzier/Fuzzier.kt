@@ -233,8 +233,9 @@ class Fuzzier : AnAction() {
     private fun processSearchString(s: String, lowerFilePath: String): Int? {
         var longestStreak = 0
         var streak = 0
-        var score: Double = 0.0
+        var score = 0.0
         var prevIndex = -10
+        var match = 0
         for (searchStringIndex in s.indices) {
             if (lowerFilePath.length - searchStringIndex < s.length - searchStringIndex) {
                 return null
@@ -244,12 +245,14 @@ class Fuzzier : AnAction() {
             // Always process the whole file path for each character, assuming they're found
             for (filePathIndex in lowerFilePath.indices) {
                 if (s[searchStringIndex] == lowerFilePath[filePathIndex]) {
+                    match++
                     // Always increase score when finding a match
                     if (multiMatch) {
                         score += matchWeightSingleChar / 10.0
                     }
                     // Only check streak and update the found variable, if the current match index is greater than the previous
                     if (found == -1 && filePathIndex > prevIndex) {
+                        // TODO: Does not work quite correct when handling a search string where a char is found first and then again for a multi match
                         // If the index is one greater than the previous chars, increment streak and update the longest streak
                         if (prevIndex + 1 == filePathIndex) {
                             streak++
@@ -267,7 +270,7 @@ class Fuzzier : AnAction() {
                             continue;
                         }
                     }
-                    // When multiMatch is disabled, setting found exists the loop. Only set found for multiMatch
+                    // When multiMatch is disabled, setting found exits the loop. Only set found for multiMatch
                     if (multiMatch) {
                         found = filePathIndex
                     }
@@ -281,22 +284,28 @@ class Fuzzier : AnAction() {
             }
         }
 
+        println("Match: $match")
+
         // If we get to here, all characters were found and have been accounted for in the score
         return calculateScore(streak, longestStreak, lowerFilePath, s, score)
     }
 
     private fun calculateScore(streak: Int, longestStreak: Int, lowerFilePath: String, lowerSearchString: String, stringComparisonScore: Double): Int {
         var score: Double = if (streak > longestStreak) {
+            println("longestStreak: $streak")
             (matchWeightStreakModifier / 10.0) * streak + stringComparisonScore
         } else {
+            println("longestStreak: $longestStreak")
             (matchWeightStreakModifier / 10.0) * longestStreak + stringComparisonScore
         }
 
+        println("Score before partial path: $score")
         StringUtils.split(lowerFilePath, "/.").forEach {
             if (it == lowerSearchString) {
                 score += matchWeightPartialPath
             }
         }
+        println("Score after partial path: $score")
 
         return score.toInt()
     }

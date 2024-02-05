@@ -35,7 +35,7 @@ class FuzzierTest {
     fun fuzzyScoreNoStreak() {
         results = listOf(
             1, // 1 streak
-            3, // 1 streak + 4 chars (0.5)
+            3, // 1 streak + 4 chars (0.5 rounded down)
             5, // 1 streak + 4 chars (1)
             1, // no partial path
             5 // 1 streak (5)
@@ -112,9 +112,15 @@ class FuzzierTest {
 
     @Test
     fun fuzzyScoreSpaceMatch() {
-        default()
-        val match = fuzzier.fuzzyContainsCaseInsensitive("Kotlin/Is/Fun/kif.kt", "fun kotlin")
-        assertMatch(29, match)
+        results = listOf(
+            29, // 6 streak + 3 streak + 2x 10 partial matches
+            36, // 6 streak + 2 streak + 2x 10 partial matches + 5 (0.5) rounded down (2) + match 12 (0.5) (6)
+            45, // 6 streak + 2 streak + 2x 10 partial matches + 5 (1) + match 12 (1)
+            109, // 6 streak + 3 streak + 2x 50 partial matches
+            65 // 6 streak (30) + 3 streak (15) + 2x 10 partial matches
+        )
+
+        runTests("Kotlin/Is/Fun/kif.kt", "fun kotlin")
     }
 
     private fun runTests(filePath: String, searchString: String) {
