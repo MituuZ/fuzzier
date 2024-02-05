@@ -1,13 +1,7 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-  <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
   <id>com.mituuz.fuzzier</id>
-
-  <!-- Public plugin name should be written in Title Case.
-       Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
   <name>Fuzzier</name>
-
-  <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
   <vendor email="mituuuuz@hotmail.com" url="https://www.mituuz.com">MituuZ</vendor>
 
   <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
@@ -30,8 +24,16 @@
       displayName="Fuzzier Settings"/>
   </extensions>
 
-  <change-notes>
-    Enable resetting popup position from settings
+  <change-notes><![CDATA[
+  <h2>Add settings to alter file list ordering</h2>
+  <p>Changing these values might be a bit finicky at the moment. I have plans on adding a tester to make adjusting easier.</p>
+  <ul>
+    <li>Match same character multiple times with specific score</li>
+    <li>Change score value used for partial path matches e.g. "is" in "kotlin/is/fun"</li>
+    <li>Change streak modifier value</li>
+   </ul>
+  <h2>Enable resetting popup position and size from settings</h2>
+  ]]>
   </change-notes>
 
   <actions>
