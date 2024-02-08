@@ -62,7 +62,7 @@ class FuzzierSettingsComponent {
         }
         startTestBench.addActionListener {
             startTestBench.isEnabled = false
-            testBench.fill()
+            testBench.fill(this)
         }
 
         exclusionInstructions.toolTipText = """

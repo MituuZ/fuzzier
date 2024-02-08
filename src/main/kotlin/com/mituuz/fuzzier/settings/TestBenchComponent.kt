@@ -28,15 +28,13 @@ class TestBenchComponent : JPanel() {
     private var searchField = EditorTextField()
     private var fuzzierSettingsService = service<FuzzierSettingsService>()
     private var debounceTimer: TimerTask? = null
-    private var multiMatch = false
-    private var matchWeightPartialPath = 10
-    private var matchWeightSingleChar = 5
-    private var matchWeightStreakModifier = 10
     @Volatile
     var currentTask: Future<*>? = null
+    private lateinit var liveSettingsComponent: FuzzierSettingsComponent
 
     // TODO: We need live settings from the menu
-    fun fill() {
+    fun fill(settingsComponent: FuzzierSettingsComponent) {
+        liveSettingsComponent = settingsComponent
         layout = GridLayoutManager(2, 1)
         val scrollPane = JBScrollPane()
         scrollPane.setViewportView(fileList)
@@ -201,8 +199,8 @@ class TestBenchComponent : JPanel() {
                 if (s[searchStringIndex] == lowerFilePath[filePathIndex]) {
                     match++
                     // Always increase score when finding a match
-                    if (multiMatch) {
-                        score += matchWeightSingleChar / 10.0
+                    if (liveSettingsComponent.multiMatchActive.isSelected) {
+                        score += liveSettingsComponent.matchWeightSingleChar.value as Int / 10.0
                     }
                     // Only check streak and update the found variable, if the current match index is greater than the previous
                     if (found == -1 && filePathIndex > prevIndex) {
@@ -218,14 +216,14 @@ class TestBenchComponent : JPanel() {
                         }
                         // Save the first found index of a new character
                         prevIndex = filePathIndex
-                        if (!multiMatch) {
+                        if (!liveSettingsComponent.multiMatchActive.isSelected) {
                             // Set found to verify a match and exit the loop
                             found = filePathIndex
                             continue;
                         }
                     }
                     // When multiMatch is disabled, setting found exits the loop. Only set found for multiMatch
-                    if (multiMatch) {
+                    if (liveSettingsComponent.multiMatchActive.isSelected) {
                         found = filePathIndex
                     }
                 }
@@ -244,14 +242,14 @@ class TestBenchComponent : JPanel() {
 
     private fun calculateScore(streak: Int, longestStreak: Int, lowerFilePath: String, lowerSearchString: String, stringComparisonScore: Double): Int {
         var score: Double = if (streak > longestStreak) {
-            (matchWeightStreakModifier / 10.0) * streak + stringComparisonScore
+            (liveSettingsComponent.matchWeightStreakModifier.value as Int / 10.0) * streak + stringComparisonScore
         } else {
-            (matchWeightStreakModifier / 10.0) * longestStreak + stringComparisonScore
+            (liveSettingsComponent.matchWeightStreakModifier.value as Int / 10.0) * longestStreak + stringComparisonScore
         }
 
         StringUtils.split(lowerFilePath, "/.").forEach {
             if (it == lowerSearchString) {
-                score += matchWeightPartialPath
+                score += liveSettingsComponent.matchWeightPartialPath.value as Int
             }
         }
 
