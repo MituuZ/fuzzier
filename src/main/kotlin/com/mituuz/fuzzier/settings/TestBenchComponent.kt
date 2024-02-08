@@ -83,7 +83,7 @@ class TestBenchComponent : JPanel() {
         document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
                 debounceTimer?.cancel()
-                val debouncePeriod = fuzzierSettingsService.state.debouncePeriod
+                val debouncePeriod = liveSettingsComponent.debounceTimerValue.value as Int
                 debounceTimer = Timer().schedule(debouncePeriod.toLong()) {
                     updateListContents(project, searchField.text)
                 }
