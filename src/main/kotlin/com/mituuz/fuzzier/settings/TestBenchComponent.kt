@@ -32,7 +32,6 @@ class TestBenchComponent : JPanel() {
     var currentTask: Future<*>? = null
     private lateinit var liveSettingsComponent: FuzzierSettingsComponent
 
-    // TODO: We need live settings from the menu
     fun fill(settingsComponent: FuzzierSettingsComponent) {
         liveSettingsComponent = settingsComponent
         layout = GridLayoutManager(2, 1)
