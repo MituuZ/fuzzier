@@ -49,7 +49,7 @@ class TestBenchComponent : JPanel() {
                 GridConstraints.FILL_BOTH,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_WANT_GROW,
                 GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_WANT_GROW,
-                null,
+                Dimension(-1, 300),
                 Dimension(-1, -1),
                 null,
                 0,
