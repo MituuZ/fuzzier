@@ -6,8 +6,9 @@ import org.apache.commons.lang3.StringUtils
 import javax.swing.DefaultListModel
 
 class StringEvaluator(
-    private val multiMatch: Boolean, private val exclusionList: List<String>, private val matchWeightSingleChar: Int,
-    private val matchWeightStreakModifier: Int, private val matchWeightPartialPath: Int) {
+    private var multiMatch: Boolean, private var exclusionList: List<String>, private var matchWeightSingleChar: Int,
+    private var matchWeightStreakModifier: Int, private var matchWeightPartialPath: Int) {
+
     fun getContentIterator(projectBasePath: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
         return ContentIterator { file: VirtualFile ->
             if (!file.isDirectory) {
@@ -143,4 +144,12 @@ class StringEvaluator(
     }
 
     data class FuzzyMatchContainer(val score: Int, val string: String)
+
+    fun setSettings(multiMatch: Boolean, matchWeightSingleChar: Int, matchWeightPartialPath: Int,
+                    matchWeightStreakModifier: Int) {
+        this.multiMatch = multiMatch
+        this.matchWeightPartialPath = matchWeightPartialPath
+        this.matchWeightSingleChar = matchWeightSingleChar
+        this.matchWeightStreakModifier = matchWeightStreakModifier
+    }
 }
