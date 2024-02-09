@@ -6,6 +6,7 @@ import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.runInEdtAndWait
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
+import com.mituuz.fuzzier.StringEvaluator.FuzzyMatchContainer
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import javax.swing.DefaultListModel
@@ -69,8 +70,8 @@ class ExcludeTest {
         Assertions.assertEquals("/asd/asd.kt", filePathContainer.get(0).string)
     }
 
-    private fun setUpProjectFileIndex(filesToAdd: List<String>) : DefaultListModel<Fuzzier.FuzzyMatchContainer> {
-        val filePathContainer = DefaultListModel<Fuzzier.FuzzyMatchContainer>()
+    private fun setUpProjectFileIndex(filesToAdd: List<String>) : DefaultListModel<FuzzyMatchContainer> {
+        val filePathContainer = DefaultListModel<FuzzyMatchContainer>()
         val factory = IdeaTestFixtureFactory.getFixtureFactory()
         val fixtureBuilder = factory.createLightFixtureBuilder(null, "Test")
         val fixture = fixtureBuilder.fixture

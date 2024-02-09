@@ -187,7 +187,7 @@ class FuzzierTest {
         fuzzier.setSettings()
     }
 
-    private fun assertMatch(score: Int, container: Fuzzier.FuzzyMatchContainer?) {
+    private fun assertMatch(score: Int, container: StringEvaluator.FuzzyMatchContainer?) {
         if (container != null) {
             assertEquals(score, container.score)
         } else {
