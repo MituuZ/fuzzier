@@ -46,17 +46,8 @@ class Fuzzier : AnAction() {
     private val fuzzyDimensionKey: String = "FuzzySearchPopup"
     @Volatile
     var currentTask: Future<*>? = null
-    private var multiMatch = false
-
-    private var matchWeightPartialPath = 10
-    private var matchWeightSingleChar = 5
-    private var matchWeightStreakModifier = 10
 
     override fun actionPerformed(p0: AnActionEvent) {
-        multiMatch = fuzzierSettingsService.state.multiMatch
-        matchWeightPartialPath = fuzzierSettingsService.state.matchWeightPartialPath
-        matchWeightSingleChar = fuzzierSettingsService.state.matchWeightSingleChar
-        matchWeightStreakModifier = fuzzierSettingsService.state.matchWeightStreakModifier
         setCustomHandlers()
         SwingUtilities.invokeLater {
             defaultDoc = EditorFactory.getInstance().createDocument("")
@@ -143,14 +134,14 @@ class Fuzzier : AnAction() {
         }
 
         currentTask?.takeIf { !it.isDone }?.cancel(true)
-
         currentTask = ApplicationManager.getApplication().executeOnPooledThread {
             component.fileList.setPaintBusy(true)
             val listModel = DefaultListModel<FuzzyMatchContainer>()
             val projectFileIndex = ProjectFileIndex.getInstance(project)
             val projectBasePath = project.basePath
-            val stringEvaluator = StringEvaluator(multiMatch, fuzzierSettingsService.state.exclusionList,
-                matchWeightSingleChar, matchWeightStreakModifier, matchWeightPartialPath)
+            val stringEvaluator = StringEvaluator(fuzzierSettingsService.state.multiMatch, fuzzierSettingsService.state.exclusionList,
+                fuzzierSettingsService.state.matchWeightSingleChar, fuzzierSettingsService.state.matchWeightStreakModifier,
+                fuzzierSettingsService.state.matchWeightPartialPath)
 
             val contentIterator = projectBasePath?.let { stringEvaluator.getContentIterator(it, searchString, listModel) }
 
