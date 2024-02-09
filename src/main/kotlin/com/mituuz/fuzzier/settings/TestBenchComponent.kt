@@ -13,6 +13,7 @@ import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
 import com.mituuz.fuzzier.StringEvaluator
 import com.mituuz.fuzzier.StringEvaluator.FuzzyMatchContainer
+import org.apache.commons.lang3.StringUtils
 import java.awt.Dimension
 import java.util.*
 import java.util.concurrent.Future
@@ -88,6 +89,13 @@ class TestBenchComponent : JPanel() {
     }
 
     fun updateListContents(project: Project, searchString: String) {
+        if (StringUtils.isBlank(searchString)) {
+            SwingUtilities.invokeLater {
+                fileList.model = DefaultListModel()
+            }
+            return
+        }
+
         val newList = liveSettingsComponent.exclusionList.text
             .split("\n")
             .filter { it.isNotBlank() }
