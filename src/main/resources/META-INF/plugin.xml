@@ -39,5 +39,12 @@
       <override-text place="MainMenu" text="Fuzzy File Search"/>
       <add-to-group group-id="ToolsMenu" anchor="first"/>
     </action>
+    <action id="com.mituuz.fuzzier.FuzzyMover"
+            class="com.mituuz.fuzzier.FuzzyMover"
+            text="Fuzzy File Mover"
+            description="Move a file using a basic fuzzy search">
+      <override-text place="MainMenu" text="Fuzzy File Mover"/>
+      <add-to-group group-id="ToolsMenu"/>
+    </action>
   </actions>
 </idea-plugin>
