@@ -25,14 +25,8 @@
   </extensions>
 
   <change-notes><![CDATA[
-  <h2>Add settings to alter file list ordering</h2>
-  <p>Changing these values might be a bit finicky at the moment. I have plans on adding a tester to make adjusting easier.</p>
-  <ul>
-    <li>Match same character multiple times with specific score</li>
-    <li>Change score value used for partial path matches e.g. "is" in "kotlin/is/fun"</li>
-    <li>Change streak modifier value</li>
-   </ul>
-  <h2>Enable resetting popup position and size from settings</h2>
+  <h2>Add test bench to Fuzzier settings</h2>
+  Enabling live tweaking and testing of the Fuzzier settings.
   ]]>
   </change-notes>
 

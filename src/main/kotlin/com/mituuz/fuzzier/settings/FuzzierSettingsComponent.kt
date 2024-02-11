@@ -28,6 +28,8 @@ class FuzzierSettingsComponent {
     private var singleCharInfo = JBLabel("<html><strong>Match weight: Single char (* 0.1)</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
     var matchWeightStreakModifier = JBIntSpinner(10, 0, 100)
     private var streakModifierInfo = JBLabel("<html><strong>Match weight: Streak modifier (* 0.1)</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
+    private var startTestBench = JButton("Launch Test Bench", AllIcons.General.ContextHelp)
+    private var testBench = TestBenchComponent()
 
     init {
         setupComponents()
@@ -38,11 +40,13 @@ class FuzzierSettingsComponent {
             .addLabeledComponent("<html><strong>Open files in a new tab</strong></html>", newTabSelect)
             .addLabeledComponent(debounceInstructions, debounceTimerValue)
             .addSeparator()
-            .addComponent(JBLabel("Match settings"))
+            .addComponent(JBLabel("<html><strong>Match settings</strong></html>"))
             .addLabeledComponent(multiMatchInstructions, multiMatchActive)
             .addLabeledComponent(singleCharInfo, matchWeightSingleChar)
             .addLabeledComponent(partialPathInfo, matchWeightPartialPath)
             .addLabeledComponent(streakModifierInfo, matchWeightStreakModifier)
+            .addComponent(startTestBench)
+            .addComponent(testBench)
             .addComponentFillVertically(JPanel(), 0)
             .addComponent(resetWindowDimension)
             .panel
@@ -55,6 +59,10 @@ class FuzzierSettingsComponent {
         exclusionList.border = LineBorder(JBColor.BLACK, 1)
         resetWindowDimension.addActionListener {
             service<FuzzierSettingsService>().state.resetWindow = true
+        }
+        startTestBench.addActionListener {
+            startTestBench.isEnabled = false
+            testBench.fill(this)
         }
 
         exclusionInstructions.toolTipText = """
@@ -89,6 +97,10 @@ class FuzzierSettingsComponent {
         streakModifierInfo.toolTipText = """
             Longest streak score is multiplied by this amount (divided by 10).<br><br>
             e.g. 10 = 1, so highest streak is added as the number of matched letters.
+        """.trimIndent()
+
+        startTestBench.toolTipText = """
+            Test settings changes live on the current project's file index.
         """.trimIndent()
     }
 }
