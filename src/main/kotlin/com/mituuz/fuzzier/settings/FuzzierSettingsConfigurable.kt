@@ -2,6 +2,7 @@ package com.mituuz.fuzzier.settings
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
+import com.mituuz.fuzzier.components.FuzzierSettingsComponent
 import javax.swing.JComponent
 
 class FuzzierSettingsConfigurable : Configurable {

@@ -1,4 +1,4 @@
-package com.mituuz.fuzzier.settings
+package com.mituuz.fuzzier.components
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.event.DocumentEvent
