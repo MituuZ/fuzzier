@@ -4,19 +4,33 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.actionSystem.IdeActions
+import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorActionHandler
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.util.DimensionService
+import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
+import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiManager
+import com.intellij.refactoring.move.moveFilesOrDirectories.MoveFilesOrDirectoriesUtil
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
+import java.awt.event.ActionEvent
+import java.awt.event.KeyEvent
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
+import javax.swing.AbstractAction
+import javax.swing.JComponent
+import javax.swing.KeyStroke
 import javax.swing.SwingUtilities
 
 class FuzzyMover : AnAction() {
@@ -26,6 +40,7 @@ class FuzzyMover : AnAction() {
     private val dimensionKey: String = "FuzzyMoverPopup"
     private lateinit var originalDownHandler: EditorActionHandler
     private lateinit var originalUpHandler: EditorActionHandler
+    private lateinit var movableFile: PsiFile
 
     override fun actionPerformed(p0: AnActionEvent) {
         setCustomHandlers()
@@ -33,9 +48,9 @@ class FuzzyMover : AnAction() {
             p0.project?.let { project ->
                 component = SimpleFinderComponent(project)
                 val projectBasePath = project.basePath
-//                if (projectBasePath != null) {
-//                    createListeners(project, projectBasePath)
-//                }
+                if (projectBasePath != null) {
+                    createListeners(project, projectBasePath)
+                }
 
                 val mainWindow = WindowManager.getInstance().getIdeFrame(p0.project)?.component
                 mainWindow?.let {
@@ -100,7 +115,8 @@ class FuzzyMover : AnAction() {
         }
     }
 
-    class FuzzyListActionHandler(private val fuzzyMover: FuzzyMover, private val isUp: Boolean) : EditorActionHandler() {
+    class FuzzyListActionHandler(private val fuzzyMover: FuzzyMover, private val isUp: Boolean) :
+        EditorActionHandler() {
         override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext?) {
             if (isUp) {
                 fuzzyMover.moveListUp()
@@ -109,6 +125,51 @@ class FuzzyMover : AnAction() {
             }
 
             super.doExecute(editor, caret, dataContext)
+        }
+    }
+
+    private fun createListeners(project: Project, projectBasePath: String) {
+        // Add a mouse listener for double-click
+        component.fileList.addMouseListener(object : MouseAdapter() {
+            override fun mouseClicked(e: MouseEvent) {
+                if (e.clickCount == 2) {
+                    handleInput(projectBasePath, project)
+                }
+            }
+        })
+
+        // Add a listener that opens the currently selected file when pressing enter (focus on the text box)
+        val enterKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)
+        val enterActionKey = "openFile"
+        val inputMap = component.searchField.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+        inputMap.put(enterKeyStroke, enterActionKey)
+        component.searchField.actionMap.put(enterActionKey, object : AbstractAction() {
+            override fun actionPerformed(e: ActionEvent?) {
+                handleInput(projectBasePath, project)
+            }
+        })
+    }
+
+    private fun handleInput(projectBasePath: String, project: Project) {
+        val selectedValue = component.fileList.selectedValue
+        if (!component.isDirSelector) {
+            val virtualFile =
+                VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
+            virtualFile?.let {
+                movableFile = PsiManager.getInstance(project).findFile(it)!!
+                component.isDirSelector = true
+                component.searchField.text = ""
+            }
+        } else {
+            val virtualDir =
+                VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
+            val targetDirectory = virtualDir?.let { PsiManager.getInstance(project).findDirectory(it) }
+            if (targetDirectory != null) {
+                WriteCommandAction.runWriteCommandAction(project) {
+                    MoveFilesOrDirectoriesUtil.doMoveFile(movableFile, targetDirectory)
+                }
+                popup?.cancel()
+            }
         }
     }
 }

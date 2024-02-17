@@ -12,6 +12,7 @@ import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
 import com.mituuz.fuzzier.StringEvaluator
 import com.intellij.openapi.components.service
+import com.intellij.openapi.roots.ContentIterator
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.apache.commons.lang3.StringUtils
 import java.awt.Dimension
@@ -29,6 +30,7 @@ class SimpleFinderComponent(val project: Project) : JPanel(){
     @Volatile
     var currentTask: Future<*>? = null
     val fuzzierSettingsService = service<FuzzierSettingsService>()
+    var isDirSelector = false
 
     init {
         layout = GridLayoutManager(2, 1)
@@ -106,7 +108,11 @@ class SimpleFinderComponent(val project: Project) : JPanel(){
             val projectFileIndex = ProjectFileIndex.getInstance(project)
             val projectBasePath = project.basePath
 
-            val contentIterator = projectBasePath?.let { stringEvaluator.getContentIterator(it, searchString, listModel) }
+            val contentIterator = if (!isDirSelector) {
+                projectBasePath?.let { stringEvaluator.getContentIterator(it, searchString, listModel) }
+            } else {
+                projectBasePath?.let { stringEvaluator.getDirIterator(it, searchString, listModel ) }
+            }
 
             if (contentIterator != null) {
                 projectFileIndex.iterateContent(contentIterator)
