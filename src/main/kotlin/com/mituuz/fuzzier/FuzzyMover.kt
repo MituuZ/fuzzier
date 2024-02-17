@@ -27,10 +27,7 @@ import com.intellij.psi.PsiManager
 import com.intellij.refactoring.move.moveFilesOrDirectories.MoveFilesOrDirectoriesUtil
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
-import java.awt.event.ActionEvent
-import java.awt.event.KeyEvent
-import java.awt.event.MouseAdapter
-import java.awt.event.MouseEvent
+import java.awt.event.*
 import javax.swing.AbstractAction
 import javax.swing.JComponent
 import javax.swing.KeyStroke
@@ -151,6 +148,22 @@ class FuzzyMover : AnAction() {
                 handleInput(projectBasePath, project)
             }
         })
+
+        // Add a listener to move fileList up and down by using CTRL + k/j
+        val kShiftKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_K, InputEvent.CTRL_DOWN_MASK)
+        val jShiftKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_J, InputEvent.CTRL_DOWN_MASK)
+        inputMap.put(kShiftKeyStroke, "moveUp")
+        component.searchField.actionMap.put("moveUp", object : AbstractAction() {
+            override fun actionPerformed(e: ActionEvent?) {
+                moveListUp()
+            }
+        })
+        inputMap.put(jShiftKeyStroke, "moveDown")
+        component.searchField.actionMap.put("moveDown", object : AbstractAction() {
+            override fun actionPerformed(e: ActionEvent?) {
+                moveListDown()
+            }
+        })
     }
 
     private fun handleInput(projectBasePath: String, project: Project) {
@@ -166,17 +179,18 @@ class FuzzyMover : AnAction() {
         } else {
             val virtualDir =
                 VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
+            // TODO: Slow operation
             val targetDirectory = virtualDir?.let { PsiManager.getInstance(project).findDirectory(it) }
+            val originalFilePath = movableFile.virtualFile.path.removePrefix(projectBasePath)
             if (targetDirectory != null) {
                 WriteCommandAction.runWriteCommandAction(project) {
                     MoveFilesOrDirectoriesUtil.doMoveFile(movableFile, targetDirectory)
                 }
                 val targetLocation = virtualDir.path.removePrefix(projectBasePath)
-                val movedFile = movableFile.name
                 val notification = Notification(
                     "Fuzzier Notification Group",
                     "File moved successfully",
-                    "Moved $movedFile to $targetLocation/$movedFile",
+                    "Moved $originalFilePath to $targetLocation/${movableFile.name}",
                     NotificationType.INFORMATION
                 )
                 Notifications.Bus.notify(notification, project)
