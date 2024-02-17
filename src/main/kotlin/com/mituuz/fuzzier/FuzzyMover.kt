@@ -1,5 +1,8 @@
 package com.mituuz.fuzzier
 
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationType
+import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DataContext
@@ -168,6 +171,15 @@ class FuzzyMover : AnAction() {
                 WriteCommandAction.runWriteCommandAction(project) {
                     MoveFilesOrDirectoriesUtil.doMoveFile(movableFile, targetDirectory)
                 }
+                val targetLocation = virtualDir.path.removePrefix(projectBasePath)
+                val movedFile = movableFile.name
+                val notification = Notification(
+                    "Fuzzier Notification Group",
+                    "File moved successfully",
+                    "Moved $movedFile to $targetLocation/$movedFile",
+                    NotificationType.INFORMATION
+                )
+                Notifications.Bus.notify(notification, project)
                 popup?.cancel()
             }
         }

@@ -22,6 +22,10 @@
       instance="com.mituuz.fuzzier.settings.FuzzierSettingsConfigurable"
       id="com.mituuz.fuzzier.settings.FuzzierSettingsConfigurable"
       displayName="Fuzzier Settings"/>
+    <notificationGroup id="Fuzzier Notification Group"
+                       displayType="BALLOON"
+                       toolWindowId="Event Log"
+                       isLogByDefault="true"/>
   </extensions>
 
   <change-notes><![CDATA[
