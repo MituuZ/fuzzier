@@ -19,7 +19,6 @@ import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.util.DimensionService
-import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
 import com.intellij.psi.PsiFile
@@ -61,7 +60,7 @@ class FuzzyMover : AnAction() {
                         .setRequestFocus(true)
                         .setResizable(true)
                         .setDimensionServiceKey(project, dimensionKey, true)
-                        .setTitle("Move Files")
+                        .setTitle("Fuzzy File Mover")
                         .setMovable(true)
                         .setShowBorder(true)
                         .createPopup()
@@ -169,6 +168,7 @@ class FuzzyMover : AnAction() {
     private fun handleInput(projectBasePath: String, project: Project) {
         val selectedValue = component.fileList.selectedValue
         if (!component.isDirSelector) {
+            // TODO: Slow operation below | If no selected value, use current file or exit (if no editor is open)
             val virtualFile =
                 VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
             virtualFile?.let {
@@ -179,7 +179,7 @@ class FuzzyMover : AnAction() {
         } else {
             val virtualDir =
                 VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
-            // TODO: Slow operation
+            // TODO: Slow operation below
             val targetDirectory = virtualDir?.let { PsiManager.getInstance(project).findDirectory(it) }
             val originalFilePath = movableFile.virtualFile.path.removePrefix(projectBasePath)
             if (targetDirectory != null) {
