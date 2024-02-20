@@ -13,6 +13,7 @@ import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorActionHandler
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
+import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
@@ -166,7 +167,10 @@ class FuzzyMover : AnAction() {
     }
 
     private fun handleInput(projectBasePath: String, project: Project) {
-        val selectedValue = component.fileList.selectedValue
+        var selectedValue = component.fileList.selectedValue
+        if (selectedValue == null) {
+            selectedValue = FileEditorManager.getInstance(project).selectedTextEditor?.virtualFile?.path?.removePrefix(projectBasePath)
+        }
         if (!component.isDirSelector) {
             // TODO: Slow operation below | If no selected value, use current file or exit (if no editor is open)
             val virtualFile =
