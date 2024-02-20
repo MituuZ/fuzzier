@@ -15,6 +15,9 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorActionHandler
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
@@ -181,20 +184,25 @@ class FuzzyMover : AnAction() {
             selectedValue = currentFile
         }
         if (!component.isDirSelector) {
-            SwingUtilities.invokeLater {
-                val virtualFile =
-                    VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
-                virtualFile?.let {
-                    movableFile = PsiManager.getInstance(project).findFile(it)!!
-                    component.isDirSelector = true
-                    component.searchField.text = ""
+            val virtualFile =
+                VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
+            virtualFile?.let {
+                ApplicationManager.getApplication().executeOnPooledThread() {
+                    ApplicationManager.getApplication().runReadAction {
+                        movableFile = PsiManager.getInstance(project).findFile(it)!!
+                    }
                 }
+            }
+            SwingUtilities.invokeLater {
+                component.isDirSelector = true
+                component.searchField.text = ""
                 component.fileList.setEmptyText("Select target folder")
             }
         } else {
             ApplicationManager.getApplication().invokeLater {
                 val virtualDir =
                     VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
+                // TODO: Slow operation below
                 val targetDirectory = virtualDir?.let { PsiManager.getInstance(project).findDirectory(it) }
                 val originalFilePath = movableFile.virtualFile.path.removePrefix(projectBasePath)
                 if (targetDirectory != null) {
