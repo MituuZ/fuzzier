@@ -213,11 +213,11 @@ class FuzzyMover : AnAction() {
                     }
                 }
 
-                targetDirectory.thenAcceptAsync { targetDirectory ->
+                targetDirectory.thenAcceptAsync { targetDir ->
                     val originalFilePath = movableFile.virtualFile.path.removePrefix(projectBasePath)
-                    if (targetDirectory != null) {
+                    if (targetDir != null) {
                         WriteCommandAction.runWriteCommandAction(project) {
-                            MoveFilesOrDirectoriesUtil.doMoveFile(movableFile, targetDirectory)
+                            MoveFilesOrDirectoriesUtil.doMoveFile(movableFile, targetDir)
                         }
                         val targetLocation = virtualDir?.path?.removePrefix(projectBasePath)
                         val notification = Notification(
