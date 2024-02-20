@@ -41,6 +41,7 @@ class FuzzyMover : AnAction() {
     private lateinit var originalDownHandler: EditorActionHandler
     private lateinit var originalUpHandler: EditorActionHandler
     private lateinit var movableFile: PsiFile
+    private lateinit var currentFile: String
 
     override fun actionPerformed(p0: AnActionEvent) {
         setCustomHandlers()
@@ -65,6 +66,13 @@ class FuzzyMover : AnAction() {
                         .setMovable(true)
                         .setShowBorder(true)
                         .createPopup()
+
+                    currentFile = projectBasePath?.let { it1 ->
+                        FileEditorManager.getInstance(project).selectedTextEditor?.virtualFile?.path?.removePrefix(
+                            it1
+                        )
+                    }.toString()
+                    component.fileList.setEmptyText("Press enter to use current file:$currentFile")
 
                     popup?.addListener(object : JBPopupListener {
                         override fun onClosed(event: LightweightWindowEvent) {
@@ -169,7 +177,7 @@ class FuzzyMover : AnAction() {
     private fun handleInput(projectBasePath: String, project: Project) {
         var selectedValue = component.fileList.selectedValue
         if (selectedValue == null) {
-            selectedValue = FileEditorManager.getInstance(project).selectedTextEditor?.virtualFile?.path?.removePrefix(projectBasePath)
+            selectedValue = currentFile
         }
         if (!component.isDirSelector) {
             // TODO: Slow operation below | If no selected value, use current file or exit (if no editor is open)
@@ -180,6 +188,7 @@ class FuzzyMover : AnAction() {
                 component.isDirSelector = true
                 component.searchField.text = ""
             }
+            component.fileList.setEmptyText("Select target folder")
         } else {
             val virtualDir =
                 VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
