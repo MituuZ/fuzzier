@@ -29,8 +29,13 @@
   </extensions>
 
   <change-notes><![CDATA[
-  <h2>Add test bench to Fuzzier settings</h2>
-  Enabling live tweaking and testing of the Fuzzier settings.
+  <h2>Add file mover</h2>
+  <p>Move files by first choosing the file with fuzzier selector, default selection being current file.</br>
+  Then choosing the target directory where the file will be moved.</p>
+  <p>File mover can be found from the Tools menu bar, or by calling the "Fuzzy File Mover" action.</p>
+
+  <pre><code>" .ideavimrc example
+  map &lt;Leader&gt;mf &lt;action&gt;(com.mituuz.fuzzier.FuzzyMover)</code></pre>
   ]]>
   </change-notes>
 
