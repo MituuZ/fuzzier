@@ -7,6 +7,7 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.actionSystem.IdeActions
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Caret
@@ -180,34 +181,36 @@ class FuzzyMover : AnAction() {
             selectedValue = currentFile
         }
         if (!component.isDirSelector) {
-            // TODO: Slow operation below | If no selected value, use current file or exit (if no editor is open)
-            val virtualFile =
-                VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
-            virtualFile?.let {
-                movableFile = PsiManager.getInstance(project).findFile(it)!!
-                component.isDirSelector = true
-                component.searchField.text = ""
-            }
-            component.fileList.setEmptyText("Select target folder")
-        } else {
-            val virtualDir =
-                VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
-            // TODO: Slow operation below
-            val targetDirectory = virtualDir?.let { PsiManager.getInstance(project).findDirectory(it) }
-            val originalFilePath = movableFile.virtualFile.path.removePrefix(projectBasePath)
-            if (targetDirectory != null) {
-                WriteCommandAction.runWriteCommandAction(project) {
-                    MoveFilesOrDirectoriesUtil.doMoveFile(movableFile, targetDirectory)
+            SwingUtilities.invokeLater {
+                val virtualFile =
+                    VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
+                virtualFile?.let {
+                    movableFile = PsiManager.getInstance(project).findFile(it)!!
+                    component.isDirSelector = true
+                    component.searchField.text = ""
                 }
-                val targetLocation = virtualDir.path.removePrefix(projectBasePath)
-                val notification = Notification(
-                    "Fuzzier Notification Group",
-                    "File moved successfully",
-                    "Moved $originalFilePath to $targetLocation/${movableFile.name}",
-                    NotificationType.INFORMATION
-                )
-                Notifications.Bus.notify(notification, project)
-                popup?.cancel()
+                component.fileList.setEmptyText("Select target folder")
+            }
+        } else {
+            ApplicationManager.getApplication().invokeLater {
+                val virtualDir =
+                    VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
+                val targetDirectory = virtualDir?.let { PsiManager.getInstance(project).findDirectory(it) }
+                val originalFilePath = movableFile.virtualFile.path.removePrefix(projectBasePath)
+                if (targetDirectory != null) {
+                    WriteCommandAction.runWriteCommandAction(project) {
+                        MoveFilesOrDirectoriesUtil.doMoveFile(movableFile, targetDirectory)
+                    }
+                    val targetLocation = virtualDir.path.removePrefix(projectBasePath)
+                    val notification = Notification(
+                        "Fuzzier Notification Group",
+                        "File moved successfully",
+                        "Moved $originalFilePath to $targetLocation/${movableFile.name}",
+                        NotificationType.INFORMATION
+                    )
+                    Notifications.Bus.notify(notification, project)
+                    popup?.cancel()
+                }
             }
         }
     }
