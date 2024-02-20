@@ -24,14 +24,17 @@ import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.util.DimensionService
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
+import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.refactoring.move.moveFilesOrDirectories.MoveFilesOrDirectoriesUtil
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import java.awt.event.*
+import java.util.concurrent.CompletableFuture
 import javax.swing.AbstractAction
 import javax.swing.JComponent
 import javax.swing.KeyStroke
@@ -202,22 +205,32 @@ class FuzzyMover : AnAction() {
             ApplicationManager.getApplication().invokeLater {
                 val virtualDir =
                     VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
-                // TODO: Slow operation below
-                val targetDirectory = virtualDir?.let { PsiManager.getInstance(project).findDirectory(it) }
-                val originalFilePath = movableFile.virtualFile.path.removePrefix(projectBasePath)
-                if (targetDirectory != null) {
-                    WriteCommandAction.runWriteCommandAction(project) {
-                        MoveFilesOrDirectoriesUtil.doMoveFile(movableFile, targetDirectory)
+                val targetDirectory: CompletableFuture<PsiDirectory> = CompletableFuture.supplyAsync {
+                    virtualDir?.let {
+                        ApplicationManager.getApplication().runReadAction<PsiDirectory> {
+                            PsiManager.getInstance(project).findDirectory(it)
+                        }
                     }
-                    val targetLocation = virtualDir.path.removePrefix(projectBasePath)
-                    val notification = Notification(
-                        "Fuzzier Notification Group",
-                        "File moved successfully",
-                        "Moved $originalFilePath to $targetLocation/${movableFile.name}",
-                        NotificationType.INFORMATION
-                    )
-                    Notifications.Bus.notify(notification, project)
-                    popup?.cancel()
+                }
+
+                targetDirectory.thenAcceptAsync { targetDirectory ->
+                    val originalFilePath = movableFile.virtualFile.path.removePrefix(projectBasePath)
+                    if (targetDirectory != null) {
+                        WriteCommandAction.runWriteCommandAction(project) {
+                            MoveFilesOrDirectoriesUtil.doMoveFile(movableFile, targetDirectory)
+                        }
+                        val targetLocation = virtualDir?.path?.removePrefix(projectBasePath)
+                        val notification = Notification(
+                            "Fuzzier Notification Group",
+                            "File moved successfully",
+                            "Moved $originalFilePath to $targetLocation/${movableFile.name}",
+                            NotificationType.INFORMATION
+                        )
+                        Notifications.Bus.notify(notification, project)
+                        ApplicationManager.getApplication().invokeLater {
+                            popup?.cancel()
+                        }
+                    }
                 }
             }
         }
