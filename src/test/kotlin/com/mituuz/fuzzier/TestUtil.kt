@@ -1,6 +1,7 @@
 package com.mituuz.fuzzier
 
 import com.intellij.openapi.project.DumbService
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.testFramework.PsiTestUtil
@@ -49,5 +50,16 @@ class TestUtil {
         myFixture.tearDown()
 
         return filePathContainer
+    }
+
+    fun setUpProject(filesToAdd: List<String>): CodeInsightTestFixture {
+        val factory = IdeaTestFixtureFactory.getFixtureFactory()
+        val fixtureBuilder = factory.createLightFixtureBuilder(null, "Test")
+        val fixture = fixtureBuilder.fixture
+        val myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture)
+
+        myFixture.setUp()
+        addFilesToProject(filesToAdd, myFixture, fixture)
+        return myFixture
     }
 }
