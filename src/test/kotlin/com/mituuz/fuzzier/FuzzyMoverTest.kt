@@ -44,7 +44,7 @@ class FuzzyMoverTest {
                 assertNotNull(targetFile)
                 targetFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/nope")
                 assertNull(targetFile)
-            }
+            }.join()
         }
     }
 }
