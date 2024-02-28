@@ -3,9 +3,11 @@ A simple plugin to allow "fuzzy" file search with the UI inspired by [telescope.
 
 If you are interested in plugin development you can check out my write-up about creating Fuzzier in [here.](https://mituuz.com/content/fuzzier_development.html)
 
-Does **not** support true fuzzy finding. All search characters must be present and in correct order in the file path, but do not need to be sequential.
+Does **not** support true fuzzy finding. All search characters must be present and in correct order in the file path, 
+but do not need to be sequential.
 
-Since 0.8 supports spaces in search string, splitting the string and searching for both parts separately. e.g. parts do not need to be in the correct order, as long as both succeed on their own.
+Supports spaces in the search string, splitting the string and searching for both parts separately. 
+e.g. parts do not need to be in the correct order, as long as both succeed on their own.
 
 ![The UI consist of three parts. A file list on the top left, search field on the bottom left and the preview pane on the right](assets/FuzzierUI.png "An image of the plugin UI")
 
@@ -19,6 +21,10 @@ When focused on the search field, you can use:
 - CTRL + j to move down
 - CTRL + k to move up
 - Enter to open the currently selected file (opens in current tab)
+
+### File operations
+Fuzzier can be used to move files using the same search to locate the file and target directory that is used for 
+searching files. File Mover defaults to current file when search string is empty.
 
 ## Settings
 Settings → Tools → Fuzzier Settings
@@ -61,6 +67,7 @@ Defaults to 150 and can be set from 0 to 2000.
 Example of a .ideavimrc-row to add a vim keybinding for the plugin
 ```
 map <Leader>pf <action>(com.mituuz.fuzzier.Fuzzier)
+map <Leader>mf <action>(com.mituuz.fuzzier.FuzzyMover)
 ```
 
 ### Adding a shortcut for the plugin

@@ -1,10 +1,9 @@
-package com.mituuz.fuzzier.settings
+package com.mituuz.fuzzier.components
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBList
@@ -12,7 +11,9 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
 import com.mituuz.fuzzier.StringEvaluator
-import com.mituuz.fuzzier.StringEvaluator.FuzzyMatchContainer
+import com.intellij.openapi.components.service
+import com.intellij.openapi.roots.ContentIterator
+import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.apache.commons.lang3.StringUtils
 import java.awt.Dimension
 import java.util.*
@@ -22,16 +23,16 @@ import javax.swing.JPanel
 import javax.swing.SwingUtilities
 import kotlin.concurrent.schedule
 
-class TestBenchComponent : JPanel() {
-    private var fileList = JBList<String?>()
-    private var searchField = EditorTextField()
+class SimpleFinderComponent(val project: Project) : JPanel(){
+    var fileList = JBList<String?>()
+    var searchField = EditorTextField()
     private var debounceTimer: TimerTask? = null
     @Volatile
     var currentTask: Future<*>? = null
-    private lateinit var liveSettingsComponent: FuzzierSettingsComponent
+    val fuzzierSettingsService = service<FuzzierSettingsService>()
+    var isDirSelector = false
 
-    fun fill(settingsComponent: FuzzierSettingsComponent) {
-        liveSettingsComponent = settingsComponent
+    init {
         layout = GridLayoutManager(2, 1)
         val scrollPane = JBScrollPane()
         scrollPane.setViewportView(fileList)
@@ -75,12 +76,10 @@ class TestBenchComponent : JPanel() {
 
         // Add a listener that updates the search list every time a change is made
         val document = searchField.document
-
-        val project = ProjectManager.getInstance().openProjects[0]
         document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
                 debounceTimer?.cancel()
-                val debouncePeriod = liveSettingsComponent.debounceTimerValue.value as Int
+                val debouncePeriod = fuzzierSettingsService.state.debouncePeriod
                 debounceTimer = Timer().schedule(debouncePeriod.toLong()) {
                     updateListContents(project, searchField.text)
                 }
@@ -96,31 +95,31 @@ class TestBenchComponent : JPanel() {
             return
         }
 
-        val newList = liveSettingsComponent.exclusionList.text
-            .split("\n")
-            .filter { it.isNotBlank() }
-            .ifEmpty { listOf() }
-        val stringEvaluator = StringEvaluator(liveSettingsComponent.multiMatchActive.isSelected,
-            newList, liveSettingsComponent.matchWeightSingleChar.value as Int,
-            liveSettingsComponent.matchWeightStreakModifier.value as Int,
-            liveSettingsComponent.matchWeightPartialPath.value as Int)
+        val stringEvaluator = StringEvaluator(fuzzierSettingsService.state.multiMatch,
+            fuzzierSettingsService.state.exclusionList, fuzzierSettingsService.state.matchWeightSingleChar,
+            fuzzierSettingsService.state.matchWeightStreakModifier,
+            fuzzierSettingsService.state.matchWeightPartialPath)
 
         currentTask?.takeIf { !it.isDone }?.cancel(true)
 
         currentTask = ApplicationManager.getApplication().executeOnPooledThread {
             fileList.setPaintBusy(true)
-            val listModel = DefaultListModel<FuzzyMatchContainer>()
+            val listModel = DefaultListModel<StringEvaluator.FuzzyMatchContainer>()
             val projectFileIndex = ProjectFileIndex.getInstance(project)
             val projectBasePath = project.basePath
 
-            val contentIterator = projectBasePath?.let { stringEvaluator.getContentIterator(it, searchString, listModel) }
+            val contentIterator = if (!isDirSelector) {
+                projectBasePath?.let { stringEvaluator.getContentIterator(it, searchString, listModel) }
+            } else {
+                projectBasePath?.let { stringEvaluator.getDirIterator(it, searchString, listModel ) }
+            }
 
             if (contentIterator != null) {
                 projectFileIndex.iterateContent(contentIterator)
             }
             val sortedList = listModel.elements().toList().sortedByDescending { it.score }
             val valModel = DefaultListModel<String>()
-            sortedList.forEach { valModel.addElement("${it.string} (${it.score})") }
+            sortedList.forEach { valModel.addElement(it.string) }
 
             SwingUtilities.invokeLater {
                 fileList.model = valModel

@@ -4,15 +4,15 @@ plugins {
 }
 
 group = "com.mituuz"
-version = "0.13"
+version = "0.14"
 
 repositories {
   mavenCentral()
 }
 
 dependencies {
-  testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.1")
-  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.1")
+  testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
+  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
 }
 
 tasks.test {
@@ -22,7 +22,7 @@ tasks.test {
 // Configure Gradle IntelliJ Plugin
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {
-  version.set("2023.3.3")
+  version.set("2023.3.4")
   plugins.set(listOf(/* Plugin Dependencies */))
 }
 

@@ -26,6 +26,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.StringEvaluator.FuzzyMatchContainer
+import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
@@ -36,7 +37,7 @@ import javax.swing.*
 import kotlin.concurrent.schedule
 
 class Fuzzier : AnAction() {
-    private lateinit var component: FuzzyFinder
+    private lateinit var component: FuzzyFinderComponent
     private var popup: JBPopup? = null
     private var defaultDoc: Document? = null
     private lateinit var originalDownHandler: EditorActionHandler
@@ -52,7 +53,7 @@ class Fuzzier : AnAction() {
         SwingUtilities.invokeLater {
             defaultDoc = EditorFactory.getInstance().createDocument("")
             p0.project?.let { project ->
-                component = FuzzyFinder(project)
+                component = FuzzyFinderComponent(project)
 
                 val projectBasePath = project.basePath
                 if (projectBasePath != null) {

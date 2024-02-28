@@ -1,4 +1,4 @@
-package com.mituuz.fuzzier
+package com.mituuz.fuzzier.components
 
 import com.intellij.openapi.fileTypes.PlainTextFileType
 import com.intellij.openapi.project.Project
@@ -13,7 +13,7 @@ import java.awt.Dimension
 import javax.swing.JPanel
 import javax.swing.JSplitPane
 
-class FuzzyFinder(project: Project) : JPanel(
+class FuzzyFinderComponent(project: Project) : JPanel(
 ) {
     var previewPane: PreviewEditor = PreviewEditor(project)
         private set

@@ -22,11 +22,20 @@
       instance="com.mituuz.fuzzier.settings.FuzzierSettingsConfigurable"
       id="com.mituuz.fuzzier.settings.FuzzierSettingsConfigurable"
       displayName="Fuzzier Settings"/>
+    <notificationGroup id="Fuzzier Notification Group"
+                       displayType="BALLOON"
+                       toolWindowId="Event Log"
+                       isLogByDefault="true"/>
   </extensions>
 
   <change-notes><![CDATA[
-  <h2>Add test bench to Fuzzier settings</h2>
-  Enabling live tweaking and testing of the Fuzzier settings.
+  <h2>Add file mover</h2>
+  <p>Move files by first choosing the file with fuzzier selector, default selection being current file.</br>
+  Then choosing the target directory where the file will be moved.</p>
+  <p>File mover can be found from the Tools menu bar, or by calling the "Fuzzy File Mover" action.</p>
+
+  <pre><code>" .ideavimrc example
+  map &lt;Leader&gt;mf &lt;action&gt;(com.mituuz.fuzzier.FuzzyMover)</code></pre>
   ]]>
   </change-notes>
 
@@ -38,6 +47,13 @@
             description="Search files using a basic fuzzy search">
       <override-text place="MainMenu" text="Fuzzy File Search"/>
       <add-to-group group-id="ToolsMenu" anchor="first"/>
+    </action>
+    <action id="com.mituuz.fuzzier.FuzzyMover"
+            class="com.mituuz.fuzzier.FuzzyMover"
+            text="Fuzzy File Mover"
+            description="Move a file using a basic fuzzy search">
+      <override-text place="MainMenu" text="Fuzzy File Mover"/>
+      <add-to-group group-id="ToolsMenu"/>
     </action>
   </actions>
 </idea-plugin>

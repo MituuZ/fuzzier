@@ -27,6 +27,24 @@ class StringEvaluator(
         }
     }
 
+    fun getDirIterator(projectBasePath: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
+        return ContentIterator { file: VirtualFile ->
+            if (file.isDirectory) {
+                val filePath = projectBasePath.let { it1 -> file.path.removePrefix(it1) }
+                if (isExcluded(filePath)) {
+                    return@ContentIterator true
+                }
+                if (filePath.isNotBlank()) {
+                    val fuzzyMatchContainer = fuzzyContainsCaseInsensitive(filePath, searchString)
+                    if (fuzzyMatchContainer != null) {
+                        listModel.addElement(fuzzyMatchContainer)
+                    }
+                }
+            }
+            true
+        }
+    }
+
     private fun isExcluded(filePath: String): Boolean {
         for (e in exclusionList) {
             when {

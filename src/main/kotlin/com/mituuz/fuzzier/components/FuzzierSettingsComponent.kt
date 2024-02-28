@@ -1,4 +1,4 @@
-package com.mituuz.fuzzier.settings
+package com.mituuz.fuzzier.components
 
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.components.service
@@ -8,6 +8,7 @@ import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.FormBuilder
+import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.border.LineBorder
