@@ -55,8 +55,6 @@ class FuzzyMoverTest {
         val basePath = myFixture.findFileInTempDir("src").canonicalPath
         val project = myFixture.project
 
-        val virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/nope")
-
         fuzzyMover.component = SimpleFinderComponent(project)
         fuzzyMover.currentFile = "/nope"
         if (basePath != null) {
