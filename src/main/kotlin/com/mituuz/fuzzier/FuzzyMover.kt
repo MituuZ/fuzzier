@@ -198,8 +198,8 @@ class FuzzyMover : AnAction() {
                 component.isDirSelector = true
                 component.searchField.text = ""
                 component.fileList.setEmptyText("Select target folder")
+                completableFuture.complete(null)
             }
-            completableFuture.complete(null)
         } else {
             ApplicationManager.getApplication().invokeLater {
                 val virtualDir =

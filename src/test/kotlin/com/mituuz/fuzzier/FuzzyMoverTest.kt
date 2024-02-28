@@ -47,4 +47,27 @@ class FuzzyMoverTest {
             }.join()
         }
     }
+
+    @Test
+    fun `Use the correct steps to move files`() {
+        val filePaths = listOf("src/asd/main.log", "src/nope")
+        val myFixture: CodeInsightTestFixture = testUtil.setUpProject(filePaths)
+        val basePath = myFixture.findFileInTempDir("src").canonicalPath
+        val project = myFixture.project
+
+        val virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/nope")
+
+        fuzzyMover.component = SimpleFinderComponent(project)
+        fuzzyMover.currentFile = "/nope"
+        if (basePath != null) {
+            fuzzyMover.handleInput(basePath, project).join()
+            fuzzyMover.currentFile = "/asd"
+            fuzzyMover.handleInput(basePath, project).thenRun{
+                var targetFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/asd/nope")
+                assertNotNull(targetFile)
+                targetFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/nope")
+                assertNull(targetFile)
+            }.join()
+        }
+    }
 }
