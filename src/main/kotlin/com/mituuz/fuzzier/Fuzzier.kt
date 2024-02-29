@@ -1,6 +1,5 @@
 package com.mituuz.fuzzier
 
-import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.application.ApplicationManager
@@ -36,8 +35,7 @@ import java.util.concurrent.Future
 import javax.swing.*
 import kotlin.concurrent.schedule
 
-class Fuzzier : AnAction() {
-    private lateinit var component: FuzzyFinderComponent
+class Fuzzier : FuzzyAction() {
     private var popup: JBPopup? = null
     private var defaultDoc: Document? = null
     private lateinit var originalDownHandler: EditorActionHandler
@@ -48,11 +46,11 @@ class Fuzzier : AnAction() {
     @Volatile
     var currentTask: Future<*>? = null
 
-    override fun actionPerformed(p0: AnActionEvent) {
-        setCustomHandlers()
+    override fun actionPerformed(actionEvent: AnActionEvent) {
+        super.actionPerformed(actionEvent)
         SwingUtilities.invokeLater {
             defaultDoc = EditorFactory.getInstance().createDocument("")
-            p0.project?.let { project ->
+            actionEvent.project?.let { project ->
                 component = FuzzyFinderComponent(project)
 
                 val projectBasePath = project.basePath
@@ -60,7 +58,7 @@ class Fuzzier : AnAction() {
                     createListeners(project, projectBasePath)
                 }
 
-                val mainWindow = WindowManager.getInstance().getIdeFrame(p0.project)?.component
+                val mainWindow = WindowManager.getInstance().getIdeFrame(actionEvent.project)?.component
                 mainWindow?.let {
                     popup = JBPopupFactory
                         .getInstance()
@@ -76,7 +74,7 @@ class Fuzzier : AnAction() {
 
                     popup?.addListener(object : JBPopupListener {
                         override fun onClosed(event: LightweightWindowEvent) {
-                            fuzzierSettingsService.state.splitPosition = component.splitPane.dividerLocation
+                            fuzzierSettingsService.state.splitPosition = (component as FuzzyFinderComponent).splitPane.dividerLocation
                             resetOriginalHandlers()
                             super.onClosed(event)
                         }
@@ -87,41 +85,9 @@ class Fuzzier : AnAction() {
                         fuzzierSettingsService.state.resetWindow = false
                     }
                     popup!!.showInCenterOf(it)
-                    component.splitPane.dividerLocation = fuzzierSettingsService.state.splitPosition
+                    (component as FuzzyFinderComponent).splitPane.dividerLocation = fuzzierSettingsService.state.splitPosition
                 }
             }
-        }
-    }
-
-    private fun setCustomHandlers() {
-        val actionManager = EditorActionManager.getInstance()
-        originalDownHandler = actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN)
-        originalUpHandler = actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_UP)
-
-        actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN, FuzzyListActionHandler(this, false))
-        actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_UP, FuzzyListActionHandler(this, true))
-    }
-
-    fun resetOriginalHandlers() {
-        val actionManager = EditorActionManager.getInstance()
-        actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN, originalDownHandler)
-        actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_UP, originalUpHandler)
-    }
-
-    fun moveListUp() {
-        val selectedIndex = component.fileList.selectedIndex
-        if (selectedIndex > 0) {
-            component.fileList.selectedIndex = selectedIndex - 1
-            component.fileList.ensureIndexIsVisible(selectedIndex - 1)
-        }
-    }
-
-    fun moveListDown() {
-        val selectedIndex = component.fileList.selectedIndex
-        val length = component.fileList.model.size
-        if (selectedIndex < length - 1) {
-            component.fileList.selectedIndex = selectedIndex + 1
-            component.fileList.ensureIndexIsVisible(selectedIndex + 1)
         }
     }
 
@@ -129,7 +95,7 @@ class Fuzzier : AnAction() {
         if (StringUtils.isBlank(searchString)) {
             SwingUtilities.invokeLater {
                 component.fileList.model = DefaultListModel()
-                defaultDoc?.let { component.previewPane.updateFile(it) }
+                defaultDoc?.let { (component as FuzzyFinderComponent).previewPane.updateFile(it) }
             }
             return
         }
@@ -189,7 +155,7 @@ class Fuzzier : AnAction() {
             if (!event.valueIsAdjusting) {
                 if (component.fileList.isEmpty) {
                     ApplicationManager.getApplication().invokeLater {
-                        defaultDoc?.let { component.previewPane.updateFile(it) }
+                        defaultDoc?.let { (component as FuzzyFinderComponent).previewPane.updateFile(it) }
                     }
                     return@addListSelectionListener
                 }
@@ -200,7 +166,7 @@ class Fuzzier : AnAction() {
                     override fun run(indicator: ProgressIndicator) {
                         val file = VirtualFileManager.getInstance().findFileByUrl(fileUrl)
                         file?.let {
-                            component.previewPane.updateFile(file)
+                            (component as FuzzyFinderComponent).previewPane.updateFile(file)
                         }
                     }
                 })

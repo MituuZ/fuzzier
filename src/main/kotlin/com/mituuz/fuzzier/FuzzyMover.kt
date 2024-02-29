@@ -36,27 +36,24 @@ import javax.swing.JComponent
 import javax.swing.KeyStroke
 import javax.swing.SwingUtilities
 
-class FuzzyMover : AnAction() {
-    lateinit var component: SimpleFinderComponent
+class FuzzyMover : FuzzyAction() {
     private var fuzzierSettingsService = service<FuzzierSettingsService>()
     private var popup: JBPopup? = null
     private val dimensionKey: String = "FuzzyMoverPopup"
-    private lateinit var originalDownHandler: EditorActionHandler
-    private lateinit var originalUpHandler: EditorActionHandler
     lateinit var movableFile: PsiFile
     lateinit var currentFile: String
 
-    override fun actionPerformed(p0: AnActionEvent) {
-        setCustomHandlers()
+    override fun actionPerformed(actionEvent: AnActionEvent) {
+        super.actionPerformed(actionEvent)
         SwingUtilities.invokeLater {
-            p0.project?.let { project ->
+            actionEvent.project?.let { project ->
                 component = SimpleFinderComponent(project)
                 val projectBasePath = project.basePath
                 if (projectBasePath != null) {
                     createListeners(project, projectBasePath)
                 }
 
-                val mainWindow = WindowManager.getInstance().getIdeFrame(p0.project)?.component
+                val mainWindow = WindowManager.getInstance().getIdeFrame(actionEvent.project)?.component
                 mainWindow?.let {
                     popup = JBPopupFactory
                         .getInstance()
@@ -91,51 +88,6 @@ class FuzzyMover : AnAction() {
                     popup!!.showInCenterOf(it)
                 }
             }
-        }
-    }
-
-    fun resetOriginalHandlers() {
-        val actionManager = EditorActionManager.getInstance()
-        actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN, originalDownHandler)
-        actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_UP, originalUpHandler)
-    }
-
-    private fun setCustomHandlers() {
-        val actionManager = EditorActionManager.getInstance()
-        originalDownHandler = actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN)
-        originalUpHandler = actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_UP)
-
-        actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN, FuzzyListActionHandler(this, false))
-        actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_UP, FuzzyListActionHandler(this, true))
-    }
-
-    fun moveListUp() {
-        val selectedIndex = component.fileList.selectedIndex
-        if (selectedIndex > 0) {
-            component.fileList.selectedIndex = selectedIndex - 1
-            component.fileList.ensureIndexIsVisible(selectedIndex - 1)
-        }
-    }
-
-    fun moveListDown() {
-        val selectedIndex = component.fileList.selectedIndex
-        val length = component.fileList.model.size
-        if (selectedIndex < length - 1) {
-            component.fileList.selectedIndex = selectedIndex + 1
-            component.fileList.ensureIndexIsVisible(selectedIndex + 1)
-        }
-    }
-
-    class FuzzyListActionHandler(private val fuzzyMover: FuzzyMover, private val isUp: Boolean) :
-        EditorActionHandler() {
-        override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext?) {
-            if (isUp) {
-                fuzzyMover.moveListUp()
-            } else {
-                fuzzyMover.moveListDown()
-            }
-
-            super.doExecute(editor, caret, dataContext)
         }
     }
 

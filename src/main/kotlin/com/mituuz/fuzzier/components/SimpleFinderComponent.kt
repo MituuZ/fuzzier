@@ -5,32 +5,25 @@ import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
-import com.intellij.ui.EditorTextField
-import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
 import com.mituuz.fuzzier.StringEvaluator
 import com.intellij.openapi.components.service
-import com.intellij.openapi.roots.ContentIterator
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.apache.commons.lang3.StringUtils
 import java.awt.Dimension
 import java.util.*
 import java.util.concurrent.Future
 import javax.swing.DefaultListModel
-import javax.swing.JPanel
 import javax.swing.SwingUtilities
 import kotlin.concurrent.schedule
 
-class SimpleFinderComponent(val project: Project) : JPanel(){
-    var fileList = JBList<String?>()
-    var searchField = EditorTextField()
+class SimpleFinderComponent(val project: Project) : FuzzyComponent() {
     private var debounceTimer: TimerTask? = null
     @Volatile
     var currentTask: Future<*>? = null
     val fuzzierSettingsService = service<FuzzierSettingsService>()
-    var isDirSelector = false
 
     init {
         layout = GridLayoutManager(2, 1)

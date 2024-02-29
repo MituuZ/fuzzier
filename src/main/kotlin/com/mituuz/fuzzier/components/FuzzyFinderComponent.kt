@@ -13,13 +13,8 @@ import java.awt.Dimension
 import javax.swing.JPanel
 import javax.swing.JSplitPane
 
-class FuzzyFinderComponent(project: Project) : JPanel(
-) {
+class FuzzyFinderComponent(project: Project) : FuzzyComponent() {
     var previewPane: PreviewEditor = PreviewEditor(project)
-        private set
-    var fileList: JBList<String?> = JBList<String?>()
-        private set
-    var searchField: EditorTextField = EditorTextField()
         private set
     private var fuzzyPanel: JPanel = JPanel()
     var splitPane: JSplitPane = JSplitPane()
