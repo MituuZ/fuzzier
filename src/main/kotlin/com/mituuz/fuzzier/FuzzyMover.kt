@@ -3,17 +3,10 @@ package com.mituuz.fuzzier
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
-import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.DataContext
-import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
-import com.intellij.openapi.editor.Caret
-import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.actionSystem.EditorActionHandler
-import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
@@ -44,13 +37,14 @@ class FuzzyMover : FuzzyAction() {
     lateinit var currentFile: String
 
     override fun actionPerformed(actionEvent: AnActionEvent) {
-        super.actionPerformed(actionEvent)
+        setCustomHandlers()
         SwingUtilities.invokeLater {
             actionEvent.project?.let { project ->
                 component = SimpleFinderComponent(project)
                 val projectBasePath = project.basePath
                 if (projectBasePath != null) {
                     createListeners(project, projectBasePath)
+                    createSharedListeners()
                 }
 
                 val mainWindow = WindowManager.getInstance().getIdeFrame(actionEvent.project)?.component
@@ -101,7 +95,6 @@ class FuzzyMover : FuzzyAction() {
             }
         })
 
-        // Add a listener that opens the currently selected file when pressing enter (focus on the text box)
         val enterKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)
         val enterActionKey = "openFile"
         val inputMap = component.searchField.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
@@ -109,22 +102,6 @@ class FuzzyMover : FuzzyAction() {
         component.searchField.actionMap.put(enterActionKey, object : AbstractAction() {
             override fun actionPerformed(e: ActionEvent?) {
                 handleInput(projectBasePath, project)
-            }
-        })
-
-        // Add a listener to move fileList up and down by using CTRL + k/j
-        val kShiftKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_K, InputEvent.CTRL_DOWN_MASK)
-        val jShiftKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_J, InputEvent.CTRL_DOWN_MASK)
-        inputMap.put(kShiftKeyStroke, "moveUp")
-        component.searchField.actionMap.put("moveUp", object : AbstractAction() {
-            override fun actionPerformed(e: ActionEvent?) {
-                moveListUp()
-            }
-        })
-        inputMap.put(jShiftKeyStroke, "moveDown")
-        component.searchField.actionMap.put("moveDown", object : AbstractAction() {
-            override fun actionPerformed(e: ActionEvent?) {
-                moveListDown()
             }
         })
     }

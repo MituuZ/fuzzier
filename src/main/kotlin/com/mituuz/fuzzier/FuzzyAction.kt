@@ -9,18 +9,42 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorActionHandler
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.mituuz.fuzzier.components.FuzzyComponent
+import java.awt.event.ActionEvent
+import java.awt.event.InputEvent
+import java.awt.event.KeyEvent
+import javax.swing.AbstractAction
+import javax.swing.JComponent
+import javax.swing.KeyStroke
 
 open class FuzzyAction : AnAction() {
     lateinit var component: FuzzyComponent
     private lateinit var originalDownHandler: EditorActionHandler
     private lateinit var originalUpHandler: EditorActionHandler
-    // Setup custom handlers
-    // Add listeners
+
     override fun actionPerformed(actionEvent: AnActionEvent) {
-        setCustomHandlers()
+        // Necessary override
     }
 
-    private fun setCustomHandlers() {
+    fun createSharedListeners() {
+        val inputMap = component.searchField.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+        // Add a listener to move fileList up and down by using CTRL + k/j
+        val kShiftKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_K, InputEvent.CTRL_DOWN_MASK)
+        val jShiftKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_J, InputEvent.CTRL_DOWN_MASK)
+        inputMap.put(kShiftKeyStroke, "moveUp")
+        component.searchField.actionMap.put("moveUp", object : AbstractAction() {
+            override fun actionPerformed(e: ActionEvent?) {
+                moveListUp()
+            }
+        })
+        inputMap.put(jShiftKeyStroke, "moveDown")
+        component.searchField.actionMap.put("moveDown", object : AbstractAction() {
+            override fun actionPerformed(e: ActionEvent?) {
+                moveListDown()
+            }
+        })
+    }
+
+    fun setCustomHandlers() {
         val actionManager = EditorActionManager.getInstance()
         originalDownHandler = actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN)
         originalUpHandler = actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_UP)

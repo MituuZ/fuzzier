@@ -1,13 +1,11 @@
 package com.mituuz.fuzzier
 
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.actionSystem.EditorActionHandler
-import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.fileEditor.FileEditorManager
@@ -47,7 +45,7 @@ class Fuzzier : FuzzyAction() {
     var currentTask: Future<*>? = null
 
     override fun actionPerformed(actionEvent: AnActionEvent) {
-        super.actionPerformed(actionEvent)
+        setCustomHandlers()
         SwingUtilities.invokeLater {
             defaultDoc = EditorFactory.getInstance().createDocument("")
             actionEvent.project?.let { project ->
@@ -56,6 +54,7 @@ class Fuzzier : FuzzyAction() {
                 val projectBasePath = project.basePath
                 if (projectBasePath != null) {
                     createListeners(project, projectBasePath)
+                    createSharedListeners()
                 }
 
                 val mainWindow = WindowManager.getInstance().getIdeFrame(actionEvent.project)?.component
@@ -199,22 +198,6 @@ class Fuzzier : FuzzyAction() {
                 virtualFile?.let {
                     openFile(project, it)
                 }
-            }
-        })
-
-        // Add a listener to move fileList up and down by using CTRL + k/j
-        val kShiftKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_K, InputEvent.CTRL_DOWN_MASK)
-        val jShiftKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_J, InputEvent.CTRL_DOWN_MASK)
-        inputMap.put(kShiftKeyStroke, "moveUp")
-        component.searchField.actionMap.put("moveUp", object : AbstractAction() {
-            override fun actionPerformed(e: ActionEvent?) {
-                moveListUp()
-            }
-        })
-        inputMap.put(jShiftKeyStroke, "moveDown")
-        component.searchField.actionMap.put("moveDown", object : AbstractAction() {
-            override fun actionPerformed(e: ActionEvent?) {
-                moveListDown()
             }
         })
 
