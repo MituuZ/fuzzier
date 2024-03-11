@@ -6,10 +6,9 @@ import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
-import com.intellij.openapi.components.service
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.popup.JBPopup
+import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
@@ -21,17 +20,12 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.refactoring.move.moveFilesOrDirectories.MoveFilesOrDirectoriesUtil
 import com.mituuz.fuzzier.components.SimpleFinderComponent
-import com.mituuz.fuzzier.settings.FuzzierSettingsService
+import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
 import java.util.concurrent.CompletableFuture
-import javax.swing.AbstractAction
-import javax.swing.JComponent
-import javax.swing.KeyStroke
-import javax.swing.SwingUtilities
+import javax.swing.*
 
 class FuzzyMover : FuzzyAction() {
-    private var fuzzierSettingsService = service<FuzzierSettingsService>()
-    private var popup: JBPopup? = null
     private val dimensionKey: String = "FuzzyMoverPopup"
     lateinit var movableFile: PsiFile
     lateinit var currentFile: String
@@ -44,7 +38,7 @@ class FuzzyMover : FuzzyAction() {
                 val projectBasePath = project.basePath
                 if (projectBasePath != null) {
                     createListeners(project, projectBasePath)
-                    createSharedListeners()
+                    createSharedListeners(project)
                 }
 
                 val mainWindow = WindowManager.getInstance().getIdeFrame(actionEvent.project)?.component
@@ -165,5 +159,49 @@ class FuzzyMover : FuzzyAction() {
             }
         }
         return completableFuture
+    }
+
+    override fun updateListContents(project: Project, searchString: String) {
+        if (StringUtils.isBlank(searchString)) {
+            SwingUtilities.invokeLater {
+                component.fileList.model = DefaultListModel()
+            }
+            return
+        }
+
+        val stringEvaluator = StringEvaluator(fuzzierSettingsService.state.multiMatch,
+            fuzzierSettingsService.state.exclusionList, fuzzierSettingsService.state.matchWeightSingleChar,
+            fuzzierSettingsService.state.matchWeightStreakModifier,
+            fuzzierSettingsService.state.matchWeightPartialPath)
+
+        currentTask?.takeIf { !it.isDone }?.cancel(true)
+
+        currentTask = ApplicationManager.getApplication().executeOnPooledThread {
+            component.fileList.setPaintBusy(true)
+            val listModel = DefaultListModel<StringEvaluator.FuzzyMatchContainer>()
+            val projectFileIndex = ProjectFileIndex.getInstance(project)
+            val projectBasePath = project.basePath
+
+            val contentIterator = if (!component.isDirSelector) {
+                projectBasePath?.let { stringEvaluator.getContentIterator(it, searchString, listModel) }
+            } else {
+                projectBasePath?.let { stringEvaluator.getDirIterator(it, searchString, listModel ) }
+            }
+
+            if (contentIterator != null) {
+                projectFileIndex.iterateContent(contentIterator)
+            }
+            val sortedList = listModel.elements().toList().sortedByDescending { it.score }
+            val valModel = DefaultListModel<String>()
+            sortedList.forEach { valModel.addElement(it.string) }
+
+            SwingUtilities.invokeLater {
+                component.fileList.model = valModel
+                component.fileList.setPaintBusy(false)
+                if (!component.fileList.isEmpty) {
+                    component.fileList.setSelectedValue(valModel[0], true)
+                }
+            }
+        }
     }
 }

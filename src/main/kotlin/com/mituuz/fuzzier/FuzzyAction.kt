@@ -4,28 +4,42 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.actionSystem.IdeActions
+import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorActionHandler
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
+import com.intellij.openapi.editor.event.DocumentEvent
+import com.intellij.openapi.editor.event.DocumentListener
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.popup.JBPopup
 import com.mituuz.fuzzier.components.FuzzyComponent
+import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import java.awt.event.ActionEvent
 import java.awt.event.InputEvent
 import java.awt.event.KeyEvent
+import java.util.*
+import java.util.concurrent.Future
 import javax.swing.AbstractAction
 import javax.swing.JComponent
 import javax.swing.KeyStroke
+import kotlin.concurrent.schedule
 
-open class FuzzyAction : AnAction() {
+abstract class FuzzyAction : AnAction() {
     lateinit var component: FuzzyComponent
+    protected var popup: JBPopup? = null
     private lateinit var originalDownHandler: EditorActionHandler
     private lateinit var originalUpHandler: EditorActionHandler
+    private var debounceTimer: TimerTask? = null
+    protected val fuzzierSettingsService = service<FuzzierSettingsService>()
+    @Volatile
+    var currentTask: Future<*>? = null
 
     override fun actionPerformed(actionEvent: AnActionEvent) {
         // Necessary override
     }
 
-    fun createSharedListeners() {
+    fun createSharedListeners(project: Project) {
         val inputMap = component.searchField.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
         // Add a listener to move fileList up and down by using CTRL + k/j
         val kShiftKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_K, InputEvent.CTRL_DOWN_MASK)
@@ -42,7 +56,20 @@ open class FuzzyAction : AnAction() {
                 moveListDown()
             }
         })
+
+        val document = component.searchField.document
+        document.addDocumentListener(object : DocumentListener {
+            override fun documentChanged(event: DocumentEvent) {
+                debounceTimer?.cancel()
+                val debouncePeriod = fuzzierSettingsService.state.debouncePeriod
+                debounceTimer = Timer().schedule(debouncePeriod.toLong()) {
+                    updateListContents(project, component.searchField.text)
+                }
+            }
+        })
     }
+
+    abstract fun updateListContents(project: Project, searchString: String)
 
     fun setCustomHandlers() {
         val actionManager = EditorActionManager.getInstance()

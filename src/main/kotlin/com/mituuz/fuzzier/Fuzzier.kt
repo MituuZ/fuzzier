@@ -2,19 +2,14 @@ package com.mituuz.fuzzier
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.EditorFactory
-import com.intellij.openapi.editor.actionSystem.EditorActionHandler
-import com.intellij.openapi.editor.event.DocumentEvent
-import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
-import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
@@ -24,25 +19,13 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.StringEvaluator.FuzzyMatchContainer
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
-import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
-import java.util.*
-import java.util.Timer
-import java.util.concurrent.Future
 import javax.swing.*
-import kotlin.concurrent.schedule
 
 class Fuzzier : FuzzyAction() {
-    private var popup: JBPopup? = null
     private var defaultDoc: Document? = null
-    private lateinit var originalDownHandler: EditorActionHandler
-    private lateinit var originalUpHandler: EditorActionHandler
-    private var fuzzierSettingsService = service<FuzzierSettingsService>()
-    private var debounceTimer: TimerTask? = null
     private val fuzzyDimensionKey: String = "FuzzySearchPopup"
-    @Volatile
-    var currentTask: Future<*>? = null
 
     override fun actionPerformed(actionEvent: AnActionEvent) {
         setCustomHandlers()
@@ -54,7 +37,7 @@ class Fuzzier : FuzzyAction() {
                 val projectBasePath = project.basePath
                 if (projectBasePath != null) {
                     createListeners(project, projectBasePath)
-                    createSharedListeners()
+                    createSharedListeners(project)
                 }
 
                 val mainWindow = WindowManager.getInstance().getIdeFrame(actionEvent.project)?.component
@@ -90,7 +73,7 @@ class Fuzzier : FuzzyAction() {
         }
     }
 
-    fun updateListContents(project: Project, searchString: String) {
+    override fun updateListContents(project: Project, searchString: String) {
         if (StringUtils.isBlank(searchString)) {
             SwingUtilities.invokeLater {
                 component.fileList.model = DefaultListModel()
@@ -197,18 +180,6 @@ class Fuzzier : FuzzyAction() {
                 val virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
                 virtualFile?.let {
                     openFile(project, it)
-                }
-            }
-        })
-
-        // Add a listener that updates the search list every time a change is made
-        val document = component.searchField.document
-        document.addDocumentListener(object : DocumentListener {
-            override fun documentChanged(event: DocumentEvent) {
-                debounceTimer?.cancel()
-                val debouncePeriod = fuzzierSettingsService.state.debouncePeriod
-                debounceTimer = Timer().schedule(debouncePeriod.toLong()) {
-                    updateListContents(project, component.searchField.text)
                 }
             }
         })
