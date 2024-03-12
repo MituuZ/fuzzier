@@ -14,6 +14,10 @@ import javax.swing.DefaultListModel
 
 class TestUtil {
     private fun addFilesToProject(filesToAdd: List<String>, myFixture: CodeInsightTestFixture, fixture: IdeaProjectTestFixture) {
+        if (filesToAdd.isEmpty()) {
+            return
+        }
+
         filesToAdd.forEach {
             myFixture.addFileToProject(it, "")
         }

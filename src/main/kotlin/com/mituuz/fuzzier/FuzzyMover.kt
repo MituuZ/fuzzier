@@ -3,20 +3,12 @@ package com.mituuz.fuzzier
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
-import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.DataContext
-import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
-import com.intellij.openapi.components.service
-import com.intellij.openapi.editor.Caret
-import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.actionSystem.EditorActionHandler
-import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.popup.JBPopup
+import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
@@ -28,35 +20,28 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.refactoring.move.moveFilesOrDirectories.MoveFilesOrDirectoriesUtil
 import com.mituuz.fuzzier.components.SimpleFinderComponent
-import com.mituuz.fuzzier.settings.FuzzierSettingsService
+import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
 import java.util.concurrent.CompletableFuture
-import javax.swing.AbstractAction
-import javax.swing.JComponent
-import javax.swing.KeyStroke
-import javax.swing.SwingUtilities
+import javax.swing.*
 
-class FuzzyMover : AnAction() {
-    lateinit var component: SimpleFinderComponent
-    private var fuzzierSettingsService = service<FuzzierSettingsService>()
-    private var popup: JBPopup? = null
+class FuzzyMover : FuzzyAction() {
     private val dimensionKey: String = "FuzzyMoverPopup"
-    private lateinit var originalDownHandler: EditorActionHandler
-    private lateinit var originalUpHandler: EditorActionHandler
     lateinit var movableFile: PsiFile
     lateinit var currentFile: String
 
-    override fun actionPerformed(p0: AnActionEvent) {
+    override fun actionPerformed(actionEvent: AnActionEvent) {
         setCustomHandlers()
         SwingUtilities.invokeLater {
-            p0.project?.let { project ->
+            actionEvent.project?.let { project ->
                 component = SimpleFinderComponent(project)
                 val projectBasePath = project.basePath
                 if (projectBasePath != null) {
                     createListeners(project, projectBasePath)
+                    createSharedListeners(project)
                 }
 
-                val mainWindow = WindowManager.getInstance().getIdeFrame(p0.project)?.component
+                val mainWindow = WindowManager.getInstance().getIdeFrame(actionEvent.project)?.component
                 mainWindow?.let {
                     popup = JBPopupFactory
                         .getInstance()
@@ -94,51 +79,6 @@ class FuzzyMover : AnAction() {
         }
     }
 
-    fun resetOriginalHandlers() {
-        val actionManager = EditorActionManager.getInstance()
-        actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN, originalDownHandler)
-        actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_UP, originalUpHandler)
-    }
-
-    private fun setCustomHandlers() {
-        val actionManager = EditorActionManager.getInstance()
-        originalDownHandler = actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN)
-        originalUpHandler = actionManager.getActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_UP)
-
-        actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN, FuzzyListActionHandler(this, false))
-        actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_UP, FuzzyListActionHandler(this, true))
-    }
-
-    fun moveListUp() {
-        val selectedIndex = component.fileList.selectedIndex
-        if (selectedIndex > 0) {
-            component.fileList.selectedIndex = selectedIndex - 1
-            component.fileList.ensureIndexIsVisible(selectedIndex - 1)
-        }
-    }
-
-    fun moveListDown() {
-        val selectedIndex = component.fileList.selectedIndex
-        val length = component.fileList.model.size
-        if (selectedIndex < length - 1) {
-            component.fileList.selectedIndex = selectedIndex + 1
-            component.fileList.ensureIndexIsVisible(selectedIndex + 1)
-        }
-    }
-
-    class FuzzyListActionHandler(private val fuzzyMover: FuzzyMover, private val isUp: Boolean) :
-        EditorActionHandler() {
-        override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext?) {
-            if (isUp) {
-                fuzzyMover.moveListUp()
-            } else {
-                fuzzyMover.moveListDown()
-            }
-
-            super.doExecute(editor, caret, dataContext)
-        }
-    }
-
     private fun createListeners(project: Project, projectBasePath: String) {
         // Add a mouse listener for double-click
         component.fileList.addMouseListener(object : MouseAdapter() {
@@ -149,7 +89,6 @@ class FuzzyMover : AnAction() {
             }
         })
 
-        // Add a listener that opens the currently selected file when pressing enter (focus on the text box)
         val enterKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)
         val enterActionKey = "openFile"
         val inputMap = component.searchField.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
@@ -157,22 +96,6 @@ class FuzzyMover : AnAction() {
         component.searchField.actionMap.put(enterActionKey, object : AbstractAction() {
             override fun actionPerformed(e: ActionEvent?) {
                 handleInput(projectBasePath, project)
-            }
-        })
-
-        // Add a listener to move fileList up and down by using CTRL + k/j
-        val kShiftKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_K, InputEvent.CTRL_DOWN_MASK)
-        val jShiftKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_J, InputEvent.CTRL_DOWN_MASK)
-        inputMap.put(kShiftKeyStroke, "moveUp")
-        component.searchField.actionMap.put("moveUp", object : AbstractAction() {
-            override fun actionPerformed(e: ActionEvent?) {
-                moveListUp()
-            }
-        })
-        inputMap.put(jShiftKeyStroke, "moveDown")
-        component.searchField.actionMap.put("moveDown", object : AbstractAction() {
-            override fun actionPerformed(e: ActionEvent?) {
-                moveListDown()
             }
         })
     }
@@ -236,5 +159,49 @@ class FuzzyMover : AnAction() {
             }
         }
         return completableFuture
+    }
+
+    override fun updateListContents(project: Project, searchString: String) {
+        if (StringUtils.isBlank(searchString)) {
+            SwingUtilities.invokeLater {
+                component.fileList.model = DefaultListModel()
+            }
+            return
+        }
+
+        val stringEvaluator = StringEvaluator(fuzzierSettingsService.state.multiMatch,
+            fuzzierSettingsService.state.exclusionList, fuzzierSettingsService.state.matchWeightSingleChar,
+            fuzzierSettingsService.state.matchWeightStreakModifier,
+            fuzzierSettingsService.state.matchWeightPartialPath)
+
+        currentTask?.takeIf { !it.isDone }?.cancel(true)
+
+        currentTask = ApplicationManager.getApplication().executeOnPooledThread {
+            component.fileList.setPaintBusy(true)
+            val listModel = DefaultListModel<StringEvaluator.FuzzyMatchContainer>()
+            val projectFileIndex = ProjectFileIndex.getInstance(project)
+            val projectBasePath = project.basePath
+
+            val contentIterator = if (!component.isDirSelector) {
+                projectBasePath?.let { stringEvaluator.getContentIterator(it, searchString, listModel) }
+            } else {
+                projectBasePath?.let { stringEvaluator.getDirIterator(it, searchString, listModel ) }
+            }
+
+            if (contentIterator != null) {
+                projectFileIndex.iterateContent(contentIterator)
+            }
+            val sortedList = listModel.elements().toList().sortedByDescending { it.score }
+            val valModel = DefaultListModel<String>()
+            sortedList.forEach { valModel.addElement(it.string) }
+
+            SwingUtilities.invokeLater {
+                component.fileList.model = valModel
+                component.fileList.setPaintBusy(false)
+                if (!component.fileList.isEmpty) {
+                    component.fileList.setSelectedValue(valModel[0], true)
+                }
+            }
+        }
     }
 }

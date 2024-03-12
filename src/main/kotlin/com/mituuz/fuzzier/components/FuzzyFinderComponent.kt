@@ -2,7 +2,6 @@ package com.mituuz.fuzzier.components
 
 import com.intellij.openapi.fileTypes.PlainTextFileType
 import com.intellij.openapi.project.Project
-import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.uiDesigner.core.GridConstraints
@@ -13,13 +12,8 @@ import java.awt.Dimension
 import javax.swing.JPanel
 import javax.swing.JSplitPane
 
-class FuzzyFinderComponent(project: Project) : JPanel(
-) {
+class FuzzyFinderComponent(project: Project) : FuzzyComponent() {
     var previewPane: PreviewEditor = PreviewEditor(project)
-        private set
-    var fileList: JBList<String?> = JBList<String?>()
-        private set
-    var searchField: EditorTextField = EditorTextField()
         private set
     private var fuzzyPanel: JPanel = JPanel()
     var splitPane: JSplitPane = JSplitPane()
