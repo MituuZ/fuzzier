@@ -1,17 +1,13 @@
 package com.mituuz.fuzzier
 
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vfs.VirtualFileManager
-import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiManager
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
-import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import javax.swing.SwingUtilities
 
 class FuzzyMoverTest {
     private var fuzzyMover: FuzzyMover
