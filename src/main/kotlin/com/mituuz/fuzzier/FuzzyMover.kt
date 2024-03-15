@@ -194,6 +194,7 @@ class FuzzyMover : FuzzyAction() {
                 projectFileIndex.iterateContent(contentIterator)
             }
             val sortedList = listModel.elements().toList().sortedByDescending { it.score }
+            listModel.clear()
             sortedList.forEach { listModel.addElement(it) }
 
             SwingUtilities.invokeLater {

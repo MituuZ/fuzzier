@@ -17,7 +17,6 @@ import com.intellij.openapi.util.DimensionService
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
-import com.mituuz.fuzzier.StringEvaluator.FilenameType
 import com.mituuz.fuzzier.StringEvaluator.FuzzyMatchContainer
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import org.apache.commons.lang3.StringUtils
@@ -107,6 +106,7 @@ class Fuzzier : FuzzyAction() {
                 projectFileIndex.iterateContent(contentIterator)
             }
             val sortedList = listModel.elements().toList().sortedByDescending { it.score }
+            listModel.clear()
             sortedList.forEach { listModel.addElement(it) }
 
             SwingUtilities.invokeLater {
