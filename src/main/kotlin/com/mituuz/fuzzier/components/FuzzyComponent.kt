@@ -2,7 +2,6 @@ package com.mituuz.fuzzier.components
 
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBList
-import com.mituuz.fuzzier.StringEvaluator
 import com.mituuz.fuzzier.StringEvaluator.FuzzyMatchContainer
 import javax.swing.JPanel
 

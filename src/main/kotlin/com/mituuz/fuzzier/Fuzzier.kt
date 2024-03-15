@@ -115,7 +115,8 @@ class Fuzzier : FuzzyAction() {
                     override fun getListCellRendererComponent(list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
                         val renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) as JLabel
                         val container = value as FuzzyMatchContainer
-                        renderer.text = container.toString(FilenameType.FILENAME_WITH_PATH)
+                        val filenameType = fuzzierSettingsService.state.filenameType
+                        renderer.text = container.toString(filenameType)
                         return renderer
                     }
                 }

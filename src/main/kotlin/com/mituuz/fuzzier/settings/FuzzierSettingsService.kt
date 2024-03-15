@@ -3,6 +3,7 @@ package com.mituuz.fuzzier.settings
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
+import com.mituuz.fuzzier.StringEvaluator.FilenameType
 
 @State(
     name = "com.mituuz.fuzzier.FuzzierSettings",
@@ -16,6 +17,7 @@ class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.S
         var debouncePeriod: Int = 150
         var resetWindow = false
         var multiMatch = false
+        var filenameType: FilenameType = FilenameType.FILEPATH_ONLY
 
         var matchWeightPartialPath = 10
         var matchWeightSingleChar = 5

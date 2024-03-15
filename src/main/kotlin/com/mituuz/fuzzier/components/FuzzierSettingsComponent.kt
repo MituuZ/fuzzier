@@ -8,9 +8,12 @@ import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.FormBuilder
+import com.intellij.openapi.ui.ComboBox
+import com.mituuz.fuzzier.StringEvaluator.FilenameType
+import com.mituuz.fuzzier.StringEvaluator.FilenameType.*
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
-import javax.swing.JButton
-import javax.swing.JPanel
+import java.awt.Component
+import javax.swing.*
 import javax.swing.border.LineBorder
 
 class FuzzierSettingsComponent {
@@ -21,6 +24,9 @@ class FuzzierSettingsComponent {
     var debounceTimerValue = JBIntSpinner(150, 0, 2000)
     private var debounceInstructions = JBLabel("<html><strong>Debounce period (ms)</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
     private var resetWindowDimension = JButton("Reset popup location")
+    private var filenameTypeInstructions = JBLabel("<html><strong>Filename type</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
+    var filenameTypeSelector = ComboBox<FilenameType>()
+
     var multiMatchActive = JBCheckBox()
     private var multiMatchInstructions = JBLabel("<html><strong>Match characters multiple times</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
     var matchWeightPartialPath = JBIntSpinner(10, 0, 100)
@@ -29,6 +35,7 @@ class FuzzierSettingsComponent {
     private var singleCharInfo = JBLabel("<html><strong>Match weight: Single char (* 0.1)</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
     var matchWeightStreakModifier = JBIntSpinner(10, 0, 100)
     private var streakModifierInfo = JBLabel("<html><strong>Match weight: Streak modifier (* 0.1)</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
+
     private var startTestBench = JButton("Launch Test Bench", AllIcons.General.ContextHelp)
     private var testBench = TestBenchComponent()
 
@@ -40,6 +47,8 @@ class FuzzierSettingsComponent {
             .addSeparator()
             .addLabeledComponent("<html><strong>Open files in a new tab</strong></html>", newTabSelect)
             .addLabeledComponent(debounceInstructions, debounceTimerValue)
+            .addLabeledComponent(filenameTypeInstructions, filenameTypeSelector)
+
             .addSeparator()
             .addComponent(JBLabel("<html><strong>Match settings</strong></html>"))
             .addLabeledComponent(multiMatchInstructions, multiMatchActive)
@@ -61,6 +70,19 @@ class FuzzierSettingsComponent {
         resetWindowDimension.addActionListener {
             service<FuzzierSettingsService>().state.resetWindow = true
         }
+
+        filenameTypeSelector.renderer = object : DefaultListCellRenderer() {
+            override fun getListCellRendererComponent(list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
+                val renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) as JLabel
+                val filenameType = value as FilenameType
+                renderer.text = filenameType.text
+                return renderer
+            }
+        }
+        for (filenameType in entries) {
+            filenameTypeSelector.addItem(filenameType)
+        }
+
         startTestBench.addActionListener {
             startTestBench.isEnabled = false
             testBench.fill(this)
@@ -102,6 +124,10 @@ class FuzzierSettingsComponent {
 
         startTestBench.toolTipText = """
             Test settings changes live on the current project's file index.
+        """.trimIndent()
+
+        filenameTypeInstructions.toolTipText = """
+            Controls how the filename is shown on the popup.
         """.trimIndent()
     }
 }

@@ -167,14 +167,16 @@ class StringEvaluator(
         fun toString(filenameType: FilenameType): String {
             return when (filenameType) {
                 FilenameType.FILENAME_ONLY -> filename
-                FilenameType.FILEPATH -> filePath
+                FilenameType.FILEPATH_ONLY -> filePath
                 FilenameType.FILENAME_WITH_PATH -> "$filename ($filePath)"
             }
         }
     }
 
-    enum class FilenameType {
-        FILENAME_ONLY, FILEPATH, FILENAME_WITH_PATH
+    enum class FilenameType(val text: String) {
+        FILEPATH_ONLY("Filepath only"),
+        FILENAME_ONLY("Filename only"),
+        FILENAME_WITH_PATH("Filename with (path)")
     }
 
     fun setSettings(multiMatch: Boolean, matchWeightSingleChar: Int, matchWeightPartialPath: Int,
