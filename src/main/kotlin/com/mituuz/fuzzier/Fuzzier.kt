@@ -17,9 +17,11 @@ import com.intellij.openapi.util.DimensionService
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
+import com.mituuz.fuzzier.StringEvaluator.FilenameType
 import com.mituuz.fuzzier.StringEvaluator.FuzzyMatchContainer
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import org.apache.commons.lang3.StringUtils
+import java.awt.Component
 import java.awt.event.*
 import javax.swing.*
 
@@ -56,7 +58,8 @@ class Fuzzier : FuzzyAction() {
 
                     popup?.addListener(object : JBPopupListener {
                         override fun onClosed(event: LightweightWindowEvent) {
-                            fuzzierSettingsService.state.splitPosition = (component as FuzzyFinderComponent).splitPane.dividerLocation
+                            fuzzierSettingsService.state.splitPosition =
+                                (component as FuzzyFinderComponent).splitPane.dividerLocation
                             resetOriginalHandlers()
                             super.onClosed(event)
                         }
@@ -67,7 +70,8 @@ class Fuzzier : FuzzyAction() {
                         fuzzierSettingsService.state.resetWindow = false
                     }
                     popup!!.showInCenterOf(it)
-                    (component as FuzzyFinderComponent).splitPane.dividerLocation = fuzzierSettingsService.state.splitPosition
+                    (component as FuzzyFinderComponent).splitPane.dividerLocation =
+                        fuzzierSettingsService.state.splitPosition
                 }
             }
         }
@@ -88,24 +92,36 @@ class Fuzzier : FuzzyAction() {
             val listModel = DefaultListModel<FuzzyMatchContainer>()
             val projectFileIndex = ProjectFileIndex.getInstance(project)
             val projectBasePath = project.basePath
-            val stringEvaluator = StringEvaluator(fuzzierSettingsService.state.multiMatch, fuzzierSettingsService.state.exclusionList,
-                fuzzierSettingsService.state.matchWeightSingleChar, fuzzierSettingsService.state.matchWeightStreakModifier,
-                fuzzierSettingsService.state.matchWeightPartialPath)
+            val stringEvaluator = StringEvaluator(
+                fuzzierSettingsService.state.multiMatch,
+                fuzzierSettingsService.state.exclusionList,
+                fuzzierSettingsService.state.matchWeightSingleChar,
+                fuzzierSettingsService.state.matchWeightStreakModifier,
+                fuzzierSettingsService.state.matchWeightPartialPath
+            )
 
-            val contentIterator = projectBasePath?.let { stringEvaluator.getContentIterator(it, searchString, listModel) }
+            val contentIterator =
+                projectBasePath?.let { stringEvaluator.getContentIterator(it, searchString, listModel) }
 
             if (contentIterator != null) {
                 projectFileIndex.iterateContent(contentIterator)
             }
             val sortedList = listModel.elements().toList().sortedByDescending { it.score }
-            val valModel = DefaultListModel<String>()
-            sortedList.forEach { valModel.addElement(it.string) }
+            sortedList.forEach { listModel.addElement(it) }
 
             SwingUtilities.invokeLater {
-                component.fileList.model = valModel
+                component.fileList.model = listModel
+                component.fileList.cellRenderer = object : DefaultListCellRenderer() {
+                    override fun getListCellRendererComponent(list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
+                        val renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) as JLabel
+                        val container = value as FuzzyMatchContainer
+                        renderer.text = container.toString(FilenameType.FILENAME_WITH_PATH)
+                        return renderer
+                    }
+                }
                 component.fileList.setPaintBusy(false)
                 if (!component.fileList.isEmpty) {
-                    component.fileList.setSelectedValue(valModel[0], true)
+                    component.fileList.setSelectedValue(listModel[0], true)
                 }
             }
         }
@@ -141,7 +157,7 @@ class Fuzzier : FuzzyAction() {
                     }
                     return@addListSelectionListener
                 }
-                val selectedValue = component.fileList.selectedValue
+                val selectedValue = component.fileList.selectedValue?.filePath
                 val fileUrl = "file://$projectBasePath$selectedValue"
 
                 ProgressManager.getInstance().run(object : Task.Backgroundable(null, "Loading file", false) {
@@ -159,8 +175,9 @@ class Fuzzier : FuzzyAction() {
         component.fileList.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent) {
                 if (e.clickCount == 2) {
-                    val selectedValue = component.fileList.selectedValue
-                    val virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
+                    val selectedValue = component.fileList.selectedValue?.filePath
+                    val virtualFile =
+                        VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
                     // Open the file in the editor
                     virtualFile?.let {
                         openFile(project, it)
@@ -176,8 +193,9 @@ class Fuzzier : FuzzyAction() {
         inputMap.put(enterKeyStroke, enterActionKey)
         component.searchField.actionMap.put(enterActionKey, object : AbstractAction() {
             override fun actionPerformed(e: ActionEvent?) {
-                val selectedValue = component.fileList.selectedValue
-                val virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
+                val selectedValue = component.fileList.selectedValue?.filePath
+                val virtualFile =
+                    VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
                 virtualFile?.let {
                     openFile(project, it)
                 }

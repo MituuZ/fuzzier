@@ -19,8 +19,12 @@ import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.refactoring.move.moveFilesOrDirectories.MoveFilesOrDirectoriesUtil
+import com.mituuz.fuzzier.StringEvaluator.FilenameType
+import com.mituuz.fuzzier.StringEvaluator.FilenameType.FILENAME_WITH_PATH
+import com.mituuz.fuzzier.StringEvaluator.FuzzyMatchContainer
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import org.apache.commons.lang3.StringUtils
+import java.awt.Component
 import java.awt.event.*
 import java.util.concurrent.CompletableFuture
 import javax.swing.*
@@ -102,7 +106,7 @@ class FuzzyMover : FuzzyAction() {
 
     fun handleInput(projectBasePath: String, project: Project): CompletableFuture<Void> {
         val completableFuture = CompletableFuture<Void>()
-        var selectedValue = component.fileList.selectedValue
+        var selectedValue = component.fileList.selectedValue?.filePath
         if (selectedValue == null) {
             selectedValue = currentFile
         }
@@ -178,7 +182,7 @@ class FuzzyMover : FuzzyAction() {
 
         currentTask = ApplicationManager.getApplication().executeOnPooledThread {
             component.fileList.setPaintBusy(true)
-            val listModel = DefaultListModel<StringEvaluator.FuzzyMatchContainer>()
+            val listModel = DefaultListModel<FuzzyMatchContainer>()
             val projectFileIndex = ProjectFileIndex.getInstance(project)
             val projectBasePath = project.basePath
 
@@ -192,14 +196,21 @@ class FuzzyMover : FuzzyAction() {
                 projectFileIndex.iterateContent(contentIterator)
             }
             val sortedList = listModel.elements().toList().sortedByDescending { it.score }
-            val valModel = DefaultListModel<String>()
-            sortedList.forEach { valModel.addElement(it.string) }
+            sortedList.forEach { listModel.addElement(it) }
 
             SwingUtilities.invokeLater {
-                component.fileList.model = valModel
+                component.fileList.model = listModel
+                component.fileList.cellRenderer = object : DefaultListCellRenderer() {
+                    override fun getListCellRendererComponent(list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
+                        val renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) as JLabel
+                        val container = value as FuzzyMatchContainer
+                        renderer.text = container.toString(FILENAME_WITH_PATH)
+                        return renderer
+                    }
+                }
                 component.fileList.setPaintBusy(false)
                 if (!component.fileList.isEmpty) {
-                    component.fileList.setSelectedValue(valModel[0], true)
+                    component.fileList.setSelectedValue(listModel[0], true)
                 }
             }
         }
