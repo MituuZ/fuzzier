@@ -19,6 +19,8 @@ import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.refactoring.move.moveFilesOrDirectories.MoveFilesOrDirectoriesUtil
+import com.mituuz.fuzzier.StringEvaluator.FilenameType
+import com.mituuz.fuzzier.StringEvaluator.FilenameType.FILEPATH_ONLY
 import com.mituuz.fuzzier.StringEvaluator.FuzzyMatchContainer
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import org.apache.commons.lang3.StringUtils
@@ -203,7 +205,12 @@ class FuzzyMover : FuzzyAction() {
                     override fun getListCellRendererComponent(list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
                         val renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) as JLabel
                         val container = value as FuzzyMatchContainer
-                        val filenameType = fuzzierSettingsService.state.filenameType
+                        val filenameType: FilenameType
+                        filenameType = if (component.isDirSelector) {
+                            FILEPATH_ONLY // Directories are always shown as full paths
+                        } else {
+                            fuzzierSettingsService.state.filenameType
+                        }
                         renderer.text = container.toString(filenameType)
                         return renderer
                     }
