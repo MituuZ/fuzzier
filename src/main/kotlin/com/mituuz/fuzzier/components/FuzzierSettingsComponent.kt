@@ -127,7 +127,7 @@ class FuzzierSettingsComponent {
         """.trimIndent()
 
         filenameTypeInstructions.toolTipText = """
-            Controls how the filename is shown on the popup.
+            Controls how the filename is shown on the file search and selector popups.
         """.trimIndent()
     }
 }
