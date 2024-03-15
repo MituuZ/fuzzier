@@ -205,8 +205,7 @@ class FuzzyMover : FuzzyAction() {
                     override fun getListCellRendererComponent(list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
                         val renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) as JLabel
                         val container = value as FuzzyMatchContainer
-                        val filenameType: FilenameType
-                        filenameType = if (component.isDirSelector) {
+                        val filenameType: FilenameType = if (component.isDirSelector) {
                             FILEPATH_ONLY // Directories are always shown as full paths
                         } else {
                             fuzzierSettingsService.state.filenameType
