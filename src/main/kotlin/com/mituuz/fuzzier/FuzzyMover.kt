@@ -112,7 +112,7 @@ class FuzzyMover : FuzzyAction() {
             val virtualFile =
                 VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
             virtualFile?.let {
-                ApplicationManager.getApplication().executeOnPooledThread() {
+                ApplicationManager.getApplication().executeOnPooledThread {
                     ApplicationManager.getApplication().runReadAction {
                         movableFile = PsiManager.getInstance(project).findFile(it)!!
                     }
