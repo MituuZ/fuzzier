@@ -120,7 +120,7 @@ class TestBenchComponent : JPanel() {
             }
             val sortedList = listModel.elements().toList().sortedByDescending { it.score }
             val valModel = DefaultListModel<String>()
-            sortedList.forEach { valModel.addElement("${it.string} (${it.score})") }
+            sortedList.forEach { valModel.addElement("${it.filePath} (${it.score})") }
 
             SwingUtilities.invokeLater {
                 fileList.model = valModel

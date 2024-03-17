@@ -19,6 +19,7 @@ import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.refactoring.move.moveFilesOrDirectories.MoveFilesOrDirectoriesUtil
+import com.mituuz.fuzzier.StringEvaluator.FuzzyMatchContainer
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
@@ -102,7 +103,7 @@ class FuzzyMover : FuzzyAction() {
 
     fun handleInput(projectBasePath: String, project: Project): CompletableFuture<Void> {
         val completableFuture = CompletableFuture<Void>()
-        var selectedValue = component.fileList.selectedValue
+        var selectedValue = component.fileList.selectedValue?.filePath
         if (selectedValue == null) {
             selectedValue = currentFile
         }
@@ -110,7 +111,7 @@ class FuzzyMover : FuzzyAction() {
             val virtualFile =
                 VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
             virtualFile?.let {
-                ApplicationManager.getApplication().executeOnPooledThread() {
+                ApplicationManager.getApplication().executeOnPooledThread {
                     ApplicationManager.getApplication().runReadAction {
                         movableFile = PsiManager.getInstance(project).findFile(it)!!
                     }
@@ -178,28 +179,29 @@ class FuzzyMover : FuzzyAction() {
 
         currentTask = ApplicationManager.getApplication().executeOnPooledThread {
             component.fileList.setPaintBusy(true)
-            val listModel = DefaultListModel<StringEvaluator.FuzzyMatchContainer>()
+            val listModel = DefaultListModel<FuzzyMatchContainer>()
             val projectFileIndex = ProjectFileIndex.getInstance(project)
             val projectBasePath = project.basePath
 
             val contentIterator = if (!component.isDirSelector) {
                 projectBasePath?.let { stringEvaluator.getContentIterator(it, searchString, listModel) }
             } else {
-                projectBasePath?.let { stringEvaluator.getDirIterator(it, searchString, listModel ) }
+                projectBasePath?.let { stringEvaluator.getDirIterator(it, searchString, listModel) }
             }
 
             if (contentIterator != null) {
                 projectFileIndex.iterateContent(contentIterator)
             }
             val sortedList = listModel.elements().toList().sortedByDescending { it.score }
-            val valModel = DefaultListModel<String>()
-            sortedList.forEach { valModel.addElement(it.string) }
+            listModel.clear()
+            sortedList.forEach { listModel.addElement(it) }
 
             SwingUtilities.invokeLater {
-                component.fileList.model = valModel
+                component.fileList.model = listModel
+                component.fileList.cellRenderer = getCellRenderer()
                 component.fileList.setPaintBusy(false)
                 if (!component.fileList.isEmpty) {
-                    component.fileList.setSelectedValue(valModel[0], true)
+                    component.fileList.setSelectedValue(listModel[0], true)
                 }
             }
         }

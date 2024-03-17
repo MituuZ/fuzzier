@@ -68,7 +68,8 @@ class StringEvaluator(
 
     fun fuzzyContainsCaseInsensitive(filePath: String, searchString: String): FuzzyMatchContainer? {
         if (searchString.isBlank()) {
-            return FuzzyMatchContainer(0, filePath)
+            val filename = filePath.substring(filePath.lastIndexOf("/") + 1)
+            return FuzzyMatchContainer(0, filePath, filename)
         }
         if (searchString.length > filePath.length) {
             return null
@@ -84,7 +85,8 @@ class StringEvaluator(
         for (s in StringUtils.split(lowerSearchString, " ")) {
             score += processSearchString(s, lowerFilePath) ?: return null
         }
-        return FuzzyMatchContainer(score, filePath)
+        val filename = filePath.substring(filePath.lastIndexOf("/") + 1)
+        return FuzzyMatchContainer(score, filePath, filename)
     }
 
     private fun processSearchString(s: String, lowerFilePath: String): Int? {
@@ -161,7 +163,21 @@ class StringEvaluator(
         return score.toInt()
     }
 
-    data class FuzzyMatchContainer(val score: Int, val string: String)
+    data class FuzzyMatchContainer(val score: Int, val filePath: String, val filename: String) {
+        fun toString(filenameType: FilenameType): String {
+            return when (filenameType) {
+                FilenameType.FILENAME_ONLY -> filename
+                FilenameType.FILEPATH_ONLY -> filePath
+                FilenameType.FILENAME_WITH_PATH -> "$filename ($filePath)"
+            }
+        }
+    }
+
+    enum class FilenameType(val text: String) {
+        FILEPATH_ONLY("Filepath only"),
+        FILENAME_ONLY("Filename only"),
+        FILENAME_WITH_PATH("Filename with (path)")
+    }
 
     fun setSettings(multiMatch: Boolean, matchWeightSingleChar: Int, matchWeightPartialPath: Int,
                     matchWeightStreakModifier: Int) {
