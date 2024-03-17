@@ -18,14 +18,10 @@ import com.intellij.openapi.wm.WindowManager
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
-import com.intellij.psi.codeStyle.extractor.ui.ExtractedSettingsDialog.CellRenderer
 import com.intellij.refactoring.move.moveFilesOrDirectories.MoveFilesOrDirectoriesUtil
-import com.mituuz.fuzzier.StringEvaluator.FilenameType
-import com.mituuz.fuzzier.StringEvaluator.FilenameType.FILEPATH_ONLY
 import com.mituuz.fuzzier.StringEvaluator.FuzzyMatchContainer
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import org.apache.commons.lang3.StringUtils
-import java.awt.Component
 import java.awt.event.*
 import java.util.concurrent.CompletableFuture
 import javax.swing.*
@@ -207,29 +203,6 @@ class FuzzyMover : FuzzyAction() {
                 if (!component.fileList.isEmpty) {
                     component.fileList.setSelectedValue(listModel[0], true)
                 }
-            }
-        }
-    }
-
-    fun getCellRenderer(): ListCellRenderer<Any?> {
-        return object : DefaultListCellRenderer() {
-            override fun getListCellRendererComponent(
-                list: JList<*>?,
-                value: Any?,
-                index: Int,
-                isSelected: Boolean,
-                cellHasFocus: Boolean
-            ): Component {
-                val renderer =
-                    super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) as JLabel
-                val container = value as FuzzyMatchContainer
-                val filenameType: FilenameType = if (component.isDirSelector) {
-                    FILEPATH_ONLY // Directories are always shown as full paths
-                } else {
-                    fuzzierSettingsService.state.filenameType
-                }
-                renderer.text = container.toString(filenameType)
-                return renderer
             }
         }
     }

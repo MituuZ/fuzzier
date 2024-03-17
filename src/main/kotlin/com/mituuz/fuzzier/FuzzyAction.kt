@@ -13,16 +13,19 @@ import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
+import com.mituuz.fuzzier.StringEvaluator.FilenameType
+import com.mituuz.fuzzier.StringEvaluator.FilenameType.FILEPATH_ONLY
+import com.mituuz.fuzzier.StringEvaluator.FuzzyMatchContainer
 import com.mituuz.fuzzier.components.FuzzyComponent
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
+import java.awt.Component
 import java.awt.event.ActionEvent
 import java.awt.event.InputEvent
 import java.awt.event.KeyEvent
 import java.util.*
+import java.util.Timer
 import java.util.concurrent.Future
-import javax.swing.AbstractAction
-import javax.swing.JComponent
-import javax.swing.KeyStroke
+import javax.swing.*
 import kotlin.concurrent.schedule
 
 abstract class FuzzyAction : AnAction() {
@@ -113,5 +116,32 @@ abstract class FuzzyAction : AnAction() {
             component.fileList.selectedIndex = selectedIndex + 1
             component.fileList.ensureIndexIsVisible(selectedIndex + 1)
         }
+    }
+
+    fun getCellRenderer(): ListCellRenderer<Any?> {
+        return object : DefaultListCellRenderer() {
+            override fun getListCellRendererComponent(
+                list: JList<*>?,
+                value: Any?,
+                index: Int,
+                isSelected: Boolean,
+                cellHasFocus: Boolean
+            ): Component {
+                val renderer =
+                    super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) as JLabel
+                val container = value as FuzzyMatchContainer
+                val filenameType: FilenameType = if (component.isDirSelector) {
+                    FILEPATH_ONLY // Directories are always shown as full paths
+                } else {
+                    fuzzierSettingsService.state.filenameType
+                }
+                renderer.text = container.toString(filenameType)
+                return renderer
+            }
+        }
+    }
+
+    fun setFiletype(filenameType: FilenameType) {
+        fuzzierSettingsService.state.filenameType = filenameType
     }
 }

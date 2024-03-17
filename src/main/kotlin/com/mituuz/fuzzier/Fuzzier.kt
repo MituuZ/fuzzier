@@ -111,15 +111,7 @@ class Fuzzier : FuzzyAction() {
 
             SwingUtilities.invokeLater {
                 component.fileList.model = listModel
-                component.fileList.cellRenderer = object : DefaultListCellRenderer() {
-                    override fun getListCellRendererComponent(list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
-                        val renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) as JLabel
-                        val container = value as FuzzyMatchContainer
-                        val filenameType = fuzzierSettingsService.state.filenameType
-                        renderer.text = container.toString(filenameType)
-                        return renderer
-                    }
-                }
+                component.fileList.cellRenderer = getCellRenderer()
                 component.fileList.setPaintBusy(false)
                 if (!component.fileList.isEmpty) {
                     component.fileList.setSelectedValue(listModel[0], true)
