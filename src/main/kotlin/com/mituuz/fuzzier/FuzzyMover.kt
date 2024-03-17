@@ -18,6 +18,7 @@ import com.intellij.openapi.wm.WindowManager
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
+import com.intellij.psi.codeStyle.extractor.ui.ExtractedSettingsDialog.CellRenderer
 import com.intellij.refactoring.move.moveFilesOrDirectories.MoveFilesOrDirectoriesUtil
 import com.mituuz.fuzzier.StringEvaluator.FilenameType
 import com.mituuz.fuzzier.StringEvaluator.FilenameType.FILEPATH_ONLY
@@ -189,7 +190,7 @@ class FuzzyMover : FuzzyAction() {
             val contentIterator = if (!component.isDirSelector) {
                 projectBasePath?.let { stringEvaluator.getContentIterator(it, searchString, listModel) }
             } else {
-                projectBasePath?.let { stringEvaluator.getDirIterator(it, searchString, listModel ) }
+                projectBasePath?.let { stringEvaluator.getDirIterator(it, searchString, listModel) }
             }
 
             if (contentIterator != null) {
@@ -201,23 +202,34 @@ class FuzzyMover : FuzzyAction() {
 
             SwingUtilities.invokeLater {
                 component.fileList.model = listModel
-                component.fileList.cellRenderer = object : DefaultListCellRenderer() {
-                    override fun getListCellRendererComponent(list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
-                        val renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) as JLabel
-                        val container = value as FuzzyMatchContainer
-                        val filenameType: FilenameType = if (component.isDirSelector) {
-                            FILEPATH_ONLY // Directories are always shown as full paths
-                        } else {
-                            fuzzierSettingsService.state.filenameType
-                        }
-                        renderer.text = container.toString(filenameType)
-                        return renderer
-                    }
-                }
+                component.fileList.cellRenderer = getCellRenderer()
                 component.fileList.setPaintBusy(false)
                 if (!component.fileList.isEmpty) {
                     component.fileList.setSelectedValue(listModel[0], true)
                 }
+            }
+        }
+    }
+
+    fun getCellRenderer(): ListCellRenderer<Any?> {
+        return object : DefaultListCellRenderer() {
+            override fun getListCellRendererComponent(
+                list: JList<*>?,
+                value: Any?,
+                index: Int,
+                isSelected: Boolean,
+                cellHasFocus: Boolean
+            ): Component {
+                val renderer =
+                    super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) as JLabel
+                val container = value as FuzzyMatchContainer
+                val filenameType: FilenameType = if (component.isDirSelector) {
+                    FILEPATH_ONLY // Directories are always shown as full paths
+                } else {
+                    fuzzierSettingsService.state.filenameType
+                }
+                renderer.text = container.toString(filenameType)
+                return renderer
             }
         }
     }
