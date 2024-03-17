@@ -141,6 +141,7 @@ abstract class FuzzyAction : AnAction() {
         }
     }
 
+    // Used for testing
     fun setFiletype(filenameType: FilenameType) {
         fuzzierSettingsService.state.filenameType = filenameType
     }
