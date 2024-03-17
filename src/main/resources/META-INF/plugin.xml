@@ -29,7 +29,13 @@
   </extensions>
 
   <change-notes><![CDATA[
-  Refactor some shared functionality into a separate class, for later
+  <h2>Added an option to select how the list is displayed on the settings page.</h2>
+  For example: /path/to/file
+  <ul>
+    <li>Filepath only: /path/to/file</li>
+    <li>Filename only: file</li>
+    <li>Filename with path: file (/path/to/file)</li>
+  </ul>
   ]]>
   </change-notes>
 
