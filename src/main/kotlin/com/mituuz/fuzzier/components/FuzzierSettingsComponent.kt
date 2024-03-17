@@ -127,7 +127,11 @@ class FuzzierSettingsComponent {
         """.trimIndent()
 
         filenameTypeInstructions.toolTipText = """
-            Controls how the filename is shown on the file search and selector popups.
+            Controls how the filename is shown on the file search and selector popups.<br><br>
+            Choices are as follows (/path/to/file):<br><br>
+            <strong>Full path</strong> - Shows the full path of the file: /path/to/file<br>
+            <strong>Filename only</strong> - Shows only the filename: file<br>
+            <strong>Filename with (path)</strong> - Shows path in brackets: file (/path/to/file)
         """.trimIndent()
     }
 }
