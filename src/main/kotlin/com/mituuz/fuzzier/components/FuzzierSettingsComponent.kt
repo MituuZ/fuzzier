@@ -11,6 +11,7 @@ import com.intellij.util.ui.FormBuilder
 import com.intellij.openapi.ui.ComboBox
 import com.mituuz.fuzzier.StringEvaluator.FilenameType
 import com.mituuz.fuzzier.StringEvaluator.FilenameType.*
+import com.mituuz.fuzzier.components.FuzzierSettingsComponent.SettingsComponent
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import java.awt.Component
 import javax.swing.*
@@ -18,9 +19,17 @@ import javax.swing.border.LineBorder
 
 class FuzzierSettingsComponent {
     var jPanel: JPanel
-    var exclusionList = JBTextArea()
-    private var exclusionInstructions = JBLabel("<html><strong>File path exclusions:</strong><br>", AllIcons.General.ContextHelp, JBLabel.LEFT)
-    var newTabSelect = JBCheckBox()
+
+    val exclusionList = SettingsComponent(JBTextArea(), "File path exclusions",
+        """
+            One line per one exclusion from the Fuzzier results.<br><br>
+            Empty lines are skipped and all files in the project root start with "/"<br><br>
+            Supports wildcards (*) for starts with and ends with. Defaults to contains if no wildcards are present.<br><br>
+            e.g. "kt" excludes all files/file paths that contain the "kt" string. (main.<strong>kt</strong>, <strong>kt</strong>lin.java)
+    """.trimIndent())
+
+    val newTabSelect = SettingsComponent(JBCheckBox(), "Open files in a new tab")
+
     var debounceTimerValue = JBIntSpinner(150, 0, 2000)
     private var debounceInstructions = JBLabel("<html><strong>Debounce period (ms)</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
     private var resetWindowDimension = JButton("Reset popup location")
@@ -45,10 +54,9 @@ class FuzzierSettingsComponent {
     init {
         setupComponents()
         jPanel = FormBuilder.createFormBuilder()
-            .addComponent(exclusionInstructions)
             .addComponent(exclusionList)
             .addSeparator()
-            .addLabeledComponent("<html><strong>Open files in a new tab</strong></html>", newTabSelect)
+            .addLabeledComponent(newTabSelect)
             .addLabeledComponent(debounceInstructions, debounceTimerValue)
             .addLabeledComponent(filenameTypeInstructions, filenameTypeSelector)
             .addLabeledComponent("<html><strong>Bold filename when using filename with (path)</strong></html>", boldFilenameWithType)
@@ -75,7 +83,7 @@ class FuzzierSettingsComponent {
         filenameTypeSelector.addActionListener {
             boldFilenameWithType.isEnabled = filenameTypeSelector.selectedItem == FILENAME_WITH_PATH
         }
-        exclusionList.border = LineBorder(JBColor.BLACK, 1)
+        exclusionList.component.border = LineBorder(JBColor.BLACK, 1)
         resetWindowDimension.addActionListener {
             service<FuzzierSettingsService>().state.resetWindow = true
         }
@@ -96,13 +104,6 @@ class FuzzierSettingsComponent {
             startTestBench.isEnabled = false
             testBench.fill(this)
         }
-
-        exclusionInstructions.toolTipText = """
-            One line per one exclusion from the Fuzzier results.<br><br>
-            Empty lines are skipped and all files in the project root start with "/"<br><br>
-            Supports wildcards (*) for starts with and ends with. Defaults to contains if no wildcards are present.<br><br>
-            e.g. "kt" excludes all files/file paths that contain the "kt" string. (main.<strong>kt</strong>, <strong>kt</strong>lin.java)
-        """.trimIndent()
 
         multiMatchInstructions.toolTipText = """
             Count score for each instance of a character in the search string.<br><br>
@@ -143,4 +144,45 @@ class FuzzierSettingsComponent {
             <strong>Filename with (path)</strong> - Shows path in brackets: file (/path/to/file)
         """.trimIndent()
     }
+
+    class SettingsComponent {
+        val component: JComponent
+        val title: String
+        private val description: String
+        var label: JBLabel
+
+        constructor(component: JComponent, title: String, description: String) {
+            this.component = component
+            this.title = title
+            this.description = description
+
+            val strongTitle = "<html><strong>$title</strong></html>"
+            label = JBLabel(strongTitle, AllIcons.General.ContextHelp, JBLabel.LEFT)
+            label.toolTipText = description
+        }
+
+        constructor(component: JComponent, title: String) {
+            this.component = component
+            this.title = title
+            this.description = ""
+            this.label = JBLabel()
+        }
+
+        fun getJBTextArea(): JBTextArea {
+            return component as JBTextArea
+        }
+
+        fun getJBCheckBox(): JBCheckBox {
+            return component as JBCheckBox
+        }
+    }
+}
+
+private fun FormBuilder.addLabeledComponent(settingsComponent: SettingsComponent): FormBuilder {
+    return addLabeledComponent(settingsComponent.title, settingsComponent.component)
+}
+
+private fun FormBuilder.addComponent(settingsComponent: SettingsComponent): FormBuilder {
+    val builder = addComponent(settingsComponent.label)
+    return builder.addComponent(settingsComponent.component)
 }

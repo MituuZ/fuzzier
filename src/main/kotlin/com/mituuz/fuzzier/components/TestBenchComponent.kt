@@ -9,6 +9,7 @@ import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
+import com.intellij.ui.components.JBTextArea
 import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
 import com.mituuz.fuzzier.StringEvaluator
@@ -80,7 +81,7 @@ class TestBenchComponent : JPanel() {
         document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
                 debounceTimer?.cancel()
-                val debouncePeriod = liveSettingsComponent.debounceTimerValue.value as Int
+                val debouncePeriod = liveSettingsComponent.debounceTimerValue.getJBIntSpinner().value as Int
                 debounceTimer = Timer().schedule(debouncePeriod.toLong()) {
                     updateListContents(project, searchField.text)
                 }
@@ -96,7 +97,7 @@ class TestBenchComponent : JPanel() {
             return
         }
 
-        val newList = liveSettingsComponent.exclusionList.text
+        val newList = (liveSettingsComponent.exclusionList.component as JBTextArea).text
             .split("\n")
             .filter { it.isNotBlank() }
             .ifEmpty { listOf() }
