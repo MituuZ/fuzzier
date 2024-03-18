@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.mituuz"
-version = "0.16"
+version = "0.17"
 
 repositories {
   mavenCentral()
@@ -33,6 +33,7 @@ tasks {
 
   patchPluginXml {
     sinceBuild.set("233")
+    untilBuild.set("241")
   }
 
   signPlugin {

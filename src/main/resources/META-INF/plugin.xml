@@ -29,13 +29,7 @@
   </extensions>
 
   <change-notes><![CDATA[
-  <h2>Added an option to select how the list is displayed on the settings page.</h2>
-  For example: /path/to/file
-  <ul>
-    <li>Filepath only: /path/to/file</li>
-    <li>Filename only: file</li>
-    <li>Filename with path: file (/path/to/file)</li>
-  </ul>
+  Update supported versions to include 241 builds
   ]]>
   </change-notes>
 
