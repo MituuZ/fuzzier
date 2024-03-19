@@ -24,6 +24,9 @@ class FuzzierSettingsConfigurable : Configurable {
         fuzzierSettingsComponent.newTabSelect.isSelected = fuzzierSettingsService.state.newTab
         fuzzierSettingsComponent.debounceTimerValue.value = fuzzierSettingsService.state.debouncePeriod
         fuzzierSettingsComponent.filenameTypeSelector.selectedIndex = fuzzierSettingsService.state.filenameType.ordinal
+        fuzzierSettingsComponent.boldFilenameWithType.isSelected = fuzzierSettingsService.state.boldFilenameWithType
+        fuzzierSettingsComponent.fontSize.value = fuzzierSettingsService.state.fontSize
+        fuzzierSettingsComponent.fileListSpacing.value = fuzzierSettingsService.state.fileListSpacing
 
         fuzzierSettingsComponent.multiMatchActive.isSelected = fuzzierSettingsService.state.multiMatch
         fuzzierSettingsComponent.matchWeightPartialPath.value = fuzzierSettingsService.state.matchWeightPartialPath
@@ -38,6 +41,9 @@ class FuzzierSettingsConfigurable : Configurable {
                 || fuzzierSettingsService.state.newTab != fuzzierSettingsComponent.newTabSelect.isSelected
                 || fuzzierSettingsService.state.debouncePeriod != fuzzierSettingsComponent.debounceTimerValue.value
                 || fuzzierSettingsService.state.filenameType != fuzzierSettingsComponent.filenameTypeSelector.selectedItem
+                || fuzzierSettingsService.state.boldFilenameWithType != fuzzierSettingsComponent.boldFilenameWithType.isSelected
+                || fuzzierSettingsService.state.fontSize != fuzzierSettingsComponent.fontSize.value
+                || fuzzierSettingsService.state.fileListSpacing != fuzzierSettingsComponent.fileListSpacing.value
 
                 || fuzzierSettingsService.state.multiMatch != fuzzierSettingsComponent.multiMatchActive.isSelected
                 || fuzzierSettingsService.state.matchWeightPartialPath != fuzzierSettingsComponent.matchWeightPartialPath.value
@@ -55,6 +61,9 @@ class FuzzierSettingsConfigurable : Configurable {
         fuzzierSettingsService.state.newTab = fuzzierSettingsComponent.newTabSelect.isSelected
         fuzzierSettingsService.state.debouncePeriod = fuzzierSettingsComponent.debounceTimerValue.value as Int
         fuzzierSettingsService.state.filenameType = FilenameType.entries.toTypedArray()[fuzzierSettingsComponent.filenameTypeSelector.selectedIndex]
+        fuzzierSettingsService.state.boldFilenameWithType = fuzzierSettingsComponent.boldFilenameWithType.isSelected
+        fuzzierSettingsService.state.fontSize = fuzzierSettingsComponent.fontSize.value as Int
+        fuzzierSettingsService.state.fileListSpacing = fuzzierSettingsComponent.fileListSpacing.value as Int
         
         fuzzierSettingsService.state.multiMatch = fuzzierSettingsComponent.multiMatchActive.isSelected
         fuzzierSettingsService.state.matchWeightPartialPath = fuzzierSettingsComponent.matchWeightPartialPath.value as Int

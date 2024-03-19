@@ -26,6 +26,9 @@ class FuzzierSettingsComponent {
     private var resetWindowDimension = JButton("Reset popup location")
     private var filenameTypeInstructions = JBLabel("<html><strong>Filename type</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
     var filenameTypeSelector = ComboBox<FilenameType>()
+    var boldFilenameWithType = JBCheckBox()
+    var fontSize = JBIntSpinner(14, 4, 20)
+    var fileListSpacing = JBIntSpinner(0, 0, 10)
 
     var multiMatchActive = JBCheckBox()
     private var multiMatchInstructions = JBLabel("<html><strong>Match characters multiple times</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
@@ -48,6 +51,9 @@ class FuzzierSettingsComponent {
             .addLabeledComponent("<html><strong>Open files in a new tab</strong></html>", newTabSelect)
             .addLabeledComponent(debounceInstructions, debounceTimerValue)
             .addLabeledComponent(filenameTypeInstructions, filenameTypeSelector)
+            .addLabeledComponent("<html><strong>Bold filename with type</strong></html>", boldFilenameWithType)
+            .addLabeledComponent("<html><strong>Font size</strong></html>", fontSize)
+            .addLabeledComponent("<html><strong>File list spacing</strong></html>", fileListSpacing)
 
             .addSeparator()
             .addComponent(JBLabel("<html><strong>Match settings</strong></html>"))
@@ -65,6 +71,9 @@ class FuzzierSettingsComponent {
     private fun setupComponents() {
         multiMatchActive.addChangeListener {
             matchWeightSingleChar.isEnabled = multiMatchActive.isSelected
+        }
+        filenameTypeSelector.addActionListener {
+            boldFilenameWithType.isEnabled = filenameTypeSelector.selectedItem == FILENAME_WITH_PATH
         }
         exclusionList.border = LineBorder(JBColor.BLACK, 1)
         resetWindowDimension.addActionListener {

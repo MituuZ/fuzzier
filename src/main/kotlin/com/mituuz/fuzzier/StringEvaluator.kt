@@ -1,7 +1,9 @@
 package com.mituuz.fuzzier
 
+import com.intellij.openapi.components.service
 import com.intellij.openapi.roots.ContentIterator
 import com.intellij.openapi.vfs.VirtualFile
+import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.apache.commons.lang3.StringUtils
 import javax.swing.DefaultListModel
 
@@ -168,8 +170,16 @@ class StringEvaluator(
             return when (filenameType) {
                 FilenameType.FILENAME_ONLY -> filename
                 FilenameType.FILEPATH_ONLY -> filePath
-                FilenameType.FILENAME_WITH_PATH -> "$filename ($filePath)"
+                FilenameType.FILENAME_WITH_PATH -> getFilenameWithPathCustomized()
             }
+        }
+
+        private fun getFilenameWithPathCustomized(): String {
+            val settings = service<FuzzierSettingsService>().state
+            if (settings.boldFilenameWithType) {
+                return "<html><strong>$filename</strong> <i>($filePath)</i></html>"
+            }
+            return "<html>$filename <i>($filePath)</i></html>"
         }
     }
 

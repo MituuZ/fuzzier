@@ -18,6 +18,9 @@ class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.S
         var resetWindow = false
         var multiMatch = false
         var filenameType: FilenameType = FilenameType.FILEPATH_ONLY
+        var boldFilenameWithType = true
+        var fontSize = 14
+        var fileListSpacing = 0
 
         var matchWeightPartialPath = 10
         var matchWeightSingleChar = 5
