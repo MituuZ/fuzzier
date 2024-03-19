@@ -23,10 +23,10 @@ class FuzzierSettingsConfigurable : Configurable {
         fuzzierSettingsComponent.exclusionList.getJBTextArea().text = combinedString
         fuzzierSettingsComponent.newTabSelect.getJBCheckBox().isSelected = fuzzierSettingsService.state.newTab
         fuzzierSettingsComponent.debounceTimerValue.getIntSpinner().value = fuzzierSettingsService.state.debouncePeriod
-        fuzzierSettingsComponent.filenameTypeSelector.selectedIndex = fuzzierSettingsService.state.filenameType.ordinal
-        fuzzierSettingsComponent.boldFilenameWithType.isSelected = fuzzierSettingsService.state.boldFilenameWithType
-        fuzzierSettingsComponent.fontSize.value = fuzzierSettingsService.state.fontSize
-        fuzzierSettingsComponent.fileListSpacing.value = fuzzierSettingsService.state.fileListSpacing
+        fuzzierSettingsComponent.filenameTypeSelector.getFilenameTypeComboBox().selectedIndex = fuzzierSettingsService.state.filenameType.ordinal
+        fuzzierSettingsComponent.boldFilenameWithType.getJBCheckBox().isSelected = fuzzierSettingsService.state.boldFilenameWithType
+        fuzzierSettingsComponent.fontSize.getIntSpinner().value = fuzzierSettingsService.state.fontSize
+        fuzzierSettingsComponent.fileListSpacing.getIntSpinner().value = fuzzierSettingsService.state.fileListSpacing
 
         fuzzierSettingsComponent.multiMatchActive.isSelected = fuzzierSettingsService.state.multiMatch
         fuzzierSettingsComponent.matchWeightPartialPath.value = fuzzierSettingsService.state.matchWeightPartialPath
@@ -40,10 +40,10 @@ class FuzzierSettingsConfigurable : Configurable {
         return fuzzierSettingsService.state.exclusionList != fuzzierSettingsComponent.exclusionList.getJBTextArea().text.split("\n")
                 || fuzzierSettingsService.state.newTab != fuzzierSettingsComponent.newTabSelect.getJBCheckBox().isSelected
                 || fuzzierSettingsService.state.debouncePeriod != fuzzierSettingsComponent.debounceTimerValue.getIntSpinner().value
-                || fuzzierSettingsService.state.filenameType != fuzzierSettingsComponent.filenameTypeSelector.selectedItem
-                || fuzzierSettingsService.state.boldFilenameWithType != fuzzierSettingsComponent.boldFilenameWithType.isSelected
-                || fuzzierSettingsService.state.fontSize != fuzzierSettingsComponent.fontSize.value
-                || fuzzierSettingsService.state.fileListSpacing != fuzzierSettingsComponent.fileListSpacing.value
+                || fuzzierSettingsService.state.filenameType != fuzzierSettingsComponent.filenameTypeSelector.getFilenameTypeComboBox().selectedItem
+                || fuzzierSettingsService.state.boldFilenameWithType != fuzzierSettingsComponent.boldFilenameWithType.getJBCheckBox().isSelected
+                || fuzzierSettingsService.state.fontSize != fuzzierSettingsComponent.fontSize.getIntSpinner().value
+                || fuzzierSettingsService.state.fileListSpacing != fuzzierSettingsComponent.fileListSpacing.getIntSpinner().value
 
                 || fuzzierSettingsService.state.multiMatch != fuzzierSettingsComponent.multiMatchActive.isSelected
                 || fuzzierSettingsService.state.matchWeightPartialPath != fuzzierSettingsComponent.matchWeightPartialPath.value
@@ -60,10 +60,10 @@ class FuzzierSettingsConfigurable : Configurable {
         fuzzierSettingsService.state.exclusionList = newList
         fuzzierSettingsService.state.newTab = fuzzierSettingsComponent.newTabSelect.getJBCheckBox().isSelected
         fuzzierSettingsService.state.debouncePeriod = fuzzierSettingsComponent.debounceTimerValue.getIntSpinner().value as Int
-        fuzzierSettingsService.state.filenameType = FilenameType.entries.toTypedArray()[fuzzierSettingsComponent.filenameTypeSelector.selectedIndex]
-        fuzzierSettingsService.state.boldFilenameWithType = fuzzierSettingsComponent.boldFilenameWithType.isSelected
-        fuzzierSettingsService.state.fontSize = fuzzierSettingsComponent.fontSize.value as Int
-        fuzzierSettingsService.state.fileListSpacing = fuzzierSettingsComponent.fileListSpacing.value as Int
+        fuzzierSettingsService.state.filenameType = FilenameType.entries.toTypedArray()[fuzzierSettingsComponent.filenameTypeSelector.getFilenameTypeComboBox().selectedIndex]
+        fuzzierSettingsService.state.boldFilenameWithType = fuzzierSettingsComponent.boldFilenameWithType.getJBCheckBox().isSelected
+        fuzzierSettingsService.state.fontSize = fuzzierSettingsComponent.fontSize.getIntSpinner().value as Int
+        fuzzierSettingsService.state.fileListSpacing = fuzzierSettingsComponent.fileListSpacing.getIntSpinner().value as Int
         
         fuzzierSettingsService.state.multiMatch = fuzzierSettingsComponent.multiMatchActive.isSelected
         fuzzierSettingsService.state.matchWeightPartialPath = fuzzierSettingsComponent.matchWeightPartialPath.value as Int

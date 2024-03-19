@@ -33,14 +33,32 @@ class FuzzierSettingsComponent {
     val debounceTimerValue = SettingsComponent(JBIntSpinner(150, 0, 2000), "Debounce period (ms)",
         """
             Controls how long the search field must be idle before starting the search process.
-        """.trimIndent())
+        """.trimIndent(),
+        false)
 
-    private var resetWindowDimension = JButton("Reset popup location")
-    private var filenameTypeInstructions = JBLabel("<html><strong>Filename type</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
-    var filenameTypeSelector = ComboBox<FilenameType>()
-    var boldFilenameWithType = JBCheckBox()
-    var fontSize = JBIntSpinner(14, 4, 20)
-    var fileListSpacing = JBIntSpinner(0, 0, 10)
+    val filenameTypeSelector = SettingsComponent(ComboBox<FilenameType>(), "Filename type",
+        """
+            Controls how the filename is shown on the file search and selector popups.<br><br>
+            Choices are as follows (/path/to/file):<br><br>
+            <strong>Full path</strong> - Shows the full path of the file: /path/to/file<br>
+            <strong>Filename only</strong> - Shows only the filename: file<br>
+            <strong>Filename with (path)</strong> - Shows path in brackets: file (/path/to/file)
+    """.trimIndent(),
+        false)
+
+    val boldFilenameWithType = SettingsComponent(JBCheckBox(), "Bold filename when using: Filename with (path)")
+
+    val fontSize = SettingsComponent(JBIntSpinner(14, 4, 20), "File list font size",
+        """
+            Controls the font size of the file list in the search and selector popups.
+        """.trimIndent(),
+        false)
+
+    val fileListSpacing = SettingsComponent(JBIntSpinner(0, 0, 10), "File list vertical spacing",
+        """
+            Controls the vertical spacing between the file list items in the search and selector popups.
+        """.trimIndent(),
+        false)
 
     var multiMatchActive = JBCheckBox()
     private var multiMatchInstructions = JBLabel("<html><strong>Match characters multiple times</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
@@ -54,6 +72,8 @@ class FuzzierSettingsComponent {
     private var startTestBench = JButton("Launch Test Bench", AllIcons.General.ContextHelp)
     private var testBench = TestBenchComponent()
 
+    private var resetWindowDimension = JButton("Reset popup location")
+
     init {
         setupComponents()
         jPanel = FormBuilder.createFormBuilder()
@@ -61,10 +81,10 @@ class FuzzierSettingsComponent {
             .addSeparator()
             .addComponent(newTabSelect)
             .addComponent(debounceTimerValue)
-            .addLabeledComponent(filenameTypeInstructions, filenameTypeSelector)
-            .addLabeledComponent("<html><strong>Bold filename when using filename with (path)</strong></html>", boldFilenameWithType)
-            .addLabeledComponent("<html><strong>File list font size</strong></html>", fontSize)
-            .addLabeledComponent("<html><strong>File list vertical spacing</strong></html>", fileListSpacing)
+            .addComponent(filenameTypeSelector)
+            .addComponent(boldFilenameWithType)
+            .addComponent(fontSize)
+            .addComponent(fileListSpacing)
 
             .addSeparator()
             .addComponent(JBLabel("<html><strong>Match settings</strong></html>"))
@@ -83,15 +103,15 @@ class FuzzierSettingsComponent {
         multiMatchActive.addChangeListener {
             matchWeightSingleChar.isEnabled = multiMatchActive.isSelected
         }
-        filenameTypeSelector.addActionListener {
-            boldFilenameWithType.isEnabled = filenameTypeSelector.selectedItem == FILENAME_WITH_PATH
+        filenameTypeSelector.getFilenameTypeComboBox().addActionListener {
+            boldFilenameWithType.getJBCheckBox().isEnabled = filenameTypeSelector.getFilenameTypeComboBox().selectedItem == FILENAME_WITH_PATH
         }
         exclusionList.component.border = LineBorder(JBColor.BLACK, 1)
         resetWindowDimension.addActionListener {
             service<FuzzierSettingsService>().state.resetWindow = true
         }
 
-        filenameTypeSelector.renderer = object : DefaultListCellRenderer() {
+        filenameTypeSelector.getFilenameTypeComboBox().renderer = object : DefaultListCellRenderer() {
             override fun getListCellRendererComponent(list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
                 val renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) as JLabel
                 val filenameType = value as FilenameType
@@ -100,7 +120,7 @@ class FuzzierSettingsComponent {
             }
         }
         for (filenameType in entries) {
-            filenameTypeSelector.addItem(filenameType)
+            filenameTypeSelector.getFilenameTypeComboBox().addItem(filenameType)
         }
 
         startTestBench.addActionListener {
@@ -134,25 +154,19 @@ class FuzzierSettingsComponent {
         startTestBench.toolTipText = """
             Test settings changes live on the current project's file index.
         """.trimIndent()
-
-        filenameTypeInstructions.toolTipText = """
-            Controls how the filename is shown on the file search and selector popups.<br><br>
-            Choices are as follows (/path/to/file):<br><br>
-            <strong>Full path</strong> - Shows the full path of the file: /path/to/file<br>
-            <strong>Filename only</strong> - Shows only the filename: file<br>
-            <strong>Filename with (path)</strong> - Shows path in brackets: file (/path/to/file)
-        """.trimIndent()
     }
 
     class SettingsComponent {
         val includesSeparateLabel: Boolean
+        val onlyTitle: Boolean
         val component: JComponent
         val title: String
         private val description: String
         var label: JBLabel
 
-        constructor(component: JComponent, title: String, description: String) {
-            this.includesSeparateLabel = true
+        constructor(component: JComponent, title: String, description: String, separateLabel: Boolean = true) {
+            this.onlyTitle = false
+            this.includesSeparateLabel = separateLabel
             this.component = component
             this.title = title
             this.description = description
@@ -163,6 +177,7 @@ class FuzzierSettingsComponent {
         }
 
         constructor(component: JComponent, title: String) {
+            this.onlyTitle = true
             this.includesSeparateLabel = false
             this.component = component
             this.title = title
@@ -181,6 +196,11 @@ class FuzzierSettingsComponent {
         fun getIntSpinner(): JBIntSpinner {
             return component as JBIntSpinner
         }
+
+        fun getFilenameTypeComboBox(): ComboBox<FilenameType> {
+            @Suppress("UNCHECKED_CAST")
+            return component as ComboBox<FilenameType>
+        }
     }
 }
 
@@ -189,9 +209,14 @@ private fun FormBuilder.addLabeledComponent(settingsComponent: SettingsComponent
 }
 
 private fun FormBuilder.addComponent(settingsComponent: SettingsComponent): FormBuilder {
-    if (!settingsComponent.includesSeparateLabel) {
+    if (!settingsComponent.includesSeparateLabel && !settingsComponent.onlyTitle) {
+        return addLabeledComponent(settingsComponent.label, settingsComponent.component)
+    }
+
+    if (settingsComponent.onlyTitle) {
         return addLabeledComponent(settingsComponent)
     }
+
     val builder = addComponent(settingsComponent.label)
     return builder.addComponent(settingsComponent.component)
 }
