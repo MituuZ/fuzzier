@@ -51,9 +51,9 @@ class FuzzierSettingsComponent {
             .addLabeledComponent("<html><strong>Open files in a new tab</strong></html>", newTabSelect)
             .addLabeledComponent(debounceInstructions, debounceTimerValue)
             .addLabeledComponent(filenameTypeInstructions, filenameTypeSelector)
-            .addLabeledComponent("<html><strong>Bold filename with type</strong></html>", boldFilenameWithType)
-            .addLabeledComponent("<html><strong>Font size</strong></html>", fontSize)
-            .addLabeledComponent("<html><strong>File list spacing</strong></html>", fileListSpacing)
+            .addLabeledComponent("<html><strong>Bold filename when using filename with (path)</strong></html>", boldFilenameWithType)
+            .addLabeledComponent("<html><strong>File list font size</strong></html>", fontSize)
+            .addLabeledComponent("<html><strong>File list vertical spacing</strong></html>", fileListSpacing)
 
             .addSeparator()
             .addComponent(JBLabel("<html><strong>Match settings</strong></html>"))
