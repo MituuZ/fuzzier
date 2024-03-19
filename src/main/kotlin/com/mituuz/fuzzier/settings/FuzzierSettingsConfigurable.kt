@@ -22,7 +22,7 @@ class FuzzierSettingsConfigurable : Configurable {
         }
         fuzzierSettingsComponent.exclusionList.getJBTextArea().text = combinedString
         fuzzierSettingsComponent.newTabSelect.getJBCheckBox().isSelected = fuzzierSettingsService.state.newTab
-        fuzzierSettingsComponent.debounceTimerValue.value = fuzzierSettingsService.state.debouncePeriod
+        fuzzierSettingsComponent.debounceTimerValue.getIntSpinner().value = fuzzierSettingsService.state.debouncePeriod
         fuzzierSettingsComponent.filenameTypeSelector.selectedIndex = fuzzierSettingsService.state.filenameType.ordinal
         fuzzierSettingsComponent.boldFilenameWithType.isSelected = fuzzierSettingsService.state.boldFilenameWithType
         fuzzierSettingsComponent.fontSize.value = fuzzierSettingsService.state.fontSize
@@ -39,7 +39,7 @@ class FuzzierSettingsConfigurable : Configurable {
     override fun isModified(): Boolean {
         return fuzzierSettingsService.state.exclusionList != fuzzierSettingsComponent.exclusionList.getJBTextArea().text.split("\n")
                 || fuzzierSettingsService.state.newTab != fuzzierSettingsComponent.newTabSelect.getJBCheckBox().isSelected
-                || fuzzierSettingsService.state.debouncePeriod != fuzzierSettingsComponent.debounceTimerValue.value
+                || fuzzierSettingsService.state.debouncePeriod != fuzzierSettingsComponent.debounceTimerValue.getIntSpinner().value
                 || fuzzierSettingsService.state.filenameType != fuzzierSettingsComponent.filenameTypeSelector.selectedItem
                 || fuzzierSettingsService.state.boldFilenameWithType != fuzzierSettingsComponent.boldFilenameWithType.isSelected
                 || fuzzierSettingsService.state.fontSize != fuzzierSettingsComponent.fontSize.value
@@ -59,7 +59,7 @@ class FuzzierSettingsConfigurable : Configurable {
 
         fuzzierSettingsService.state.exclusionList = newList
         fuzzierSettingsService.state.newTab = fuzzierSettingsComponent.newTabSelect.getJBCheckBox().isSelected
-        fuzzierSettingsService.state.debouncePeriod = fuzzierSettingsComponent.debounceTimerValue.value as Int
+        fuzzierSettingsService.state.debouncePeriod = fuzzierSettingsComponent.debounceTimerValue.getIntSpinner().value as Int
         fuzzierSettingsService.state.filenameType = FilenameType.entries.toTypedArray()[fuzzierSettingsComponent.filenameTypeSelector.selectedIndex]
         fuzzierSettingsService.state.boldFilenameWithType = fuzzierSettingsComponent.boldFilenameWithType.isSelected
         fuzzierSettingsService.state.fontSize = fuzzierSettingsComponent.fontSize.value as Int

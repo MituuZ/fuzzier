@@ -81,7 +81,7 @@ class TestBenchComponent : JPanel() {
         document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
                 debounceTimer?.cancel()
-                val debouncePeriod = liveSettingsComponent.debounceTimerValue.getJBIntSpinner().value as Int
+                val debouncePeriod = liveSettingsComponent.debounceTimerValue.getIntSpinner().value as Int
                 debounceTimer = Timer().schedule(debouncePeriod.toLong()) {
                     updateListContents(project, searchField.text)
                 }

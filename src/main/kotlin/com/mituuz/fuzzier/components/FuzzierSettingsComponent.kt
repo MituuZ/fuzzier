@@ -30,8 +30,11 @@ class FuzzierSettingsComponent {
 
     val newTabSelect = SettingsComponent(JBCheckBox(), "Open files in a new tab")
 
-    var debounceTimerValue = JBIntSpinner(150, 0, 2000)
-    private var debounceInstructions = JBLabel("<html><strong>Debounce period (ms)</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
+    val debounceTimerValue = SettingsComponent(JBIntSpinner(150, 0, 2000), "Debounce period (ms)",
+        """
+            Controls how long the search field must be idle before starting the search process.
+        """.trimIndent())
+
     private var resetWindowDimension = JButton("Reset popup location")
     private var filenameTypeInstructions = JBLabel("<html><strong>Filename type</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
     var filenameTypeSelector = ComboBox<FilenameType>()
@@ -56,8 +59,8 @@ class FuzzierSettingsComponent {
         jPanel = FormBuilder.createFormBuilder()
             .addComponent(exclusionList)
             .addSeparator()
-            .addLabeledComponent(newTabSelect)
-            .addLabeledComponent(debounceInstructions, debounceTimerValue)
+            .addComponent(newTabSelect)
+            .addComponent(debounceTimerValue)
             .addLabeledComponent(filenameTypeInstructions, filenameTypeSelector)
             .addLabeledComponent("<html><strong>Bold filename when using filename with (path)</strong></html>", boldFilenameWithType)
             .addLabeledComponent("<html><strong>File list font size</strong></html>", fontSize)
@@ -110,10 +113,6 @@ class FuzzierSettingsComponent {
             Normally file list sorting is done based on the longest streak,
             but similar package or folder names might make finding correct files inconvenient.<br><br>
             e.g. kotlin/is/fun contains "i" two times, so search "if" would score three points.
-            
-        """.trimIndent()
-        debounceInstructions.toolTipText = """
-            Controls how long the search field must be idle before starting the search process.
         """.trimIndent()
 
         partialPathInfo.toolTipText = """
@@ -146,12 +145,14 @@ class FuzzierSettingsComponent {
     }
 
     class SettingsComponent {
+        val includesSeparateLabel: Boolean
         val component: JComponent
         val title: String
         private val description: String
         var label: JBLabel
 
         constructor(component: JComponent, title: String, description: String) {
+            this.includesSeparateLabel = true
             this.component = component
             this.title = title
             this.description = description
@@ -162,6 +163,7 @@ class FuzzierSettingsComponent {
         }
 
         constructor(component: JComponent, title: String) {
+            this.includesSeparateLabel = false
             this.component = component
             this.title = title
             this.description = ""
@@ -175,6 +177,10 @@ class FuzzierSettingsComponent {
         fun getJBCheckBox(): JBCheckBox {
             return component as JBCheckBox
         }
+
+        fun getIntSpinner(): JBIntSpinner {
+            return component as JBIntSpinner
+        }
     }
 }
 
@@ -183,6 +189,9 @@ private fun FormBuilder.addLabeledComponent(settingsComponent: SettingsComponent
 }
 
 private fun FormBuilder.addComponent(settingsComponent: SettingsComponent): FormBuilder {
+    if (!settingsComponent.includesSeparateLabel) {
+        return addLabeledComponent(settingsComponent)
+    }
     val builder = addComponent(settingsComponent.label)
     return builder.addComponent(settingsComponent.component)
 }
