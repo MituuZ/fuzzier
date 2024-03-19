@@ -136,6 +136,12 @@ abstract class FuzzyAction : AnAction() {
                     fuzzierSettingsService.state.filenameType
                 }
                 renderer.text = container.toString(filenameType)
+                fuzzierSettingsService.state.fileListSpacing.let {
+                    renderer.border = BorderFactory.createEmptyBorder(it, 0, it, 0)
+                }
+                fuzzierSettingsService.state.fontSize.let {
+                    renderer.font = renderer.font.deriveFont(it.toFloat())
+                }
                 return renderer
             }
         }
@@ -144,5 +150,9 @@ abstract class FuzzyAction : AnAction() {
     // Used for testing
     fun setFiletype(filenameType: FilenameType) {
         fuzzierSettingsService.state.filenameType = filenameType
+    }
+
+    fun setBoldFilename(value: Boolean) {
+        fuzzierSettingsService.state.boldFilenameWithType = value
     }
 }
