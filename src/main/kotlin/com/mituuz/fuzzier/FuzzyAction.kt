@@ -151,4 +151,8 @@ abstract class FuzzyAction : AnAction() {
     fun setFiletype(filenameType: FilenameType) {
         fuzzierSettingsService.state.filenameType = filenameType
     }
+
+    fun setBoldFilename(value: Boolean) {
+        fuzzierSettingsService.state.boldFilenameWithType = value
+    }
 }
