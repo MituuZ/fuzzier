@@ -20,6 +20,9 @@ import javax.swing.border.LineBorder
 class FuzzierSettingsComponent {
     var jPanel: JPanel
 
+    /////////////////////////////////////////////////////////////////
+    // General settings
+    /////////////////////////////////////////////////////////////////
     val exclusionList = SettingsComponent(JBTextArea(), "File path exclusions",
         """
             One line per one exclusion from the Fuzzier results.<br><br>
@@ -60,16 +63,45 @@ class FuzzierSettingsComponent {
         """.trimIndent(),
         false)
 
-    var multiMatchActive = JBCheckBox()
-    private var multiMatchInstructions = JBLabel("<html><strong>Match characters multiple times</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
-    var matchWeightPartialPath = JBIntSpinner(10, 0, 100)
-    private var partialPathInfo = JBLabel("<html><strong>Match weight: Partial path match</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
-    var matchWeightSingleChar = JBIntSpinner(5, 0, 50)
-    private var singleCharInfo = JBLabel("<html><strong>Match weight: Single char (* 0.1)</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
-    var matchWeightStreakModifier = JBIntSpinner(10, 0, 100)
-    private var streakModifierInfo = JBLabel("<html><strong>Match weight: Streak modifier (* 0.1)</strong></html>", AllIcons.General.ContextHelp, JBLabel.LEFT)
 
-    private var startTestBench = JButton("Launch Test Bench", AllIcons.General.ContextHelp)
+    /////////////////////////////////////////////////////////////////
+    // Match settings
+    /////////////////////////////////////////////////////////////////
+    val multiMatchActive = SettingsComponent(JBCheckBox(), "Match characters multiple times",
+        """
+            Count score for each instance of a character in the search string.<br><br>
+            Normally file list sorting is done based on the longest streak,
+            but similar package or folder names might make finding correct files inconvenient.<br><br>
+            e.g. kotlin/is/fun contains "i" two times, so search "if" would score three points.
+        """.trimIndent(),
+        false)
+
+    val matchWeightPartialPath = SettingsComponent(JBIntSpinner(10, 0, 100), "Match weight: Partial path match",
+        """
+            How much score should a partial path match give.<br><br>
+            Partial matches are checked against file path parts, delimited by "/" and ".".<br><br>
+            e.g. search string "is" is a partial path match for kotlin/<strong>is</strong>/fun, where as "isf" is not.
+        """.trimIndent(),
+        false)
+
+    val matchWeightSingleChar = SettingsComponent(JBIntSpinner(5, 0, 50), "Match weight: Single char (* 0.1)",
+        """
+            How much score should a single char give. Only applies when multi match is active.<br><br>
+            Is divided by 10 when calculating score.
+        """.trimIndent(),
+        false)
+
+    val matchWeightStreakModifier = SettingsComponent(JBIntSpinner(10, 0, 100), "Match weight: Streak modifier (* 0.1)",
+        """
+            Longest streak score is multiplied by this amount (divided by 10).<br><br>
+            e.g. 10 = 1, so highest streak is added as the number of matched letters.
+        """.trimIndent(),
+        false)
+
+    private val startTestBench = SettingsComponent(JButton("Launch Test Bench", AllIcons.General.ContextHelp), "Test Bench",
+        """
+            Test settings live with the current project's file index.
+        """.trimIndent())
     private var testBench = TestBenchComponent()
 
     private var resetWindowDimension = JButton("Reset popup location")
@@ -88,10 +120,10 @@ class FuzzierSettingsComponent {
 
             .addSeparator()
             .addComponent(JBLabel("<html><strong>Match settings</strong></html>"))
-            .addLabeledComponent(multiMatchInstructions, multiMatchActive)
-            .addLabeledComponent(singleCharInfo, matchWeightSingleChar)
-            .addLabeledComponent(partialPathInfo, matchWeightPartialPath)
-            .addLabeledComponent(streakModifierInfo, matchWeightStreakModifier)
+            .addComponent(multiMatchActive)
+            .addComponent(matchWeightSingleChar)
+            .addComponent(matchWeightPartialPath)
+            .addComponent(matchWeightStreakModifier)
             .addComponent(startTestBench)
             .addComponent(testBench)
             .addComponentFillVertically(JPanel(), 0)
@@ -100,11 +132,11 @@ class FuzzierSettingsComponent {
     }
 
     private fun setupComponents() {
-        multiMatchActive.addChangeListener {
-            matchWeightSingleChar.isEnabled = multiMatchActive.isSelected
+        multiMatchActive.getCheckBox().addChangeListener {
+            matchWeightSingleChar.getIntSpinner().isEnabled = multiMatchActive.getCheckBox().isSelected
         }
         filenameTypeSelector.getFilenameTypeComboBox().addActionListener {
-            boldFilenameWithType.getJBCheckBox().isEnabled = filenameTypeSelector.getFilenameTypeComboBox().selectedItem == FILENAME_WITH_PATH
+            boldFilenameWithType.getCheckBox().isEnabled = filenameTypeSelector.getFilenameTypeComboBox().selectedItem == FILENAME_WITH_PATH
         }
         exclusionList.component.border = LineBorder(JBColor.BLACK, 1)
         resetWindowDimension.addActionListener {
@@ -123,37 +155,10 @@ class FuzzierSettingsComponent {
             filenameTypeSelector.getFilenameTypeComboBox().addItem(filenameType)
         }
 
-        startTestBench.addActionListener {
-            startTestBench.isEnabled = false
+        startTestBench.getButton().addActionListener {
+            startTestBench.getButton().isEnabled = false
             testBench.fill(this)
         }
-
-        multiMatchInstructions.toolTipText = """
-            Count score for each instance of a character in the search string.<br><br>
-            Normally file list sorting is done based on the longest streak,
-            but similar package or folder names might make finding correct files inconvenient.<br><br>
-            e.g. kotlin/is/fun contains "i" two times, so search "if" would score three points.
-        """.trimIndent()
-
-        partialPathInfo.toolTipText = """
-            How much score should a partial path match give.<br><br>
-            Partial matches are checked against file path parts, delimited by "/" and ".".<br><br>
-            e.g. search string "is" is a partial path match for kotlin/<strong>is</strong>/fun, where as "isf" is not.
-        """.trimIndent()
-
-        singleCharInfo.toolTipText = """
-            How much score should a single char give. Only applies when multi match is active.<br><br>
-            Is divided by 10 when calculating score.
-        """.trimIndent()
-
-        streakModifierInfo.toolTipText = """
-            Longest streak score is multiplied by this amount (divided by 10).<br><br>
-            e.g. 10 = 1, so highest streak is added as the number of matched letters.
-        """.trimIndent()
-
-        startTestBench.toolTipText = """
-            Test settings changes live on the current project's file index.
-        """.trimIndent()
     }
 
     class SettingsComponent {
@@ -189,7 +194,7 @@ class FuzzierSettingsComponent {
             return component as JBTextArea
         }
 
-        fun getJBCheckBox(): JBCheckBox {
+        fun getCheckBox(): JBCheckBox {
             return component as JBCheckBox
         }
 
@@ -200,6 +205,10 @@ class FuzzierSettingsComponent {
         fun getFilenameTypeComboBox(): ComboBox<FilenameType> {
             @Suppress("UNCHECKED_CAST")
             return component as ComboBox<FilenameType>
+        }
+
+        fun getButton(): JButton {
+            return component as JButton
         }
     }
 }

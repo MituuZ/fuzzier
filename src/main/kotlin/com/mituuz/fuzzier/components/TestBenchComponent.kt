@@ -101,10 +101,10 @@ class TestBenchComponent : JPanel() {
             .split("\n")
             .filter { it.isNotBlank() }
             .ifEmpty { listOf() }
-        val stringEvaluator = StringEvaluator(liveSettingsComponent.multiMatchActive.isSelected,
-            newList, liveSettingsComponent.matchWeightSingleChar.value as Int,
-            liveSettingsComponent.matchWeightStreakModifier.value as Int,
-            liveSettingsComponent.matchWeightPartialPath.value as Int)
+        val stringEvaluator = StringEvaluator(liveSettingsComponent.multiMatchActive.getCheckBox().isSelected,
+            newList, liveSettingsComponent.matchWeightSingleChar.getIntSpinner().value as Int,
+            liveSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int,
+            liveSettingsComponent.matchWeightPartialPath.getIntSpinner().value as Int)
 
         currentTask?.takeIf { !it.isDone }?.cancel(true)
 
