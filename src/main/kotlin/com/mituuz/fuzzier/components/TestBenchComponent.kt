@@ -9,6 +9,7 @@ import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
+import com.intellij.ui.components.JBTextArea
 import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
 import com.mituuz.fuzzier.StringEvaluator
@@ -80,7 +81,7 @@ class TestBenchComponent : JPanel() {
         document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
                 debounceTimer?.cancel()
-                val debouncePeriod = liveSettingsComponent.debounceTimerValue.value as Int
+                val debouncePeriod = liveSettingsComponent.debounceTimerValue.getIntSpinner().value as Int
                 debounceTimer = Timer().schedule(debouncePeriod.toLong()) {
                     updateListContents(project, searchField.text)
                 }
@@ -96,14 +97,14 @@ class TestBenchComponent : JPanel() {
             return
         }
 
-        val newList = liveSettingsComponent.exclusionList.text
+        val newList = (liveSettingsComponent.exclusionList.component as JBTextArea).text
             .split("\n")
             .filter { it.isNotBlank() }
             .ifEmpty { listOf() }
-        val stringEvaluator = StringEvaluator(liveSettingsComponent.multiMatchActive.isSelected,
-            newList, liveSettingsComponent.matchWeightSingleChar.value as Int,
-            liveSettingsComponent.matchWeightStreakModifier.value as Int,
-            liveSettingsComponent.matchWeightPartialPath.value as Int)
+        val stringEvaluator = StringEvaluator(liveSettingsComponent.multiMatchActive.getCheckBox().isSelected,
+            newList, liveSettingsComponent.matchWeightSingleChar.getIntSpinner().value as Int,
+            liveSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int,
+            liveSettingsComponent.matchWeightPartialPath.getIntSpinner().value as Int)
 
         currentTask?.takeIf { !it.isDone }?.cancel(true)
 
