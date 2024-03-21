@@ -29,12 +29,7 @@
   </extensions>
 
   <change-notes><![CDATA[
-  <h2>Add options to visually modify the file list:</h2>
-    <ul>
-        <li>Change font size</li>
-        <li>Use bold to mark filename when using filename with (path)</li>
-        <li>Change row spacing</li>
-    </ul>
+  Revert html parsing and fix freezing issue when using Filename with (path). Have to take another look how to do this properly.
   ]]>
   </change-notes>
 
