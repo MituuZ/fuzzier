@@ -84,7 +84,6 @@ class FuzzyActionTest {
     fun `Check renderer with path`() {
         val action = getAction()
         action.setFiletype(FILENAME_WITH_PATH)
-        action.setBoldFilename(false)
         val myFixture: CodeInsightTestFixture = testUtil.setUpProject(emptyList())
         val project = myFixture.project
         action.component = SimpleFinderComponent(project)
@@ -93,23 +92,7 @@ class FuzzyActionTest {
         val dummyList = JList<FuzzyMatchContainer>()
         val component = renderer.getListCellRendererComponent(dummyList, container, 0, false, false) as JLabel
         assertNotNull(component)
-        assertEquals("<html>asd <i>(/src/asd)</i></html>", component.text)
-    }
-
-    @Test
-    fun `Check renderer with path strong filename`() {
-        val action = getAction()
-        action.setFiletype(FILENAME_WITH_PATH)
-        action.setBoldFilename(true)
-        val myFixture: CodeInsightTestFixture = testUtil.setUpProject(emptyList())
-        val project = myFixture.project
-        action.component = SimpleFinderComponent(project)
-        val renderer = action.getCellRenderer()
-        val container = FuzzyMatchContainer(1, "/src/asd", "asd")
-        val dummyList = JList<FuzzyMatchContainer>()
-        val component = renderer.getListCellRendererComponent(dummyList, container, 0, false, false) as JLabel
-        assertNotNull(component)
-        assertEquals("<html><strong>asd</strong> <i>(/src/asd)</i></html>", component.text)
+        assertEquals("asd   (/src/asd)", component.text)
     }
 
     @Test
