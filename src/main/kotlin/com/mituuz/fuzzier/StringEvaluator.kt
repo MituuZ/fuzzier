@@ -170,16 +170,8 @@ class StringEvaluator(
             return when (filenameType) {
                 FilenameType.FILENAME_ONLY -> filename
                 FilenameType.FILEPATH_ONLY -> filePath
-                FilenameType.FILENAME_WITH_PATH -> getFilenameWithPathCustomized()
+                FilenameType.FILENAME_WITH_PATH -> "$filename   ($filePath)"
             }
-        }
-
-        private fun getFilenameWithPathCustomized(): String {
-            val settings = service<FuzzierSettingsService>().state
-            if (settings.boldFilenameWithType) {
-                return "<html><strong>$filename</strong> <i>($filePath)</i></html>"
-            }
-            return "<html>$filename <i>($filePath)</i></html>"
         }
     }
 
