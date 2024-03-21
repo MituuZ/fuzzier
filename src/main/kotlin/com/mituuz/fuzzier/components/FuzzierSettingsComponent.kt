@@ -96,7 +96,7 @@ class FuzzierSettingsComponent {
         """.trimIndent(),
         false)
 
-    private val startTestBench = SettingsComponent(JButton("Launch Test Bench", AllIcons.General.ContextHelp), "Test Bench",
+    private val startTestBench = SettingsComponent(JButton("Launch Test Bench"), "Test Bench",
         """
             Test settings live with the current project's file index.
         """.trimIndent())
