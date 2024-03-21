@@ -84,7 +84,6 @@ class FuzzyActionTest {
     fun `Check renderer with path`() {
         val action = getAction()
         action.setFiletype(FILENAME_WITH_PATH)
-        action.setBoldFilename(false)
         val myFixture: CodeInsightTestFixture = testUtil.setUpProject(emptyList())
         val project = myFixture.project
         action.component = SimpleFinderComponent(project)

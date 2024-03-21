@@ -49,8 +49,6 @@ class FuzzierSettingsComponent {
     """.trimIndent(),
         false)
 
-    val boldFilenameWithType = SettingsComponent(JBCheckBox(), "Bold filename when using: Filename with (path)")
-
     val fontSize = SettingsComponent(JBIntSpinner(14, 4, 20), "File list font size",
         """
             Controls the font size of the file list in the search and selector popups.
@@ -114,7 +112,6 @@ class FuzzierSettingsComponent {
             .addComponent(newTabSelect)
             .addComponent(debounceTimerValue)
             .addComponent(filenameTypeSelector)
-            .addComponent(boldFilenameWithType)
             .addComponent(fontSize)
             .addComponent(fileListSpacing)
 
@@ -134,9 +131,6 @@ class FuzzierSettingsComponent {
     private fun setupComponents() {
         multiMatchActive.getCheckBox().addChangeListener {
             matchWeightSingleChar.getIntSpinner().isEnabled = multiMatchActive.getCheckBox().isSelected
-        }
-        filenameTypeSelector.getFilenameTypeComboBox().addActionListener {
-            boldFilenameWithType.getCheckBox().isEnabled = filenameTypeSelector.getFilenameTypeComboBox().selectedItem == FILENAME_WITH_PATH
         }
         exclusionList.component.border = LineBorder(JBColor.BLACK, 1)
         resetWindowDimension.addActionListener {
