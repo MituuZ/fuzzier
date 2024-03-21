@@ -20,7 +20,6 @@ import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.StringEvaluator.FuzzyMatchContainer
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import org.apache.commons.lang3.StringUtils
-import java.awt.Component
 import java.awt.event.*
 import javax.swing.*
 
