@@ -23,7 +23,7 @@ tasks.test {
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {
   version.set("2023.3.4")
-  plugins.set(listOf(/* Plugin Dependencies */))
+  plugins.set(listOf("Git4Idea"))
 }
 
 tasks {
