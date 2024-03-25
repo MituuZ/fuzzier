@@ -23,8 +23,8 @@ import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
 import javax.swing.*
 
-class Fuzzier : FuzzyAction() {
-    private var defaultDoc: Document? = null
+open class Fuzzier : FuzzyAction() {
+    var defaultDoc: Document? = null
     private val fuzzyDimensionKey: String = "FuzzySearchPopup"
 
     override fun actionPerformed(actionEvent: AnActionEvent) {
@@ -92,7 +92,7 @@ class Fuzzier : FuzzyAction() {
             val projectBasePath = project.basePath
             val stringEvaluator = StringEvaluator(
                 fuzzierSettingsService.state.multiMatch,
-                fuzzierSettingsService.state.exclusionList,
+                fuzzierSettingsService.state.exclusionSet,
                 fuzzierSettingsService.state.matchWeightSingleChar,
                 fuzzierSettingsService.state.matchWeightStreakModifier,
                 fuzzierSettingsService.state.matchWeightPartialPath

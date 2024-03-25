@@ -1,14 +1,12 @@
 package com.mituuz.fuzzier
 
-import com.intellij.openapi.components.service
 import com.intellij.openapi.roots.ContentIterator
 import com.intellij.openapi.vfs.VirtualFile
-import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.apache.commons.lang3.StringUtils
 import javax.swing.DefaultListModel
 
 class StringEvaluator(
-    private var multiMatch: Boolean, private var exclusionList: List<String>, private var matchWeightSingleChar: Int,
+    private var multiMatch: Boolean, private var exclusionList: Set<String>, private var matchWeightSingleChar: Int,
     private var matchWeightStreakModifier: Int, private var matchWeightPartialPath: Int) {
 
     fun getContentIterator(projectBasePath: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
@@ -48,6 +46,8 @@ class StringEvaluator(
     }
 
     private fun isExcluded(filePath: String): Boolean {
+        println(filePath)
+        println(exclusionList)
         for (e in exclusionList) {
             when {
                 e.startsWith("*") -> {

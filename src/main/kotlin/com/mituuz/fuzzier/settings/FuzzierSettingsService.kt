@@ -12,7 +12,7 @@ import com.mituuz.fuzzier.StringEvaluator.FilenameType
 class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.State> {
     class State {
         var splitPosition: Int = 300
-        var exclusionList: List<String> = listOf("/.idea/*", "/.git/*", "/target/*", "/build/*", "/.gradle/*", "/.run/*")
+        var exclusionSet: MutableSet<String> = mutableSetOf("/.idea/*", "/.git/*", "/target/*", "/build/*", "/.gradle/*", "/.run/*")
         var newTab: Boolean = false
         var debouncePeriod: Int = 150
         var resetWindow = false

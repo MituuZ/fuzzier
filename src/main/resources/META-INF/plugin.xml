@@ -43,6 +43,13 @@
       <override-text place="MainMenu" text="Fuzzy File Search"/>
       <add-to-group group-id="ToolsMenu" anchor="first"/>
     </action>
+    <action id="com.mituuz.fuzzier.GitAction"
+            class="com.mituuz.fuzzier.GitAction"
+            text="Fuzzy File Search (Only Git Tracked Files)"
+            description="Search files using a basic fuzzy search on git tracked files only">
+      <override-text place="MainMenu" text="Fuzzy File Search (Only Git Tracked Files)"/>
+      <add-to-group group-id="ToolsMenu" />
+    </action>
     <action id="com.mituuz.fuzzier.FuzzyMover"
             class="com.mituuz.fuzzier.FuzzyMover"
             text="Fuzzy File Mover"

@@ -31,7 +31,7 @@ class TestUtil {
         DumbService.getInstance(fixture.project).waitForSmartMode()
     }
 
-    fun setUpProjectFileIndex(filesToAdd: List<String>, exclusionList: List<String>) : DefaultListModel<FuzzyMatchContainer> {
+    fun setUpProjectFileIndex(filesToAdd: List<String>, exclusionList: Set<String>) : DefaultListModel<FuzzyMatchContainer> {
         val filePathContainer = DefaultListModel<FuzzyMatchContainer>()
         val factory = IdeaTestFixtureFactory.getFixtureFactory()
         val fixtureBuilder = factory.createLightFixtureBuilder(null, "Test")
