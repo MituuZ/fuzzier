@@ -1,4 +1,15 @@
 # Fuzzier - IntelliJ IDEA plugin
+<p align="center">
+    <a href="https://plugins.jetbrains.com/plugin/23451-fuzzier" alt="Downloads">
+        <img src="https://img.shields.io/jetbrains/plugin/d/23451-fuzzier" />
+    </a>
+    <a href="https://plugins.jetbrains.com/plugin/23451-fuzzier/versions" alt="Latest Version">
+        <img src="https://img.shields.io/jetbrains/plugin/v/23451-fuzzier" />
+    </a>
+    <a href="https://plugins.jetbrains.com/plugin/23451-fuzzier/reviews" alt="Plugin Reviews">
+        <img src="https://img.shields.io/jetbrains/plugin/r/stars/23451-fuzzier" />
+    </a>
+</p>
 A simple plugin to allow "fuzzy" file search with the UI inspired by [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
 
 If you are interested in plugin development you can check out my write-up about creating Fuzzier in [here.](https://mituuz.com/content/fuzzier_development.html)
