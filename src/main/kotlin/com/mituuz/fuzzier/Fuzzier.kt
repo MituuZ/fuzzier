@@ -25,6 +25,7 @@ import javax.swing.*
 
 open class Fuzzier : FuzzyAction() {
     var defaultDoc: Document? = null
+    open var title: String = "Fuzzy Search"
     private val fuzzyDimensionKey: String = "FuzzySearchPopup"
 
     override fun actionPerformed(actionEvent: AnActionEvent) {
@@ -49,7 +50,7 @@ open class Fuzzier : FuzzyAction() {
                         .setRequestFocus(true)
                         .setResizable(true)
                         .setDimensionServiceKey(project, fuzzyDimensionKey, true)
-                        .setTitle("Fuzzy Search")
+                        .setTitle(title)
                         .setMovable(true)
                         .setShowBorder(true)
                         .createPopup()

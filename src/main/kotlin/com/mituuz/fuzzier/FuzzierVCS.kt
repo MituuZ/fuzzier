@@ -3,14 +3,15 @@ package com.mituuz.fuzzier
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
-import git4idea.GitUtil
 import org.apache.commons.lang3.StringUtils
 import javax.swing.DefaultListModel
 import javax.swing.SwingUtilities
 
 
-class GitAction : Fuzzier() {
+class FuzzierVCS : Fuzzier() {
+    override var title: String = "Fuzzy Search (Only VCS Tracked Files)"
     override fun updateListContents(project: Project, searchString: String) {
         if (StringUtils.isBlank(searchString)) {
             SwingUtilities.invokeLater {
@@ -25,24 +26,16 @@ class GitAction : Fuzzier() {
             component.fileList.setPaintBusy(true)
             val listModel = DefaultListModel<StringEvaluator.FuzzyMatchContainer>()
             val projectFileIndex = ProjectFileIndex.getInstance(project)
+            val changeListManager = ChangeListManager.getInstance(project)
             val projectBasePath = project.basePath
 
-            val repositoryManager = GitUtil.getRepositoryManager(project)
-            val gitExclusions = mutableSetOf<String>()
-            for (repository in repositoryManager.repositories) {
-                val repoGitExclusions = repository.untrackedFilesHolder.ignoredFilePaths.toSet().map {
-                    it.virtualFile?.path?.split("/")?.last() ?: ""
-                }
-                gitExclusions.addAll(repoGitExclusions)
-            }
-
-            fuzzierSettingsService.state.exclusionSet.addAll(gitExclusions)
             val stringEvaluator = StringEvaluator(
                 fuzzierSettingsService.state.multiMatch,
                 fuzzierSettingsService.state.exclusionSet,
                 fuzzierSettingsService.state.matchWeightSingleChar,
                 fuzzierSettingsService.state.matchWeightStreakModifier,
-                fuzzierSettingsService.state.matchWeightPartialPath
+                fuzzierSettingsService.state.matchWeightPartialPath,
+                changeListManager
             )
 
             val contentIterator =

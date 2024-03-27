@@ -17,7 +17,7 @@ class FuzzierSettingsConfigurable : Configurable {
         fuzzierSettingsComponent = FuzzierSettingsComponent()
 
         val combinedString = fuzzierSettingsService.state.exclusionSet.joinToString("\n")
-        fuzzierSettingsComponent.exclusionList.getJBTextArea().text = combinedString
+        fuzzierSettingsComponent.exclusionSet.getJBTextArea().text = combinedString
         fuzzierSettingsComponent.newTabSelect.getCheckBox().isSelected = fuzzierSettingsService.state.newTab
         fuzzierSettingsComponent.debounceTimerValue.getIntSpinner().value = fuzzierSettingsService.state.debouncePeriod
         fuzzierSettingsComponent.filenameTypeSelector.getFilenameTypeComboBox().selectedIndex = fuzzierSettingsService.state.filenameType.ordinal
@@ -33,7 +33,7 @@ class FuzzierSettingsConfigurable : Configurable {
     }
 
     override fun isModified(): Boolean {
-        return fuzzierSettingsService.state.exclusionSet != fuzzierSettingsComponent.exclusionList.getJBTextArea().text.split("\n")
+        return fuzzierSettingsService.state.exclusionSet != fuzzierSettingsComponent.exclusionSet.getJBTextArea().text.split("\n")
                 || fuzzierSettingsService.state.newTab != fuzzierSettingsComponent.newTabSelect.getCheckBox().isSelected
                 || fuzzierSettingsService.state.debouncePeriod != fuzzierSettingsComponent.debounceTimerValue.getIntSpinner().value
                 || fuzzierSettingsService.state.filenameType != fuzzierSettingsComponent.filenameTypeSelector.getFilenameTypeComboBox().selectedItem
@@ -47,7 +47,7 @@ class FuzzierSettingsConfigurable : Configurable {
     }
 
     override fun apply() {
-        val newSet = fuzzierSettingsComponent.exclusionList.getJBTextArea().text
+        val newSet = fuzzierSettingsComponent.exclusionSet.getJBTextArea().text
             .split("\n")
             .filter { it.isNotBlank() }
             .toSet()

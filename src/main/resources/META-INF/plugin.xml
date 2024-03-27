@@ -12,7 +12,6 @@
   <!-- Product and plugin compatibility requirements.
        Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
   <depends>com.intellij.modules.platform</depends>
-  <depends>Git4Idea</depends>
 
   <!-- Extension points defined by the plugin.
        Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
@@ -43,11 +42,11 @@
       <override-text place="MainMenu" text="Fuzzy File Search"/>
       <add-to-group group-id="ToolsMenu" anchor="first"/>
     </action>
-    <action id="com.mituuz.fuzzier.GitAction"
-            class="com.mituuz.fuzzier.GitAction"
-            text="Fuzzy File Search (Only Git Tracked Files)"
-            description="Search files using a basic fuzzy search on git tracked files only">
-      <override-text place="MainMenu" text="Fuzzy File Search (Only Git Tracked Files)"/>
+    <action id="com.mituuz.fuzzier.FuzzierVCS"
+            class="com.mituuz.fuzzier.FuzzierVCS"
+            text="Fuzzy File Search (Only VCS Tracked Files)"
+            description="Search files using a basic fuzzy search on only VCS tracked files">
+      <override-text place="MainMenu" text="Fuzzy File Search (Only VCS Tracked Files)"/>
       <add-to-group group-id="ToolsMenu" />
     </action>
     <action id="com.mituuz.fuzzier.FuzzyMover"

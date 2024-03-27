@@ -97,7 +97,7 @@ class TestBenchComponent : JPanel() {
             return
         }
 
-        val newSet = (liveSettingsComponent.exclusionList.component as JBTextArea).text
+        val newSet = (liveSettingsComponent.exclusionSet.component as JBTextArea).text
             .split("\n")
             .filter { it.isNotBlank() }
             .toSet()
