@@ -13,7 +13,7 @@ e.g. parts do not need to be in the correct order, as long as both succeed on th
 
 ## Usage
 You can open Fuzzier with a shortcut or from the Tools menu. There is an action to fuzzy search over all files or over
-only VCS tracked files available.
+only VCS tracked files.
 
 Double-clicking a list item opens the file
 
