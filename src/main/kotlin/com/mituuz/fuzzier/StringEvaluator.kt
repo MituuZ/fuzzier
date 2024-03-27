@@ -9,28 +9,9 @@ import javax.swing.DefaultListModel
 class StringEvaluator(
     private var multiMatch: Boolean, private var exclusionList: Set<String>, private var matchWeightSingleChar: Int,
     private var matchWeightStreakModifier: Int, private var matchWeightPartialPath: Int, private var changeListManager: ChangeListManager? = null) {
-
     fun getContentIterator(projectBasePath: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
         return ContentIterator { file: VirtualFile ->
             if (!file.isDirectory) {
-                val filePath = projectBasePath.let { it1 -> file.path.removePrefix(it1) }
-                if (isExcluded(file, filePath)) {
-                    return@ContentIterator true
-                }
-                if (filePath.isNotBlank()) {
-                    val fuzzyMatchContainer = fuzzyContainsCaseInsensitive(filePath, searchString)
-                    if (fuzzyMatchContainer != null) {
-                        listModel.addElement(fuzzyMatchContainer)
-                    }
-                }
-            }
-            true
-        }
-    }
-
-    fun getDirIterator(projectBasePath: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
-        return ContentIterator { file: VirtualFile ->
-            if (file.isDirectory) {
                 val filePath = projectBasePath.let { it1 -> file.path.removePrefix(it1) }
                 if (isExcluded(file, filePath)) {
                     return@ContentIterator true
