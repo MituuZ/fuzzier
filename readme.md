@@ -12,7 +12,8 @@ e.g. parts do not need to be in the correct order, as long as both succeed on th
 ![The UI consist of three parts. A file list on the top left, search field on the bottom left and the preview pane on the right](assets/FuzzierUI.png "An image of the plugin UI")
 
 ## Usage
-You can open Fuzzier with a shortcut or from the Tools menu
+You can open Fuzzier with a shortcut or from the Tools menu. There is an action to fuzzy search over all files or over
+only VCS tracked files available.
 
 Double-clicking a list item opens the file
 
@@ -67,6 +68,7 @@ Defaults to 150 and can be set from 0 to 2000.
 Example of a .ideavimrc-row to add a vim keybinding for the plugin
 ```
 map <Leader>pf <action>(com.mituuz.fuzzier.Fuzzier)
+map <Leader>gf <action>(com.mituuz.fuzzier.FuzzierVCS)
 map <Leader>mf <action>(com.mituuz.fuzzier.FuzzyMover)
 ```
 
