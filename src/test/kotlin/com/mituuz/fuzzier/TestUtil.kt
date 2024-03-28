@@ -3,6 +3,7 @@ package com.mituuz.fuzzier
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vcs.changes.ChangeListManager
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.testFramework.PsiTestUtil
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
@@ -10,7 +11,9 @@ import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.runInEdtAndWait
 import com.mituuz.fuzzier.StringEvaluator.FuzzyMatchContainer
+import org.mockito.ArgumentMatchers.any
 import javax.swing.DefaultListModel
+import org.mockito.Mockito
 
 class TestUtil {
     private fun addFilesToProject(filesToAdd: List<String>, myFixture: CodeInsightTestFixture, fixture: IdeaProjectTestFixture) {
@@ -43,8 +46,12 @@ class TestUtil {
         addFilesToProject(filesToAdd, myFixture, fixture)
 
         if (ignoredFiles !== null) {
-            val changeListManager = ChangeListManager.getInstance(fixture.project)
-            /* some way to set ignored files on this changeListManager */
+            val changeListManager = Mockito.mock(ChangeListManager::class.java)
+            Mockito.`when`(changeListManager.isIgnoredFile(any<VirtualFile>())).thenAnswer { invocation ->
+                val file = invocation.getArgument<VirtualFile>(0)
+                val tempDirPath = myFixture.tempDirPath
+                ignoredFiles.any{ ("$tempDirPath/$it") == file.path }
+            }
             stringEvaluator = StringEvaluator(true, exclusionList, 5, 10, 10, changeListManager)
         } else {
             stringEvaluator = StringEvaluator(true, exclusionList, 5, 10, 10)

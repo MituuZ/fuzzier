@@ -32,12 +32,6 @@ class ExcludeTest {
         Assertions.assertEquals("/dsa/not.kt", filePathContainer.get(0).filePath)
     }
 
-    @Test
-    fun testIgnoreTmpExample() {
-        val filePaths = listOf("src/ignore-me.kt", "src/main.kt")
-        val filePathContainer = testUtil.setUpProjectFileIndex(filePaths, setOf(), listOf("src/ignore-me.kt"))
-        Assertions.assertEquals(1, filePathContainer.size())
-    }
 
     @Test
     fun excludeListTestEmptyList() {
@@ -63,5 +57,31 @@ class ExcludeTest {
         val filePathContainer = testUtil.setUpProjectFileIndex(filePaths, setOf("*.log"))
         Assertions.assertEquals(3, filePathContainer.size())
         Assertions.assertEquals("/asd/asd.kt", filePathContainer.get(0).filePath)
+    }
+
+    @Test
+    fun testIgnoreOneFile() {
+        val filePaths = listOf("src/ignore-me.kt", "src/main.kt")
+        val filePathContainer = testUtil.setUpProjectFileIndex(filePaths, setOf(), listOf("src/ignore-me.kt"))
+        Assertions.assertEquals(1, filePathContainer.size())
+        Assertions.assertEquals("/main.kt", filePathContainer.get(0).filePath)
+    }
+
+    @Test
+    fun testIgnoreEmptyList() {
+        val filePaths = listOf("src/dir/file.txt", "src/main.kt", "src/other.kt")
+        val filePathContainer = testUtil.setUpProjectFileIndex(filePaths, setOf(), listOf())
+        Assertions.assertEquals(3, filePathContainer.size())
+        Assertions.assertEquals("/dir/file.txt", filePathContainer.get(0).filePath)
+        Assertions.assertEquals("/main.kt", filePathContainer.get(1).filePath)
+        Assertions.assertEquals("/other.kt", filePathContainer.get(2).filePath)
+    }
+
+    @Test
+    fun testIgnoreMultipleFiles() {
+        val filePaths = listOf("src/dir/file.txt", "src/main.kt", "src/other.kt")
+        val filePathContainer = testUtil.setUpProjectFileIndex(filePaths, setOf(), listOf("src/dir/file.txt", "src/other.kt"))
+        Assertions.assertEquals(1, filePathContainer.size())
+        Assertions.assertEquals("/main.kt", filePathContainer.get(0).filePath)
     }
 }
