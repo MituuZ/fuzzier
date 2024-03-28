@@ -97,12 +97,12 @@ class TestBenchComponent : JPanel() {
             return
         }
 
-        val newList = (liveSettingsComponent.exclusionList.component as JBTextArea).text
+        val newSet = (liveSettingsComponent.exclusionSet.component as JBTextArea).text
             .split("\n")
             .filter { it.isNotBlank() }
-            .ifEmpty { listOf() }
+            .toSet()
         val stringEvaluator = StringEvaluator(liveSettingsComponent.multiMatchActive.getCheckBox().isSelected,
-            newList, liveSettingsComponent.matchWeightSingleChar.getIntSpinner().value as Int,
+            newSet, liveSettingsComponent.matchWeightSingleChar.getIntSpinner().value as Int,
             liveSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int,
             liveSettingsComponent.matchWeightPartialPath.getIntSpinner().value as Int)
 

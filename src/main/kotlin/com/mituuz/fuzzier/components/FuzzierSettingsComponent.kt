@@ -23,7 +23,7 @@ class FuzzierSettingsComponent {
     /////////////////////////////////////////////////////////////////
     // General settings
     /////////////////////////////////////////////////////////////////
-    val exclusionList = SettingsComponent(JBTextArea(), "File path exclusions",
+    val exclusionSet = SettingsComponent(JBTextArea(), "File path exclusions",
         """
             One line per one exclusion from the Fuzzier results.<br><br>
             Empty lines are skipped and all files in the project root start with "/"<br><br>
@@ -107,7 +107,7 @@ class FuzzierSettingsComponent {
     init {
         setupComponents()
         jPanel = FormBuilder.createFormBuilder()
-            .addComponent(exclusionList)
+            .addComponent(exclusionSet)
             .addSeparator()
             .addComponent(newTabSelect)
             .addComponent(debounceTimerValue)
@@ -132,7 +132,7 @@ class FuzzierSettingsComponent {
         multiMatchActive.getCheckBox().addChangeListener {
             matchWeightSingleChar.getIntSpinner().isEnabled = multiMatchActive.getCheckBox().isSelected
         }
-        exclusionList.component.border = LineBorder(JBColor.BLACK, 1)
+        exclusionSet.component.border = LineBorder(JBColor.BLACK, 1)
         resetWindowDimension.addActionListener {
             service<FuzzierSettingsService>().state.resetWindow = true
         }

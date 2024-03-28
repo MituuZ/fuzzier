@@ -16,11 +16,8 @@ class FuzzierSettingsConfigurable : Configurable {
     override fun createComponent(): JComponent {
         fuzzierSettingsComponent = FuzzierSettingsComponent()
 
-        val list = fuzzierSettingsService.state.exclusionList
-        val combinedString = list.indices.joinToString("\n") { index ->
-            list[index]
-        }
-        fuzzierSettingsComponent.exclusionList.getJBTextArea().text = combinedString
+        val combinedString = fuzzierSettingsService.state.exclusionSet.joinToString("\n")
+        fuzzierSettingsComponent.exclusionSet.getJBTextArea().text = combinedString
         fuzzierSettingsComponent.newTabSelect.getCheckBox().isSelected = fuzzierSettingsService.state.newTab
         fuzzierSettingsComponent.debounceTimerValue.getIntSpinner().value = fuzzierSettingsService.state.debouncePeriod
         fuzzierSettingsComponent.filenameTypeSelector.getFilenameTypeComboBox().selectedIndex = fuzzierSettingsService.state.filenameType.ordinal
@@ -36,7 +33,7 @@ class FuzzierSettingsConfigurable : Configurable {
     }
 
     override fun isModified(): Boolean {
-        return fuzzierSettingsService.state.exclusionList != fuzzierSettingsComponent.exclusionList.getJBTextArea().text.split("\n")
+        return fuzzierSettingsService.state.exclusionSet != fuzzierSettingsComponent.exclusionSet.getJBTextArea().text.split("\n")
                 || fuzzierSettingsService.state.newTab != fuzzierSettingsComponent.newTabSelect.getCheckBox().isSelected
                 || fuzzierSettingsService.state.debouncePeriod != fuzzierSettingsComponent.debounceTimerValue.getIntSpinner().value
                 || fuzzierSettingsService.state.filenameType != fuzzierSettingsComponent.filenameTypeSelector.getFilenameTypeComboBox().selectedItem
@@ -50,12 +47,11 @@ class FuzzierSettingsConfigurable : Configurable {
     }
 
     override fun apply() {
-        val newList = fuzzierSettingsComponent.exclusionList.getJBTextArea().text
+        val newSet = fuzzierSettingsComponent.exclusionSet.getJBTextArea().text
             .split("\n")
             .filter { it.isNotBlank() }
-            .ifEmpty { listOf() }
-
-        fuzzierSettingsService.state.exclusionList = newList
+            .toSet()
+        fuzzierSettingsService.state.exclusionSet = newSet as MutableSet<String>
         fuzzierSettingsService.state.newTab = fuzzierSettingsComponent.newTabSelect.getCheckBox().isSelected
         fuzzierSettingsService.state.debouncePeriod = fuzzierSettingsComponent.debounceTimerValue.getIntSpinner().value as Int
         fuzzierSettingsService.state.filenameType = FilenameType.entries.toTypedArray()[fuzzierSettingsComponent.filenameTypeSelector.getFilenameTypeComboBox().selectedIndex]
