@@ -183,7 +183,11 @@ class FuzzyMover : FuzzyAction() {
             val projectFileIndex = ProjectFileIndex.getInstance(project)
             val projectBasePath = project.basePath
 
-            val contentIterator =  projectBasePath?.let { stringEvaluator.getContentIterator(it, searchString, listModel) }
+            val contentIterator = if (!component.isDirSelector) {
+                projectBasePath?.let { stringEvaluator.getContentIterator(it, searchString, listModel) }
+            } else {
+                projectBasePath?.let { stringEvaluator.getDirIterator(it, searchString, listModel) }
+            }
 
             if (contentIterator != null) {
                 projectFileIndex.iterateContent(contentIterator)
