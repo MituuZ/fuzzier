@@ -1,8 +1,8 @@
 package com.mituuz.fuzzier
 
 import com.intellij.openapi.project.DumbService
-import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.testFramework.PsiTestUtil
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
@@ -31,18 +31,26 @@ class TestUtil {
         DumbService.getInstance(fixture.project).waitForSmartMode()
     }
 
-    fun setUpProjectFileIndex(filesToAdd: List<String>, exclusionList: Set<String>) : DefaultListModel<FuzzyMatchContainer> {
+    fun setUpProjectFileIndex(filesToAdd: List<String>, exclusionList: Set<String>, ignoredFiles: List<String>? = null) : DefaultListModel<FuzzyMatchContainer> {
         val filePathContainer = DefaultListModel<FuzzyMatchContainer>()
         val factory = IdeaTestFixtureFactory.getFixtureFactory()
         val fixtureBuilder = factory.createLightFixtureBuilder(null, "Test")
         val fixture = fixtureBuilder.fixture
         val myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture)
+        val stringEvaluator: StringEvaluator
 
         myFixture.setUp()
         addFilesToProject(filesToAdd, myFixture, fixture)
 
+        if (ignoredFiles !== null) {
+            val changeListManager = ChangeListManager.getInstance(fixture.project)
+            /* some way to set ignored files on this changeListManager */
+            stringEvaluator = StringEvaluator(true, exclusionList, 5, 10, 10, changeListManager)
+        } else {
+            stringEvaluator = StringEvaluator(true, exclusionList, 5, 10, 10)
+        }
+
         val basePath = myFixture.findFileInTempDir("src").canonicalPath
-        val stringEvaluator = StringEvaluator(true, exclusionList, 5, 10, 10)
         val contentIterator = basePath?.let { stringEvaluator.getContentIterator(it, "", filePathContainer) }
         val index = ProjectFileIndex.getInstance(fixture.project)
         runInEdtAndWait {

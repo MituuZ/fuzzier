@@ -33,6 +33,13 @@ class ExcludeTest {
     }
 
     @Test
+    fun testIgnoreTmpExample() {
+        val filePaths = listOf("src/ignore-me.kt", "src/main.kt")
+        val filePathContainer = testUtil.setUpProjectFileIndex(filePaths, setOf(), listOf("src/ignore-me.kt"))
+        Assertions.assertEquals(1, filePathContainer.size())
+    }
+
+    @Test
     fun excludeListTestEmptyList() {
         val filePaths = listOf("src/main.kt", "src/not.kt", "src/dsa/not.kt")
         val filePathContainer = testUtil.setUpProjectFileIndex(filePaths, setOf())
