@@ -1,4 +1,16 @@
 # Fuzzier - IntelliJ IDEA plugin
+<p align="left">
+    <a href="https://plugins.jetbrains.com/plugin/23451-fuzzier" alt="Downloads">
+        <img src="https://img.shields.io/jetbrains/plugin/d/23451-fuzzier" />
+    </a>
+    <a href="https://plugins.jetbrains.com/plugin/23451-fuzzier/versions" alt="Latest Version">
+        <img src="https://img.shields.io/jetbrains/plugin/v/23451-fuzzier" />
+    </a>
+    <a href="https://plugins.jetbrains.com/plugin/23451-fuzzier/reviews" alt="Plugin Reviews">
+        <img src="https://img.shields.io/jetbrains/plugin/r/stars/23451-fuzzier" />
+    </a>
+</p>
+
 A simple plugin to allow "fuzzy" file search with the UI inspired by [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
 
 If you are interested in plugin development you can check out my write-up about creating Fuzzier in [here.](https://mituuz.com/content/fuzzier_development.html)
@@ -12,7 +24,8 @@ e.g. parts do not need to be in the correct order, as long as both succeed on th
 ![The UI consist of three parts. A file list on the top left, search field on the bottom left and the preview pane on the right](assets/FuzzierUI.png "An image of the plugin UI")
 
 ## Usage
-You can open Fuzzier with a shortcut or from the Tools menu
+You can open Fuzzier with a shortcut or from the Tools menu. There is an action to fuzzy search over all files or over
+only VCS tracked files.
 
 Double-clicking a list item opens the file
 
@@ -67,6 +80,7 @@ Defaults to 150 and can be set from 0 to 2000.
 Example of a .ideavimrc-row to add a vim keybinding for the plugin
 ```
 map <Leader>pf <action>(com.mituuz.fuzzier.Fuzzier)
+map <Leader>gf <action>(com.mituuz.fuzzier.FuzzierVCS)
 map <Leader>mf <action>(com.mituuz.fuzzier.FuzzyMover)
 ```
 

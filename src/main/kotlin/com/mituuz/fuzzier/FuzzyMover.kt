@@ -171,7 +171,7 @@ class FuzzyMover : FuzzyAction() {
         }
 
         val stringEvaluator = StringEvaluator(fuzzierSettingsService.state.multiMatch,
-            fuzzierSettingsService.state.exclusionList, fuzzierSettingsService.state.matchWeightSingleChar,
+            fuzzierSettingsService.state.exclusionSet, fuzzierSettingsService.state.matchWeightSingleChar,
             fuzzierSettingsService.state.matchWeightStreakModifier,
             fuzzierSettingsService.state.matchWeightPartialPath)
 

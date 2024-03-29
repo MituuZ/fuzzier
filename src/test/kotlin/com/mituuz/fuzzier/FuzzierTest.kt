@@ -11,7 +11,7 @@ class FuzzierTest {
     private var testApplicationManager: TestApplicationManager
     private var settings: FuzzierSettingsService.State
     private lateinit var results: List<Int>
-    private val stringEvaluator = StringEvaluator(true, listOf(), 5, 10, 10)
+    private val stringEvaluator = StringEvaluator(true, setOf(), 5, 10, 10)
 
     init {
         testApplicationManager = TestApplicationManager.getInstance()
