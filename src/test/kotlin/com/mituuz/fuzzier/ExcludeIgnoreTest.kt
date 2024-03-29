@@ -4,7 +4,7 @@ import com.intellij.testFramework.TestApplicationManager
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-class ExcludeTest {
+class ExcludeIgnoreTest {
     private var fuzzier: Fuzzier
     private var testApplicationManager: TestApplicationManager
     private var testUtil = TestUtil()
@@ -83,5 +83,14 @@ class ExcludeTest {
         val filePathContainer = testUtil.setUpProjectFileIndex(filePaths, setOf(), listOf("src/dir/file.txt", "src/other.kt"))
         Assertions.assertEquals(1, filePathContainer.size())
         Assertions.assertEquals("/main.kt", filePathContainer.get(0).filePath)
+    }
+
+    @Test
+    fun testIgnoreInCombinationWithExclusionList() {
+        val filePaths = listOf("src/dir/file.txt", "src/main.kt", "src/other.kt", "src/ignore-me.kt", "src/exclude-me.kt")
+        val filePathContainer = testUtil.setUpProjectFileIndex(filePaths, setOf("dir", "exclude-me.kt"), listOf("src/ignore-me.kt"))
+        Assertions.assertEquals(2, filePathContainer.size())
+        Assertions.assertEquals("/main.kt", filePathContainer.get(0).filePath)
+        Assertions.assertEquals("/other.kt", filePathContainer.get(1).filePath)
     }
 }
