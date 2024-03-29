@@ -47,6 +47,9 @@ class StringEvaluator(
     }
 
     private fun isExcluded(file: VirtualFile, filePath: String): Boolean {
+        if (changeListManager !== null) {
+            return changeListManager!!.isIgnoredFile(file)
+        }
        for (e in exclusionList) {
             when {
                 e.startsWith("*") -> {
@@ -63,9 +66,6 @@ class StringEvaluator(
                     return true
                 }
             }
-        }
-        if (changeListManager !== null) {
-            return changeListManager!!.isIgnoredFile(file)
         }
         return false
     }

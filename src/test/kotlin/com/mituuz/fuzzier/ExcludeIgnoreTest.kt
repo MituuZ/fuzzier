@@ -87,10 +87,13 @@ class ExcludeIgnoreTest {
 
     @Test
     fun testIgnoreInCombinationWithExclusionList() {
+        /* for a FuzzierVCS action only the ignore list should be applied, and the exclusions should be skipped */
         val filePaths = listOf("src/dir/file.txt", "src/main.kt", "src/other.kt", "src/ignore-me.kt", "src/exclude-me.kt")
         val filePathContainer = testUtil.setUpProjectFileIndex(filePaths, setOf("dir", "exclude-me.kt"), listOf("src/ignore-me.kt"))
-        Assertions.assertEquals(2, filePathContainer.size())
-        Assertions.assertEquals("/main.kt", filePathContainer.get(0).filePath)
-        Assertions.assertEquals("/other.kt", filePathContainer.get(1).filePath)
+        Assertions.assertEquals(4, filePathContainer.size())
+        Assertions.assertEquals("/dir/file.txt", filePathContainer.get(0).filePath)
+        Assertions.assertEquals("/main.kt", filePathContainer.get(1).filePath)
+        Assertions.assertEquals("/other.kt", filePathContainer.get(2).filePath)
+        Assertions.assertEquals("/exclude-me.kt", filePathContainer.get(3).filePath)
     }
 }
