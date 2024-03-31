@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.mituuz"
-version = "0.18"
+version = "0.19.0"
 
 repositories {
   mavenCentral()
