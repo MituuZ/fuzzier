@@ -37,6 +37,9 @@
 
   <h3>Adding an ideavim binding</h3>
   <pre>map &lt;Leader&gt;gf &lt;action&gt;(com.mituuz.fuzzier.FuzzierVCS)</pre>
+  <h2>Versioning changes</h2>
+  - The versioning scheme has been changed to follow the semantic versioning scheme more closely.<br>
+  - Create changelog.md to simplify the changelog process.<br>
   ]]>
   </change-notes>
 
