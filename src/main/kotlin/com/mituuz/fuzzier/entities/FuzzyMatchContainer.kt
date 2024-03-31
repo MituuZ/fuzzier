@@ -1,6 +1,21 @@
 package com.mituuz.fuzzier.entities
 
-class FuzzyMatchContainer (val score: Int, val filePath: String, val filename: String) {
+class FuzzyMatchContainer {
+    var score: Int = 0
+    var filePath: String = ""
+    var filename: String = ""
+    var fuzzyScore: FuzzyScore = FuzzyScore()
+
+    constructor(score: Int, filePath: String, filename: String) {
+        this.score = score
+        this.filePath = filePath
+        this.filename = filename
+    }
+
+    constructor(filePath: String, searchString: String) {
+
+    }
+
     fun toString(filenameType: FilenameType): String {
         return when (filenameType) {
             FilenameType.FILENAME_ONLY -> filename
@@ -16,8 +31,5 @@ class FuzzyMatchContainer (val score: Int, val filePath: String, val filename: S
     }
 
     class FuzzyScore {
-        fun getScore(): Int {
-            return 0
-        }
     }
 }

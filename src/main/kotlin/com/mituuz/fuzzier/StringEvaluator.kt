@@ -4,14 +4,17 @@ import com.intellij.openapi.roots.ContentIterator
 import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.intellij.openapi.vfs.VirtualFile
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
+import com.mituuz.fuzzier.entities.ScoreCalculator
 import org.apache.commons.lang3.StringUtils
 import javax.swing.DefaultListModel
 
 class StringEvaluator(
     private var multiMatch: Boolean, private var exclusionList: Set<String>, private var matchWeightSingleChar: Int,
     private var matchWeightStreakModifier: Int, private var matchWeightPartialPath: Int, private var changeListManager: ChangeListManager? = null) {
+    private lateinit var scoreCalculator: ScoreCalculator
 
     fun getContentIterator(projectBasePath: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
+        scoreCalculator = ScoreCalculator(searchString)
         return ContentIterator { file: VirtualFile ->
             if (!file.isDirectory) {
                 val filePath = projectBasePath.let { it1 -> file.path.removePrefix(it1) }
@@ -19,7 +22,7 @@ class StringEvaluator(
                     return@ContentIterator true
                 }
                 if (filePath.isNotBlank()) {
-                    val fuzzyMatchContainer = fuzzyContainsCaseInsensitive(filePath, searchString)
+                    val fuzzyMatchContainer = createFuzzyContainer(filePath)
                     if (fuzzyMatchContainer != null) {
                         listModel.addElement(fuzzyMatchContainer)
                     }
@@ -30,6 +33,7 @@ class StringEvaluator(
     }
 
     fun getDirIterator(projectBasePath: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
+        scoreCalculator = ScoreCalculator(searchString)
         return ContentIterator { file: VirtualFile ->
             if (file.isDirectory) {
                 val filePath = projectBasePath.let { it1 -> file.path.removePrefix(it1) }
@@ -37,7 +41,7 @@ class StringEvaluator(
                     return@ContentIterator true
                 }
                 if (filePath.isNotBlank()) {
-                    val fuzzyMatchContainer = fuzzyContainsCaseInsensitive(filePath, searchString)
+                    val fuzzyMatchContainer = createFuzzyContainer(filePath)
                     if (fuzzyMatchContainer != null) {
                         listModel.addElement(fuzzyMatchContainer)
                     }
@@ -69,6 +73,18 @@ class StringEvaluator(
             }
         }
         return false
+    }
+
+    // Returns null if no match can be found
+    private fun createFuzzyContainer(filePath: String): FuzzyMatchContainer? {
+        val filename = filePath.substring(filePath.lastIndexOf("/") + 1)
+        return when (val score = scoreCalculator.calculateScore(filePath, filename)) {
+            null -> {
+                null
+            }
+
+            else -> FuzzyMatchContainer(score, filePath, filename)
+        }
     }
 
     fun fuzzyContainsCaseInsensitive(filePath: String, searchString: String): FuzzyMatchContainer? {
