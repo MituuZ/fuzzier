@@ -7,7 +7,7 @@ import com.intellij.ui.components.JBScrollPane
 import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
 import com.intellij.util.ui.JBUI
-import com.mituuz.fuzzier.StringEvaluator
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import java.awt.BorderLayout
 import java.awt.Dimension
 import javax.swing.JPanel
@@ -93,7 +93,7 @@ class FuzzyFinderComponent(project: Project) : FuzzyComponent() {
                 false
             )
         )
-        fileList = JBList<StringEvaluator.FuzzyMatchContainer?>()
+        fileList = JBList<FuzzyMatchContainer?>()
         fileList.selectionMode = 0
         scrollPane1.setViewportView(fileList)
     }

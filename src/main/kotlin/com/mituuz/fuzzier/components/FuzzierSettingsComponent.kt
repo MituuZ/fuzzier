@@ -9,9 +9,9 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.FormBuilder
 import com.intellij.openapi.ui.ComboBox
-import com.mituuz.fuzzier.StringEvaluator.FilenameType
-import com.mituuz.fuzzier.StringEvaluator.FilenameType.*
 import com.mituuz.fuzzier.components.FuzzierSettingsComponent.SettingsComponent
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType.*
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import java.awt.Component
 import javax.swing.*

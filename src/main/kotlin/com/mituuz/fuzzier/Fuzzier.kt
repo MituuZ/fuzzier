@@ -17,8 +17,8 @@ import com.intellij.openapi.util.DimensionService
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
-import com.mituuz.fuzzier.StringEvaluator.FuzzyMatchContainer
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
 import javax.swing.*

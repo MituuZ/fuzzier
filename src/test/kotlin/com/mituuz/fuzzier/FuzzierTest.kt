@@ -2,6 +2,7 @@ package com.mituuz.fuzzier
 
 import com.intellij.openapi.components.service
 import com.intellij.testFramework.TestApplicationManager
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -147,7 +148,7 @@ class FuzzierTest {
         stringEvaluator.setSettings(false, 5, 10, 10)
     }
 
-    private fun assertMatch(score: Int, container: StringEvaluator.FuzzyMatchContainer?) {
+    private fun assertMatch(score: Int, container: FuzzyMatchContainer?) {
         if (container != null) {
             assertEquals(score, container.score)
         } else {

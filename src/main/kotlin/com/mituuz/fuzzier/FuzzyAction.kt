@@ -13,10 +13,10 @@ import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
-import com.mituuz.fuzzier.StringEvaluator.FilenameType
-import com.mituuz.fuzzier.StringEvaluator.FilenameType.FILEPATH_ONLY
-import com.mituuz.fuzzier.StringEvaluator.FuzzyMatchContainer
 import com.mituuz.fuzzier.components.FuzzyComponent
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType.FILEPATH_ONLY
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import java.awt.Component
 import java.awt.event.ActionEvent

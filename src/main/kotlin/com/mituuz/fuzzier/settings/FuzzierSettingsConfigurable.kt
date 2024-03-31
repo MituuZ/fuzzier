@@ -2,8 +2,8 @@ package com.mituuz.fuzzier.settings
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
-import com.mituuz.fuzzier.StringEvaluator.FilenameType
 import com.mituuz.fuzzier.components.FuzzierSettingsComponent
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType
 import javax.swing.JComponent
 
 class FuzzierSettingsConfigurable : Configurable {

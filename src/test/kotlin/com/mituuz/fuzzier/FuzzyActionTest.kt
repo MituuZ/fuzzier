@@ -6,9 +6,9 @@ import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.project.Project
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
-import com.mituuz.fuzzier.StringEvaluator.FilenameType.*
-import com.mituuz.fuzzier.StringEvaluator.FuzzyMatchContainer
 import com.mituuz.fuzzier.components.SimpleFinderComponent
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType.*
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test

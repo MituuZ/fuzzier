@@ -3,6 +3,7 @@ package com.mituuz.fuzzier
 import com.intellij.openapi.roots.ContentIterator
 import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.intellij.openapi.vfs.VirtualFile
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import org.apache.commons.lang3.StringUtils
 import javax.swing.DefaultListModel
 
@@ -165,22 +166,6 @@ class StringEvaluator(
         }
 
         return score.toInt()
-    }
-
-    data class FuzzyMatchContainer(val score: Int, val filePath: String, val filename: String) {
-        fun toString(filenameType: FilenameType): String {
-            return when (filenameType) {
-                FilenameType.FILENAME_ONLY -> filename
-                FilenameType.FILEPATH_ONLY -> filePath
-                FilenameType.FILENAME_WITH_PATH -> "$filename   ($filePath)"
-            }
-        }
-    }
-
-    enum class FilenameType(val text: String) {
-        FILEPATH_ONLY("Filepath only"),
-        FILENAME_ONLY("Filename only"),
-        FILENAME_WITH_PATH("Filename with (path)")
     }
 
     fun setSettings(multiMatch: Boolean, matchWeightSingleChar: Int, matchWeightPartialPath: Int,

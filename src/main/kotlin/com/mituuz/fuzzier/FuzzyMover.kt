@@ -19,8 +19,8 @@ import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.refactoring.move.moveFilesOrDirectories.MoveFilesOrDirectoriesUtil
-import com.mituuz.fuzzier.StringEvaluator.FuzzyMatchContainer
 import com.mituuz.fuzzier.components.SimpleFinderComponent
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
 import java.util.concurrent.CompletableFuture

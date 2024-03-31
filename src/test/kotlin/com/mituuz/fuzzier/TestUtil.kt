@@ -10,7 +10,7 @@ import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.runInEdtAndWait
-import com.mituuz.fuzzier.StringEvaluator.FuzzyMatchContainer
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import org.mockito.ArgumentMatchers.any
 import javax.swing.DefaultListModel
 import org.mockito.Mockito
