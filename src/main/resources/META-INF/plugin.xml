@@ -29,7 +29,14 @@
   </extensions>
 
   <change-notes><![CDATA[
-  Revert html parsing and fix freezing issue when using Filename with (path). Have to take another look how to do this properly.
+  <h2>VCS only search</h2>
+  Add a new action that only searches files that are being tracked by the VCS, called FuzzierVCS.<br>
+  Ignored files are not included in the search, and it is not affected by the exclusion list.<br><br>
+  Huge thanks to <a href="https://github.com/ramonvermeulen"
+  title="Link to Ramon's GitHub profile">ramonvermeulen</a> for fully implementing this feature.
+
+  <h3>Adding an ideavim binding</h3>
+  <pre>map &lt;Leader&gt;gf &lt;action&gt;(com.mituuz.fuzzier.FuzzierVCS)</pre>
   ]]>
   </change-notes>
 
