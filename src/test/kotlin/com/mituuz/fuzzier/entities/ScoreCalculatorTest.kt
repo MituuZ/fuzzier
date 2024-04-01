@@ -7,12 +7,10 @@ import org.junit.jupiter.api.Test
 
 class ScoreCalculatorTest {
     private var testApplicationManager: TestApplicationManager = TestApplicationManager.getInstance()
-    private var settings: FuzzierSettingsService.State = FuzzierSettingsService.State()
-
-    private val sc = ScoreCalculator("test")
 
     @Test
     fun `Search string contained same index`() {
+        val sc = ScoreCalculator("test")
         sc.searchStringIndex = 0
         sc.searchStringLength = 4
 
@@ -24,6 +22,7 @@ class ScoreCalculatorTest {
 
     @Test
     fun `Search string contained different index`() {
+        val sc = ScoreCalculator("test")
         sc.searchStringIndex = 0
         sc.searchStringLength = 4
 
@@ -34,9 +33,29 @@ class ScoreCalculatorTest {
     }
 
     @Test
-    fun `Test the whole process`() {
+    fun `Basic streak happy case`() {
+        val sc = ScoreCalculator("test")
+
         sc.setMatchWeightStreakModifier(1)
         val fScore = sc.calculateScore("/test", "test")
         assertEquals(4, fScore!!.streakScore)
+    }
+
+    @Test
+    fun `Basic streak longer path`() {
+        val sc = ScoreCalculator("test")
+
+        sc.setMatchWeightStreakModifier(1)
+        val fScore = sc.calculateScore("/te/st", "st")
+        assertEquals(2, fScore!!.streakScore)
+    }
+
+    @Test
+    fun `Basic streak no possible match`() {
+        val sc = ScoreCalculator("test")
+
+        sc.setMatchWeightStreakModifier(1)
+        val fScore = sc.calculateScore("/te", "te")
+        assertNull(fScore)
     }
 }
