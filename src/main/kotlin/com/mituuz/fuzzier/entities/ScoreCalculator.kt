@@ -17,7 +17,7 @@ class ScoreCalculator(private val searchString: String) {
     // Set up the settings
     private val settings = service<FuzzierSettingsService>().state
     private val matchWeightSingleChar = settings.matchWeightSingleChar
-    private val matchWeightStreakModifier = settings.matchWeightStreakModifier
+    private var matchWeightStreakModifier = settings.matchWeightStreakModifier
     private val matchWeightPartialPath = settings.matchWeightPartialPath
 
     var currentFilePath = ""
@@ -58,7 +58,6 @@ class ScoreCalculator(private val searchString: String) {
      * Returns false if no match can be found, this stops the search
      */
     private fun processString(searchStringPart: String): Boolean {
-        var searchStringIndex = 0;
         while (searchStringIndex < searchStringLength) {
             if (!canSearchStringBeContained()) {
                 return false
@@ -68,20 +67,22 @@ class ScoreCalculator(private val searchString: String) {
             if (!processChar(currentChar)) {
                 return false
             }
-            searchStringIndex++
         }
 
         return true
     }
 
-    private fun processChar(char: Char): Boolean {
-        if (char == currentFilePath[filePathIndex]) {
+    private fun processChar(searchStringPartChar: Char): Boolean {
+        val filePathPartChar = currentFilePath[filePathIndex]
+        if (searchStringPartChar == filePathPartChar) {
+            searchStringIndex++
             updateStreak(true)
             // Increase the score
         } else {
             updateStreak(false)
             // Decrease the score
         }
+        filePathIndex++
         return true
     }
 
@@ -107,5 +108,9 @@ class ScoreCalculator(private val searchString: String) {
         val remainingSearchStringLength = searchStringLength - searchStringIndex
         val remainingFilePathLength = currentFilePath.length - filePathIndex
         return remainingSearchStringLength <= remainingFilePathLength // TODO: + tolerance when it is implemented
+    }
+
+    fun setMatchWeightStreakModifier(value: Int) {
+        matchWeightStreakModifier = value
     }
 }

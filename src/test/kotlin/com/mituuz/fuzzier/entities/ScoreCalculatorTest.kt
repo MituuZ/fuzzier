@@ -2,8 +2,7 @@ package com.mituuz.fuzzier.entities
 
 import com.intellij.testFramework.TestApplicationManager
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class ScoreCalculatorTest {
@@ -32,5 +31,12 @@ class ScoreCalculatorTest {
         sc.filePathIndex = 1
 
         assertFalse(sc.canSearchStringBeContained())
+    }
+
+    @Test
+    fun `Test the whole process`() {
+        sc.setMatchWeightStreakModifier(1)
+        val fScore = sc.calculateScore("/test", "test")
+        assertEquals(4, fScore!!.streakScore)
     }
 }
