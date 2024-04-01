@@ -1,15 +1,17 @@
 package com.mituuz.fuzzier.entities
 
 import com.intellij.openapi.components.service
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FuzzyScore
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 
 class ScoreCalculator(private val searchString: String) {
     // TODO: We can parse/handle the search string here, just once per search
     private val searchStringParts = searchString.split(" ")
+    private lateinit var fuzzyScore: FuzzyScore
 
-    private var searchStringIndex: Int = 0
-    private var searchStringLength: Int = 0
-    private var filePathIndex: Int = 0
+    var searchStringIndex: Int = 0
+    var searchStringLength: Int = 0
+    var filePathIndex: Int = 0
     private var filenameIndex: Int = 0
 
     // Set up the settings
@@ -18,17 +20,18 @@ class ScoreCalculator(private val searchString: String) {
     private val matchWeightStreakModifier = settings.matchWeightStreakModifier
     private val matchWeightPartialPath = settings.matchWeightPartialPath
 
-    private var currentFilePath = ""
+    var currentFilePath = ""
     private var longestStreak: Int = 0
     private var currentStreak: Int = 0
 
     /**
      * Returns null if no match can be found
      */
-    fun calculateScore(filePath: String, filename: String): Int? { // TODO: This should return FuzzyScore
-        filePathIndex = filePath.lastIndexOf("/") + 1
-        this.currentFilePath = filePath
+    fun calculateScore(filePath: String, filename: String): FuzzyScore? { // TODO: This should return FuzzyScore
+        filenameIndex = filePath.lastIndexOf("/") + 1
+        currentFilePath = filePath
         longestStreak = 0
+        fuzzyScore = FuzzyScore()
 
         // Check if the search string is longer than the file path, which results in no match
         if (searchString.length > currentFilePath.length) { // TODO: + tolerance when it is implemented
@@ -46,7 +49,9 @@ class ScoreCalculator(private val searchString: String) {
             }
         }
 
-        return 0
+        fuzzyScore.streakScore = longestStreak * matchWeightStreakModifier
+
+        return fuzzyScore
     }
 
     /**
@@ -97,7 +102,7 @@ class ScoreCalculator(private val searchString: String) {
      * e.g. if the remaining search string is "abc" and the remaining file path is "def", it can't be contained
      * e.g. if the remaining search string is "abc" and the remaining file path is "ab", it can't be contained
      */
-    private fun canSearchStringBeContained(): Boolean {
+    fun canSearchStringBeContained(): Boolean {
         // TODO: Can this be handled in another way?
         val remainingSearchStringLength = searchStringLength - searchStringIndex
         val remainingFilePathLength = currentFilePath.length - filePathIndex
