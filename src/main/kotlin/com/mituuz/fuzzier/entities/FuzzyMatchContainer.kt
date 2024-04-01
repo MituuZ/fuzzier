@@ -12,14 +12,11 @@ class FuzzyMatchContainer {
         this.filename = filename
     }
 
+    // TODO: Remove this once it is no longer necessary
     constructor(score: Int, filePath: String, filename: String) {
         this.intScore = score
         this.filePath = filePath
         this.filename = filename
-    }
-
-    constructor(filePath: String, searchString: String) {
-
     }
 
     fun toString(filenameType: FilenameType): String {
