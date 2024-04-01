@@ -10,6 +10,7 @@ class ScoreCalculator(private val searchString: String) {
     private var searchStringIndex: Int = 0
     private var searchStringLength: Int = 0
     private var filePathIndex: Int = 0
+    private var filenameIndex: Int = 0
 
     // Set up the settings
     private val settings = service<FuzzierSettingsService>().state
@@ -19,11 +20,13 @@ class ScoreCalculator(private val searchString: String) {
 
     private var currentFilePath = ""
     private var longestStreak: Int = 0
+    private var currentStreak: Int = 0
 
     /**
      * Returns null if no match can be found
      */
     fun calculateScore(filePath: String, filename: String): Int? { // TODO: This should return FuzzyScore
+        filePathIndex = filePath.lastIndexOf("/") + 1
         this.currentFilePath = filePath
         longestStreak = 0
 
@@ -56,7 +59,8 @@ class ScoreCalculator(private val searchString: String) {
                 return false
             }
 
-            if (!processChar()) {
+            val currentChar = searchStringPart[searchStringIndex]
+            if (!processChar(currentChar)) {
                 return false
             }
             searchStringIndex++
@@ -65,8 +69,26 @@ class ScoreCalculator(private val searchString: String) {
         return true
     }
 
-    private fun processChar(): Boolean {
+    private fun processChar(char: Char): Boolean {
+        if (char == currentFilePath[filePathIndex]) {
+            updateStreak(true)
+            // Increase the score
+        } else {
+            updateStreak(false)
+            // Decrease the score
+        }
         return true
+    }
+
+    private fun updateStreak(match: Boolean) {
+        if (match) {
+            currentStreak++
+            if (currentStreak > longestStreak) {
+                longestStreak = currentStreak
+            }
+        } else {
+            currentStreak = 0
+        }
     }
 
     /**
@@ -76,6 +98,7 @@ class ScoreCalculator(private val searchString: String) {
      * e.g. if the remaining search string is "abc" and the remaining file path is "ab", it can't be contained
      */
     private fun canSearchStringBeContained(): Boolean {
+        // TODO: Can this be handled in another way?
         val remainingSearchStringLength = searchStringLength - searchStringIndex
         val remainingFilePathLength = currentFilePath.length - filePathIndex
         return remainingSearchStringLength <= remainingFilePathLength // TODO: + tolerance when it is implemented
