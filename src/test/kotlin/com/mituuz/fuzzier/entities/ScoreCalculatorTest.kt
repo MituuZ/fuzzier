@@ -59,11 +59,14 @@ class ScoreCalculatorTest {
         assertNull(fScore)
     }
 
+    // TODO: Remember to scale the weights to support ints!
+
     @Test
     fun `Multi match basic test`() {
         val sc = ScoreCalculator("test")
 
         sc.setMultiMatch(true)
+        sc.setMatchWeightSingleChar(1)
         val fScore = sc.calculateScore("/test", "test")
         assertEquals(4, fScore!!.multiMatchScore)
     }
@@ -73,6 +76,7 @@ class ScoreCalculatorTest {
         val sc = ScoreCalculator("test")
 
         sc.setMultiMatch(true)
+        sc.setMatchWeightSingleChar(1)
         val fScore = sc.calculateScore("/testtest", "testtest")
         assertEquals(8, fScore!!.multiMatchScore)
     }
@@ -82,6 +86,7 @@ class ScoreCalculatorTest {
         val sc = ScoreCalculator("test test")
 
         sc.setMultiMatch(true)
+        sc.setMatchWeightSingleChar(1)
         val fScore = sc.calculateScore("/testtest", "testtest")
         assertEquals(16, fScore!!.multiMatchScore)
     }

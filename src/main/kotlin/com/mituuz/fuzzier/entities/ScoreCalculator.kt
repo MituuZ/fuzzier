@@ -18,7 +18,7 @@ class ScoreCalculator(private val searchString: String) {
     // Set up the settings
     private val settings = service<FuzzierSettingsService>().state
     private var multiMatch = settings.multiMatch
-    private val matchWeightSingleChar = settings.matchWeightSingleChar
+    private var matchWeightSingleChar = settings.matchWeightSingleChar
     private var matchWeightStreakModifier = settings.matchWeightStreakModifier
     private val matchWeightPartialPath = settings.matchWeightPartialPath
 
@@ -79,7 +79,7 @@ class ScoreCalculator(private val searchString: String) {
     }
 
     private fun calculateMultiMatchScore() {
-        fuzzyScore.multiMatchScore += currentFilePath.count { it in uniqueLetters }
+        fuzzyScore.multiMatchScore += currentFilePath.count { it in uniqueLetters } * matchWeightSingleChar
     }
 
     private fun processChar(searchStringPartChar: Char): Boolean {
@@ -122,6 +122,10 @@ class ScoreCalculator(private val searchString: String) {
 
     fun setMatchWeightStreakModifier(value: Int) {
         matchWeightStreakModifier = value
+    }
+
+    fun setMatchWeightSingleChar(value: Int) {
+        matchWeightSingleChar = value
     }
 
     fun setMultiMatch(value: Boolean) {
