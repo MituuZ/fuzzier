@@ -61,7 +61,7 @@ class ScoreCalculator(private val searchString: String) {
      */
     private fun processString(searchStringPart: String): Boolean {
         if (multiMatch) {
-            processAllChars()
+            calculateMultiMatchScore()
         }
 
         while (searchStringIndex < searchStringLength) {
@@ -70,7 +70,7 @@ class ScoreCalculator(private val searchString: String) {
             }
 
             val currentChar = searchStringPart[searchStringIndex]
-            if (!processSearchChar(currentChar)) {
+            if (!processChar(currentChar)) {
                 return false
             }
         }
@@ -78,11 +78,7 @@ class ScoreCalculator(private val searchString: String) {
         return true
     }
 
-    private fun processSearchChar(searchStringPartChar: Char): Boolean {
-        return processChar(searchStringPartChar)
-    }
-
-    private fun processAllChars() {
+    private fun calculateMultiMatchScore() {
         fuzzyScore.multiMatchScore += currentFilePath.count { it in uniqueLetters }
     }
 
