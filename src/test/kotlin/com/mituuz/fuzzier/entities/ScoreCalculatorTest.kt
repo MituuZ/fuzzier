@@ -90,4 +90,13 @@ class ScoreCalculatorTest {
         val fScore = sc.calculateScore("/testtest", "testtest")
         assertEquals(16, fScore!!.multiMatchScore)
     }
+
+    @Test
+    fun `Partial path score basic test`() {
+        val sc = ScoreCalculator("test")
+
+        sc.setMatchWeightPartialPath(1)
+        val fScore = sc.calculateScore("/test.kt", "test.kt")
+        assertEquals(1, fScore!!.partialPathScore)
+    }
 }

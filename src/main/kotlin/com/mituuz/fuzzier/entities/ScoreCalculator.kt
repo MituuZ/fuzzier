@@ -3,6 +3,7 @@ package com.mituuz.fuzzier.entities
 import com.intellij.openapi.components.service
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FuzzyScore
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
+import org.apache.commons.lang3.StringUtils
 
 class ScoreCalculator(private val searchString: String) {
     // TODO: We can parse/handle the search string here, just once per search
@@ -20,7 +21,8 @@ class ScoreCalculator(private val searchString: String) {
     private var multiMatch = settings.multiMatch
     private var matchWeightSingleChar = settings.matchWeightSingleChar
     private var matchWeightStreakModifier = settings.matchWeightStreakModifier
-    private val matchWeightPartialPath = settings.matchWeightPartialPath
+    private var matchWeightPartialPath = settings.matchWeightPartialPath
+    private var matchWeightFilename = 1
 
     var currentFilePath = ""
     private var longestStreak: Int = 0
@@ -64,6 +66,8 @@ class ScoreCalculator(private val searchString: String) {
             calculateMultiMatchScore()
         }
 
+        calculatePartialPathScore(searchStringPart)
+
         while (searchStringIndex < searchStringLength) {
             if (!canSearchStringBeContained()) {
                 return false
@@ -80,6 +84,14 @@ class ScoreCalculator(private val searchString: String) {
 
     private fun calculateMultiMatchScore() {
         fuzzyScore.multiMatchScore += currentFilePath.count { it in uniqueLetters } * matchWeightSingleChar
+    }
+
+    private fun calculatePartialPathScore(searchStringPart: String) {
+        StringUtils.split(currentFilePath, "/.").forEach {
+            if (it == searchStringPart) {
+                fuzzyScore.partialPathScore += matchWeightPartialPath
+            }
+        }
     }
 
     private fun processChar(searchStringPartChar: Char): Boolean {
@@ -126,6 +138,14 @@ class ScoreCalculator(private val searchString: String) {
 
     fun setMatchWeightSingleChar(value: Int) {
         matchWeightSingleChar = value
+    }
+
+    fun setMatchWeightPartialPath(value: Int) {
+        matchWeightPartialPath = value
+    }
+
+    fun setFilenameMatchWeight(value: Int) {
+        matchWeightFilename = value
     }
 
     fun setMultiMatch(value: Boolean) {

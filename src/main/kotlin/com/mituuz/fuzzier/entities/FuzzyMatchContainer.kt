@@ -41,5 +41,7 @@ class FuzzyMatchContainer {
         var streakScore = 0
         var multiMatchScore = 0
         var score = 0
+        var partialPathScore = 0
+        var filenameScore = 0
     }
 }
