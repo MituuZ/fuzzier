@@ -39,6 +39,7 @@ class FuzzyMatchContainer {
 
     class FuzzyScore {
         var streakScore = 0
+        var multiMatchScore = 0
         var score = 0
     }
 }

@@ -58,4 +58,31 @@ class ScoreCalculatorTest {
         val fScore = sc.calculateScore("/te", "te")
         assertNull(fScore)
     }
+
+    @Test
+    fun `Multi match basic test`() {
+        val sc = ScoreCalculator("test")
+
+        sc.setMultiMatch(true)
+        val fScore = sc.calculateScore("/test", "test")
+        assertEquals(4, fScore!!.multiMatchScore)
+    }
+
+    @Test
+    fun `Multi match basic test multiples`() {
+        val sc = ScoreCalculator("test")
+
+        sc.setMultiMatch(true)
+        val fScore = sc.calculateScore("/testtest", "testtest")
+        assertEquals(8, fScore!!.multiMatchScore)
+    }
+
+    @Test
+    fun `Multi match basic test multiples multiples`() {
+        val sc = ScoreCalculator("test test")
+
+        sc.setMultiMatch(true)
+        val fScore = sc.calculateScore("/testtest", "testtest")
+        assertEquals(16, fScore!!.multiMatchScore)
+    }
 }

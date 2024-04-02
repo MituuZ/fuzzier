@@ -8,6 +8,7 @@ class ScoreCalculator(private val searchString: String) {
     // TODO: We can parse/handle the search string here, just once per search
     private val searchStringParts = searchString.split(" ")
     private lateinit var fuzzyScore: FuzzyScore
+    private val uniqueLetters = searchString.toSet()
 
     var searchStringIndex: Int = 0
     var searchStringLength: Int = 0
@@ -16,6 +17,7 @@ class ScoreCalculator(private val searchString: String) {
 
     // Set up the settings
     private val settings = service<FuzzierSettingsService>().state
+    private var multiMatch = settings.multiMatch
     private val matchWeightSingleChar = settings.matchWeightSingleChar
     private var matchWeightStreakModifier = settings.matchWeightStreakModifier
     private val matchWeightPartialPath = settings.matchWeightPartialPath
@@ -58,18 +60,30 @@ class ScoreCalculator(private val searchString: String) {
      * Returns false if no match can be found, this stops the search
      */
     private fun processString(searchStringPart: String): Boolean {
+        if (multiMatch) {
+            processAllChars()
+        }
+
         while (searchStringIndex < searchStringLength) {
             if (!canSearchStringBeContained()) {
                 return false
             }
 
             val currentChar = searchStringPart[searchStringIndex]
-            if (!processChar(currentChar)) {
+            if (!processSearchChar(currentChar)) {
                 return false
             }
         }
 
         return true
+    }
+
+    private fun processSearchChar(searchStringPartChar: Char): Boolean {
+        return processChar(searchStringPartChar)
+    }
+
+    private fun processAllChars() {
+        fuzzyScore.multiMatchScore += currentFilePath.count { it in uniqueLetters }
     }
 
     private fun processChar(searchStringPartChar: Char): Boolean {
@@ -112,5 +126,9 @@ class ScoreCalculator(private val searchString: String) {
 
     fun setMatchWeightStreakModifier(value: Int) {
         matchWeightStreakModifier = value
+    }
+
+    fun setMultiMatch(value: Boolean) {
+        multiMatch = value
     }
 }
