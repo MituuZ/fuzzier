@@ -36,7 +36,7 @@ class ScoreCalculatorTest {
     fun `Basic streak happy case`() {
         val sc = ScoreCalculator("test")
 
-        sc.setMatchWeightStreakModifier(1)
+        sc.setMatchWeightStreakModifier(10)
         val fScore = sc.calculateScore("/test")
         assertEquals(4, fScore!!.streakScore)
     }
@@ -45,7 +45,7 @@ class ScoreCalculatorTest {
     fun `Basic streak longer path`() {
         val sc = ScoreCalculator("test")
 
-        sc.setMatchWeightStreakModifier(1)
+        sc.setMatchWeightStreakModifier(10)
         val fScore = sc.calculateScore("/te/st")
         assertEquals(2, fScore!!.streakScore)
     }
@@ -54,7 +54,7 @@ class ScoreCalculatorTest {
     fun `Basic streak no possible match`() {
         val sc = ScoreCalculator("test")
 
-        sc.setMatchWeightStreakModifier(1)
+        sc.setMatchWeightStreakModifier(10)
         val fScore = sc.calculateScore("/te")
         assertNull(fScore)
     }
@@ -66,7 +66,7 @@ class ScoreCalculatorTest {
         val sc = ScoreCalculator("test")
 
         sc.setMultiMatch(true)
-        sc.setMatchWeightSingleChar(1)
+        sc.setMatchWeightSingleChar(10)
         val fScore = sc.calculateScore("/test")
         assertEquals(4, fScore!!.multiMatchScore)
     }
@@ -76,7 +76,7 @@ class ScoreCalculatorTest {
         val sc = ScoreCalculator("test")
 
         sc.setMultiMatch(true)
-        sc.setMatchWeightSingleChar(1)
+        sc.setMatchWeightSingleChar(10)
         val fScore = sc.calculateScore("/testtest")
         assertEquals(8, fScore!!.multiMatchScore)
     }
@@ -86,7 +86,7 @@ class ScoreCalculatorTest {
         val sc = ScoreCalculator("test test")
 
         sc.setMultiMatch(true)
-        sc.setMatchWeightSingleChar(1)
+        sc.setMatchWeightSingleChar(10)
         val fScore = sc.calculateScore("/testtest")
         assertEquals(16, fScore!!.multiMatchScore)
     }

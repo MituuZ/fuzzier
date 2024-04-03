@@ -25,7 +25,7 @@ import javax.swing.table.DefaultTableModel
 import kotlin.concurrent.schedule
 
 class TestBenchComponent : JPanel() {
-    private val columnNames = arrayOf("Filename", "Filepath", "Streak", "MultiMatch", "PartialPath", "Filename")
+    private val columnNames = arrayOf("Filename", "Filepath", "Streak", "MultiMatch", "PartialPath", "Filename", "Total")
     private val table = JBTable()
     private var searchField = EditorTextField()
     private var debounceTimer: TimerTask? = null
@@ -124,7 +124,8 @@ class TestBenchComponent : JPanel() {
             }
             val sortedList = listModel.elements().toList().sortedByDescending { it.getScore() }
             val data = sortedList.map {
-                arrayOf(it.filename, it.filePath, it.score.streakScore, it.score.multiMatchScore, it.score.partialPathScore, it.score.filenameScore)
+                arrayOf(it.filename, it.filePath, it.score.streakScore, it.score.multiMatchScore,
+                    it.score.partialPathScore, it.score.filenameScore, it.score.getTotalScore())
             }.toTypedArray()
 
             val tableModel = DefaultTableModel(data, columnNames)
