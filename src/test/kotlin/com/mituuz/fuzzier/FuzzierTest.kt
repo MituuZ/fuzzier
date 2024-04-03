@@ -150,7 +150,7 @@ class FuzzierTest {
 
     private fun assertMatch(score: Int, container: FuzzyMatchContainer?) {
         if (container != null) {
-            assertEquals(score, container.score)
+            assertEquals(score, container.intScore)
         } else {
             fail("match is null")
         }
