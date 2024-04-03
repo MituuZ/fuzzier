@@ -7,9 +7,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.ui.EditorTextField
-import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextArea
+import com.intellij.ui.table.JBTable
 import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
 import com.mituuz.fuzzier.StringEvaluator
@@ -21,10 +21,12 @@ import java.util.concurrent.Future
 import javax.swing.DefaultListModel
 import javax.swing.JPanel
 import javax.swing.SwingUtilities
+import javax.swing.table.DefaultTableModel
 import kotlin.concurrent.schedule
 
 class TestBenchComponent : JPanel() {
-    private var fileList = JBList<String?>()
+    private val columnNames = arrayOf("Filename", "Filepath", "IntScore", "StreakScore", "MultiMatchScore", "Score", "PartialPathScore", "FilenameScore")
+    private val table = JBTable()
     private var searchField = EditorTextField()
     private var debounceTimer: TimerTask? = null
     @Volatile
@@ -35,7 +37,7 @@ class TestBenchComponent : JPanel() {
         liveSettingsComponent = settingsComponent
         layout = GridLayoutManager(2, 1)
         val scrollPane = JBScrollPane()
-        scrollPane.setViewportView(fileList)
+        scrollPane.setViewportView(table)
 
         add(
             scrollPane,
@@ -92,7 +94,7 @@ class TestBenchComponent : JPanel() {
     fun updateListContents(project: Project, searchString: String) {
         if (StringUtils.isBlank(searchString)) {
             SwingUtilities.invokeLater {
-                fileList.model = DefaultListModel()
+                table.model = DefaultTableModel()
             }
             return
         }
@@ -109,8 +111,9 @@ class TestBenchComponent : JPanel() {
         currentTask?.takeIf { !it.isDone }?.cancel(true)
 
         currentTask = ApplicationManager.getApplication().executeOnPooledThread {
-            fileList.setPaintBusy(true)
+            table.setPaintBusy(true)
             val listModel = DefaultListModel<FuzzyMatchContainer>()
+
             val projectFileIndex = ProjectFileIndex.getInstance(project)
             val projectBasePath = project.basePath
 
@@ -120,15 +123,15 @@ class TestBenchComponent : JPanel() {
                 projectFileIndex.iterateContent(contentIterator)
             }
             val sortedList = listModel.elements().toList().sortedByDescending { it.getScore() }
-            val valModel = DefaultListModel<String>()
-            sortedList.forEach { valModel.addElement("${it.filePath} (${it.score})") }
+            val data = sortedList.map {
+                arrayOf(it.filename, it.filePath, it.intScore, it.score.streakScore, it.score.multiMatchScore, it.score.score, it.score.partialPathScore, it.score.filenameScore)
+            }.toTypedArray()
+
+            val tableModel = DefaultTableModel(data, columnNames)
 
             SwingUtilities.invokeLater {
-                fileList.model = valModel
-                fileList.setPaintBusy(false)
-                if (!fileList.isEmpty) {
-                    fileList.setSelectedValue(valModel[0], true)
-                }
+                table.model = tableModel
+                table.setPaintBusy(false)
             }
         }
     }
