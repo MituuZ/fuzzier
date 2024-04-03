@@ -11,7 +11,7 @@ import javax.swing.DefaultListModel
 class StringEvaluator(
     private var multiMatch: Boolean, private var exclusionList: Set<String>, private var matchWeightSingleChar: Int,
     private var matchWeightStreakModifier: Int, private var matchWeightPartialPath: Int, private var changeListManager: ChangeListManager? = null) {
-    private lateinit var scoreCalculator: ScoreCalculator
+    lateinit var scoreCalculator: ScoreCalculator
 
     fun getContentIterator(projectBasePath: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
         scoreCalculator = ScoreCalculator(searchString)

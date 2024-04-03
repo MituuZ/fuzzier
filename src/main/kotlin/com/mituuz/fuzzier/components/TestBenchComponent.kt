@@ -118,6 +118,12 @@ class TestBenchComponent : JPanel() {
             val projectBasePath = project.basePath
 
             val contentIterator = projectBasePath?.let { stringEvaluator.getContentIterator(it, searchString, listModel) }
+            
+            val scoreCalculator = stringEvaluator.scoreCalculator
+            scoreCalculator.setMultiMatch(liveSettingsComponent.multiMatchActive.getCheckBox().isSelected)
+            scoreCalculator.setMatchWeightSingleChar(liveSettingsComponent.matchWeightSingleChar.getIntSpinner().value as Int)
+            scoreCalculator.setMatchWeightStreakModifier(liveSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int)
+            scoreCalculator.setMatchWeightPartialPath(liveSettingsComponent.matchWeightPartialPath.getIntSpinner().value as Int)
 
             if (contentIterator != null) {
                 projectFileIndex.iterateContent(contentIterator)

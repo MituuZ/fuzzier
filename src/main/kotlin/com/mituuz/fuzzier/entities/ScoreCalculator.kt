@@ -57,7 +57,7 @@ class ScoreCalculator(searchString: String) {
             }
         }
 
-        fuzzyScore.streakScore = longestStreak * (matchWeightStreakModifier / 10)
+        fuzzyScore.streakScore = (longestStreak * matchWeightStreakModifier) / 10
         fuzzyScore.filenameScore = longestFilenameStreak * matchWeightFilename
 
         return fuzzyScore
@@ -88,7 +88,7 @@ class ScoreCalculator(searchString: String) {
     }
 
     private fun calculateMultiMatchScore() {
-        fuzzyScore.multiMatchScore += currentFilePath.count { it in uniqueLetters } * (matchWeightSingleChar / 10)
+        fuzzyScore.multiMatchScore += (currentFilePath.count { it in uniqueLetters } * matchWeightSingleChar) / 10
     }
 
     private fun calculatePartialPathScore(searchStringPart: String) {
