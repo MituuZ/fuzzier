@@ -27,6 +27,8 @@ class ScoreCalculator(private val searchString: String) {
     var currentFilePath = ""
     private var longestStreak: Int = 0
     private var currentStreak: Int = 0
+    private var longestFilenameStreak: Int = 0
+    private var currentFilenameStreak: Int = 0
 
     /**
      * Returns null if no match can be found
@@ -54,6 +56,7 @@ class ScoreCalculator(private val searchString: String) {
         }
 
         fuzzyScore.streakScore = longestStreak * matchWeightStreakModifier
+        fuzzyScore.filenameScore = longestFilenameStreak * matchWeightFilename
 
         return fuzzyScore
     }
@@ -66,8 +69,6 @@ class ScoreCalculator(private val searchString: String) {
             calculateMultiMatchScore()
         }
 
-        calculatePartialPathScore(searchStringPart)
-
         while (searchStringIndex < searchStringLength) {
             if (!canSearchStringBeContained()) {
                 return false
@@ -78,6 +79,8 @@ class ScoreCalculator(private val searchString: String) {
                 return false
             }
         }
+
+        calculatePartialPathScore(searchStringPart)
 
         return true
     }
@@ -116,6 +119,16 @@ class ScoreCalculator(private val searchString: String) {
             }
         } else {
             currentStreak = 0
+        }
+        if (filePathIndex >= filenameIndex) {
+            if (match) {
+                currentFilenameStreak++
+                if (currentFilenameStreak > longestFilenameStreak) {
+                    longestFilenameStreak = currentFilenameStreak
+                }
+            } else {
+                currentFilenameStreak = 0
+            }
         }
     }
 

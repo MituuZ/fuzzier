@@ -99,4 +99,13 @@ class ScoreCalculatorTest {
         val fScore = sc.calculateScore("/test.kt", "test.kt")
         assertEquals(1, fScore!!.partialPathScore)
     }
+
+    @Test
+    fun `Filename score basic test`() {
+        val sc = ScoreCalculator("test")
+
+        sc.setFilenameMatchWeight(1)
+        val fScore = sc.calculateScore("/test.kt", "test.kt")
+        assertEquals(4, fScore!!.filenameScore)
+    }
 }
