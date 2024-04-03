@@ -5,11 +5,12 @@ import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FuzzyScore
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.apache.commons.lang3.StringUtils
 
-class ScoreCalculator(private val searchString: String) {
-    // TODO: We can parse/handle the search string here, just once per search
-    private val searchStringParts = searchString.split(" ")
+class ScoreCalculator(searchString: String) {
+    private val lowerSearchString: String = searchString.lowercase()
+    private val searchStringParts = lowerSearchString.split(" ")
     private lateinit var fuzzyScore: FuzzyScore
-    private val uniqueLetters = searchString.toSet()
+    private val uniqueLetters = lowerSearchString.toSet()
+    private lateinit var lowerFilePath: String
 
     var searchStringIndex: Int = 0
     var searchStringLength: Int = 0
@@ -33,14 +34,15 @@ class ScoreCalculator(private val searchString: String) {
     /**
      * Returns null if no match can be found
      */
-    fun calculateScore(filePath: String, filename: String): FuzzyScore? { // TODO: This should return FuzzyScore
-        filenameIndex = filePath.lastIndexOf("/") + 1
-        currentFilePath = filePath
+    fun calculateScore(filePath: String): FuzzyScore? { // TODO: This should return FuzzyScore
+        lowerFilePath = filePath.lowercase()
+        filenameIndex = lowerFilePath.lastIndexOf("/") + 1
+        currentFilePath = lowerFilePath
         longestStreak = 0
         fuzzyScore = FuzzyScore()
 
         // Check if the search string is longer than the file path, which results in no match
-        if (searchString.length > currentFilePath.length) { // TODO: + tolerance when it is implemented
+        if (lowerSearchString.length > currentFilePath.length) { // TODO: + tolerance when it is implemented
             return null
         }
 

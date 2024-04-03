@@ -37,7 +37,7 @@ class ScoreCalculatorTest {
         val sc = ScoreCalculator("test")
 
         sc.setMatchWeightStreakModifier(1)
-        val fScore = sc.calculateScore("/test", "test")
+        val fScore = sc.calculateScore("/test")
         assertEquals(4, fScore!!.streakScore)
     }
 
@@ -46,7 +46,7 @@ class ScoreCalculatorTest {
         val sc = ScoreCalculator("test")
 
         sc.setMatchWeightStreakModifier(1)
-        val fScore = sc.calculateScore("/te/st", "st")
+        val fScore = sc.calculateScore("/te/st")
         assertEquals(2, fScore!!.streakScore)
     }
 
@@ -55,7 +55,7 @@ class ScoreCalculatorTest {
         val sc = ScoreCalculator("test")
 
         sc.setMatchWeightStreakModifier(1)
-        val fScore = sc.calculateScore("/te", "te")
+        val fScore = sc.calculateScore("/te")
         assertNull(fScore)
     }
 
@@ -67,7 +67,7 @@ class ScoreCalculatorTest {
 
         sc.setMultiMatch(true)
         sc.setMatchWeightSingleChar(1)
-        val fScore = sc.calculateScore("/test", "test")
+        val fScore = sc.calculateScore("/test")
         assertEquals(4, fScore!!.multiMatchScore)
     }
 
@@ -77,7 +77,7 @@ class ScoreCalculatorTest {
 
         sc.setMultiMatch(true)
         sc.setMatchWeightSingleChar(1)
-        val fScore = sc.calculateScore("/testtest", "testtest")
+        val fScore = sc.calculateScore("/testtest")
         assertEquals(8, fScore!!.multiMatchScore)
     }
 
@@ -87,7 +87,7 @@ class ScoreCalculatorTest {
 
         sc.setMultiMatch(true)
         sc.setMatchWeightSingleChar(1)
-        val fScore = sc.calculateScore("/testtest", "testtest")
+        val fScore = sc.calculateScore("/testtest")
         assertEquals(16, fScore!!.multiMatchScore)
     }
 
@@ -96,7 +96,7 @@ class ScoreCalculatorTest {
         val sc = ScoreCalculator("test")
 
         sc.setMatchWeightPartialPath(1)
-        val fScore = sc.calculateScore("/test.kt", "test.kt")
+        val fScore = sc.calculateScore("/test.kt")
         assertEquals(1, fScore!!.partialPathScore)
     }
 
@@ -105,7 +105,7 @@ class ScoreCalculatorTest {
         val sc = ScoreCalculator("test")
 
         sc.setFilenameMatchWeight(1)
-        val fScore = sc.calculateScore("/test.kt", "test.kt")
+        val fScore = sc.calculateScore("/test.kt")
         assertEquals(4, fScore!!.filenameScore)
     }
 }

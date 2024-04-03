@@ -28,7 +28,7 @@ class FuzzyMatchContainer {
     }
 
     fun getScore(): Int {
-        return score.score
+        return score.getTotalScore()
     }
 
     enum class FilenameType(val text: String) {
@@ -40,8 +40,11 @@ class FuzzyMatchContainer {
     class FuzzyScore {
         var streakScore = 0
         var multiMatchScore = 0
-        var score = 0
         var partialPathScore = 0
         var filenameScore = 0
+
+        fun getTotalScore(): Int {
+            return streakScore + multiMatchScore + partialPathScore + filenameScore
+        }
     }
 }

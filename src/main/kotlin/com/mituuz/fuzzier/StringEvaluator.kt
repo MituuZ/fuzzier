@@ -78,7 +78,7 @@ class StringEvaluator(
     // Returns null if no match can be found
     private fun createFuzzyContainer(filePath: String): FuzzyMatchContainer? {
         val filename = filePath.substring(filePath.lastIndexOf("/") + 1)
-        return when (val score = scoreCalculator.calculateScore(filePath, filename)) {
+        return when (val score = scoreCalculator.calculateScore(filePath)) {
             null -> {
                 null
             }
