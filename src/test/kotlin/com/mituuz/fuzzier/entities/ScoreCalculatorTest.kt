@@ -60,8 +60,6 @@ class ScoreCalculatorTest {
         assertNull(fScore)
     }
 
-    // TODO: Remember to scale the weights to support ints!
-
     @Test
     fun `Multi match basic test`() {
         val sc = ScoreCalculator("test")
