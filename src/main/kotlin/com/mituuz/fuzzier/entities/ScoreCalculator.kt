@@ -10,7 +10,6 @@ class ScoreCalculator(searchString: String) {
     private val searchStringParts = lowerSearchString.split(" ")
     private lateinit var fuzzyScore: FuzzyScore
     private val uniqueLetters = lowerSearchString.toSet()
-    private lateinit var lowerFilePath: String
 
     var searchStringIndex: Int = 0
     var searchStringLength: Int = 0
@@ -35,9 +34,8 @@ class ScoreCalculator(searchString: String) {
      * Returns null if no match can be found
      */
     fun calculateScore(filePath: String): FuzzyScore? {
-        lowerFilePath = filePath.lowercase()
-        filenameIndex = lowerFilePath.lastIndexOf("/") + 1
-        currentFilePath = lowerFilePath
+        currentFilePath = filePath.lowercase()
+        filenameIndex = currentFilePath.lastIndexOf("/") + 1
         longestStreak = 0
         fuzzyScore = FuzzyScore()
 
@@ -57,6 +55,11 @@ class ScoreCalculator(searchString: String) {
             }
         }
 
+        if (multiMatch) {
+            calculateMultiMatchScore()
+        }
+        calculateFilenameScore()
+
         fuzzyScore.streakScore = (longestStreak * matchWeightStreakModifier) / 10
         fuzzyScore.filenameScore = (longestFilenameStreak * matchWeightFilename) / 10
 
@@ -67,10 +70,6 @@ class ScoreCalculator(searchString: String) {
      * Returns false if no match can be found, this stops the search
      */
     private fun processString(searchStringPart: String): Boolean {
-        if (multiMatch) {
-            calculateMultiMatchScore()
-        }
-
         while (searchStringIndex < searchStringLength) {
             if (!canSearchStringBeContained()) {
                 return false
@@ -104,13 +103,39 @@ class ScoreCalculator(searchString: String) {
         if (searchStringPartChar == filePathPartChar) {
             searchStringIndex++
             updateStreak(true)
-            // Increase the score
         } else {
             updateStreak(false)
-            // Decrease the score
         }
         filePathIndex++
         return true
+    }
+
+    /**
+     * Go through the search string one more time and calculate the longest streak present in the filename
+     */
+    private fun calculateFilenameScore() {
+        searchStringIndex = 0
+        currentFilenameStreak = 0
+        longestFilenameStreak = 0
+
+        filePathIndex = filenameIndex
+        while (searchStringIndex < searchStringLength && filePathIndex < currentFilePath.length) {
+            processFilenameChar(lowerSearchString[searchStringIndex])
+        }
+    }
+
+    private fun processFilenameChar(searchStringPartChar: Char) {
+        val filePathPartChar = currentFilePath[filePathIndex]
+        if (searchStringPartChar == filePathPartChar) {
+            searchStringIndex++
+            currentFilenameStreak++
+            if (currentFilenameStreak > longestFilenameStreak) {
+                longestFilenameStreak = currentFilenameStreak
+            }
+        } else {
+            currentFilenameStreak = 0
+        }
+        filePathIndex++
     }
 
     private fun updateStreak(match: Boolean) {
@@ -121,16 +146,6 @@ class ScoreCalculator(searchString: String) {
             }
         } else {
             currentStreak = 0
-        }
-        if (filePathIndex >= filenameIndex) {
-            if (match) {
-                currentFilenameStreak++
-                if (currentFilenameStreak > longestFilenameStreak) {
-                    longestFilenameStreak = currentFilenameStreak
-                }
-            } else {
-                currentFilenameStreak = 0
-            }
         }
     }
 

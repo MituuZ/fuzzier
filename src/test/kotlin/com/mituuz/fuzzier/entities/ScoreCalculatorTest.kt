@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class ScoreCalculatorTest {
+    @Suppress("unused") // Required for the tests
     private var testApplicationManager: TestApplicationManager = TestApplicationManager.getInstance()
 
     @Test
@@ -88,7 +89,7 @@ class ScoreCalculatorTest {
         sc.setMultiMatch(true)
         sc.setMatchWeightSingleChar(10)
         val fScore = sc.calculateScore("/testtest")
-        assertEquals(16, fScore!!.multiMatchScore)
+        assertEquals(8, fScore!!.multiMatchScore)
     }
 
     @Test
@@ -104,8 +105,104 @@ class ScoreCalculatorTest {
     fun `Filename score basic test`() {
         val sc = ScoreCalculator("test")
 
-        sc.setFilenameMatchWeight(1)
+        sc.setFilenameMatchWeight(10)
         val fScore = sc.calculateScore("/test.kt")
         assertEquals(4, fScore!!.filenameScore)
+    }
+
+    @Test
+    fun `Empty ss and fp`() {
+        val sc = ScoreCalculator("")
+
+        val fScore = sc.calculateScore("")
+        assertEquals(0, fScore!!.getTotalScore())
+    }
+
+    // Legacy tests
+    @Test
+    fun `Non-consecutive streak`() {
+        val sc = ScoreCalculator("kif")
+
+        sc.setMatchWeightStreakModifier(10)
+        sc.setMultiMatch(true)
+        sc.setMatchWeightSingleChar(10)
+        sc.setFilenameMatchWeight(10)
+
+        val fScore = sc.calculateScore("/KotlinIsFun")
+
+        assertEquals(1, fScore!!.streakScore)
+        assertEquals(4, fScore.multiMatchScore)
+        assertEquals(0, fScore.partialPathScore)
+        assertEquals(1, fScore.filenameScore)
+    }
+
+    @Test
+    fun `Consecutive streak`() {
+        val sc = ScoreCalculator("kot")
+
+        sc.setMatchWeightStreakModifier(10)
+        sc.setMultiMatch(true)
+        sc.setMatchWeightSingleChar(10)
+        sc.setFilenameMatchWeight(10)
+
+        val fScore = sc.calculateScore("/KotlinIsFun")
+
+        assertEquals(3, fScore!!.streakScore)
+        assertEquals(3, fScore.multiMatchScore)
+        assertEquals(0, fScore.partialPathScore)
+        assertEquals(3, fScore.filenameScore)
+    }
+
+    @Test
+    fun `Too long ss`() {
+        val sc = ScoreCalculator("TooLongSearchString")
+        val fScore = sc.calculateScore("/KIF")
+        assertNull(fScore)
+    }
+
+    @Test
+    fun `No possible match`() {
+        val sc = ScoreCalculator("A")
+        val fScore = sc.calculateScore("/KIF")
+        assertNull(fScore)
+    }
+
+    @Test
+    fun `Empty ss`() {
+        val sc = ScoreCalculator("")
+
+        val fScore = sc.calculateScore("/KIF")
+        assertEquals(0, fScore!!.getTotalScore())
+    }
+
+    @Test
+    fun `No possible match split`() {
+        val sc = ScoreCalculator("A A B")
+        val fScore = sc.calculateScore("/Kotlin/Is/Fun/kif.kt")
+        assertNull(fScore)
+    }
+
+    @Test
+    fun `Partial match split`() {
+        val sc = ScoreCalculator("A A K")
+        val fScore = sc.calculateScore("/Kotlin/Is/Fun/kif.kt")
+        assertNull(fScore)
+    }
+
+    @Test
+    fun `Split match for space`() {
+        val sc = ScoreCalculator("fun kotlin")
+
+        sc.setMatchWeightStreakModifier(10)
+        sc.setMultiMatch(true)
+        sc.setMatchWeightSingleChar(10)
+        sc.setFilenameMatchWeight(10)
+
+        val fScore = sc.calculateScore("/Kotlin/Is/Fun/kif.kt")
+
+        assertEquals(6, fScore!!.streakScore)
+        assertEquals(15, fScore.multiMatchScore)
+        assertEquals(20, fScore.partialPathScore)
+        assertEquals(1, fScore.filenameScore)
     }
 }
