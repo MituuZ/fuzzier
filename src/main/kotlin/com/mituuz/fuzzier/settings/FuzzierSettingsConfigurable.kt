@@ -29,6 +29,7 @@ class FuzzierSettingsConfigurable : Configurable {
         fuzzierSettingsComponent.matchWeightSingleChar.getIntSpinner().value = fuzzierSettingsService.state.matchWeightSingleChar
         fuzzierSettingsComponent.matchWeightSingleChar.getIntSpinner().isEnabled = fuzzierSettingsService.state.multiMatch
         fuzzierSettingsComponent.matchWeightStreakModifier.getIntSpinner().value = fuzzierSettingsService.state.matchWeightStreakModifier
+        fuzzierSettingsComponent.matchWeightFilename.getIntSpinner().value = fuzzierSettingsService.state.matchWeightFilename
         return fuzzierSettingsComponent.jPanel
     }
 
@@ -44,6 +45,7 @@ class FuzzierSettingsConfigurable : Configurable {
                 || fuzzierSettingsService.state.matchWeightPartialPath != fuzzierSettingsComponent.matchWeightPartialPath.getIntSpinner().value
                 || fuzzierSettingsService.state.matchWeightSingleChar != fuzzierSettingsComponent.matchWeightSingleChar.getIntSpinner().value
                 || fuzzierSettingsService.state.matchWeightStreakModifier != fuzzierSettingsComponent.matchWeightStreakModifier.getIntSpinner().value
+                || fuzzierSettingsService.state.matchWeightFilename != fuzzierSettingsComponent.matchWeightFilename.getIntSpinner().value
     }
 
     override fun apply() {
@@ -62,5 +64,6 @@ class FuzzierSettingsConfigurable : Configurable {
         fuzzierSettingsService.state.matchWeightPartialPath = fuzzierSettingsComponent.matchWeightPartialPath.getIntSpinner().value as Int
         fuzzierSettingsService.state.matchWeightSingleChar = fuzzierSettingsComponent.matchWeightSingleChar.getIntSpinner().value as Int
         fuzzierSettingsService.state.matchWeightStreakModifier = fuzzierSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int
+        fuzzierSettingsService.state.matchWeightFilename = fuzzierSettingsComponent.matchWeightFilename.getIntSpinner().value as Int
     }
 }

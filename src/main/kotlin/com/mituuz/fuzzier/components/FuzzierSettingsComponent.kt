@@ -96,6 +96,13 @@ class FuzzierSettingsComponent {
         """.trimIndent(),
         false)
 
+    val matchWeightFilename = SettingsComponent(JBIntSpinner(5, 0, 100), "Match weight: Filename",
+        """
+            How much score should a filename match give.<br><br>
+            e.g. search string "file" is a filename match for kotlin/<strong>file</strong>.kt
+        """.trimIndent(),
+        false)
+
     private val startTestBench = SettingsComponent(JButton("Launch Test Bench"), "Test Bench",
         """
             Test settings live with the current project's file index.
@@ -121,6 +128,8 @@ class FuzzierSettingsComponent {
             .addComponent(matchWeightSingleChar)
             .addComponent(matchWeightPartialPath)
             .addComponent(matchWeightStreakModifier)
+            .addComponent(matchWeightFilename)
+
             .addComponent(startTestBench)
             .addComponent(testBench)
             .addComponentFillVertically(JPanel(), 0)

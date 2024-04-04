@@ -23,7 +23,7 @@ class ScoreCalculator(searchString: String) {
     private var matchWeightSingleChar = settings.matchWeightSingleChar
     private var matchWeightStreakModifier = settings.matchWeightStreakModifier
     private var matchWeightPartialPath = settings.matchWeightPartialPath
-    private var matchWeightFilename = 1
+    private var matchWeightFilename = settings.matchWeightFilename
 
     var currentFilePath = ""
     private var longestStreak: Int = 0
@@ -58,7 +58,7 @@ class ScoreCalculator(searchString: String) {
         }
 
         fuzzyScore.streakScore = (longestStreak * matchWeightStreakModifier) / 10
-        fuzzyScore.filenameScore = longestFilenameStreak * matchWeightFilename
+        fuzzyScore.filenameScore = (longestFilenameStreak * matchWeightFilename) / 10
 
         return fuzzyScore
     }
