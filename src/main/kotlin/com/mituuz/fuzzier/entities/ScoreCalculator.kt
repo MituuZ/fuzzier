@@ -34,7 +34,7 @@ class ScoreCalculator(searchString: String) {
     /**
      * Returns null if no match can be found
      */
-    fun calculateScore(filePath: String): FuzzyScore? { // TODO: This should return FuzzyScore
+    fun calculateScore(filePath: String): FuzzyScore? {
         lowerFilePath = filePath.lowercase()
         filenameIndex = lowerFilePath.lastIndexOf("/") + 1
         currentFilePath = lowerFilePath
