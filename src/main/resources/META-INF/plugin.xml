@@ -29,6 +29,10 @@
   </extensions>
 
   <change-notes><![CDATA[
+  <h1>0.19.1</h2>
+  - Correct supported version to include 241*
+
+  <h1>0.19.0</h1>
   <h2>VCS only search</h2>
   Add a new action that only searches files that are being tracked by the VCS, called FuzzierVCS.<br>
   Ignored files are not included in the search, and it is not affected by the exclusion list.<br><br>
