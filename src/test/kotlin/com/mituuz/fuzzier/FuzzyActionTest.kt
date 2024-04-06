@@ -20,21 +20,16 @@ import javax.swing.JList
 import javax.swing.KeyStroke
 
 class FuzzyActionTest {
-    private var testApplicationManager: TestApplicationManager
+    @Suppress("unused")
+    private val testApplicationManager: TestApplicationManager = TestApplicationManager.getInstance()
     private val testUtil: TestUtil = TestUtil()
-    private var settings: FuzzierSettingsService.State
-
-    init {
-        testApplicationManager = TestApplicationManager.getInstance()
-        settings = FuzzierSettingsService.State()
-    }
 
     @Test
     fun `Test custom handlers`() {
         val action = getAction()
         val myFixture: CodeInsightTestFixture = testUtil.setUpProject(emptyList())
 
-        action.component = SimpleFinderComponent(myFixture.project)
+        action.component = SimpleFinderComponent()
         action.createSharedListeners(myFixture.project)
         assertNotNull(action.component)
 
@@ -69,9 +64,7 @@ class FuzzyActionTest {
     fun `Check renderer filename only`() {
         val action = getAction()
         action.setFiletype(FILENAME_ONLY)
-        val myFixture: CodeInsightTestFixture = testUtil.setUpProject(emptyList())
-        val project = myFixture.project
-        action.component = SimpleFinderComponent(project)
+        action.component = SimpleFinderComponent()
         val renderer = action.getCellRenderer()
         val container = FuzzyMatchContainer(1, "/src/asd", "asd")
         val dummyList = JList<FuzzyMatchContainer>()
@@ -84,9 +77,7 @@ class FuzzyActionTest {
     fun `Check renderer with path`() {
         val action = getAction()
         action.setFiletype(FILENAME_WITH_PATH)
-        val myFixture: CodeInsightTestFixture = testUtil.setUpProject(emptyList())
-        val project = myFixture.project
-        action.component = SimpleFinderComponent(project)
+        action.component = SimpleFinderComponent()
         val renderer = action.getCellRenderer()
         val container = FuzzyMatchContainer(1, "/src/asd", "asd")
         val dummyList = JList<FuzzyMatchContainer>()
@@ -99,9 +90,7 @@ class FuzzyActionTest {
     fun `Check renderer full path`() {
         val action = getAction()
         action.setFiletype(FILEPATH_ONLY)
-        val myFixture: CodeInsightTestFixture = testUtil.setUpProject(emptyList())
-        val project = myFixture.project
-        action.component = SimpleFinderComponent(project)
+        action.component = SimpleFinderComponent()
         val renderer = action.getCellRenderer()
         val container = FuzzyMatchContainer(1, "/src/asd", "asd")
         val dummyList = JList<FuzzyMatchContainer>()
@@ -114,9 +103,7 @@ class FuzzyActionTest {
     fun `Check renderer dir selector`() {
         val action = getAction()
         action.setFiletype(FILENAME_ONLY)
-        val myFixture: CodeInsightTestFixture = testUtil.setUpProject(emptyList())
-        val project = myFixture.project
-        action.component = SimpleFinderComponent(project)
+        action.component = SimpleFinderComponent()
         action.component.isDirSelector = true
         val renderer = action.getCellRenderer()
         val container = FuzzyMatchContainer(1, "/src/asd", "asd")

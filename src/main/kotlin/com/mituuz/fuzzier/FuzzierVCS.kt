@@ -31,11 +31,7 @@ class FuzzierVCS : Fuzzier() {
             val projectBasePath = project.basePath
 
             val stringEvaluator = StringEvaluator(
-                fuzzierSettingsService.state.multiMatch,
                 fuzzierSettingsService.state.exclusionSet,
-                fuzzierSettingsService.state.matchWeightSingleChar,
-                fuzzierSettingsService.state.matchWeightStreakModifier,
-                fuzzierSettingsService.state.matchWeightPartialPath,
                 changeListManager
             )
 

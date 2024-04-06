@@ -8,8 +8,9 @@ import com.mituuz.fuzzier.entities.ScoreCalculator
 import javax.swing.DefaultListModel
 
 class StringEvaluator(
-    private var multiMatch: Boolean, private var exclusionList: Set<String>, private var matchWeightSingleChar: Int,
-    private var matchWeightStreakModifier: Int, private var matchWeightPartialPath: Int, private var changeListManager: ChangeListManager? = null) {
+    private var exclusionList: Set<String>,
+    private var changeListManager: ChangeListManager? = null
+) {
     lateinit var scoreCalculator: ScoreCalculator
 
     fun getContentIterator(projectBasePath: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
@@ -84,13 +85,5 @@ class StringEvaluator(
 
             else -> FuzzyMatchContainer(score, filePath, filename)
         }
-    }
-
-    fun setSettings(multiMatch: Boolean, matchWeightSingleChar: Int, matchWeightPartialPath: Int,
-                    matchWeightStreakModifier: Int) {
-        this.multiMatch = multiMatch
-        this.matchWeightPartialPath = matchWeightPartialPath
-        this.matchWeightSingleChar = matchWeightSingleChar
-        this.matchWeightStreakModifier = matchWeightStreakModifier
     }
 }

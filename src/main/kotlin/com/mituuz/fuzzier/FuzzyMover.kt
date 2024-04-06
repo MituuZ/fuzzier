@@ -35,7 +35,7 @@ class FuzzyMover : FuzzyAction() {
         setCustomHandlers()
         SwingUtilities.invokeLater {
             actionEvent.project?.let { project ->
-                component = SimpleFinderComponent(project)
+                component = SimpleFinderComponent()
                 val projectBasePath = project.basePath
                 if (projectBasePath != null) {
                     createListeners(project, projectBasePath)
@@ -170,10 +170,9 @@ class FuzzyMover : FuzzyAction() {
             return
         }
 
-        val stringEvaluator = StringEvaluator(fuzzierSettingsService.state.multiMatch,
-            fuzzierSettingsService.state.exclusionSet, fuzzierSettingsService.state.matchWeightSingleChar,
-            fuzzierSettingsService.state.matchWeightStreakModifier,
-            fuzzierSettingsService.state.matchWeightPartialPath)
+        val stringEvaluator = StringEvaluator(
+            fuzzierSettingsService.state.exclusionSet,
+        )
 
         currentTask?.takeIf { !it.isDone }?.cancel(true)
 
