@@ -5,7 +5,7 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
     fun toString(filenameType: FilenameType): String {
         return when (filenameType) {
             FilenameType.FILENAME_ONLY -> filename
-            FilenameType.FILEPATH_ONLY -> filePath
+            FilenameType.FILE_PATH_ONLY -> filePath
             FilenameType.FILENAME_WITH_PATH -> "$filename   ($filePath)"
         }
     }
@@ -15,7 +15,7 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
     }
 
     enum class FilenameType(val text: String) {
-        FILEPATH_ONLY("Filepath only"),
+        FILE_PATH_ONLY("File path only"),
         FILENAME_ONLY("Filename only"),
         FILENAME_WITH_PATH("Filename with (path)")
     }

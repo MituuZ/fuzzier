@@ -89,7 +89,7 @@ class FuzzyActionTest {
     @Test
     fun `Check renderer full path`() {
         val action = getAction()
-        action.setFiletype(FILEPATH_ONLY)
+        action.setFiletype(FILE_PATH_ONLY)
         action.component = SimpleFinderComponent()
         val renderer = action.getCellRenderer()
         val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd")
