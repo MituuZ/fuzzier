@@ -56,7 +56,7 @@ class ScoreCalculator(searchString: String) {
         }
 
         if (multiMatch) {
-            calculateMultiMatchScore()
+        calculateMultiMatchScore()
         }
         calculateFilenameScore()
 
@@ -150,13 +150,12 @@ class ScoreCalculator(searchString: String) {
     }
 
     /**
-     * Checks if the remaining search string can be contained in the remaining file path
+     * Checks if the remaining search string can be contained in the remaining file path based on the length
      * e.g. if the remaining search string is "abc" and the remaining file path is "abcdef", it can be contained
      * e.g. if the remaining search string is "abc" and the remaining file path is "def", it can't be contained
      * e.g. if the remaining search string is "abc" and the remaining file path is "ab", it can't be contained
      */
     fun canSearchStringBeContained(): Boolean {
-        // TODO: Can this be handled in another way?
         val remainingSearchStringLength = searchStringLength - searchStringIndex
         val remainingFilePathLength = currentFilePath.length - filePathIndex
         return remainingSearchStringLength <= remainingFilePathLength // TODO: + tolerance when it is implemented
