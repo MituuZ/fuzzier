@@ -39,41 +39,10 @@ When focused on the search field, you can use:
 Fuzzier can be used to move files using the same search to locate the file and target directory that is used for 
 searching files. File Mover defaults to current file when search string is empty.
 
-## Settings
-Settings → Tools → Fuzzier Settings
+## Documentation
+For a more thorough documentation of the plugin, please refer to the [Fuzzier Wiki](https://github.com/MituuZ/fuzzier/wiki).
 
-![A picture of the IntelliJ IDEA settings, showing Fuzzier settings](assets/FuzzierSettings.png "An image of the IntelliJ IDEA settings")
-
-### Excluding files from the search
-You exclude files and file paths by adding them to the file exclusion list.
-No empty strings or comments are supported.
-
-All files in the project begin with `/` at the start of the file path.
-
-#### Options for exclusions are as follows:
-- Ends with
-  - e.g. `*.log`
-  - excludes all files that end with `.log`
-- Starts with
-  - e.g. `/build*`
-  - excludes all files from the project root that start with `build`
-  - excludes all files under folders that start with `build`
-  - to exclude only folders do append `/` at the end. e.g. `/build/*`
-- Contains
-  - e.g. `ee`
-  - excludes all files and folders that have the string `ee` in them
-
-### Open files in a new tab
-Decides whether Fuzzier opens a file to a new tab or not.
-
-#### Tip
-Can be combined with the editors tab amount limit. e.g. set the limit to 1 and open files in a new tab to allow splitting and changing files with vim commands (:sp and :vs)
-
-### Debounce period
-You can manually set a time after which the search processes the current search string. 
-This allows inserting multiple characters before starting the process.
-
-Defaults to 150 and can be set from 0 to 2000.
+The goal is to have a central place for all the documentation and to keep the README as a quick reference.
 
 ## Shortcuts
 ### Adding ideavim mapping for the plugin
@@ -84,7 +53,7 @@ map <Leader>gf <action>(com.mituuz.fuzzier.FuzzierVCS)
 map <Leader>mf <action>(com.mituuz.fuzzier.FuzzyMover)
 ```
 
-### Adding a shortcut for the plugin
+### Adding an editor shortcut
 ![A picture of the IntelliJ IDEA settings, showing where to set the shortcut](assets/Shortcut.png "An image of the IntelliJ IDEA settings")
 
 ## Installation
@@ -92,3 +61,9 @@ The plugin can be installed from the [JetBrains Marketplace](https://plugins.jet
 
 ## Contact
 I can be reached from <mituuuuz@hotmail.com>
+
+## Contributing
+I have a tendency to make some larger refactors from time to time, 
+so I would appreciate it if you would open an issue before starting to work on a feature or a bug fix.
+
+I'll help as I can and can give guidance on how to implement the feature or fix the bug, but cannot guarantee that I will accept the PR.
