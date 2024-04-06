@@ -10,14 +10,10 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class FuzzyMoverTest {
-    private var fuzzyMover: FuzzyMover
-    private var testApplicationManager: TestApplicationManager
+    @Suppress("unused")
+    private var testApplicationManager: TestApplicationManager = TestApplicationManager.getInstance()
+    private var fuzzyMover: FuzzyMover = FuzzyMover()
     private val testUtil: TestUtil = TestUtil()
-
-    init {
-        testApplicationManager = TestApplicationManager.getInstance()
-        fuzzyMover = FuzzyMover()
-    }
 
     @Test
     fun `Check that files are moved correctly`() {

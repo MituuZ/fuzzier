@@ -1,7 +1,6 @@
 package com.mituuz.fuzzier.entities
 
 import com.intellij.testFramework.TestApplicationManager
-import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
