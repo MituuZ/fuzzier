@@ -23,4 +23,4 @@ jobs:
       - name: Run publish
         run: ./gradlew publishPlugin
         env:
-          ORG_GRADLE_PROJECT_PUBLISH_TOKEN: ${{ secrets.MARKETPLACE_TOKEN }}
+          PUBLISH_TOKEN: ${{ secrets.MARKETPLACE_TOKEN }}
