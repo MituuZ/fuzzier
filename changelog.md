@@ -9,6 +9,7 @@
 - Multi match correction
   - Correctly calculates each occurrence of unique search string characters in the filepath
 - Introduced filename match weight
+- Set up automated publishing to marketplace from GitHub on new tags
 
 ## Version 0.19.1
 - Corrected version support from 241 to 241.*

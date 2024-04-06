@@ -43,6 +43,9 @@
   A new match weight has been added, which only affects the filename.
   <br><br>
   It calculates the score based on the longest streak of characters that match the filename.
+
+  <h2>Other changes</h2>
+  Set up automated publishing to marketplace from GitHub when creating a new release tag
   ]]>
   </change-notes>
 
