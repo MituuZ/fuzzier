@@ -29,21 +29,20 @@
   </extensions>
 
   <change-notes><![CDATA[
-  <h1>0.19.1</h2>
-  - Correct supported version to include 241*
+  <h1>0.20.0</h1>
+  <h2>Rewrite score calculation</h2>
+  The score calculation has been upgraded and made more transparent. This can be clearly seen in the test bench,
+  where you can now see each individual score for each file.
+  <br><br>
+  A bunch of cleaning up and tweaks here and there were made along with the big changes.
 
-  <h1>0.19.0</h1>
-  <h2>VCS only search</h2>
-  Add a new action that only searches files that are being tracked by the VCS, called FuzzierVCS.<br>
-  Ignored files are not included in the search, and it is not affected by the exclusion list.<br><br>
-  Huge thanks to <a href="https://github.com/ramonvermeulen"
-  title="Link to Ramon's GitHub profile">ramonvermeulen</a> for fully implementing this feature.
+  <h2>Multi match correction</h2>
+  Now correctly calculates each occurrence of unique search string characters in the filepath.
 
-  <h3>Adding an ideavim binding</h3>
-  <pre>map &lt;Leader&gt;gf &lt;action&gt;(com.mituuz.fuzzier.FuzzierVCS)</pre>
-  <h2>Versioning changes</h2>
-  - The versioning scheme has been changed to follow the semantic versioning scheme more closely.<br>
-  - Create changelog.md to simplify the changelog process.<br>
+  <h2>Filename match weight</h2>
+  A new match weight has been added, which only affects the filename.
+  <br><br>
+  It calculates the score based on the longest streak of characters that match the filename.
   ]]>
   </change-notes>
 
