@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.mituuz"
-version = "0.19.1"
+version = "0.20.0"
 
 repositories {
   mavenCentral()
@@ -12,7 +12,8 @@ repositories {
 
 dependencies {
   testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
-  testImplementation("org.mockito:mockito-core:5.10.0")
+  testImplementation("org.mockito:mockito-core:5.11.0")
+
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
 }
 
