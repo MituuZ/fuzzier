@@ -96,7 +96,7 @@ class FuzzierSettingsComponent {
         """.trimIndent(),
         false)
 
-    val matchWeightFilename = SettingsComponent(JBIntSpinner(5, 0, 100), "Match weight: Filename (* 0.1)",
+    val matchWeightFilename = SettingsComponent(JBIntSpinner(5, 0, 100), "Match weight: Filename modifier (* 0.1)",
         """
             How much score should a filename match give (divided by 10). Considers the longest streak that matches.<br><br>
             e.g. search string "file" is a filename match for kotlin/<strong>file</strong>.kt
