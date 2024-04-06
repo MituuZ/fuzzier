@@ -1,6 +1,6 @@
 plugins {
-  id("org.jetbrains.kotlin.jvm") version "1.9.22"
-  id("org.jetbrains.intellij") version "1.17.0"
+  id("org.jetbrains.kotlin.jvm") version "1.9.23"
+  id("org.jetbrains.intellij") version "1.17.3"
 }
 
 group = "com.mituuz"
@@ -24,7 +24,7 @@ tasks.test {
 // Configure Gradle IntelliJ Plugin
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {
-  version.set("2023.3.4")
+  version.set("2024.1")
   plugins.set(listOf(/* Plugin Dependencies */))
 }
 
