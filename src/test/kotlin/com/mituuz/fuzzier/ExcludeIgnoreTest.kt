@@ -1,18 +1,10 @@
 package com.mituuz.fuzzier
 
-import com.intellij.testFramework.TestApplicationManager
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class ExcludeIgnoreTest {
-    private var fuzzier: Fuzzier
-    private var testApplicationManager: TestApplicationManager
     private var testUtil = TestUtil()
-
-    init {
-        testApplicationManager = TestApplicationManager.getInstance()
-        fuzzier = Fuzzier()
-    }
 
     @Test
     fun excludeListTest() {
