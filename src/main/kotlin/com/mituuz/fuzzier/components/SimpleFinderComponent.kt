@@ -1,12 +1,11 @@
 package com.mituuz.fuzzier.components
 
-import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
 import java.awt.Dimension
 
-class SimpleFinderComponent(val project: Project) : FuzzyComponent() {
+class SimpleFinderComponent() : FuzzyComponent() {
     init {
         layout = GridLayoutManager(2, 1)
         val scrollPane = JBScrollPane()

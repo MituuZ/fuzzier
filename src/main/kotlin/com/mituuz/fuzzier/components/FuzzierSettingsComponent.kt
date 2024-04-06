@@ -9,9 +9,9 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.FormBuilder
 import com.intellij.openapi.ui.ComboBox
-import com.mituuz.fuzzier.StringEvaluator.FilenameType
-import com.mituuz.fuzzier.StringEvaluator.FilenameType.*
 import com.mituuz.fuzzier.components.FuzzierSettingsComponent.SettingsComponent
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType.*
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import java.awt.Component
 import javax.swing.*
@@ -96,6 +96,13 @@ class FuzzierSettingsComponent {
         """.trimIndent(),
         false)
 
+    val matchWeightFilename = SettingsComponent(JBIntSpinner(5, 0, 100), "Match weight: Filename (* 0.1)",
+        """
+            How much score should a filename match give (divided by 10). Considers the longest streak that matches.<br><br>
+            e.g. search string "file" is a filename match for kotlin/<strong>file</strong>.kt
+        """.trimIndent(),
+        false)
+
     private val startTestBench = SettingsComponent(JButton("Launch Test Bench"), "Test Bench",
         """
             Test settings live with the current project's file index.
@@ -121,6 +128,8 @@ class FuzzierSettingsComponent {
             .addComponent(matchWeightSingleChar)
             .addComponent(matchWeightPartialPath)
             .addComponent(matchWeightStreakModifier)
+            .addComponent(matchWeightFilename)
+
             .addComponent(startTestBench)
             .addComponent(testBench)
             .addComponentFillVertically(JPanel(), 0)

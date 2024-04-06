@@ -1,29 +1,19 @@
 package com.mituuz.fuzzier
 
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.service
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.psi.PsiManager
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
-import com.mituuz.fuzzier.StringEvaluator.FuzzyMatchContainer
 import com.mituuz.fuzzier.components.SimpleFinderComponent
-import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import javax.swing.JLabel
-import javax.swing.JList
-import javax.swing.SwingUtilities
 
 class FuzzyMoverTest {
-    private var fuzzyMover: FuzzyMover
-    private var testApplicationManager: TestApplicationManager
+    @Suppress("unused")
+    private var testApplicationManager: TestApplicationManager = TestApplicationManager.getInstance()
+    private var fuzzyMover: FuzzyMover = FuzzyMover()
     private val testUtil: TestUtil = TestUtil()
-
-    init {
-        testApplicationManager = TestApplicationManager.getInstance()
-        fuzzyMover = FuzzyMover()
-    }
 
     @Test
     fun `Check that files are moved correctly`() {
@@ -34,7 +24,7 @@ class FuzzyMoverTest {
 
         val virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/nope")
 
-        fuzzyMover.component = SimpleFinderComponent(project)
+        fuzzyMover.component = SimpleFinderComponent()
         fuzzyMover.component.isDirSelector = true
         fuzzyMover.currentFile = "/asd"
         ApplicationManager.getApplication().runReadAction {
@@ -57,7 +47,7 @@ class FuzzyMoverTest {
         val basePath = myFixture.findFileInTempDir("src").canonicalPath
         val project = myFixture.project
 
-        fuzzyMover.component = SimpleFinderComponent(project)
+        fuzzyMover.component = SimpleFinderComponent()
         fuzzyMover.currentFile = "/nope"
         if (basePath != null) {
             fuzzyMover.handleInput(basePath, project).join()

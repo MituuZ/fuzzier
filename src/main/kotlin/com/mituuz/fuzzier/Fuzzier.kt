@@ -17,8 +17,8 @@ import com.intellij.openapi.util.DimensionService
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
-import com.mituuz.fuzzier.StringEvaluator.FuzzyMatchContainer
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
 import javax.swing.*
@@ -92,11 +92,7 @@ open class Fuzzier : FuzzyAction() {
             val projectFileIndex = ProjectFileIndex.getInstance(project)
             val projectBasePath = project.basePath
             val stringEvaluator = StringEvaluator(
-                fuzzierSettingsService.state.multiMatch,
                 fuzzierSettingsService.state.exclusionSet,
-                fuzzierSettingsService.state.matchWeightSingleChar,
-                fuzzierSettingsService.state.matchWeightStreakModifier,
-                fuzzierSettingsService.state.matchWeightPartialPath
             )
 
             val contentIterator =
@@ -105,7 +101,7 @@ open class Fuzzier : FuzzyAction() {
             if (contentIterator != null) {
                 projectFileIndex.iterateContent(contentIterator)
             }
-            val sortedList = listModel.elements().toList().sortedByDescending { it.score }
+            val sortedList = listModel.elements().toList().sortedByDescending { it.getScore() }
             listModel.clear()
             sortedList.forEach { listModel.addElement(it) }
 

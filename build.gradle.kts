@@ -1,10 +1,10 @@
 plugins {
-  id("org.jetbrains.kotlin.jvm") version "1.9.22"
-  id("org.jetbrains.intellij") version "1.17.0"
+  id("org.jetbrains.kotlin.jvm") version "1.9.23"
+  id("org.jetbrains.intellij") version "1.17.3"
 }
 
 group = "com.mituuz"
-version = "0.19.1"
+version = "0.20.0"
 
 repositories {
   mavenCentral()
@@ -12,7 +12,8 @@ repositories {
 
 dependencies {
   testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
-  testImplementation("org.mockito:mockito-core:5.10.0")
+  testImplementation("org.mockito:mockito-core:5.11.0")
+
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
 }
 
@@ -23,7 +24,7 @@ tasks.test {
 // Configure Gradle IntelliJ Plugin
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {
-  version.set("2023.3.4")
+  version.set("2024.1")
   plugins.set(listOf(/* Plugin Dependencies */))
 }
 

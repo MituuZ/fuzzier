@@ -19,8 +19,8 @@ import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.refactoring.move.moveFilesOrDirectories.MoveFilesOrDirectoriesUtil
-import com.mituuz.fuzzier.StringEvaluator.FuzzyMatchContainer
 import com.mituuz.fuzzier.components.SimpleFinderComponent
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
 import java.util.concurrent.CompletableFuture
@@ -35,7 +35,7 @@ class FuzzyMover : FuzzyAction() {
         setCustomHandlers()
         SwingUtilities.invokeLater {
             actionEvent.project?.let { project ->
-                component = SimpleFinderComponent(project)
+                component = SimpleFinderComponent()
                 val projectBasePath = project.basePath
                 if (projectBasePath != null) {
                     createListeners(project, projectBasePath)
@@ -170,10 +170,9 @@ class FuzzyMover : FuzzyAction() {
             return
         }
 
-        val stringEvaluator = StringEvaluator(fuzzierSettingsService.state.multiMatch,
-            fuzzierSettingsService.state.exclusionSet, fuzzierSettingsService.state.matchWeightSingleChar,
-            fuzzierSettingsService.state.matchWeightStreakModifier,
-            fuzzierSettingsService.state.matchWeightPartialPath)
+        val stringEvaluator = StringEvaluator(
+            fuzzierSettingsService.state.exclusionSet,
+        )
 
         currentTask?.takeIf { !it.isDone }?.cancel(true)
 
@@ -192,7 +191,7 @@ class FuzzyMover : FuzzyAction() {
             if (contentIterator != null) {
                 projectFileIndex.iterateContent(contentIterator)
             }
-            val sortedList = listModel.elements().toList().sortedByDescending { it.score }
+            val sortedList = listModel.elements().toList().sortedByDescending { it.getScore() }
             listModel.clear()
             sortedList.forEach { listModel.addElement(it) }
 

@@ -10,7 +10,7 @@ import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.runInEdtAndWait
-import com.mituuz.fuzzier.StringEvaluator.FuzzyMatchContainer
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import org.mockito.ArgumentMatchers.any
 import javax.swing.DefaultListModel
 import org.mockito.Mockito
@@ -52,9 +52,9 @@ class TestUtil {
                 val tempDirPath = myFixture.tempDirPath
                 ignoredFiles.any{ ("$tempDirPath/$it") == file.path }
             }
-            stringEvaluator = StringEvaluator(true, exclusionList, 5, 10, 10, changeListManager)
+            stringEvaluator = StringEvaluator(exclusionList, changeListManager)
         } else {
-            stringEvaluator = StringEvaluator(true, exclusionList, 5, 10, 10)
+            stringEvaluator = StringEvaluator(exclusionList)
         }
 
         val basePath = myFixture.findFileInTempDir("src").canonicalPath
