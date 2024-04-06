@@ -203,4 +203,72 @@ class ScoreCalculatorTest {
         assertEquals(20, fScore.partialPathScore)
         assertEquals(1, fScore.filenameScore)
     }
+
+    @Test
+    fun `Legacy test 1`() {
+        val sc = ScoreCalculator("kif")
+
+        sc.setMatchWeightStreakModifier(10)
+        sc.setMultiMatch(true)
+        sc.setMatchWeightSingleChar(10)
+        sc.setFilenameMatchWeight(10)
+
+        val fScore = sc.calculateScore("/Kotlin/Is/Fun/kif.kt")
+
+        assertEquals(1, fScore!!.streakScore)
+        assertEquals(8, fScore.multiMatchScore)
+        assertEquals(10, fScore.partialPathScore)
+        assertEquals(3, fScore.filenameScore)
+    }
+
+    @Test
+    fun `Legacy test 2`() {
+        val sc = ScoreCalculator("kif")
+
+        sc.setMatchWeightStreakModifier(10)
+        sc.setMultiMatch(true)
+        sc.setMatchWeightSingleChar(10)
+        sc.setFilenameMatchWeight(10)
+
+        val fScore = sc.calculateScore("/Kiffer/Is/Fun/kiffer.kt")
+
+        assertEquals(3, fScore!!.streakScore)
+        assertEquals(11, fScore.multiMatchScore)
+        assertEquals(0, fScore.partialPathScore)
+        assertEquals(3, fScore.filenameScore)
+    }
+
+    @Test
+    fun `Multiple partial file path matches`() {
+        val sc = ScoreCalculator("kif")
+
+        sc.setMatchWeightStreakModifier(10)
+        sc.setMultiMatch(true)
+        sc.setMatchWeightSingleChar(10)
+        sc.setFilenameMatchWeight(10)
+
+        val fScore = sc.calculateScore("/Kif/Is/Fun/kif.kt")
+
+        assertEquals(3, fScore!!.streakScore)
+        assertEquals(9, fScore.multiMatchScore)
+        assertEquals(20, fScore.partialPathScore)
+        assertEquals(3, fScore.filenameScore)
+    }
+
+    @Test
+    fun `Legacy test 3`() {
+        val sc = ScoreCalculator("kif fun kotlin")
+
+        sc.setMatchWeightStreakModifier(10)
+        sc.setMultiMatch(true)
+        sc.setMatchWeightSingleChar(10)
+        sc.setFilenameMatchWeight(10)
+
+        val fScore = sc.calculateScore("/Kotlin/Is/Fun/kif.kt")
+
+        assertEquals(6, fScore!!.streakScore)
+        assertEquals(15, fScore.multiMatchScore)
+        assertEquals(30, fScore.partialPathScore)
+        assertEquals(3, fScore.filenameScore)
+    }
 }
