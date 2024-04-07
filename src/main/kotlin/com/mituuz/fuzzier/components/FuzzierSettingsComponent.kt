@@ -46,7 +46,15 @@ class FuzzierSettingsComponent {
             <strong>Full path</strong> - Shows the full path of the file: /path/to/file<br>
             <strong>Filename only</strong> - Shows only the filename: file<br>
             <strong>Filename with (path)</strong> - Shows path in brackets: file (/path/to/file)
+            <strong>Filename with (path) styled</strong> - Uses bold for filename and italic for the path: <strong>file</strong> <i>(path/to/file)</i>
+            This is more performance intensive, you should not use too high file list limit with this option.
     """.trimIndent(),
+        false)
+
+    val fileListLimit = SettingsComponent(JBIntSpinner(50, 1, 5000), "File list limit",
+        """
+            Controls how many files are shown and listed on the popup.
+        """.trimIndent(),
         false)
 
     val fontSize = SettingsComponent(JBIntSpinner(14, 4, 20), "File list font size",
@@ -119,6 +127,7 @@ class FuzzierSettingsComponent {
             .addComponent(newTabSelect)
             .addComponent(debounceTimerValue)
             .addComponent(filenameTypeSelector)
+            .addComponent(fileListLimit)
             .addComponent(fontSize)
             .addComponent(fileListSpacing)
 
