@@ -7,7 +7,7 @@ import java.util.*
 import javax.swing.DefaultListModel
 
 class FuzzierUtil {
-    private val listLimit: Int = service<FuzzierSettingsService>().state.fileListLimit
+    private var listLimit: Int = service<FuzzierSettingsService>().state.fileListLimit
 
     /**
      * Process all the elements in the listModel with a priority queue to limit the size
@@ -35,5 +35,9 @@ class FuzzierUtil {
         result.addAll(priorityQueue.toList().sortedByDescending { it.getScore() })
 
         return result
+    }
+
+    fun setListLimit(limit: Int) {
+        listLimit = limit
     }
 }
