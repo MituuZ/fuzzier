@@ -25,7 +25,7 @@ class FuzzierVCS : Fuzzier() {
         currentTask?.takeIf { !it.isDone }?.cancel(true)
         currentTask = ApplicationManager.getApplication().executeOnPooledThread {
             component.fileList.setPaintBusy(true)
-            val listModel = DefaultListModel<FuzzyMatchContainer>()
+            var listModel = DefaultListModel<FuzzyMatchContainer>()
             val projectFileIndex = ProjectFileIndex.getInstance(project)
             val changeListManager = ChangeListManager.getInstance(project)
             val projectBasePath = project.basePath
@@ -41,9 +41,8 @@ class FuzzierVCS : Fuzzier() {
             if (contentIterator != null) {
                 projectFileIndex.iterateContent(contentIterator)
             }
-            val sortedList = listModel.elements().toList().sortedByDescending { it.getScore() }
-            listModel.clear()
-            sortedList.forEach { listModel.addElement(it) }
+
+            listModel = fuzzierUtil.sortAndLimit(listModel)
 
             SwingUtilities.invokeLater {
                 component.fileList.model = listModel
