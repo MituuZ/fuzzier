@@ -43,11 +43,27 @@ class FuzzierSettingsComponent {
         """
             Controls how the filename is shown on the file search and selector popups.<br><br>
             Choices are as follows (/path/to/file):<br><br>
-            <strong>Full path</strong> - Shows the full path of the file: /path/to/file<br>
-            <strong>Filename only</strong> - Shows only the filename: file<br>
-            <strong>Filename with (path)</strong> - Shows path in brackets: file (/path/to/file)
-            <strong>Filename with (path) styled</strong> - Uses bold for filename and italic for the path: <strong>file</strong> <i>(path/to/file)</i>
-            This is more performance intensive, you should not use too high file list limit with this option.
+            
+            <strong>Full path</strong> - Shows the full path of the file:
+            <br>
+            /path/to/file
+            
+            <br><br>
+            <strong>Filename only</strong> - Shows only the filename:
+            <br>
+            file
+            
+            <br><br>
+            <strong>Filename with (path)</strong> - Shows path in brackets:
+            <br>
+            file (/path/to/file)
+            
+            <br><br>
+            <strong>Filename with (path) styled</strong> - Uses bold for filename and italic for the path:
+            <br>
+            <strong>file</strong>  <i>(path/to/file)</i>
+            <br>
+            <strong>Note!</strong>This is more performance intensive, you should not use too high file list limit with this option.
     """.trimIndent(),
         false)
 
