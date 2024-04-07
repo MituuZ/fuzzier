@@ -32,7 +32,7 @@ class FuzzierUtil {
         }
 
         val result = DefaultListModel<FuzzyMatchContainer>()
-        result.addAll(priorityQueue.toList())
+        result.addAll(priorityQueue.toList().sortedByDescending { it.getScore() })
 
         return result
     }
