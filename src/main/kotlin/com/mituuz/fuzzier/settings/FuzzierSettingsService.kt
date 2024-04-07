@@ -17,11 +17,13 @@ class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.S
         var newTab: Boolean = false
         var debouncePeriod: Int = 150
         var resetWindow = false
-        var multiMatch = false
+        var fileListLimit: Int = 50
+
         var filenameType: FilenameType = FILE_PATH_ONLY
         var fontSize = 14
         var fileListSpacing = 0
 
+        var multiMatch = false
         var matchWeightPartialPath = 10
         var matchWeightSingleChar = 5
         var matchWeightStreakModifier = 10

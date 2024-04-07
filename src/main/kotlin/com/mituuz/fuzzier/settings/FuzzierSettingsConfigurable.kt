@@ -21,6 +21,7 @@ class FuzzierSettingsConfigurable : Configurable {
         fuzzierSettingsComponent.newTabSelect.getCheckBox().isSelected = fuzzierSettingsService.state.newTab
         fuzzierSettingsComponent.debounceTimerValue.getIntSpinner().value = fuzzierSettingsService.state.debouncePeriod
         fuzzierSettingsComponent.filenameTypeSelector.getFilenameTypeComboBox().selectedIndex = fuzzierSettingsService.state.filenameType.ordinal
+        fuzzierSettingsComponent.fileListLimit.getIntSpinner().value = fuzzierSettingsService.state.fileListLimit
         fuzzierSettingsComponent.fontSize.getIntSpinner().value = fuzzierSettingsService.state.fontSize
         fuzzierSettingsComponent.fileListSpacing.getIntSpinner().value = fuzzierSettingsService.state.fileListSpacing
 
@@ -38,6 +39,7 @@ class FuzzierSettingsConfigurable : Configurable {
                 || fuzzierSettingsService.state.newTab != fuzzierSettingsComponent.newTabSelect.getCheckBox().isSelected
                 || fuzzierSettingsService.state.debouncePeriod != fuzzierSettingsComponent.debounceTimerValue.getIntSpinner().value
                 || fuzzierSettingsService.state.filenameType != fuzzierSettingsComponent.filenameTypeSelector.getFilenameTypeComboBox().selectedItem
+                || fuzzierSettingsService.state.fileListLimit != fuzzierSettingsComponent.fileListLimit.getIntSpinner().value
                 || fuzzierSettingsService.state.fontSize != fuzzierSettingsComponent.fontSize.getIntSpinner().value
                 || fuzzierSettingsService.state.fileListSpacing != fuzzierSettingsComponent.fileListSpacing.getIntSpinner().value
 
@@ -57,6 +59,7 @@ class FuzzierSettingsConfigurable : Configurable {
         fuzzierSettingsService.state.newTab = fuzzierSettingsComponent.newTabSelect.getCheckBox().isSelected
         fuzzierSettingsService.state.debouncePeriod = fuzzierSettingsComponent.debounceTimerValue.getIntSpinner().value as Int
         fuzzierSettingsService.state.filenameType = FilenameType.entries.toTypedArray()[fuzzierSettingsComponent.filenameTypeSelector.getFilenameTypeComboBox().selectedIndex]
+        fuzzierSettingsService.state.fileListLimit = fuzzierSettingsComponent.fileListLimit.getIntSpinner().value as Int
         fuzzierSettingsService.state.fontSize = fuzzierSettingsComponent.fontSize.getIntSpinner().value as Int
         fuzzierSettingsService.state.fileListSpacing = fuzzierSettingsComponent.fileListSpacing.getIntSpinner().value as Int
         

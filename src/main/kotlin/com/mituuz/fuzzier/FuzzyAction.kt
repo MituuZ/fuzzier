@@ -18,6 +18,7 @@ import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType.FILE_PATH_ONLY
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
+import com.mituuz.fuzzier.util.FuzzierUtil
 import java.awt.Component
 import java.awt.event.ActionEvent
 import java.awt.event.InputEvent
@@ -37,6 +38,7 @@ abstract class FuzzyAction : AnAction() {
     protected val fuzzierSettingsService = service<FuzzierSettingsService>()
     @Volatile
     var currentTask: Future<*>? = null
+    val fuzzierUtil = FuzzierUtil()
 
     override fun actionPerformed(actionEvent: AnActionEvent) {
         // Necessary override
