@@ -25,6 +25,7 @@ class FuzzierSettingsConfigurable : Configurable {
         fuzzierSettingsComponent.fontSize.getIntSpinner().value = fuzzierSettingsService.state.fontSize
         fuzzierSettingsComponent.fileListSpacing.getIntSpinner().value = fuzzierSettingsService.state.fileListSpacing
 
+        fuzzierSettingsComponent.tolerance.getIntSpinner().value = fuzzierSettingsService.state.tolerance
         fuzzierSettingsComponent.multiMatchActive.getCheckBox().isSelected = fuzzierSettingsService.state.multiMatch
         fuzzierSettingsComponent.matchWeightPartialPath.getIntSpinner().value = fuzzierSettingsService.state.matchWeightPartialPath
         fuzzierSettingsComponent.matchWeightSingleChar.getIntSpinner().value = fuzzierSettingsService.state.matchWeightSingleChar
@@ -48,6 +49,7 @@ class FuzzierSettingsConfigurable : Configurable {
                 || fuzzierSettingsService.state.fontSize != fuzzierSettingsComponent.fontSize.getIntSpinner().value
                 || fuzzierSettingsService.state.fileListSpacing != fuzzierSettingsComponent.fileListSpacing.getIntSpinner().value
 
+                || fuzzierSettingsService.state.tolerance != fuzzierSettingsComponent.tolerance.getIntSpinner().value
                 || fuzzierSettingsService.state.multiMatch != fuzzierSettingsComponent.multiMatchActive.getCheckBox().isSelected
                 || fuzzierSettingsService.state.matchWeightPartialPath != fuzzierSettingsComponent.matchWeightPartialPath.getIntSpinner().value
                 || fuzzierSettingsService.state.matchWeightSingleChar != fuzzierSettingsComponent.matchWeightSingleChar.getIntSpinner().value
@@ -67,7 +69,8 @@ class FuzzierSettingsConfigurable : Configurable {
         fuzzierSettingsService.state.fileListLimit = fuzzierSettingsComponent.fileListLimit.getIntSpinner().value as Int
         fuzzierSettingsService.state.fontSize = fuzzierSettingsComponent.fontSize.getIntSpinner().value as Int
         fuzzierSettingsService.state.fileListSpacing = fuzzierSettingsComponent.fileListSpacing.getIntSpinner().value as Int
-        
+
+        fuzzierSettingsService.state.tolerance = fuzzierSettingsComponent.tolerance.getIntSpinner().value as Int
         fuzzierSettingsService.state.multiMatch = fuzzierSettingsComponent.multiMatchActive.getCheckBox().isSelected
         fuzzierSettingsService.state.matchWeightPartialPath = fuzzierSettingsComponent.matchWeightPartialPath.getIntSpinner().value as Int
         fuzzierSettingsService.state.matchWeightSingleChar = fuzzierSettingsComponent.matchWeightSingleChar.getIntSpinner().value as Int

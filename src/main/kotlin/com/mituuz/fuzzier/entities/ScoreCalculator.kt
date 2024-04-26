@@ -18,6 +18,7 @@ class ScoreCalculator(searchString: String) {
 
     // Set up the settings
     private val settings = service<FuzzierSettingsService>().state
+    private var tolerance = settings.tolerance
     private var multiMatch = settings.multiMatch
     private var matchWeightSingleChar = settings.matchWeightSingleChar
     private var matchWeightStreakModifier = settings.matchWeightStreakModifier
@@ -29,6 +30,7 @@ class ScoreCalculator(searchString: String) {
     private var currentStreak: Int = 0
     private var longestFilenameStreak: Int = 0
     private var currentFilenameStreak: Int = 0
+    private var toleranceCount: Int = 0
 
     /**
      * Returns null if no match can be found
@@ -40,7 +42,7 @@ class ScoreCalculator(searchString: String) {
         fuzzyScore = FuzzyScore()
 
         // Check if the search string is longer than the file path, which results in no match
-        if (lowerSearchString.length > currentFilePath.length) { // TODO: + tolerance when it is implemented
+        if (lowerSearchString.length > (currentFilePath.length + tolerance)) {
             return null
         }
 
@@ -99,11 +101,21 @@ class ScoreCalculator(searchString: String) {
     }
 
     private fun processChar(searchStringPartChar: Char): Boolean {
+        if (filePathIndex >= currentFilePath.length) {
+            return false;
+        }
         val filePathPartChar = currentFilePath[filePathIndex]
         if (searchStringPartChar == filePathPartChar) {
             searchStringIndex++
             updateStreak(true)
         } else {
+            if (currentStreak > 0 && toleranceCount < tolerance) {
+                // When hitting tolerance increment the search string and filepath, but do not add streak
+                searchStringIndex++
+                toleranceCount++
+                filePathIndex++
+                return true
+            }
             updateStreak(false)
         }
         filePathIndex++
@@ -158,7 +170,7 @@ class ScoreCalculator(searchString: String) {
     fun canSearchStringBeContained(): Boolean {
         val remainingSearchStringLength = searchStringLength - searchStringIndex
         val remainingFilePathLength = currentFilePath.length - filePathIndex
-        return remainingSearchStringLength <= remainingFilePathLength // TODO: + tolerance when it is implemented
+        return remainingSearchStringLength <= (remainingFilePathLength + tolerance)
     }
 
     fun setMatchWeightStreakModifier(value: Int) {
@@ -179,5 +191,9 @@ class ScoreCalculator(searchString: String) {
 
     fun setMultiMatch(value: Boolean) {
         multiMatch = value
+    }
+
+    fun setTolerance(value: Int) {
+        tolerance = value
     }
 }

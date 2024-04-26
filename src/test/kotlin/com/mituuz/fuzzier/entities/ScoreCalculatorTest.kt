@@ -270,4 +270,68 @@ class ScoreCalculatorTest {
         assertEquals(30, fScore.partialPathScore)
         assertEquals(3, fScore.filenameScore)
     }
+
+    @Test
+    fun `5 tolerance matching normal match`() {
+        val sc = ScoreCalculator("kotlin")
+        sc.setTolerance(5)
+
+        assertNotNull(sc.calculateScore("/Kotlin"))
+    }
+
+    @Test
+    fun `5 tolerance matching 1 letter difference`() {
+        val sc = ScoreCalculator("korlin")
+        sc.setTolerance(5)
+
+        assertNotNull(sc.calculateScore("/Kotlin"))
+    }
+
+    @Test
+    fun `1 tolerance matching 1 letter difference`() {
+        val sc = ScoreCalculator("korlin")
+        sc.setTolerance(1)
+
+        assertNotNull(sc.calculateScore("/Kotlin"))
+    }
+
+    @Test
+    fun `1 tolerance matching 2 letter difference`() {
+        val sc = ScoreCalculator("korlnn")
+        sc.setTolerance(1)
+
+        assertNull(sc.calculateScore("/Kotlin"))
+    }
+
+    @Test
+    fun `1 tolerance matching 1 letter difference with split path`() {
+        val sc = ScoreCalculator("korlin")
+        sc.setTolerance(1)
+
+        assertNotNull(sc.calculateScore("/Kot/lin"))
+    }
+
+    @Test
+    fun `1 tolerance matching 2 letter difference with split path`() {
+        val sc = ScoreCalculator("korlin")
+        sc.setTolerance(1)
+
+        assertNull(sc.calculateScore("/Kot/sin"))
+    }
+
+    @Test
+    fun `2 tolerance matching 2 letter difference with split path`() {
+        val sc = ScoreCalculator("korlin")
+        sc.setTolerance(2)
+
+        assertNotNull(sc.calculateScore("/Kot/sin"))
+    }
+
+    @Test
+    fun `qewji`() {
+        val sc = ScoreCalculator("kotlin12345")
+        sc.setTolerance(5)
+
+        assertNull(sc.calculateScore("/Kotlin"))
+    }
 }

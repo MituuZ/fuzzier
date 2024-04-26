@@ -23,6 +23,7 @@ class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.S
         var fontSize = 14
         var fileListSpacing = 0
 
+        var tolerance = 0
         var multiMatch = false
         var matchWeightPartialPath = 10
         var matchWeightSingleChar = 5
