@@ -155,6 +155,7 @@ class FuzzierSettingsComponent {
 
             .addSeparator()
             .addComponent(JBLabel("<html><strong>Match settings</strong></html>"))
+            .addComponent(tolerance)
             .addComponent(multiMatchActive)
             .addComponent(matchWeightSingleChar)
             .addComponent(matchWeightPartialPath)
