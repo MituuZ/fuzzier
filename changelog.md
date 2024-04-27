@@ -1,6 +1,9 @@
 # Changelog
 ## Earlier Versions
 - Prior to version 0.19.0, numerous features and improvements were made, laying the foundation for the current version. This includes initial development, various enhancements, and bug fixes. For detailed history, please refer to commit logs or release notes.
+ 
+## Version 0.20.1
+- Fix settings modification comparison using set 
 
 ## Version 0.20.0
 - Score calculation rewrite

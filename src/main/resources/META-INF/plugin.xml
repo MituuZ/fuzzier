@@ -29,38 +29,8 @@
   </extensions>
 
   <change-notes><![CDATA[
-  <h1>0.20.0</h1>
-  <h2>Rewrite score calculation</h2>
-  The score calculation has been upgraded and made more transparent. This can be clearly seen in the test bench,
-  where you can now see each individual score for each file.
-  <br><br>
-  A bunch of cleaning up and tweaks here and there were made along with the big changes.
-
-  <h2>Multi match correction</h2>
-  Now correctly calculates each occurrence of unique search string characters in the filepath.
-
-  <h2>Filename match weight</h2>
-  A new match weight has been added, which only affects the filename.
-  <br><br>
-  It calculates the score based on the longest streak of characters that match the filename.
-
-  <h2>Re-implement html rendering</h2>
-  Add "Filename with (path) styled" as an option to filename type.
-  <br>
-  This uses bold for the filename and italic for the path to make it easier to distinguish between the two.
-  <br><br>
-  e.g. <strong>file</strong>  <i>(path/to/file)</i>
-
-  <h2>Implement file list limit</h2>
-  Add a new setting to limit the number of files shown in the file list.
-  Made a few optimizations to the file list handling and sorting.
-  <br><br>
-  This was necessary to implement the html rendering, because otherwise it would be too slow to render.
-
-  <h2>Other changes</h2>
-  Set up automated publishing to marketplace from GitHub when creating a new release tag.
-  <br><br>
-  Move documentation to a <a href="https://github.com/MituuZ/fuzzier/wiki" title="Fuzzier Wiki">GitHub Wiki</a>.
+  <h2>Version 0.20.1</h2>
+  <p>Fix settings modification comparison using set </p>
   ]]>
   </change-notes>
 
