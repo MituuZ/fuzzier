@@ -40,6 +40,7 @@ class ScoreCalculator(searchString: String) {
         filenameIndex = currentFilePath.lastIndexOf("/") + 1
         longestStreak = 0
         fuzzyScore = FuzzyScore()
+        toleranceCount = 0
 
         // Check if the search string is longer than the file path, which results in no match
         if (lowerSearchString.length > (currentFilePath.length + tolerance)) {

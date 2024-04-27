@@ -328,7 +328,7 @@ class ScoreCalculatorTest {
     }
 
     @Test
-    fun `qewji`() {
+    fun `Don't match longer strings even if there is tolerance left`() {
         val sc = ScoreCalculator("kotlin12345")
         sc.setTolerance(5)
 
