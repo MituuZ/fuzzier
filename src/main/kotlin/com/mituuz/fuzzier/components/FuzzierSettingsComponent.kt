@@ -93,7 +93,8 @@ class FuzzierSettingsComponent {
         """
             How many non-matching letters are allowed when calculating matches.<br><br>
             e.g. korlin would still match kotlin.
-        """.trimIndent())
+        """.trimIndent(),
+        false)
 
     val multiMatchActive = SettingsComponent(JBCheckBox(), "Match characters multiple times",
         """
