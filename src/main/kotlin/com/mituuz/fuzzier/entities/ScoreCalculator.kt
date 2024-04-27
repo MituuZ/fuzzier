@@ -56,7 +56,7 @@ class ScoreCalculator(searchString: String) {
         }
 
         if (multiMatch) {
-        calculateMultiMatchScore()
+            calculateMultiMatchScore()
         }
         calculateFilenameScore()
 
