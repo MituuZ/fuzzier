@@ -29,7 +29,8 @@
   </extensions>
 
   <change-notes><![CDATA[
-  <h2>Version 0.20.1</h2>
+  <h2>Version 0.21.0</h2>
+  <p>Add tolerance setting for string matching</p>
   <p>Fix settings modification comparison using set </p>
   ]]>
   </change-notes>
