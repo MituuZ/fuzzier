@@ -89,6 +89,13 @@ class FuzzierSettingsComponent {
     /////////////////////////////////////////////////////////////////
     // Match settings
     /////////////////////////////////////////////////////////////////
+    val tolerance = SettingsComponent(JBIntSpinner(0, 0, 5), "Match tolerance",
+        """
+            How many non-matching letters are allowed when calculating matches.<br><br>
+            e.g. korlin would still match kotlin.
+        """.trimIndent(),
+        false)
+
     val multiMatchActive = SettingsComponent(JBCheckBox(), "Match characters multiple times",
         """
             Count score for each instance of a character in the search string.<br><br>
@@ -149,6 +156,7 @@ class FuzzierSettingsComponent {
 
             .addSeparator()
             .addComponent(JBLabel("<html><strong>Match settings</strong></html>"))
+            .addComponent(tolerance)
             .addComponent(multiMatchActive)
             .addComponent(matchWeightSingleChar)
             .addComponent(matchWeightPartialPath)
