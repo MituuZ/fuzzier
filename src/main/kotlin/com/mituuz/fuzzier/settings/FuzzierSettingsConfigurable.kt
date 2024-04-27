@@ -7,74 +7,74 @@ import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType
 import javax.swing.JComponent
 
 class FuzzierSettingsConfigurable : Configurable {
-    private lateinit var fuzzierSettingsComponent: FuzzierSettingsComponent
-    private var fuzzierSettingsService = service<FuzzierSettingsService>()
+    private lateinit var component: FuzzierSettingsComponent
+    private var state = service<FuzzierSettingsService>().state
     override fun getDisplayName(): String {
         return "Fuzzy File Finder Settings"
     }
 
     override fun createComponent(): JComponent {
-        fuzzierSettingsComponent = FuzzierSettingsComponent()
+        component = FuzzierSettingsComponent()
 
-        val combinedString = fuzzierSettingsService.state.exclusionSet.joinToString("\n")
-        fuzzierSettingsComponent.exclusionSet.getJBTextArea().text = combinedString
-        fuzzierSettingsComponent.newTabSelect.getCheckBox().isSelected = fuzzierSettingsService.state.newTab
-        fuzzierSettingsComponent.debounceTimerValue.getIntSpinner().value = fuzzierSettingsService.state.debouncePeriod
-        fuzzierSettingsComponent.filenameTypeSelector.getFilenameTypeComboBox().selectedIndex = fuzzierSettingsService.state.filenameType.ordinal
-        fuzzierSettingsComponent.fileListLimit.getIntSpinner().value = fuzzierSettingsService.state.fileListLimit
-        fuzzierSettingsComponent.fontSize.getIntSpinner().value = fuzzierSettingsService.state.fontSize
-        fuzzierSettingsComponent.fileListSpacing.getIntSpinner().value = fuzzierSettingsService.state.fileListSpacing
+        val combinedString = state.exclusionSet.joinToString("\n")
+        component.exclusionSet.getJBTextArea().text = combinedString
+        component.newTabSelect.getCheckBox().isSelected = state.newTab
+        component.debounceTimerValue.getIntSpinner().value = state.debouncePeriod
+        component.filenameTypeSelector.getFilenameTypeComboBox().selectedIndex = state.filenameType.ordinal
+        component.fileListLimit.getIntSpinner().value = state.fileListLimit
+        component.fontSize.getIntSpinner().value = state.fontSize
+        component.fileListSpacing.getIntSpinner().value = state.fileListSpacing
 
-        fuzzierSettingsComponent.tolerance.getIntSpinner().value = fuzzierSettingsService.state.tolerance
-        fuzzierSettingsComponent.multiMatchActive.getCheckBox().isSelected = fuzzierSettingsService.state.multiMatch
-        fuzzierSettingsComponent.matchWeightPartialPath.getIntSpinner().value = fuzzierSettingsService.state.matchWeightPartialPath
-        fuzzierSettingsComponent.matchWeightSingleChar.getIntSpinner().value = fuzzierSettingsService.state.matchWeightSingleChar
-        fuzzierSettingsComponent.matchWeightSingleChar.getIntSpinner().isEnabled = fuzzierSettingsService.state.multiMatch
-        fuzzierSettingsComponent.matchWeightStreakModifier.getIntSpinner().value = fuzzierSettingsService.state.matchWeightStreakModifier
-        fuzzierSettingsComponent.matchWeightFilename.getIntSpinner().value = fuzzierSettingsService.state.matchWeightFilename
-        return fuzzierSettingsComponent.jPanel
+        component.tolerance.getIntSpinner().value = state.tolerance
+        component.multiMatchActive.getCheckBox().isSelected = state.multiMatch
+        component.matchWeightPartialPath.getIntSpinner().value = state.matchWeightPartialPath
+        component.matchWeightSingleChar.getIntSpinner().value = state.matchWeightSingleChar
+        component.matchWeightSingleChar.getIntSpinner().isEnabled = state.multiMatch
+        component.matchWeightStreakModifier.getIntSpinner().value = state.matchWeightStreakModifier
+        component.matchWeightFilename.getIntSpinner().value = state.matchWeightFilename
+        return component.jPanel
     }
 
     override fun isModified(): Boolean {
-        val newSet = fuzzierSettingsComponent.exclusionSet.getJBTextArea().text
+        val newSet = component.exclusionSet.getJBTextArea().text
             .split("\n")
             .filter { it.isNotBlank() }
             .toSet()
 
-        return fuzzierSettingsService.state.exclusionSet != newSet
-                || fuzzierSettingsService.state.newTab != fuzzierSettingsComponent.newTabSelect.getCheckBox().isSelected
-                || fuzzierSettingsService.state.debouncePeriod != fuzzierSettingsComponent.debounceTimerValue.getIntSpinner().value
-                || fuzzierSettingsService.state.filenameType != fuzzierSettingsComponent.filenameTypeSelector.getFilenameTypeComboBox().selectedItem
-                || fuzzierSettingsService.state.fileListLimit != fuzzierSettingsComponent.fileListLimit.getIntSpinner().value
-                || fuzzierSettingsService.state.fontSize != fuzzierSettingsComponent.fontSize.getIntSpinner().value
-                || fuzzierSettingsService.state.fileListSpacing != fuzzierSettingsComponent.fileListSpacing.getIntSpinner().value
+        return state.exclusionSet != newSet
+                || state.newTab != component.newTabSelect.getCheckBox().isSelected
+                || state.debouncePeriod != component.debounceTimerValue.getIntSpinner().value
+                || state.filenameType != component.filenameTypeSelector.getFilenameTypeComboBox().selectedItem
+                || state.fileListLimit != component.fileListLimit.getIntSpinner().value
+                || state.fontSize != component.fontSize.getIntSpinner().value
+                || state.fileListSpacing != component.fileListSpacing.getIntSpinner().value
 
-                || fuzzierSettingsService.state.tolerance != fuzzierSettingsComponent.tolerance.getIntSpinner().value
-                || fuzzierSettingsService.state.multiMatch != fuzzierSettingsComponent.multiMatchActive.getCheckBox().isSelected
-                || fuzzierSettingsService.state.matchWeightPartialPath != fuzzierSettingsComponent.matchWeightPartialPath.getIntSpinner().value
-                || fuzzierSettingsService.state.matchWeightSingleChar != fuzzierSettingsComponent.matchWeightSingleChar.getIntSpinner().value
-                || fuzzierSettingsService.state.matchWeightStreakModifier != fuzzierSettingsComponent.matchWeightStreakModifier.getIntSpinner().value
-                || fuzzierSettingsService.state.matchWeightFilename != fuzzierSettingsComponent.matchWeightFilename.getIntSpinner().value
+                || state.tolerance != component.tolerance.getIntSpinner().value
+                || state.multiMatch != component.multiMatchActive.getCheckBox().isSelected
+                || state.matchWeightPartialPath != component.matchWeightPartialPath.getIntSpinner().value
+                || state.matchWeightSingleChar != component.matchWeightSingleChar.getIntSpinner().value
+                || state.matchWeightStreakModifier != component.matchWeightStreakModifier.getIntSpinner().value
+                || state.matchWeightFilename != component.matchWeightFilename.getIntSpinner().value
     }
 
     override fun apply() {
-        val newSet = fuzzierSettingsComponent.exclusionSet.getJBTextArea().text
+        val newSet = component.exclusionSet.getJBTextArea().text
             .split("\n")
             .filter { it.isNotBlank() }
             .toSet()
-        fuzzierSettingsService.state.exclusionSet = newSet as MutableSet<String>
-        fuzzierSettingsService.state.newTab = fuzzierSettingsComponent.newTabSelect.getCheckBox().isSelected
-        fuzzierSettingsService.state.debouncePeriod = fuzzierSettingsComponent.debounceTimerValue.getIntSpinner().value as Int
-        fuzzierSettingsService.state.filenameType = FilenameType.entries.toTypedArray()[fuzzierSettingsComponent.filenameTypeSelector.getFilenameTypeComboBox().selectedIndex]
-        fuzzierSettingsService.state.fileListLimit = fuzzierSettingsComponent.fileListLimit.getIntSpinner().value as Int
-        fuzzierSettingsService.state.fontSize = fuzzierSettingsComponent.fontSize.getIntSpinner().value as Int
-        fuzzierSettingsService.state.fileListSpacing = fuzzierSettingsComponent.fileListSpacing.getIntSpinner().value as Int
+        state.exclusionSet = newSet as MutableSet<String>
+        state.newTab = component.newTabSelect.getCheckBox().isSelected
+        state.debouncePeriod = component.debounceTimerValue.getIntSpinner().value as Int
+        state.filenameType = FilenameType.entries.toTypedArray()[component.filenameTypeSelector.getFilenameTypeComboBox().selectedIndex]
+        state.fileListLimit = component.fileListLimit.getIntSpinner().value as Int
+        state.fontSize = component.fontSize.getIntSpinner().value as Int
+        state.fileListSpacing = component.fileListSpacing.getIntSpinner().value as Int
 
-        fuzzierSettingsService.state.tolerance = fuzzierSettingsComponent.tolerance.getIntSpinner().value as Int
-        fuzzierSettingsService.state.multiMatch = fuzzierSettingsComponent.multiMatchActive.getCheckBox().isSelected
-        fuzzierSettingsService.state.matchWeightPartialPath = fuzzierSettingsComponent.matchWeightPartialPath.getIntSpinner().value as Int
-        fuzzierSettingsService.state.matchWeightSingleChar = fuzzierSettingsComponent.matchWeightSingleChar.getIntSpinner().value as Int
-        fuzzierSettingsService.state.matchWeightStreakModifier = fuzzierSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int
-        fuzzierSettingsService.state.matchWeightFilename = fuzzierSettingsComponent.matchWeightFilename.getIntSpinner().value as Int
+        state.tolerance = component.tolerance.getIntSpinner().value as Int
+        state.multiMatch = component.multiMatchActive.getCheckBox().isSelected
+        state.matchWeightPartialPath = component.matchWeightPartialPath.getIntSpinner().value as Int
+        state.matchWeightSingleChar = component.matchWeightSingleChar.getIntSpinner().value as Int
+        state.matchWeightStreakModifier = component.matchWeightStreakModifier.getIntSpinner().value as Int
+        state.matchWeightFilename = component.matchWeightFilename.getIntSpinner().value as Int
     }
 }
