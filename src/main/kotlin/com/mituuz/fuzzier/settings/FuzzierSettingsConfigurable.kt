@@ -35,7 +35,12 @@ class FuzzierSettingsConfigurable : Configurable {
     }
 
     override fun isModified(): Boolean {
-        return fuzzierSettingsService.state.exclusionSet != fuzzierSettingsComponent.exclusionSet.getJBTextArea().text.split("\n")
+        val newSet = fuzzierSettingsComponent.exclusionSet.getJBTextArea().text
+            .split("\n")
+            .filter { it.isNotBlank() }
+            .toSet()
+
+        return fuzzierSettingsService.state.exclusionSet != newSet
                 || fuzzierSettingsService.state.newTab != fuzzierSettingsComponent.newTabSelect.getCheckBox().isSelected
                 || fuzzierSettingsService.state.debouncePeriod != fuzzierSettingsComponent.debounceTimerValue.getIntSpinner().value
                 || fuzzierSettingsService.state.filenameType != fuzzierSettingsComponent.filenameTypeSelector.getFilenameTypeComboBox().selectedItem
