@@ -16,9 +16,12 @@ class FuzzierUtil {
      * Priority queue's size is limit + 1 to prevent any resizing
      * Only add entries to the queue if they have larger score than the minimum in the queue
      *
+     * @param listModel to limit and sort
+     * @param isDirSort defaults to false, enables using different sort for directories
+     *
      * @return a sorted and sized list model
      */
-    fun sortAndLimit(listModel: DefaultListModel<FuzzyMatchContainer>): DefaultListModel<FuzzyMatchContainer> {
+    fun sortAndLimit(listModel: DefaultListModel<FuzzyMatchContainer>, isDirSort: Boolean = false): DefaultListModel<FuzzyMatchContainer> {
         val priorityQueue = PriorityQueue(listLimit + 1, compareBy(FuzzyMatchContainer::getScore))
 
         var minimumScore = -1
@@ -32,7 +35,11 @@ class FuzzierUtil {
         }
 
         val result = DefaultListModel<FuzzyMatchContainer>()
-        result.addAll(priorityQueue.toList().sortedByDescending { it.getScore() })
+        if (isDirSort) {
+            result.addAll(priorityQueue.toList().sortedByDescending { it.getScoreWithDirLength() })
+        } else {
+            result.addAll(priorityQueue.toList().sortedByDescending { it.getScore() })
+        }
 
         return result
     }

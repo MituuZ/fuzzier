@@ -36,7 +36,11 @@ class StringEvaluator(
         scoreCalculator = ScoreCalculator(searchString)
         return ContentIterator { file: VirtualFile ->
             if (file.isDirectory) {
-                val filePath = projectBasePath.let { it1 -> file.path.removePrefix(it1) }
+                var filePath = projectBasePath.let { it1 -> file.path.removePrefix(it1) }
+                // Handle project root as a special case
+                if (filePath == "") {
+                    filePath = "/"
+                }
                 if (isExcluded(file, filePath)) {
                     return@ContentIterator true
                 }
@@ -55,7 +59,7 @@ class StringEvaluator(
         if (changeListManager !== null) {
             return changeListManager!!.isIgnoredFile(file)
         }
-       for (e in exclusionList) {
+        for (e in exclusionList) {
             when {
                 e.startsWith("*") -> {
                     if (filePath.endsWith(e.substring(1))) {
@@ -75,7 +79,10 @@ class StringEvaluator(
         return false
     }
 
-    // Returns null if no match can be found
+    /**
+     * @param filePath to evaluate
+     * @return Returns null if no match can be found
+     */
     private fun createFuzzyContainer(filePath: String): FuzzyMatchContainer? {
         val filename = filePath.substring(filePath.lastIndexOf("/") + 1)
         return when (val score = scoreCalculator.calculateScore(filePath)) {

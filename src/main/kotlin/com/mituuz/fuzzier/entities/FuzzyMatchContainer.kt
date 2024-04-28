@@ -18,6 +18,13 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
         return score.getTotalScore()
     }
 
+    /**
+     * Gets score that is prioritizing shorter dir paths
+     */
+    fun getScoreWithDirLength(): Int {
+        return score.getTotalScore() + filePath.length * -1
+    }
+
     enum class FilenameType(val text: String) {
         FILE_PATH_ONLY("File path only"),
         FILENAME_ONLY("Filename only"),
