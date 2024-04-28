@@ -33,7 +33,7 @@ class FuzzyMover : FuzzyAction() {
 
     override fun actionPerformed(actionEvent: AnActionEvent) {
         setCustomHandlers()
-        SwingUtilities.invokeLater {
+       ApplicationManager.getApplication().invokeLater {
             actionEvent.project?.let { project ->
                 component = SimpleFinderComponent()
                 val projectBasePath = project.basePath
@@ -117,7 +117,7 @@ class FuzzyMover : FuzzyAction() {
                     }
                 }
             }
-            SwingUtilities.invokeLater {
+           ApplicationManager.getApplication().invokeLater {
                 component.isDirSelector = true
                 component.searchField.text = ""
                 component.fileList.setEmptyText("Select target folder")
@@ -164,7 +164,7 @@ class FuzzyMover : FuzzyAction() {
 
     override fun updateListContents(project: Project, searchString: String) {
         if (StringUtils.isBlank(searchString)) {
-            SwingUtilities.invokeLater {
+           ApplicationManager.getApplication().invokeLater {
                 component.fileList.model = DefaultListModel()
             }
             return
@@ -194,7 +194,7 @@ class FuzzyMover : FuzzyAction() {
 
             listModel = fuzzierUtil.sortAndLimit(listModel)
 
-            SwingUtilities.invokeLater {
+           ApplicationManager.getApplication().invokeLater {
                 component.fileList.model = listModel
                 component.fileList.cellRenderer = getCellRenderer()
                 component.fileList.setPaintBusy(false)

@@ -29,8 +29,8 @@ open class Fuzzier : FuzzyAction() {
     private val fuzzyDimensionKey: String = "FuzzySearchPopup"
 
     override fun actionPerformed(actionEvent: AnActionEvent) {
-        setCustomHandlers()
-        SwingUtilities.invokeLater {
+       setCustomHandlers()
+       ApplicationManager.getApplication().invokeLater {
             defaultDoc = EditorFactory.getInstance().createDocument("")
             actionEvent.project?.let { project ->
                 component = FuzzyFinderComponent(project)
@@ -78,7 +78,7 @@ open class Fuzzier : FuzzyAction() {
 
     override fun updateListContents(project: Project, searchString: String) {
         if (StringUtils.isBlank(searchString)) {
-            SwingUtilities.invokeLater {
+           ApplicationManager.getApplication().invokeLater {
                 component.fileList.model = DefaultListModel()
                 defaultDoc?.let { (component as FuzzyFinderComponent).previewPane.updateFile(it) }
             }
@@ -104,7 +104,7 @@ open class Fuzzier : FuzzyAction() {
 
             listModel = fuzzierUtil.sortAndLimit(listModel)
 
-            SwingUtilities.invokeLater {
+           ApplicationManager.getApplication().invokeLater {
                 component.fileList.model = listModel
                 component.fileList.cellRenderer = getCellRenderer()
                 component.fileList.setPaintBusy(false)

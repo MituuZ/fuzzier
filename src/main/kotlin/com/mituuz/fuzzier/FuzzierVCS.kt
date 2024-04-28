@@ -8,14 +8,12 @@ import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import org.apache.commons.lang3.StringUtils
 import javax.swing.DefaultListModel
-import javax.swing.SwingUtilities
-
 
 class FuzzierVCS : Fuzzier() {
     override var title: String = "Fuzzy Search (Only VCS Tracked Files)"
     override fun updateListContents(project: Project, searchString: String) {
         if (StringUtils.isBlank(searchString)) {
-            SwingUtilities.invokeLater {
+           ApplicationManager.getApplication().invokeLater {
                 component.fileList.model = DefaultListModel()
                 defaultDoc?.let { (component as FuzzyFinderComponent).previewPane.updateFile(it) }
             }
@@ -44,7 +42,7 @@ class FuzzierVCS : Fuzzier() {
 
             listModel = fuzzierUtil.sortAndLimit(listModel)
 
-            SwingUtilities.invokeLater {
+           ApplicationManager.getApplication().invokeLater {
                 component.fileList.model = listModel
                 component.fileList.cellRenderer = getCellRenderer()
                 component.fileList.setPaintBusy(false)

@@ -93,7 +93,7 @@ class TestBenchComponent : JPanel() {
 
     fun updateListContents(project: Project, searchString: String) {
         if (StringUtils.isBlank(searchString)) {
-            SwingUtilities.invokeLater {
+           ApplicationManager.getApplication().invokeLater {
                 table.model = DefaultTableModel()
             }
             return
@@ -136,7 +136,7 @@ class TestBenchComponent : JPanel() {
 
             val tableModel = DefaultTableModel(data, columnNames)
 
-            SwingUtilities.invokeLater {
+           ApplicationManager.getApplication().invokeLater {
                 table.model = tableModel
                 table.setPaintBusy(false)
             }
