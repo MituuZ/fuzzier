@@ -4,7 +4,9 @@
  
 ## Version 0.21.0
 - Add tolerance setting for string matching
-- Fix settings modification comparison using set 
+- Set default preview text for files that cannot be previewed
+- Use application manager instead of swing utilities for invoke later
+- Fix settings modification comparison using set
 
 ## Version 0.20.0
 - Score calculation rewrite

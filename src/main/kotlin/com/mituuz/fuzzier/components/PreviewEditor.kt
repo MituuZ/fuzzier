@@ -75,6 +75,8 @@ class PreviewEditor(project: Project?) : EditorTextField(
                             }
                         }
                     }
+                } else {
+                    this.document = EditorFactory.getInstance().createDocument("Cannot preview file")
                 }
                 this.fileType = fileType
             }

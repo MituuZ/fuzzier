@@ -31,7 +31,9 @@
   <change-notes><![CDATA[
   <h2>Version 0.21.0</h2>
   <p>Add tolerance setting for string matching</p>
-  <p>Fix settings modification comparison using set </p>
+  <p>Fix settings modification comparison using set</p>
+  <p>Set default preview text for files that cannot be previewed</p>
+  <p>Use application manager instead of swing utilities for invoke later</p>
   ]]>
   </change-notes>
 
