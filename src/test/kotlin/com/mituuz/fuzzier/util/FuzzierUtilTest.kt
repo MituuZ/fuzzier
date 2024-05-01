@@ -72,8 +72,32 @@ class FuzzierUtilTest {
         listModel.addElement(container)
     }
 
+    private fun addElement(score: Int, filename: String, filePath: String) {
+        val fuzzyScore = FuzzyScore()
+        fuzzyScore.streakScore = score
+        val container = FuzzyMatchContainer(fuzzyScore, filePath, filename)
+        listModel.addElement(container)
+    }
+
+    private fun runPrioritizedList() {
+
+    }
+
+    /**
+     * Tests both the dir sort without priority and the file sorting
+     */
     private fun runWithLimit(limit: Int) {
         fuzzierUtil.setListLimit(limit)
+        fuzzierUtil.setPrioritizeShorterDirPaths(false)
+        val dirResult = fuzzierUtil.sortAndLimit(listModel, true)
         result = fuzzierUtil.sortAndLimit(listModel)
+
+        assertEquals(dirResult.size, result.size)
+
+        var i = 0
+        while (i < result.size) {
+            assertEquals(result[i], dirResult[i])
+            i++
+        }
     }
 }

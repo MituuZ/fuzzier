@@ -9,6 +9,7 @@ import javax.swing.DefaultListModel
 class FuzzierUtil {
     private var settingsState = service<FuzzierSettingsService>().state
     private var listLimit: Int = settingsState.fileListLimit
+    private var prioritizeShorterDirPaths = settingsState.prioritizeShorterDirPaths
 
     /**
      * Process all the elements in the listModel with a priority queue to limit the size
@@ -36,7 +37,7 @@ class FuzzierUtil {
         }
 
         val result = DefaultListModel<FuzzyMatchContainer>()
-        if (isDirSort && settingsState.prioritizeShorterDirPaths) {
+        if (isDirSort && prioritizeShorterDirPaths) {
             result.addAll(priorityQueue.toList().sortedByDescending { it.getScoreWithDirLength() })
         } else {
             result.addAll(priorityQueue.toList().sortedByDescending { it.getScore() })
@@ -45,7 +46,11 @@ class FuzzierUtil {
         return result
     }
 
-    fun setListLimit(limit: Int) {
-        listLimit = limit
+    fun setListLimit(listLimit: Int) {
+        this.listLimit = listLimit
+    }
+
+    fun setPrioritizeShorterDirPaths(prioritizeShortedFilePaths: Boolean) {
+        this.prioritizeShorterDirPaths = prioritizeShortedFilePaths;
     }
 }
