@@ -33,6 +33,11 @@ class FuzzierSettingsComponent {
 
     val newTabSelect = SettingsComponent(JBCheckBox(), "Open files in a new tab")
 
+    val prioritizeShortDirs = SettingsComponent(JBCheckBox(), "Prioritize shorter dir paths", """
+        When having a directory selector active, prioritize shorter file paths over pure score calculation.
+    """.trimIndent(),
+        false)
+
     val debounceTimerValue = SettingsComponent(JBIntSpinner(150, 0, 2000), "Debounce period (ms)",
         """
             Controls how long the search field must be idle before starting the search process.
@@ -148,6 +153,7 @@ class FuzzierSettingsComponent {
             .addComponent(exclusionSet)
             .addSeparator()
             .addComponent(newTabSelect)
+            .addComponent(prioritizeShortDirs)
             .addComponent(debounceTimerValue)
             .addComponent(filenameTypeSelector)
             .addComponent(fileListLimit)

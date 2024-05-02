@@ -7,7 +7,9 @@ import java.util.*
 import javax.swing.DefaultListModel
 
 class FuzzierUtil {
-    private var listLimit: Int = service<FuzzierSettingsService>().state.fileListLimit
+    private var settingsState = service<FuzzierSettingsService>().state
+    private var listLimit: Int = settingsState.fileListLimit
+    private var prioritizeShorterDirPaths = settingsState.prioritizeShorterDirPaths
 
     /**
      * Process all the elements in the listModel with a priority queue to limit the size
@@ -16,9 +18,12 @@ class FuzzierUtil {
      * Priority queue's size is limit + 1 to prevent any resizing
      * Only add entries to the queue if they have larger score than the minimum in the queue
      *
+     * @param listModel to limit and sort
+     * @param isDirSort defaults to false, enables using different sort for directories
+     *
      * @return a sorted and sized list model
      */
-    fun sortAndLimit(listModel: DefaultListModel<FuzzyMatchContainer>): DefaultListModel<FuzzyMatchContainer> {
+    fun sortAndLimit(listModel: DefaultListModel<FuzzyMatchContainer>, isDirSort: Boolean = false): DefaultListModel<FuzzyMatchContainer> {
         val priorityQueue = PriorityQueue(listLimit + 1, compareBy(FuzzyMatchContainer::getScore))
 
         var minimumScore = -1
@@ -32,12 +37,20 @@ class FuzzierUtil {
         }
 
         val result = DefaultListModel<FuzzyMatchContainer>()
-        result.addAll(priorityQueue.toList().sortedByDescending { it.getScore() })
+        if (isDirSort && prioritizeShorterDirPaths) {
+            result.addAll(priorityQueue.toList().sortedByDescending { it.getScoreWithDirLength() })
+        } else {
+            result.addAll(priorityQueue.toList().sortedByDescending { it.getScore() })
+        }
 
         return result
     }
 
-    fun setListLimit(limit: Int) {
-        listLimit = limit
+    fun setListLimit(listLimit: Int) {
+        this.listLimit = listLimit
+    }
+
+    fun setPrioritizeShorterDirPaths(prioritizeShortedFilePaths: Boolean) {
+        this.prioritizeShorterDirPaths = prioritizeShortedFilePaths;
     }
 }

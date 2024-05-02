@@ -65,6 +65,51 @@ class FuzzierUtilTest {
         assertEquals(0, result.size)
     }
 
+    @Test
+    fun `Prioritize file paths with same score`() {
+        addElement(0, "file1", "1")
+        addElement(0, "file2", "123")
+        addElement(0, "file3", "12")
+        addElement(0, "file4", "1234")
+
+        runPrioritizedList()
+        assertEquals(4, result.size)
+        assertEquals("file1", result[0].filename)
+        assertEquals("file3", result[1].filename)
+        assertEquals("file2", result[2].filename)
+        assertEquals("file4", result[3].filename)
+    }
+
+    @Test
+    fun `Prioritize file paths with different scores`() {
+        addElement(10, "file1", "1")
+        addElement(0, "file2", "123")
+        addElement(0, "file3", "12")
+        addElement(0, "file4", "1234")
+
+        runPrioritizedList()
+        assertEquals(4, result.size)
+        assertEquals("file1", result[0].filename)
+        assertEquals("file3", result[1].filename)
+        assertEquals("file2", result[2].filename)
+        assertEquals("file4", result[3].filename)
+    }
+
+    @Test
+    fun `Prioritize empty paths`() {
+        addElement(4, "file1", "")
+        addElement(3, "file2", "")
+        addElement(1, "file3", "")
+        addElement(2, "file4", "")
+
+        runPrioritizedList()
+        assertEquals(4, result.size)
+        assertEquals("file1", result[0].filename)
+        assertEquals("file2", result[1].filename)
+        assertEquals("file4", result[2].filename)
+        assertEquals("file3", result[3].filename)
+    }
+
     private fun addElement(score: Int, fileName: String) {
         val fuzzyScore = FuzzyScore()
         fuzzyScore.streakScore = score
@@ -72,8 +117,34 @@ class FuzzierUtilTest {
         listModel.addElement(container)
     }
 
+    private fun addElement(score: Int, filename: String, filePath: String) {
+        val fuzzyScore = FuzzyScore()
+        fuzzyScore.streakScore = score
+        val container = FuzzyMatchContainer(fuzzyScore, filePath, filename)
+        listModel.addElement(container)
+    }
+
+    private fun runPrioritizedList() {
+        fuzzierUtil.setListLimit(4)
+        fuzzierUtil.setPrioritizeShorterDirPaths(true)
+        result = fuzzierUtil.sortAndLimit(listModel, true)
+    }
+
+    /**
+     * Tests both the dir sort without priority and the file sorting
+     */
     private fun runWithLimit(limit: Int) {
         fuzzierUtil.setListLimit(limit)
+        fuzzierUtil.setPrioritizeShorterDirPaths(false)
+        val dirResult = fuzzierUtil.sortAndLimit(listModel, true)
         result = fuzzierUtil.sortAndLimit(listModel)
+
+        assertEquals(dirResult.size, result.size)
+
+        var i = 0
+        while (i < result.size) {
+            assertEquals(result[i], dirResult[i])
+            i++
+        }
     }
 }

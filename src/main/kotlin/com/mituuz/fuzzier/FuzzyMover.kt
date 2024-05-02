@@ -32,7 +32,7 @@ class FuzzyMover : FuzzyAction() {
     lateinit var currentFile: String
 
     override fun actionPerformed(actionEvent: AnActionEvent) {
-        setCustomHandlers()
+       setCustomHandlers()
        ApplicationManager.getApplication().invokeLater {
             actionEvent.project?.let { project ->
                 component = SimpleFinderComponent()
@@ -101,8 +101,8 @@ class FuzzyMover : FuzzyAction() {
         })
     }
 
-    fun handleInput(projectBasePath: String, project: Project): CompletableFuture<Void> {
-        val completableFuture = CompletableFuture<Void>()
+    fun handleInput(projectBasePath: String, project: Project): CompletableFuture<Unit> {
+        val completableFuture = CompletableFuture<Unit>()
         var selectedValue = component.fileList.selectedValue?.filePath
         if (selectedValue == null) {
             selectedValue = currentFile
@@ -192,7 +192,7 @@ class FuzzyMover : FuzzyAction() {
                 projectFileIndex.iterateContent(contentIterator)
             }
 
-            listModel = fuzzierUtil.sortAndLimit(listModel)
+            listModel = fuzzierUtil.sortAndLimit(listModel, true)
 
            ApplicationManager.getApplication().invokeLater {
                 component.fileList.model = listModel
