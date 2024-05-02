@@ -56,9 +56,9 @@ class FuzzyMover : FuzzyAction() {
                         .setShowBorder(true)
                         .createPopup()
 
-                    currentFile = projectBasePath?.let { it1 ->
+                    currentFile = projectBasePath?.let { projectBasePath ->
                         FileEditorManager.getInstance(project).selectedTextEditor?.virtualFile?.path?.removePrefix(
-                            it1
+                            projectBasePath
                         )
                     }.toString()
                     component.fileList.setEmptyText("Press enter to use current file:$currentFile")
