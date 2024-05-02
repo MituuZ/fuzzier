@@ -81,7 +81,7 @@ class StringEvaluator(
 
     /**
      * @param filePath to evaluate
-     * @return Returns null if no match can be found
+     * @return null if no match can be found
      */
     private fun createFuzzyContainer(filePath: String): FuzzyMatchContainer? {
         val filename = filePath.substring(filePath.lastIndexOf("/") + 1)
