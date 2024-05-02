@@ -1,6 +1,11 @@
 # Changelog
 ## Earlier Versions
 - Prior to version 0.19.0, numerous features and improvements were made, laying the foundation for the current version. This includes initial development, various enhancements, and bug fixes. For detailed history, please refer to commit logs or release notes.
+
+## Version 0.22.0
+- Add setting to prioritize shorter file paths for file mover
+- Handle root path "/" separately for file mover
+- Upgrade to gradle 8.7
  
 ## Version 0.21.0
 - Add tolerance setting for string matching

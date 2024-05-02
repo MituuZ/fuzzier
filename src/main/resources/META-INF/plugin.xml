@@ -29,11 +29,10 @@
   </extensions>
 
   <change-notes><![CDATA[
-  <h2>Version 0.21.0</h2>
-  <p>Add tolerance setting for string matching</p>
-  <p>Fix settings modification comparison using set</p>
-  <p>Set default preview text for files that cannot be previewed</p>
-  <p>Use application manager instead of swing utilities for invoke later</p>
+  <h2>Version 0.22.0</h2>
+  - Add setting to prioritize shorter file paths for file mover<br>
+  - Handle root path "/" separately for file mover<br>
+  - Upgrade to gradle 8.7<br>
   ]]>
   </change-notes>
 
