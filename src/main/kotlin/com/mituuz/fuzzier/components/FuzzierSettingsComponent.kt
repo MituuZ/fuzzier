@@ -25,7 +25,7 @@ class FuzzierSettingsComponent {
     /////////////////////////////////////////////////////////////////
     val exclusionSet = SettingsComponent(JBTextArea(), "File path exclusions",
         """
-            One line per one exclusion from the Fuzzier results.<br><br>
+            Exclusions apply to Fuzzier search and FuzzyMover. One line per one exclusion.<br><br>
             Empty lines are skipped and all files in the project root start with "/"<br><br>
             Supports wildcards (*) for starts with and ends with. Defaults to contains if no wildcards are present.<br><br>
             e.g. "kt" excludes all files/file paths that contain the "kt" string. (main.<strong>kt</strong>, <strong>kt</strong>lin.java)
