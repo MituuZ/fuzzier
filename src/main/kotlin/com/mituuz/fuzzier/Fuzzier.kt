@@ -14,6 +14,7 @@ import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.util.DimensionService
+import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
@@ -24,9 +25,11 @@ import java.awt.event.*
 import javax.swing.*
 
 open class Fuzzier : FuzzyAction() {
-    var defaultDoc: Document? = null
+    private var defaultDoc: Document? = null
     open var title: String = "Fuzzy Search"
     private val fuzzyDimensionKey: String = "FuzzySearchPopup"
+    // Used by FuzzierVCS to check if files are tracked by the VCS
+    protected var changeListManager: ChangeListManager? = null
 
     override fun actionPerformed(actionEvent: AnActionEvent) {
        setCustomHandlers()
@@ -78,7 +81,7 @@ open class Fuzzier : FuzzyAction() {
 
     override fun updateListContents(project: Project, searchString: String) {
         if (StringUtils.isBlank(searchString)) {
-           ApplicationManager.getApplication().invokeLater {
+            ApplicationManager.getApplication().invokeLater {
                 component.fileList.model = DefaultListModel()
                 defaultDoc?.let { (component as FuzzyFinderComponent).previewPane.updateFile(it) }
             }
@@ -93,6 +96,7 @@ open class Fuzzier : FuzzyAction() {
             val projectBasePath = project.basePath
             val stringEvaluator = StringEvaluator(
                 fuzzierSettingsService.state.exclusionSet,
+                changeListManager
             )
 
             val contentIterator =
@@ -104,7 +108,7 @@ open class Fuzzier : FuzzyAction() {
 
             listModel = fuzzierUtil.sortAndLimit(listModel)
 
-           ApplicationManager.getApplication().invokeLater {
+            ApplicationManager.getApplication().invokeLater {
                 component.fileList.model = listModel
                 component.fileList.cellRenderer = getCellRenderer()
                 component.fileList.setPaintBusy(false)
