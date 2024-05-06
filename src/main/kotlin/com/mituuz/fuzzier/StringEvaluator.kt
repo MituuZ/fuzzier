@@ -7,6 +7,11 @@ import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.ScoreCalculator
 import javax.swing.DefaultListModel
 
+/**
+ * Handles creating the content iterators used for string handling and excluding files
+ * @param exclusionList exclusion list from settings
+ * @param changeListManager handles VCS check if file is being tracked. Null if VCS search should not be used
+ */
 class StringEvaluator(
     private var exclusionList: Set<String>,
     private var changeListManager: ChangeListManager? = null
@@ -55,6 +60,18 @@ class StringEvaluator(
         }
     }
 
+    /**
+     * Checks if file should be excluded from the results.
+     *
+     * If change list manager is set, only use it to decide if file should be ignored.
+     *
+     * Otherwise, use exclusion list from settings.
+     *
+     * @param file virtual file to check with change list manager
+     * @param filePath to check against the exclusion list
+     *
+     * @return true if file should be excluded
+     */
     private fun isExcluded(file: VirtualFile, filePath: String): Boolean {
         if (changeListManager !== null) {
             return changeListManager!!.isIgnoredFile(file)
