@@ -98,20 +98,23 @@ open class Fuzzier : FuzzyAction() {
                 changeListManager
             )
 
-            // Reset modules before
+            // Reset modules before creating the content iterator
             val state = service<FuzzierSettingsService>().state
             state.modules = HashMap()
+            val moduleManager = ModuleManager.getInstance(project)
 
-            for (module in ModuleManager.getInstance(project).modules) {
+            // If project is multimodal, include the module at the beginning of the file path
+            val isMultiModal = moduleManager.modules.size > 1
+
+            for (module in moduleManager.modules) {
                 val moduleFileIndex = module.rootManager.fileIndex
-                val moduleBasePath = module.rootManager.contentRoots[0]
-                state.modules[module.name] = moduleBasePath.path
-                val contentIterator =
-                    moduleBasePath?.let { stringEvaluator.getContentIterator(it.path, module.name, searchString, listModel) }
-
-                if (contentIterator != null) {
-                    moduleFileIndex.iterateContent(contentIterator)
+                var moduleBasePath = module.rootManager.contentRoots[0].path
+                if (isMultiModal) {
+                    moduleBasePath = moduleBasePath.substringBeforeLast("/")
                 }
+                state.modules[module.name] = moduleBasePath
+                val contentIterator = stringEvaluator.getContentIterator(moduleBasePath, module.name, isMultiModal, searchString, listModel)
+                moduleFileIndex.iterateContent(contentIterator)
             }
 
             listModel = fuzzierUtil.sortAndLimit(listModel)

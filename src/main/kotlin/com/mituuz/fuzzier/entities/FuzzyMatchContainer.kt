@@ -4,21 +4,17 @@ import com.intellij.openapi.components.service
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 
 class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filename: String, private var module: String = "") {
-    fun toString(filenameType: FilenameType, includeModule: Boolean): String {
-        var addInfo = ""
-        if (includeModule) {
-            addInfo = module
-        }
+    fun toString(filenameType: FilenameType): String {
         return when (filenameType) {
             FilenameType.FILENAME_ONLY -> filename
-            FilenameType.FILE_PATH_ONLY -> addInfo + filePath
-            FilenameType.FILENAME_WITH_PATH -> "$filename   ($addInfo$filePath)"
-            FilenameType.FILENAME_WITH_PATH_STYLED -> getFilenameWithPathStyled(addInfo)
+            FilenameType.FILE_PATH_ONLY -> filePath
+            FilenameType.FILENAME_WITH_PATH -> "$filename   ($filePath)"
+            FilenameType.FILENAME_WITH_PATH_STYLED -> getFilenameWithPathStyled()
         }
     }
 
-    private fun getFilenameWithPathStyled(addInfo: String): String {
-        return "<html><strong>$filename</strong>  <i>($addInfo$filePath)</i></html>"
+    private fun getFilenameWithPathStyled(): String {
+        return "<html><strong>$filename</strong>  <i>($filePath)</i></html>"
     }
 
     fun getFileUri(): String {

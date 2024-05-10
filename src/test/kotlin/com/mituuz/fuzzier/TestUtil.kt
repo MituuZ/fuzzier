@@ -58,7 +58,7 @@ class TestUtil {
         }
 
         val basePath = myFixture.findFileInTempDir("src").canonicalPath
-        val contentIterator = basePath?.let { stringEvaluator.getContentIterator(it, "", "", filePathContainer) }
+        val contentIterator = basePath?.let { stringEvaluator.getContentIterator(it, "", false, "", filePathContainer) }
         val index = ProjectFileIndex.getInstance(fixture.project)
         runInEdtAndWait {
             if (contentIterator != null) {

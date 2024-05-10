@@ -18,12 +18,12 @@ class StringEvaluator(
 ) {
     lateinit var scoreCalculator: ScoreCalculator
 
-    fun getContentIterator(moduleBasePath: String, module: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
+    fun getContentIterator(moduleBasePath: String, module: String, isMultiModal: Boolean, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
         scoreCalculator = ScoreCalculator(searchString)
         return ContentIterator { file: VirtualFile ->
             if (!file.isDirectory) {
                 val filePath = moduleBasePath.let { it1 -> file.path.removePrefix(it1) }
-                if (isExcluded(file, filePath)) {
+                if (isExcluded(file, filePath, isMultiModal)) {
                     return@ContentIterator true
                 }
                 if (filePath.isNotBlank()) {
@@ -72,28 +72,21 @@ class StringEvaluator(
      *
      * @return true if file should be excluded
      */
-    private fun isExcluded(file: VirtualFile, filePath: String): Boolean {
+    private fun isExcluded(file: VirtualFile, filePath: String, isMultiModal: Boolean = false): Boolean {
+        var evPath = filePath
+        if (isMultiModal) {
+            evPath = "/" + evPath.split("/").drop(2).joinToString("/")
+        }
         if (changeListManager !== null) {
             return changeListManager!!.isIgnoredFile(file)
         }
-        for (e in exclusionList) {
+        return exclusionList.any { e ->
             when {
-                e.startsWith("*") -> {
-                    if (filePath.endsWith(e.substring(1))) {
-                        return true
-                    }
-                }
-                e.endsWith("*") -> {
-                    if (filePath.startsWith(e.substring(0, e.length - 1))) {
-                        return true
-                    }
-                }
-                filePath.contains(e) -> {
-                    return true
-                }
+                e.startsWith("*") -> evPath.endsWith(e.substring(1))
+                e.endsWith("*") -> evPath.startsWith(e.substring(0, e.length - 1))
+                else -> evPath.contains(e)
             }
         }
-        return false
     }
 
     /**

@@ -185,7 +185,7 @@ class FuzzyMover : FuzzyAction() {
             val moduleBasePath = rootModule.rootManager.contentRoots[0]
 
             val contentIterator = if (!component.isDirSelector) {
-                moduleBasePath?.let { stringEvaluator.getContentIterator(it.path, project.name, searchString, listModel) }
+                moduleBasePath?.let { stringEvaluator.getContentIterator(it.path, project.name, false, searchString, listModel) }
             } else {
                 moduleBasePath?.let { stringEvaluator.getDirIterator(it.path, searchString, listModel) }
             }

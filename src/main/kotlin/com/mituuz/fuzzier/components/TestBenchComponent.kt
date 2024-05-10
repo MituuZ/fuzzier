@@ -116,7 +116,7 @@ class TestBenchComponent : JPanel() {
             val projectFileIndex = ProjectFileIndex.getInstance(project)
             val projectBasePath = project.basePath
 
-            val contentIterator = projectBasePath?.let { stringEvaluator.getContentIterator(it, searchString, project.name, listModel) }
+            val contentIterator = projectBasePath?.let { stringEvaluator.getContentIterator(it, searchString, false, project.name, listModel) }
             
             val scoreCalculator = stringEvaluator.scoreCalculator
             scoreCalculator.setMultiMatch(liveSettingsComponent.multiMatchActive.getCheckBox().isSelected)
