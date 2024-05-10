@@ -2,6 +2,7 @@ package com.mituuz.fuzzier
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.fileEditor.FileEditorManager
@@ -21,8 +22,10 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
+import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
+import java.util.HashMap
 import javax.swing.*
 
 open class Fuzzier : FuzzyAction() {
@@ -33,8 +36,8 @@ open class Fuzzier : FuzzyAction() {
     protected var changeListManager: ChangeListManager? = null
 
     override fun actionPerformed(actionEvent: AnActionEvent) {
-       setCustomHandlers()
-       ApplicationManager.getApplication().invokeLater {
+        setCustomHandlers()
+        ApplicationManager.getApplication().invokeLater {
             defaultDoc = EditorFactory.getInstance().createDocument("")
             actionEvent.project?.let { project ->
                 component = FuzzyFinderComponent(project)
@@ -95,12 +98,16 @@ open class Fuzzier : FuzzyAction() {
                 changeListManager
             )
 
+            // Reset modules before
+            val state = service<FuzzierSettingsService>().state
+            state.modules = HashMap()
+
             for (module in ModuleManager.getInstance(project).modules) {
                 val moduleFileIndex = module.rootManager.fileIndex
                 val moduleBasePath = module.rootManager.contentRoots[0]
-
+                state.modules[module.name] = moduleBasePath.path
                 val contentIterator =
-                    moduleBasePath?.let { stringEvaluator.getContentIterator(it.path, searchString, listModel) }
+                    moduleBasePath?.let { stringEvaluator.getContentIterator(it.path, module.name, searchString, listModel) }
 
                 if (contentIterator != null) {
                     moduleFileIndex.iterateContent(contentIterator)

@@ -32,8 +32,8 @@ class FuzzyMover : FuzzyAction() {
     lateinit var currentFile: String
 
     override fun actionPerformed(actionEvent: AnActionEvent) {
-       setCustomHandlers()
-       ApplicationManager.getApplication().invokeLater {
+        setCustomHandlers()
+        ApplicationManager.getApplication().invokeLater {
             actionEvent.project?.let { project ->
                 component = SimpleFinderComponent()
                 val projectBasePath = project.basePath
@@ -183,7 +183,7 @@ class FuzzyMover : FuzzyAction() {
             val projectBasePath = project.basePath
 
             val contentIterator = if (!component.isDirSelector) {
-                projectBasePath?.let { stringEvaluator.getContentIterator(it, searchString, listModel) }
+                projectBasePath?.let { stringEvaluator.getContentIterator(it, project.name, searchString, listModel) }
             } else {
                 projectBasePath?.let { stringEvaluator.getDirIterator(it, searchString, listModel) }
             }

@@ -137,7 +137,8 @@ abstract class FuzzyAction : AnAction() {
                 } else {
                     fuzzierSettingsService.state.filenameType
                 }
-                renderer.text = container.toString(filenameType)
+                val includeModule = fuzzierSettingsService.state.modules.size > 1
+                renderer.text = container.toString(filenameType, includeModule)
                 fuzzierSettingsService.state.fileListSpacing.let {
                     renderer.border = BorderFactory.createEmptyBorder(it, 0, it, 0)
                 }
