@@ -113,14 +113,14 @@ class FuzzierUtilTest {
     private fun addElement(score: Int, fileName: String) {
         val fuzzyScore = FuzzyScore()
         fuzzyScore.streakScore = score
-        val container = FuzzyMatchContainer(fuzzyScore, "", fileName)
+        val container = FuzzyMatchContainer(fuzzyScore, "", fileName, "")
         listModel.addElement(container)
     }
 
     private fun addElement(score: Int, filename: String, filePath: String) {
         val fuzzyScore = FuzzyScore()
         fuzzyScore.streakScore = score
-        val container = FuzzyMatchContainer(fuzzyScore, filePath, filename)
+        val container = FuzzyMatchContainer(fuzzyScore, filePath, filename, "")
         listModel.addElement(container)
     }
 

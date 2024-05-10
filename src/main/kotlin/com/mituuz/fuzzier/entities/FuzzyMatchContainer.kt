@@ -1,6 +1,6 @@
 package com.mituuz.fuzzier.entities
 
-class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filename: String) {
+class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filename: String, var basePath: String) {
     fun toString(filenameType: FilenameType): String {
         return when (filenameType) {
             FilenameType.FILENAME_ONLY -> filename
@@ -12,6 +12,10 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
 
     private fun getFilenameWithPathStyled(): String {
         return "<html><strong>$filename</strong>  <i>($filePath)</i></html>"
+    }
+
+    fun getFileUri(): String {
+        return "$basePath$filePath"
     }
 
     fun getScore(): Int {

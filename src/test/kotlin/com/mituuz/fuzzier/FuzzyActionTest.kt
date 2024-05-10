@@ -66,7 +66,7 @@ class FuzzyActionTest {
         action.setFiletype(FILENAME_ONLY)
         action.component = SimpleFinderComponent()
         val renderer = action.getCellRenderer()
-        val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd")
+        val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd", "")
         val dummyList = JList<FuzzyMatchContainer>()
         val component = renderer.getListCellRendererComponent(dummyList, container, 0, false, false) as JLabel
         assertNotNull(component)
@@ -79,7 +79,7 @@ class FuzzyActionTest {
         action.setFiletype(FILENAME_WITH_PATH)
         action.component = SimpleFinderComponent()
         val renderer = action.getCellRenderer()
-        val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd")
+        val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd", "")
         val dummyList = JList<FuzzyMatchContainer>()
         val component = renderer.getListCellRendererComponent(dummyList, container, 0, false, false) as JLabel
         assertNotNull(component)
@@ -92,7 +92,7 @@ class FuzzyActionTest {
         action.setFiletype(FILENAME_WITH_PATH_STYLED)
         action.component = SimpleFinderComponent()
         val renderer = action.getCellRenderer()
-        val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd")
+        val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd", "")
         val dummyList = JList<FuzzyMatchContainer>()
         val component = renderer.getListCellRendererComponent(dummyList, container, 0, false, false) as JLabel
         assertNotNull(component)
@@ -105,7 +105,7 @@ class FuzzyActionTest {
         action.setFiletype(FILE_PATH_ONLY)
         action.component = SimpleFinderComponent()
         val renderer = action.getCellRenderer()
-        val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd")
+        val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd", "")
         val dummyList = JList<FuzzyMatchContainer>()
         val component = renderer.getListCellRendererComponent(dummyList, container, 0, false, false) as JLabel
         assertNotNull(component)
@@ -119,7 +119,7 @@ class FuzzyActionTest {
         action.component = SimpleFinderComponent()
         action.component.isDirSelector = true
         val renderer = action.getCellRenderer()
-        val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd")
+        val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd", "")
         val dummyList = JList<FuzzyMatchContainer>()
         val component = renderer.getListCellRendererComponent(dummyList, container, 0, false, false) as JLabel
         assertNotNull(component)
