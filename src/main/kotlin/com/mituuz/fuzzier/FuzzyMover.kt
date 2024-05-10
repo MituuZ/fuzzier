@@ -7,8 +7,9 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.openapi.project.rootManager
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
@@ -179,17 +180,18 @@ class FuzzyMover : FuzzyAction() {
         currentTask = ApplicationManager.getApplication().executeOnPooledThread {
             component.fileList.setPaintBusy(true)
             var listModel = DefaultListModel<FuzzyMatchContainer>()
-            val projectFileIndex = ProjectFileIndex.getInstance(project)
-            val projectBasePath = project.basePath
+            val rootModule = ModuleManager.getInstance(project).modules[0]
+            val moduleFileIndex = rootModule.rootManager.fileIndex
+            val moduleBasePath = rootModule.rootManager.contentRoots[0]
 
             val contentIterator = if (!component.isDirSelector) {
-                projectBasePath?.let { stringEvaluator.getContentIterator(it, project.name, searchString, listModel) }
+                moduleBasePath?.let { stringEvaluator.getContentIterator(it.path, project.name, searchString, listModel) }
             } else {
-                projectBasePath?.let { stringEvaluator.getDirIterator(it, searchString, listModel) }
+                moduleBasePath?.let { stringEvaluator.getDirIterator(it.path, searchString, listModel) }
             }
 
             if (contentIterator != null) {
-                projectFileIndex.iterateContent(contentIterator)
+                moduleFileIndex.iterateContent(contentIterator)
             }
 
             listModel = fuzzierUtil.sortAndLimit(listModel, true)

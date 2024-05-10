@@ -37,11 +37,11 @@ class StringEvaluator(
         }
     }
 
-    fun getDirIterator(projectBasePath: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
+    fun getDirIterator(moduleBasePath: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
         scoreCalculator = ScoreCalculator(searchString)
         return ContentIterator { file: VirtualFile ->
             if (file.isDirectory) {
-                var filePath = projectBasePath.let { it1 -> file.path.removePrefix(it1) }
+                var filePath = moduleBasePath.let { it1 -> file.path.removePrefix(it1) }
                 // Handle project root as a special case
                 if (filePath == "") {
                     filePath = "/"
@@ -50,7 +50,7 @@ class StringEvaluator(
                     return@ContentIterator true
                 }
                 if (filePath.isNotBlank()) {
-                    val fuzzyMatchContainer = createFuzzyContainer(filePath, projectBasePath)
+                    val fuzzyMatchContainer = createFuzzyContainer(filePath, moduleBasePath)
                     if (fuzzyMatchContainer != null) {
                         listModel.addElement(fuzzyMatchContainer)
                     }
