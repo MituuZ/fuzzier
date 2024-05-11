@@ -40,11 +40,8 @@ class FuzzyMover : FuzzyAction() {
         ApplicationManager.getApplication().invokeLater {
             actionEvent.project?.let { project ->
                 component = SimpleFinderComponent()
-                val projectBasePath = project.basePath
-                if (projectBasePath != null) {
-                    createListeners(project, projectBasePath)
-                    createSharedListeners(project)
-                }
+                createListeners(project)
+                createSharedListeners(project)
 
                 val mainWindow = WindowManager.getInstance().getIdeFrame(actionEvent.project)?.component
                 mainWindow?.let {
@@ -61,11 +58,6 @@ class FuzzyMover : FuzzyAction() {
                         .createPopup()
 
                     currentFile = FileEditorManager.getInstance(project).selectedTextEditor?.virtualFile!!
-//                    currentFile = projectBasePath?.let { projectBasePath ->
-//                        FileEditorManager.getInstance(project).selectedTextEditor?.virtualFile?.path?.removePrefix(
-//                            projectBasePath
-//                        )
-//                    }.toString()
                     component.fileList.setEmptyText("Press enter to use current file: ${currentFile.path}")
 
                     popup?.addListener(object : JBPopupListener {
@@ -85,12 +77,12 @@ class FuzzyMover : FuzzyAction() {
         }
     }
 
-    private fun createListeners(project: Project, projectBasePath: String) {
+    private fun createListeners(project: Project) {
         // Add a mouse listener for double-click
         component.fileList.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent) {
                 if (e.clickCount == 2) {
-                    handleInput(projectBasePath, project)
+                    handleInput(project)
                 }
             }
         })
@@ -101,12 +93,12 @@ class FuzzyMover : FuzzyAction() {
         inputMap.put(enterKeyStroke, enterActionKey)
         component.searchField.actionMap.put(enterActionKey, object : AbstractAction() {
             override fun actionPerformed(e: ActionEvent?) {
-                handleInput(projectBasePath, project)
+                handleInput(project)
             }
         })
     }
 
-    fun handleInput(projectBasePath: String, project: Project): CompletableFuture<Unit> {
+    fun handleInput(project: Project): CompletableFuture<Unit> {
         val completableFuture = CompletableFuture<Unit>()
         var selectedValue = component.fileList.selectedValue?.getFileUri()
         if (selectedValue == null) {
