@@ -47,15 +47,6 @@ class FuzzyMoverTest {
         }
     }
 
-    private fun getListModel(virtualFile: VirtualFile?): ListModel<FuzzyMatchContainer?> {
-        val listModel = DefaultListModel<FuzzyMatchContainer?>()
-        if (virtualFile != null) {
-            val container = FuzzyMatchContainer(FuzzyMatchContainer.FuzzyScore(), virtualFile.path, virtualFile.name)
-            listModel.addElement(container)
-        }
-        return listModel
-    }
-
     @Test
     fun `Use the correct steps to move files`() {
         val filePaths = listOf("src/asd/main.log", "src/nope")
@@ -65,9 +56,17 @@ class FuzzyMoverTest {
 
         fuzzyMover.component = SimpleFinderComponent()
         fuzzyMover.currentFile = LightVirtualFile("/nope")
+        val virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/nope")
+        val virtualDir = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/asd/")
+
+        fuzzyMover.component.fileList.model = getListModel(virtualFile)
+        fuzzyMover.component.fileList.selectedIndex = 0
         if (basePath != null) {
             fuzzyMover.handleInput(project).join()
             fuzzyMover.currentFile = LightVirtualFile("/asd")
+            fuzzyMover.component.fileList.model = getListModel(virtualDir)
+            fuzzyMover.component.fileList.selectedIndex = 0
+
             fuzzyMover.handleInput(project).thenRun{
                 var targetFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/asd/nope")
                 assertNotNull(targetFile)
@@ -75,5 +74,14 @@ class FuzzyMoverTest {
                 assertNull(targetFile)
             }.join()
         }
+    }
+
+    private fun getListModel(virtualFile: VirtualFile?): ListModel<FuzzyMatchContainer?> {
+        val listModel = DefaultListModel<FuzzyMatchContainer?>()
+        if (virtualFile != null) {
+            val container = FuzzyMatchContainer(FuzzyMatchContainer.FuzzyScore(), virtualFile.path, virtualFile.name)
+            listModel.addElement(container)
+        }
+        return listModel
     }
 }
