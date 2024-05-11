@@ -37,7 +37,7 @@ class StringEvaluator(
         }
     }
 
-    fun getDirIterator(moduleBasePath: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
+    fun getDirIterator(moduleBasePath: String, module: String, isMultiModal: Boolean, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
         scoreCalculator = ScoreCalculator(searchString)
         return ContentIterator { file: VirtualFile ->
             if (file.isDirectory) {
@@ -46,11 +46,14 @@ class StringEvaluator(
                 if (filePath == "") {
                     filePath = "/"
                 }
-                if (isExcluded(file, filePath)) {
+                if (filePath == "/$module") {
+                    filePath = "/$module/"
+                }
+                if (isExcluded(file, filePath, isMultiModal)) {
                     return@ContentIterator true
                 }
                 if (filePath.isNotBlank()) {
-                    val fuzzyMatchContainer = createFuzzyContainer(filePath, moduleBasePath)
+                    val fuzzyMatchContainer = createFuzzyContainer(filePath, module)
                     if (fuzzyMatchContainer != null) {
                         listModel.addElement(fuzzyMatchContainer)
                     }
@@ -72,7 +75,7 @@ class StringEvaluator(
      *
      * @return true if file should be excluded
      */
-    private fun isExcluded(file: VirtualFile, filePath: String, isMultiModal: Boolean = false): Boolean {
+    private fun isExcluded(file: VirtualFile, filePath: String, isMultiModal: Boolean): Boolean {
         var evPath = filePath
         if (isMultiModal) {
             evPath = "/" + evPath.split("/").drop(2).joinToString("/")
