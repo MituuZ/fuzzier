@@ -1,7 +1,9 @@
 package com.mituuz.fuzzier
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.WriteAction
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.modules
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
@@ -79,6 +81,16 @@ class FuzzyMoverTest {
                 assertNull(targetFile)
             }.join()
         }
+    }
+
+    @Test
+    fun `Multi module test`() {
+        val module1Files = listOf("src1/main.kt", "src/app.log")
+        val module2Files = listOf("src2/tool.kt")
+        val myFixture: CodeInsightTestFixture = testUtil.setUpMultiModuleProject(module1Files, module2Files)
+        val project = myFixture.project
+
+        assertEquals(2, project.modules.size)
     }
 
     private fun getListModel(virtualFile: VirtualFile?): ListModel<FuzzyMatchContainer?> {
