@@ -34,6 +34,7 @@
   - Handle root path "/" separately for file mover<br>
   - Upgrade to gradle 8.7<br>
   - Multi module support (initial testing version)
+  - Handle file mover for multiple modules
   ]]>
   </change-notes>
 
