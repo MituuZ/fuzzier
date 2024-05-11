@@ -5,6 +5,7 @@ import com.intellij.openapi.application.WriteAction
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.modules
+import com.intellij.openapi.project.rootManager
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.psi.PsiManager
@@ -85,12 +86,34 @@ class FuzzyMoverTest {
 
     @Test
     fun `Multi module test`() {
-        val module1Files = listOf("src1/main.kt", "src/app.log")
+        val module1Files = listOf("src1/main.kt", "src1/test/app.log")
         val module2Files = listOf("src2/tool.kt")
         val myFixture: CodeInsightTestFixture = testUtil.setUpMultiModuleProject(module1Files, module2Files)
         val project = myFixture.project
 
         assertEquals(2, project.modules.size)
+
+        val basePath = project.modules[0].rootManager.contentRoots[0]
+
+        fuzzyMover.component = SimpleFinderComponent()
+        fuzzyMover.currentFile = LightVirtualFile("")
+        val virtualFile = VirtualFileManager.getInstance().findFileByUrl("$basePath/main.kt")
+        val virtualDir = VirtualFileManager.getInstance().findFileByUrl("$basePath/test/")
+
+        fuzzyMover.component.fileList.model = getListModel(virtualFile)
+        fuzzyMover.component.fileList.selectedIndex = 0
+        if (basePath != null) {
+            fuzzyMover.handleInput(project).join()
+            fuzzyMover.component.fileList.model = getListModel(virtualDir)
+            fuzzyMover.component.fileList.selectedIndex = 0
+
+            fuzzyMover.handleInput(project).thenRun{
+                var targetFile = VirtualFileManager.getInstance().findFileByUrl("$basePath/test/main.kt")
+                assertNotNull(targetFile)
+                targetFile = VirtualFileManager.getInstance().findFileByUrl("$basePath/main.kt")
+                assertNull(targetFile)
+            }.join()
+        }
     }
 
     private fun getListModel(virtualFile: VirtualFile?): ListModel<FuzzyMatchContainer?> {
