@@ -15,6 +15,7 @@ import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.util.DimensionService
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
 import com.intellij.psi.PsiDirectory
@@ -32,7 +33,7 @@ import javax.swing.*
 class FuzzyMover : FuzzyAction() {
     private val dimensionKey: String = "FuzzyMoverPopup"
     lateinit var movableFile: PsiFile
-    lateinit var currentFile: String
+    lateinit var currentFile: VirtualFile
 
     override fun actionPerformed(actionEvent: AnActionEvent) {
         setCustomHandlers()
@@ -59,12 +60,13 @@ class FuzzyMover : FuzzyAction() {
                         .setShowBorder(true)
                         .createPopup()
 
-                    currentFile = projectBasePath?.let { projectBasePath ->
-                        FileEditorManager.getInstance(project).selectedTextEditor?.virtualFile?.path?.removePrefix(
-                            projectBasePath
-                        )
-                    }.toString()
-                    component.fileList.setEmptyText("Press enter to use current file:$currentFile")
+                    currentFile = FileEditorManager.getInstance(project).selectedTextEditor?.virtualFile!!
+//                    currentFile = projectBasePath?.let { projectBasePath ->
+//                        FileEditorManager.getInstance(project).selectedTextEditor?.virtualFile?.path?.removePrefix(
+//                            projectBasePath
+//                        )
+//                    }.toString()
+                    component.fileList.setEmptyText("Press enter to use current file: ${currentFile.path}")
 
                     popup?.addListener(object : JBPopupListener {
                         override fun onClosed(event: LightweightWindowEvent) {
@@ -106,16 +108,15 @@ class FuzzyMover : FuzzyAction() {
 
     fun handleInput(projectBasePath: String, project: Project): CompletableFuture<Unit> {
         val completableFuture = CompletableFuture<Unit>()
-        var selectedValue = component.fileList.selectedValue?.filePath
+        var selectedValue = component.fileList.selectedValue?.getFileUri()
         if (selectedValue == null) {
-            selectedValue = currentFile
+            selectedValue = currentFile.path
         }
         if (!component.isDirSelector) {
-            val virtualFile =
-                VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
-            virtualFile?.let {
-                ApplicationManager.getApplication().executeOnPooledThread {
-                    ApplicationManager.getApplication().runReadAction {
+            ApplicationManager.getApplication().executeOnPooledThread {
+                val virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$selectedValue")
+                ApplicationManager.getApplication().runReadAction {
+                    virtualFile?.let {
                         movableFile = PsiManager.getInstance(project).findFile(it)!!
                     }
                 }
@@ -129,7 +130,7 @@ class FuzzyMover : FuzzyAction() {
         } else {
             ApplicationManager.getApplication().invokeLater {
                 val virtualDir =
-                    VirtualFileManager.getInstance().findFileByUrl("file://$projectBasePath$selectedValue")
+                    VirtualFileManager.getInstance().findFileByUrl("file://$selectedValue")
                 val targetDirectory: CompletableFuture<PsiDirectory> = CompletableFuture.supplyAsync {
                     virtualDir?.let {
                         ApplicationManager.getApplication().runReadAction<PsiDirectory> {
@@ -139,16 +140,15 @@ class FuzzyMover : FuzzyAction() {
                 }
 
                 targetDirectory.thenAcceptAsync { targetDir ->
-                    val originalFilePath = movableFile.virtualFile.path.removePrefix(projectBasePath)
+                    val originalFilePath = movableFile.virtualFile.path
                     if (targetDir != null) {
                         WriteCommandAction.runWriteCommandAction(project) {
                             MoveFilesOrDirectoriesUtil.doMoveFile(movableFile, targetDir)
                         }
-                        val targetLocation = virtualDir?.path?.removePrefix(projectBasePath)
                         val notification = Notification(
                             "Fuzzier Notification Group",
                             "File moved successfully",
-                            "Moved $originalFilePath to $targetLocation/${movableFile.name}",
+                            "Moved $originalFilePath to $selectedValue}",
                             NotificationType.INFORMATION
                         )
                         Notifications.Bus.notify(notification, project)
