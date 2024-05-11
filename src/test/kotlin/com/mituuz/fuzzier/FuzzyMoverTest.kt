@@ -1,9 +1,6 @@
 package com.mituuz.fuzzier
 
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.application.WriteAction
-import com.intellij.openapi.module.Module
-import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.modules
 import com.intellij.openapi.project.rootManager
 import com.intellij.openapi.vfs.VirtualFile
@@ -11,12 +8,7 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.psi.PsiManager
 import com.intellij.testFramework.LightVirtualFile
 import com.intellij.testFramework.TestApplicationManager
-import com.intellij.testFramework.builders.JavaModuleFixtureBuilder
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
-import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
-import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
-import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
-import com.intellij.testFramework.fixtures.TestFixtureBuilder
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import org.junit.jupiter.api.Assertions.*
@@ -85,7 +77,7 @@ class FuzzyMoverTest {
     }
 
     @Test
-    fun `Multi module test`() {
+    fun `Multi module test move to same module`() {
         val module1Files = listOf("src1/main.kt", "src1/test/app.log")
         val module2Files = listOf("src2/tool.kt")
         val myFixture: CodeInsightTestFixture = testUtil.setUpMultiModuleProject(module1Files, module2Files)
@@ -111,6 +103,39 @@ class FuzzyMoverTest {
                 var targetFile = VirtualFileManager.getInstance().findFileByUrl("$basePath/test/main.kt")
                 assertNotNull(targetFile)
                 targetFile = VirtualFileManager.getInstance().findFileByUrl("$basePath/main.kt")
+                assertNull(targetFile)
+            }.join()
+        }
+    }
+
+    @Test
+    fun `Multi module test move to different module`() {
+        val module1Files = listOf("src1/MoveMe.kt", "src1/test/app.log")
+        val module2Files = listOf("src2/tool.kt", "src2/target/test.kt")
+        val myFixture: CodeInsightTestFixture = testUtil.setUpMultiModuleProject(module1Files, module2Files)
+        val project = myFixture.project
+
+        assertEquals(2, project.modules.size)
+
+        val module1BasePath = project.modules[0].rootManager.contentRoots[0]
+        val module2BasePath = project.modules[1].rootManager.contentRoots[0]
+
+        fuzzyMover.component = SimpleFinderComponent()
+        fuzzyMover.currentFile = LightVirtualFile("")
+        val virtualFile = VirtualFileManager.getInstance().findFileByUrl("$module1BasePath/MoveMe.kt")
+        val virtualDir = VirtualFileManager.getInstance().findFileByUrl("$module2BasePath/target/")
+
+        fuzzyMover.component.fileList.model = getListModel(virtualFile)
+        fuzzyMover.component.fileList.selectedIndex = 0
+        if (module1BasePath != null) {
+            fuzzyMover.handleInput(project).join()
+            fuzzyMover.component.fileList.model = getListModel(virtualDir)
+            fuzzyMover.component.fileList.selectedIndex = 0
+
+            fuzzyMover.handleInput(project).thenRun{
+                var targetFile = VirtualFileManager.getInstance().findFileByUrl("$module2BasePath/target/MoveMe.kt")
+                assertNotNull(targetFile)
+                targetFile = VirtualFileManager.getInstance().findFileByUrl("$module1BasePath/MoveMe.kt")
                 assertNull(targetFile)
             }.join()
         }
