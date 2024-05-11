@@ -19,7 +19,10 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
 
     fun getFileUri(): String {
         val basePath = service<FuzzierSettingsService>().state.modules[module]
-        return "$basePath$filePath"
+        if (basePath != null) {
+            return "$basePath$filePath"
+        }
+        return filePath
     }
 
     fun getScore(): Int {
