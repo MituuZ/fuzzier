@@ -11,6 +11,7 @@ import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import javax.swing.DefaultListModel
@@ -47,6 +48,7 @@ class FuzzyMoverTest {
                 assertNull(targetFile)
             }.join()
         }
+        myFixture.tearDown()
     }
 
     @Test
@@ -74,6 +76,7 @@ class FuzzyMoverTest {
                 assertNull(targetFile)
             }.join()
         }
+        myFixture.tearDown()
     }
 
     @Test
@@ -106,6 +109,7 @@ class FuzzyMoverTest {
                 assertNull(targetFile)
             }.join()
         }
+        myFixture.tearDown()
     }
 
     @Test
@@ -139,6 +143,7 @@ class FuzzyMoverTest {
                 assertNull(targetFile)
             }.join()
         }
+        myFixture.tearDown()
     }
 
     private fun getListModel(virtualFile: VirtualFile?): ListModel<FuzzyMatchContainer?> {

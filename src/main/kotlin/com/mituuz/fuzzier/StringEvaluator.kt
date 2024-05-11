@@ -41,14 +41,7 @@ class StringEvaluator(
         scoreCalculator = ScoreCalculator(searchString)
         return ContentIterator { file: VirtualFile ->
             if (file.isDirectory) {
-                var filePath = moduleBasePath.let { it1 -> file.path.removePrefix(it1) }
-                // Handle project root as a special case
-                if (filePath == "") {
-                    filePath = "/"
-                }
-                if (filePath == "/$module") {
-                    filePath = "/$module/"
-                }
+                val filePath = getDirPath(file, moduleBasePath, module)
                 if (isExcluded(file, filePath, isMultiModal)) {
                     return@ContentIterator true
                 }
@@ -61,6 +54,18 @@ class StringEvaluator(
             }
             true
         }
+    }
+
+    private fun getDirPath(virtualFile: VirtualFile, basePath: String, module: String): String {
+        var res = virtualFile.path.removePrefix(basePath)
+        // Handle project root as a special case
+        if (res == "") {
+            res = "/"
+        }
+        if (res == "/$module") {
+            res = "/$module/"
+        }
+        return res
     }
 
     /**
