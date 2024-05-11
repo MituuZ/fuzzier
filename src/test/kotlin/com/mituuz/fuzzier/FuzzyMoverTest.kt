@@ -1,12 +1,19 @@
 package com.mituuz.fuzzier
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.module.Module
+import com.intellij.openapi.project.modules
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.psi.PsiManager
 import com.intellij.testFramework.LightVirtualFile
 import com.intellij.testFramework.TestApplicationManager
+import com.intellij.testFramework.builders.JavaModuleFixtureBuilder
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
+import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
+import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
+import com.intellij.testFramework.fixtures.JavaTestFixtureFactory
+import com.intellij.testFramework.fixtures.TestFixtureBuilder
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import org.junit.jupiter.api.Assertions.*
@@ -55,7 +62,6 @@ class FuzzyMoverTest {
         val project = myFixture.project
 
         fuzzyMover.component = SimpleFinderComponent()
-        fuzzyMover.currentFile = LightVirtualFile("/nope")
         val virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/nope")
         val virtualDir = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/asd/")
 
@@ -63,7 +69,6 @@ class FuzzyMoverTest {
         fuzzyMover.component.fileList.selectedIndex = 0
         if (basePath != null) {
             fuzzyMover.handleInput(project).join()
-            fuzzyMover.currentFile = LightVirtualFile("/asd")
             fuzzyMover.component.fileList.model = getListModel(virtualDir)
             fuzzyMover.component.fileList.selectedIndex = 0
 
