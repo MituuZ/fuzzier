@@ -33,6 +33,7 @@
   - Add setting to prioritize shorter file paths for file mover<br>
   - Handle root path "/" separately for file mover<br>
   - Upgrade to gradle 8.7<br>
+  - Multi module support for finder and mover
   ]]>
   </change-notes>
 

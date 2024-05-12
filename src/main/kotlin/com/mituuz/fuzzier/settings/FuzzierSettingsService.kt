@@ -12,6 +12,8 @@ import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType.FILE_PATH_ON
 )
 class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.State> {
     class State {
+        var modules: HashMap<String, String> = HashMap()
+
         var splitPosition: Int = 300
         var exclusionSet: Set<String> = setOf("/.idea/*", "/.git/*", "/target/*", "/build/*", "/.gradle/*", "/.run/*")
         var newTab: Boolean = false

@@ -1,6 +1,9 @@
 package com.mituuz.fuzzier.entities
 
-class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filename: String) {
+import com.intellij.openapi.components.service
+import com.mituuz.fuzzier.settings.FuzzierSettingsService
+
+class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filename: String, private var module: String = "") {
     fun toString(filenameType: FilenameType): String {
         return when (filenameType) {
             FilenameType.FILENAME_ONLY -> filename
@@ -14,6 +17,14 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
         return "<html><strong>$filename</strong>  <i>($filePath)</i></html>"
     }
 
+    fun getFileUri(): String {
+        val basePath = service<FuzzierSettingsService>().state.modules[module]
+        if (basePath != null) {
+            return "$basePath$filePath"
+        }
+        return filePath
+    }
+
     fun getScore(): Int {
         return score.getTotalScore()
     }
@@ -22,7 +33,7 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
      * Gets score that is prioritizing shorter dir paths
      */
     fun getScoreWithDirLength(): Int {
-        return score.getTotalScore() + filePath.length * -1
+        return score.getTotalScore() + filePath.length * -5
     }
 
     enum class FilenameType(val text: String) {

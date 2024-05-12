@@ -1,5 +1,8 @@
 package com.mituuz.fuzzier
 
+import com.intellij.openapi.application.WriteAction
+import com.intellij.openapi.module.ModuleManager
+import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vcs.changes.ChangeListManager
@@ -58,7 +61,7 @@ class TestUtil {
         }
 
         val basePath = myFixture.findFileInTempDir("src").canonicalPath
-        val contentIterator = basePath?.let { stringEvaluator.getContentIterator(it, "", filePathContainer) }
+        val contentIterator = basePath?.let { stringEvaluator.getContentIterator(it, "", false, "", filePathContainer) }
         val index = ProjectFileIndex.getInstance(fixture.project)
         runInEdtAndWait {
             if (contentIterator != null) {
@@ -80,5 +83,42 @@ class TestUtil {
         myFixture.setUp()
         addFilesToProject(filesToAdd, myFixture, fixture)
         return myFixture
+    }
+
+    fun setUpMultiModuleProject(module1Files: List<String>, module2Files: List<String>): CodeInsightTestFixture {
+        val factory = IdeaTestFixtureFactory.getFixtureFactory()
+        val fixtureBuilder = factory.createFixtureBuilder("Test")
+        val fixture = fixtureBuilder.fixture
+        val myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture)
+        myFixture.setUp()
+        val project = myFixture.project
+
+        addFiles(module1Files, myFixture)
+        addFiles(module2Files, myFixture)
+
+        val module1Path = myFixture.findFileInTempDir("src1")
+        val module2Path = myFixture.findFileInTempDir("src2")
+
+        val module1 = WriteAction.computeAndWait<Module, RuntimeException> {
+            ModuleManager.getInstance(project).newModule(module1Path.path, "Empty")
+        }
+        PsiTestUtil.addSourceRoot(module1, module1Path)
+        val module2 = WriteAction.computeAndWait<Module, RuntimeException> {
+            ModuleManager.getInstance(project).newModule(module2Path.path, "Empty")
+        }
+        PsiTestUtil.addSourceRoot(module2, module2Path)
+
+        runInEdtAndWait {
+            PsiDocumentManager.getInstance(fixture.project).commitAllDocuments()
+        }
+        DumbService.getInstance(fixture.project).waitForSmartMode()
+
+        return myFixture
+    }
+
+    private fun addFiles(files: List<String>, myFixture: CodeInsightTestFixture) {
+        for (file in files) {
+            myFixture.addFileToProject(file, "")
+        }
     }
 }

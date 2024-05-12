@@ -1,13 +1,21 @@
 package com.mituuz.fuzzier
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.project.modules
+import com.intellij.openapi.project.rootManager
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.psi.PsiManager
+import com.intellij.testFramework.LightVirtualFile
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import com.mituuz.fuzzier.components.SimpleFinderComponent
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import javax.swing.DefaultListModel
+import javax.swing.ListModel
 
 class FuzzyMoverTest {
     @Suppress("unused")
@@ -23,21 +31,24 @@ class FuzzyMoverTest {
         val project = myFixture.project
 
         val virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/nope")
+        val virtualDir = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/asd/")
 
         fuzzyMover.component = SimpleFinderComponent()
+        fuzzyMover.component.fileList.model = getListModel(virtualDir)
+        fuzzyMover.component.fileList.selectedIndex = 0
         fuzzyMover.component.isDirSelector = true
-        fuzzyMover.currentFile = "/asd"
         ApplicationManager.getApplication().runReadAction {
             fuzzyMover.movableFile = virtualFile?.let { PsiManager.getInstance(project).findFile(it) }!!
         }
         if (basePath != null) {
-            fuzzyMover.handleInput(basePath, project).thenRun{
+            fuzzyMover.handleInput(project).thenRun{
                 var targetFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/asd/nope")
                 assertNotNull(targetFile)
                 targetFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/nope")
                 assertNull(targetFile)
             }.join()
         }
+        myFixture.tearDown()
     }
 
     @Test
@@ -48,16 +59,99 @@ class FuzzyMoverTest {
         val project = myFixture.project
 
         fuzzyMover.component = SimpleFinderComponent()
-        fuzzyMover.currentFile = "/nope"
+        val virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/nope")
+        val virtualDir = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/asd/")
+
+        fuzzyMover.component.fileList.model = getListModel(virtualFile)
+        fuzzyMover.component.fileList.selectedIndex = 0
         if (basePath != null) {
-            fuzzyMover.handleInput(basePath, project).join()
-            fuzzyMover.currentFile = "/asd"
-            fuzzyMover.handleInput(basePath, project).thenRun{
+            fuzzyMover.handleInput(project).join()
+            fuzzyMover.component.fileList.model = getListModel(virtualDir)
+            fuzzyMover.component.fileList.selectedIndex = 0
+
+            fuzzyMover.handleInput(project).thenRun{
                 var targetFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/asd/nope")
                 assertNotNull(targetFile)
                 targetFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/nope")
                 assertNull(targetFile)
             }.join()
         }
+        myFixture.tearDown()
+    }
+
+    @Test
+    fun `Multi module test move to same module`() {
+        val module1Files = listOf("src1/main.kt", "src1/test/app.log")
+        val module2Files = listOf("src2/tool.kt")
+        val myFixture: CodeInsightTestFixture = testUtil.setUpMultiModuleProject(module1Files, module2Files)
+        val project = myFixture.project
+
+        assertEquals(2, project.modules.size)
+
+        val basePath = project.modules[0].rootManager.contentRoots[0]
+
+        fuzzyMover.component = SimpleFinderComponent()
+        fuzzyMover.currentFile = LightVirtualFile("")
+        val virtualFile = VirtualFileManager.getInstance().findFileByUrl("$basePath/main.kt")
+        val virtualDir = VirtualFileManager.getInstance().findFileByUrl("$basePath/test/")
+
+        fuzzyMover.component.fileList.model = getListModel(virtualFile)
+        fuzzyMover.component.fileList.selectedIndex = 0
+        if (basePath != null) {
+            fuzzyMover.handleInput(project).join()
+            fuzzyMover.component.fileList.model = getListModel(virtualDir)
+            fuzzyMover.component.fileList.selectedIndex = 0
+
+            fuzzyMover.handleInput(project).thenRun{
+                var targetFile = VirtualFileManager.getInstance().findFileByUrl("$basePath/test/main.kt")
+                assertNotNull(targetFile)
+                targetFile = VirtualFileManager.getInstance().findFileByUrl("$basePath/main.kt")
+                assertNull(targetFile)
+            }.join()
+        }
+        myFixture.tearDown()
+    }
+
+    @Test
+    fun `Multi module test move to different module`() {
+        val module1Files = listOf("src1/MoveMe.kt", "src1/test/app.log")
+        val module2Files = listOf("src2/tool.kt", "src2/target/test.kt")
+        val myFixture: CodeInsightTestFixture = testUtil.setUpMultiModuleProject(module1Files, module2Files)
+        val project = myFixture.project
+
+        assertEquals(2, project.modules.size)
+
+        val module1BasePath = project.modules[0].rootManager.contentRoots[0]
+        val module2BasePath = project.modules[1].rootManager.contentRoots[0]
+
+        fuzzyMover.component = SimpleFinderComponent()
+        fuzzyMover.currentFile = LightVirtualFile("")
+        val virtualFile = VirtualFileManager.getInstance().findFileByUrl("$module1BasePath/MoveMe.kt")
+        val virtualDir = VirtualFileManager.getInstance().findFileByUrl("$module2BasePath/target/")
+
+        fuzzyMover.component.fileList.model = getListModel(virtualFile)
+        fuzzyMover.component.fileList.selectedIndex = 0
+        if (module1BasePath != null) {
+            fuzzyMover.handleInput(project).join()
+            fuzzyMover.component.fileList.model = getListModel(virtualDir)
+            fuzzyMover.component.fileList.selectedIndex = 0
+
+            fuzzyMover.handleInput(project).thenRun{
+                var targetFile = VirtualFileManager.getInstance().findFileByUrl("$module2BasePath/target/MoveMe.kt")
+                assertNotNull(targetFile)
+                targetFile = VirtualFileManager.getInstance().findFileByUrl("$module1BasePath/MoveMe.kt")
+                assertNull(targetFile)
+            }.join()
+        }
+        myFixture.tearDown()
+    }
+
+    private fun getListModel(virtualFile: VirtualFile?): ListModel<FuzzyMatchContainer?> {
+        val listModel = DefaultListModel<FuzzyMatchContainer?>()
+        if (virtualFile != null) {
+            val container = FuzzyMatchContainer(FuzzyMatchContainer.FuzzyScore(), virtualFile.path, virtualFile.name)
+            listModel.addElement(container)
+        }
+        return listModel
     }
 }
