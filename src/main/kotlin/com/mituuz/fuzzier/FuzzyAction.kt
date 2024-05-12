@@ -23,8 +23,6 @@ import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.util.FuzzierUtil
 import java.awt.Component
 import java.awt.event.ActionEvent
-import java.awt.event.InputEvent
-import java.awt.event.KeyEvent
 import java.util.*
 import java.util.Timer
 import java.util.concurrent.Future
