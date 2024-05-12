@@ -7,6 +7,7 @@
 - Handle root path "/" separately for file mover
 - Upgrade to gradle 8.7
 - Multi module support for finder and mover
+- Enable remapping list movement
  
 ## Version 0.21.0
 - Add tolerance setting for string matching
