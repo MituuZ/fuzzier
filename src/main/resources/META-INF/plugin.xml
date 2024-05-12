@@ -60,5 +60,17 @@
       <override-text place="MainMenu" text="Fuzzy File Mover"/>
       <add-to-group group-id="ToolsMenu"/>
     </action>
+    <action id="com.mituuz.fuzzier.util.MoveDownAction"
+            class="com.mituuz.fuzzier.util.MoveDownAction"
+            text="Move Down"
+            description="Move list selector down">
+      <keyboard-shortcut first-keystroke="ctrl j" keymap="$default"/>
+    </action>
+    <action id="com.mituuz.fuzzier.util.MoveUpAction"
+            class="com.mituuz.fuzzier.util.MoveUpAction"
+            text="Move Up"
+            description="Move list selector up">
+      <keyboard-shortcut first-keystroke="ctrl k" keymap="$default"/>
+    </action>
   </actions>
 </idea-plugin>
