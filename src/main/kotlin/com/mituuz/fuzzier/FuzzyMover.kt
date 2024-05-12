@@ -11,6 +11,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.rootManager
+import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
@@ -141,7 +142,7 @@ class FuzzyMover : FuzzyAction() {
                         val notification = Notification(
                             "Fuzzier Notification Group",
                             "File moved successfully",
-                            "Moved $originalFilePath to $selectedValue}",
+                            "Moved $originalFilePath to $selectedValue",
                             NotificationType.INFORMATION
                         )
                         Notifications.Bus.notify(notification, project)
@@ -160,7 +161,7 @@ class FuzzyMover : FuzzyAction() {
 
     override fun updateListContents(project: Project, searchString: String) {
         if (StringUtils.isBlank(searchString)) {
-           ApplicationManager.getApplication().invokeLater {
+            ApplicationManager.getApplication().invokeLater {
                 component.fileList.model = DefaultListModel()
             }
             return
@@ -179,29 +180,16 @@ class FuzzyMover : FuzzyAction() {
             val state = service<FuzzierSettingsService>().state
             state.modules = HashMap()
 
-
             val moduleManager = ModuleManager.getInstance(project)
-            val isMultiModal = moduleManager.modules.size > 1
-
-            for (module in moduleManager.modules) {
-                val moduleFileIndex = module.rootManager.fileIndex
-                var moduleBasePath = module.rootManager.contentRoots[0].path
-                if (isMultiModal) {
-                    moduleBasePath = moduleBasePath.substringBeforeLast("/")
-                }
-                state.modules[module.name] = moduleBasePath
-
-                val contentIterator = if (!component.isDirSelector) {
-                    stringEvaluator.getContentIterator(moduleBasePath, module.name, isMultiModal, searchString, listModel)
-                } else {
-                    stringEvaluator.getDirIterator(moduleBasePath, module.name, isMultiModal, searchString, listModel)
-                }
-                moduleFileIndex.iterateContent(contentIterator)
+            if (moduleManager.modules.size > 1) {
+                processModules(moduleManager, state, stringEvaluator, searchString, listModel)
+            } else {
+                processProject(project, state, stringEvaluator, searchString, listModel)
             }
 
             listModel = fuzzierUtil.sortAndLimit(listModel, true)
 
-           ApplicationManager.getApplication().invokeLater {
+            ApplicationManager.getApplication().invokeLater {
                 component.fileList.model = listModel
                 component.fileList.cellRenderer = getCellRenderer()
                 component.fileList.setPaintBusy(false)
@@ -209,6 +197,40 @@ class FuzzyMover : FuzzyAction() {
                     component.fileList.setSelectedValue(listModel[0], true)
                 }
             }
+        }
+    }
+
+    private fun processProject(project: Project, state: FuzzierSettingsService.State, stringEvaluator: StringEvaluator,
+                               searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
+        val projectFileIndex = ProjectFileIndex.getInstance(project)
+        val projectBasePath = project.basePath
+        if (projectBasePath != null) {
+            state.modules[project.name] = projectBasePath
+
+            val contentIterator = if (!component.isDirSelector) {
+                stringEvaluator.getContentIterator(projectBasePath, project.name, false, searchString, listModel)
+            } else {
+                stringEvaluator.getDirIterator(projectBasePath, project.name, false, searchString, listModel)
+            }
+
+            projectFileIndex.iterateContent(contentIterator)
+        }
+    }
+
+    private fun processModules(moduleManager: ModuleManager, state: FuzzierSettingsService.State,
+                               stringEvaluator: StringEvaluator, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
+        for (module in moduleManager.modules) {
+            val moduleFileIndex = module.rootManager.fileIndex
+            var moduleBasePath = module.rootManager.contentRoots[0].path
+            moduleBasePath = moduleBasePath.substringBeforeLast("/")
+            state.modules[module.name] = moduleBasePath
+
+            val contentIterator = if (!component.isDirSelector) {
+                stringEvaluator.getContentIterator(moduleBasePath, module.name, true, searchString, listModel)
+            } else {
+                stringEvaluator.getDirIterator(moduleBasePath, module.name, true, searchString, listModel)
+            }
+            moduleFileIndex.iterateContent(contentIterator)
         }
     }
 }
