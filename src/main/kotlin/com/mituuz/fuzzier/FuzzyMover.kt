@@ -57,8 +57,11 @@ class FuzzyMover : FuzzyAction() {
                         .setShowBorder(true)
                         .createPopup()
 
-                    currentFile = FileEditorManager.getInstance(project).selectedTextEditor?.virtualFile!!
-                    component.fileList.setEmptyText("Press enter to use current file: ${currentFile.path}")
+                    val currentEditor = FileEditorManager.getInstance(project).selectedTextEditor
+                    if (currentEditor != null) {
+                        currentFile = currentEditor.virtualFile
+                            component.fileList.setEmptyText("Press enter to use current file: ${currentFile.path}")
+                    }
 
                     popup?.addListener(object : JBPopupListener {
                         override fun onClosed(event: LightweightWindowEvent) {
