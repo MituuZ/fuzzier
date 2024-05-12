@@ -103,8 +103,9 @@ open class Fuzzier : FuzzyAction() {
             val state = service<FuzzierSettingsService>().state
             state.modules = HashMap()
             val moduleManager = ModuleManager.getInstance(project)
+            val uniqueModuleRoots = countModuleRoots(moduleManager)
 
-            if (moduleManager.modules.size > 1) {
+            if (uniqueModuleRoots > 1) {
                 processModules(moduleManager, state, stringEvaluator, searchString, listModel)
             } else {
                 processProject(project, state, stringEvaluator, searchString, listModel)
@@ -123,16 +124,36 @@ open class Fuzzier : FuzzyAction() {
         }
     }
 
+    private fun countModuleRoots(moduleManager: ModuleManager): Int {
+        val moduleRoots = mutableSetOf<String>()
+        for (module in moduleManager.modules) {
+            val contentRoots = module.rootManager.contentRoots
+            if (contentRoots.isNotEmpty()) {
+                val moduleBasePath = contentRoots[0]?.path
+                if (moduleBasePath != null) {
+                    moduleRoots.add(moduleBasePath)
+                }
+            }
+        }
+        return moduleRoots.size
+    }
+
     private fun processModules(moduleManager: ModuleManager, state: FuzzierSettingsService.State,
                                stringEvaluator: StringEvaluator, searchString: String,
                                listModel: DefaultListModel<FuzzyMatchContainer>) {
         for (module in moduleManager.modules) {
             val moduleFileIndex = module.rootManager.fileIndex
-            var moduleBasePath = module.rootManager.contentRoots[0].path
-            moduleBasePath = moduleBasePath.substringBeforeLast("/")
-            state.modules[module.name] = moduleBasePath
-            val contentIterator = stringEvaluator.getContentIterator(moduleBasePath, module.name, true, searchString, listModel)
-            moduleFileIndex.iterateContent(contentIterator)
+            val contentRoots = module.rootManager.contentRoots
+            if (contentRoots.isNotEmpty()) {
+                var moduleBasePath = contentRoots[0]?.path
+                if (moduleBasePath != null) {
+                    moduleBasePath = moduleBasePath.substringBeforeLast("/")
+                    state.modules[module.name] = moduleBasePath
+                    val contentIterator =
+                        stringEvaluator.getContentIterator(moduleBasePath, module.name, true, searchString, listModel)
+                    moduleFileIndex.iterateContent(contentIterator)
+                }
+            }
         }
     }
 
