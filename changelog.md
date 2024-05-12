@@ -6,7 +6,7 @@
 - Add setting to prioritize shorter file paths for file mover
 - Handle root path "/" separately for file mover
 - Upgrade to gradle 8.7
-- Multi module support
+- Multi module support for finder and mover
  
 ## Version 0.21.0
 - Add tolerance setting for string matching
