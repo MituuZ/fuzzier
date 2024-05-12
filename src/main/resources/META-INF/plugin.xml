@@ -33,7 +33,8 @@
   - Add setting to prioritize shorter file paths for file mover<br>
   - Handle root path "/" separately for file mover<br>
   - Upgrade to gradle 8.7<br>
-  - Multi module support for finder and mover
+  - Multi module support for finder and mover<br>
+  - Enable remapping list movement
   ]]>
   </change-notes>
 
@@ -59,6 +60,18 @@
             description="Move a file using a basic fuzzy search">
       <override-text place="MainMenu" text="Fuzzy File Mover"/>
       <add-to-group group-id="ToolsMenu"/>
+    </action>
+    <action id="com.mituuz.fuzzier.util.MoveDownAction"
+            class="com.mituuz.fuzzier.util.MoveDownAction"
+            text="Move Fuzzier List Selection Down"
+            description="Move the list selector down">
+      <keyboard-shortcut first-keystroke="ctrl j" keymap="$default"/>
+    </action>
+    <action id="com.mituuz.fuzzier.util.MoveUpAction"
+            class="com.mituuz.fuzzier.util.MoveUpAction"
+            text="Move Fuzzier List Selection Up"
+            description="Move the list selector up">
+      <keyboard-shortcut first-keystroke="ctrl k" keymap="$default"/>
     </action>
   </actions>
 </idea-plugin>

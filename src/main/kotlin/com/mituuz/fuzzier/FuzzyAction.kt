@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.actionSystem.IdeActions
+import com.intellij.openapi.actionSystem.KeyboardShortcut
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
@@ -11,6 +12,7 @@ import com.intellij.openapi.editor.actionSystem.EditorActionHandler
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
+import com.intellij.openapi.keymap.KeymapManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
 import com.mituuz.fuzzier.components.FuzzyComponent
@@ -21,8 +23,6 @@ import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.util.FuzzierUtil
 import java.awt.Component
 import java.awt.event.ActionEvent
-import java.awt.event.InputEvent
-import java.awt.event.KeyEvent
 import java.util.*
 import java.util.Timer
 import java.util.concurrent.Future
@@ -46,16 +46,33 @@ abstract class FuzzyAction : AnAction() {
 
     fun createSharedListeners(project: Project) {
         val inputMap = component.searchField.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
-        // Add a listener to move fileList up and down by using CTRL + k/j
-        val kShiftKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_K, InputEvent.CTRL_DOWN_MASK)
-        val jShiftKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_J, InputEvent.CTRL_DOWN_MASK)
-        inputMap.put(kShiftKeyStroke, "moveUp")
+
+        val keymapManager = KeymapManager.getInstance()
+        val activeKeymap = keymapManager.activeKeymap
+
+        val downActionId = "com.mituuz.fuzzier.util.MoveDownAction"
+        val upActionId = "com.mituuz.fuzzier.util.MoveUpAction"
+
+        var shortcuts = activeKeymap.getShortcuts(downActionId)
+
+        for (shortcut in shortcuts) {
+            if (shortcut is KeyboardShortcut) {
+                inputMap.put(shortcut.firstKeyStroke, "moveDown")
+            }
+        }
+
+        shortcuts = activeKeymap.getShortcuts(upActionId)
+        for (shortcut in shortcuts) {
+            if (shortcut is KeyboardShortcut) {
+                inputMap.put(shortcut.firstKeyStroke, "moveUp")
+            }
+        }
+
         component.searchField.actionMap.put("moveUp", object : AbstractAction() {
             override fun actionPerformed(e: ActionEvent?) {
                 moveListUp()
             }
         })
-        inputMap.put(jShiftKeyStroke, "moveDown")
         component.searchField.actionMap.put("moveDown", object : AbstractAction() {
             override fun actionPerformed(e: ActionEvent?) {
                 moveListDown()

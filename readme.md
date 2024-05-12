@@ -36,9 +36,11 @@ Double-clicking a list item opens the file
 
 When focused on the search field, you can use:
 - Arrow keys to move up and down
-- CTRL + j to move down
-- CTRL + k to move up
-- Enter to open the currently selected file (opens in current tab)
+- CTRL + j to move down (modifiable)
+- CTRL + k to move up (modifiable)
+- Enter to open the currently selected file
+
+List movement can be remapped from settings -> keymaps, but do not support chorded shortcuts.
 
 ### File operations
 Fuzzier can be used to move files using the same search to locate the file and target directory that is used for 
