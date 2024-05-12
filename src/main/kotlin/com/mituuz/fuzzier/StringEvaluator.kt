@@ -18,16 +18,16 @@ class StringEvaluator(
 ) {
     lateinit var scoreCalculator: ScoreCalculator
 
-    fun getContentIterator(moduleBasePath: String, module: String, isMultiModal: Boolean, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
+    fun getContentIterator(basePath: String, moduleName: String, isMultiModal: Boolean, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
         scoreCalculator = ScoreCalculator(searchString)
         return ContentIterator { file: VirtualFile ->
             if (!file.isDirectory) {
-                val filePath = moduleBasePath.let { it1 -> file.path.removePrefix(it1) }
+                val filePath = basePath.let { it1 -> file.path.removePrefix(it1) }
                 if (isExcluded(file, filePath, isMultiModal)) {
                     return@ContentIterator true
                 }
                 if (filePath.isNotBlank()) {
-                    val fuzzyMatchContainer = createFuzzyContainer(filePath, module)
+                    val fuzzyMatchContainer = createFuzzyContainer(filePath, moduleName)
                     if (fuzzyMatchContainer != null) {
                         listModel.addElement(fuzzyMatchContainer)
                     }
@@ -37,16 +37,16 @@ class StringEvaluator(
         }
     }
 
-    fun getDirIterator(moduleBasePath: String, module: String, isMultiModal: Boolean, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
+    fun getDirIterator(basePath: String, moduleName: String, isMultiModal: Boolean, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
         scoreCalculator = ScoreCalculator(searchString)
         return ContentIterator { file: VirtualFile ->
             if (file.isDirectory) {
-                val filePath = getDirPath(file, moduleBasePath, module)
+                val filePath = getDirPath(file, basePath, moduleName)
                 if (isExcluded(file, filePath, isMultiModal)) {
                     return@ContentIterator true
                 }
                 if (filePath.isNotBlank()) {
-                    val fuzzyMatchContainer = createFuzzyContainer(filePath, module)
+                    val fuzzyMatchContainer = createFuzzyContainer(filePath, moduleName)
                     if (fuzzyMatchContainer != null) {
                         listModel.addElement(fuzzyMatchContainer)
                     }
