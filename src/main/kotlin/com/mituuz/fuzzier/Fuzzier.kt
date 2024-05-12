@@ -12,6 +12,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.rootManager
+import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
@@ -103,18 +104,10 @@ open class Fuzzier : FuzzyAction() {
             state.modules = HashMap()
             val moduleManager = ModuleManager.getInstance(project)
 
-            // If project is multimodal, include the module at the beginning of the file path
-            val isMultiModal = moduleManager.modules.size > 1
-
-            for (module in moduleManager.modules) {
-                val moduleFileIndex = module.rootManager.fileIndex
-                var moduleBasePath = module.rootManager.contentRoots[0].path
-                if (isMultiModal) {
-                    moduleBasePath = moduleBasePath.substringBeforeLast("/")
-                }
-                state.modules[module.name] = moduleBasePath
-                val contentIterator = stringEvaluator.getContentIterator(moduleBasePath, module.name, isMultiModal, searchString, listModel)
-                moduleFileIndex.iterateContent(contentIterator)
+            if (moduleManager.modules.size > 1) {
+                processModules(moduleManager, state, stringEvaluator, searchString, listModel)
+            } else {
+                processProject(project, state, stringEvaluator, searchString, listModel)
             }
 
             listModel = fuzzierUtil.sortAndLimit(listModel)
@@ -127,6 +120,30 @@ open class Fuzzier : FuzzyAction() {
                     component.fileList.setSelectedValue(listModel[0], true)
                 }
             }
+        }
+    }
+
+    private fun processModules(moduleManager: ModuleManager, state: FuzzierSettingsService.State,
+                               stringEvaluator: StringEvaluator, searchString: String,
+                               listModel: DefaultListModel<FuzzyMatchContainer>) {
+        for (module in moduleManager.modules) {
+            val moduleFileIndex = module.rootManager.fileIndex
+            var moduleBasePath = module.rootManager.contentRoots[0].path
+            moduleBasePath = moduleBasePath.substringBeforeLast("/")
+            state.modules[module.name] = moduleBasePath
+            val contentIterator = stringEvaluator.getContentIterator(moduleBasePath, module.name, true, searchString, listModel)
+            moduleFileIndex.iterateContent(contentIterator)
+        }
+    }
+
+    private fun processProject(project: Project, state: FuzzierSettingsService.State, stringEvaluator: StringEvaluator,
+                               searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
+        val projectFileIndex = ProjectFileIndex.getInstance(project)
+        val projectBasePath = project.basePath
+        if (projectBasePath != null) {
+            state.modules[project.name] = projectBasePath
+            val contentIterator = stringEvaluator.getContentIterator(projectBasePath, project.name, false, searchString, listModel)
+            projectFileIndex.iterateContent(contentIterator)
         }
     }
 
