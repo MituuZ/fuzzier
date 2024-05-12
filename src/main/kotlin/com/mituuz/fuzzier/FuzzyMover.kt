@@ -124,13 +124,11 @@ class FuzzyMover : FuzzyAction() {
             }
         } else {
             ApplicationManager.getApplication().invokeLater {
-                val virtualDir =
-                    VirtualFileManager.getInstance().findFileByUrl("file://$selectedValue")
                 val targetDirectory: CompletableFuture<PsiDirectory> = CompletableFuture.supplyAsync {
-                    virtualDir?.let {
-                        ApplicationManager.getApplication().runReadAction<PsiDirectory> {
-                            PsiManager.getInstance(project).findDirectory(it)
-                        }
+                    ApplicationManager.getApplication().runReadAction<PsiDirectory> {
+                        val virtualDir =
+                            VirtualFileManager.getInstance().findFileByUrl("file://$selectedValue")
+                        virtualDir?.let { PsiManager.getInstance(project).findDirectory(it) }
                     }
                 }
 
