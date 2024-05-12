@@ -43,7 +43,7 @@ abstract class FuzzyAction : AnAction() {
     val fuzzierUtil = FuzzierUtil()
 
     override fun actionPerformed(actionEvent: AnActionEvent) {
-        fuzzierSettingsService.state.currentAction = this
+        // Necessary override
     }
 
     fun createSharedListeners(project: Project) {
