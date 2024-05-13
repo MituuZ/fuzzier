@@ -85,7 +85,7 @@ class TestUtil {
         return myFixture
     }
 
-    fun setUpMultiModuleProject(module1Files: List<String>, module2Files: List<String>): CodeInsightTestFixture {
+    fun setUpMultiModuleProject(module1Files: List<String>, module2Files: List<String>, customModule2Path: String = "src2"): CodeInsightTestFixture {
         val factory = IdeaTestFixtureFactory.getFixtureFactory()
         val fixtureBuilder = factory.createFixtureBuilder("Test")
         val fixture = fixtureBuilder.fixture
@@ -97,7 +97,7 @@ class TestUtil {
         addFiles(module2Files, myFixture)
 
         val module1Path = myFixture.findFileInTempDir("src1")
-        val module2Path = myFixture.findFileInTempDir("src2")
+        val module2Path = myFixture.findFileInTempDir(customModule2Path)
 
         val module1 = WriteAction.computeAndWait<Module, RuntimeException> {
             ModuleManager.getInstance(project).newModule(module1Path.path, "Empty")

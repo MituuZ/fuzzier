@@ -103,9 +103,7 @@ open class Fuzzier : FuzzyAction() {
             val state = service<FuzzierSettingsService>().state
             state.modules = HashMap()
             val moduleManager = ModuleManager.getInstance(project)
-            val uniqueModuleRoots = countModuleRoots(moduleManager)
-
-            if (uniqueModuleRoots > 1) {
+            if (fuzzierUtil.hasMultipleUniqueRootPaths(moduleManager)) {
                 processModules(moduleManager, state, stringEvaluator, searchString, listModel)
             } else {
                 processProject(project, state, stringEvaluator, searchString, listModel)
@@ -122,20 +120,6 @@ open class Fuzzier : FuzzyAction() {
                 }
             }
         }
-    }
-
-    private fun countModuleRoots(moduleManager: ModuleManager): Int {
-        val moduleRoots = mutableSetOf<String>()
-        for (module in moduleManager.modules) {
-            val contentRoots = module.rootManager.contentRoots
-            if (contentRoots.isNotEmpty()) {
-                val moduleBasePath = contentRoots[0]?.path
-                if (moduleBasePath != null) {
-                    moduleRoots.add(moduleBasePath)
-                }
-            }
-        }
-        return moduleRoots.size
     }
 
     private fun processModules(moduleManager: ModuleManager, state: FuzzierSettingsService.State,

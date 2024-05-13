@@ -1,9 +1,11 @@
 package com.mituuz.fuzzier.util
 
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.testFramework.TestApplicationManager
+import com.mituuz.fuzzier.TestUtil
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FuzzyScore
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import javax.swing.DefaultListModel
@@ -108,6 +110,27 @@ class FuzzierUtilTest {
         assertEquals("file2", result[1].filename)
         assertEquals("file4", result[2].filename)
         assertEquals("file3", result[3].filename)
+    }
+
+    @Test
+    fun `Has multiple modules, single module`() {
+        val testUtil = TestUtil()
+        val myFixture = testUtil.setUpProject(listOf("/src"))
+        assertFalse(fuzzierUtil.hasMultipleUniqueRootPaths(ModuleManager.getInstance(myFixture.project)))
+    }
+
+    @Test
+    fun `Has multiple modules, two modules with different paths`() {
+        val testUtil = TestUtil()
+        val myFixture = testUtil.setUpMultiModuleProject(listOf("/src1/file1"), listOf("/src2/file"))
+        assertTrue(fuzzierUtil.hasMultipleUniqueRootPaths(ModuleManager.getInstance(myFixture.project)))
+    }
+
+    @Test
+    fun `Has multiple modules, two modules with same paths`() {
+        val testUtil = TestUtil()
+        val myFixture = testUtil.setUpMultiModuleProject(listOf("/src1/file1"), listOf("/src1/submodule/file"), "src1/submodule")
+        assertFalse(fuzzierUtil.hasMultipleUniqueRootPaths(ModuleManager.getInstance(myFixture.project)))
     }
 
     private fun addElement(score: Int, fileName: String) {
