@@ -117,9 +117,14 @@ open class Fuzzier : FuzzyAction() {
             val listModel = DefaultListModel<FuzzyMatchContainer>()
             val limit = fuzzierSettingsService.state.fileListLimit
             var i = min(editorHistory.size - 1, limit)
-            while (i >= 0) {
+            while (listModel.size < i || i >= 0) {
                 val file = editorHistory[i]
-                val filePathAndModule = fuzzierUtil.removeModulePath(file.path, modulePaths)
+                val filePathAndModule = fuzzierUtil.removeModulePath(file.path, modulePaths, project.basePath)
+                // Don't add files that do not have a module path in the project
+                if (filePathAndModule.second == "") {
+                    i--
+                    continue
+                }
                 val fuzzyMatchContainer =
                     FuzzyMatchContainer.createOrderedContainer(i, filePathAndModule.first, filePathAndModule.second, file.name)
                 listModel.addElement(fuzzyMatchContainer)

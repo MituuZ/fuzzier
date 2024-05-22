@@ -112,11 +112,14 @@ class FuzzierUtil {
         return uniqueModuleRoots
     }
 
-    fun removeModulePath(filePath: String, modulePaths: List<String>): Pair<String, String> {
+    fun removeModulePath(filePath: String, modulePaths: List<String>, projectBasePath: String?): Pair<String, String> {
         for (modulePath in modulePaths) {
             if (filePath.contains(modulePath)) {
                 return Pair(filePath.removePrefix(modulePath), modulePath)
             }
+        }
+        if (projectBasePath != null && filePath.contains(projectBasePath)) {
+            return Pair(filePath.removePrefix(projectBasePath), projectBasePath)
         }
         return Pair(filePath, "")
     }
