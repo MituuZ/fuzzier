@@ -29,7 +29,9 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.fileEditor.impl.EditorHistoryManager
 import com.intellij.openapi.module.ModuleManager
+import com.intellij.openapi.module.ModuleUtil
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -51,6 +53,7 @@ import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
 import java.util.HashMap
 import javax.swing.*
+import kotlin.math.min
 
 open class Fuzzier : FuzzyAction() {
     private var defaultDoc: Document? = null
@@ -98,6 +101,36 @@ open class Fuzzier : FuzzyAction() {
                     popup!!.showInCenterOf(it)
                     (component as FuzzyFinderComponent).splitPane.dividerLocation =
                         fuzzierSettingsService.state.splitPosition
+                }
+
+                createInitialView(project)
+            }
+        }
+    }
+
+    private fun createInitialView(project: Project) {
+        ApplicationManager.getApplication().executeOnPooledThread {
+            val editorHistory = EditorHistoryManager.getInstance(project).fileList
+            val listModel = DefaultListModel<FuzzyMatchContainer>()
+            val limit = fuzzierSettingsService.state.fileListLimit
+            var i = min(editorHistory.size - 1, limit)
+            while (i >= 0) {
+                val file = editorHistory[i]
+
+                val fuzzyScore = FuzzyMatchContainer.FuzzyScore()
+                fuzzyScore.filenameScore = 1
+                val fuzzyMatchContainer =
+                    FuzzyMatchContainer(fuzzyScore, file.path, file.name)
+                listModel.addElement(fuzzyMatchContainer)
+                i--
+            }
+
+            ApplicationManager.getApplication().invokeLater {
+                component.fileList.model = listModel
+                component.fileList.cellRenderer = getCellRenderer()
+                component.fileList.setPaintBusy(false)
+                if (!component.fileList.isEmpty) {
+                    component.fileList.setSelectedValue(listModel[0], true)
                 }
             }
         }
