@@ -31,7 +31,6 @@ import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.impl.EditorHistoryManager
 import com.intellij.openapi.module.ModuleManager
-import com.intellij.openapi.module.ModuleUtil
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -113,14 +112,16 @@ open class Fuzzier : FuzzyAction() {
      */
     private fun createInitialView(project: Project) {
         ApplicationManager.getApplication().executeOnPooledThread {
+            val modulePaths = fuzzierUtil.getUniqueModulePaths(project)
             val editorHistory = EditorHistoryManager.getInstance(project).fileList
             val listModel = DefaultListModel<FuzzyMatchContainer>()
             val limit = fuzzierSettingsService.state.fileListLimit
             var i = min(editorHistory.size - 1, limit)
             while (i >= 0) {
                 val file = editorHistory[i]
+                val filePath = fuzzierUtil.removeModulePath(file.path, modulePaths)
                 val fuzzyMatchContainer =
-                    FuzzyMatchContainer.createOrderedContainer(i, file.path, file.name)
+                    FuzzyMatchContainer.createOrderedContainer(i, filePath, file.name)
                 listModel.addElement(fuzzyMatchContainer)
                 i--
             }

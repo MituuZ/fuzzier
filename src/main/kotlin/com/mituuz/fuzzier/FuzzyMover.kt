@@ -204,7 +204,7 @@ class FuzzyMover : FuzzyAction() {
             state.modules = HashMap()
 
             val moduleManager = ModuleManager.getInstance(project)
-            if (moduleManager.modules.size > 1) {
+            if (fuzzierUtil.hasMultipleUniqueRootPaths(moduleManager)) {
                 processModules(moduleManager, state, stringEvaluator, searchString, listModel)
             } else {
                 processProject(project, state, stringEvaluator, searchString, listModel)

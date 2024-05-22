@@ -25,11 +25,13 @@ package com.mituuz.fuzzier.util
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.module.ModuleManager
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.rootManager
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import java.util.*
 import javax.swing.DefaultListModel
+import kotlin.collections.ArrayList
 
 class FuzzierUtil {
     private var settingsState = service<FuzzierSettingsService>().state
@@ -77,6 +79,48 @@ class FuzzierUtil {
 
     fun setPrioritizeShorterDirPaths(prioritizeShortedFilePaths: Boolean) {
         this.prioritizeShorterDirPaths = prioritizeShortedFilePaths;
+    }
+
+    fun getUniqueModulePaths(project: Project): List<String> {
+        val moduleManager = ModuleManager.getInstance(project)
+        val uniqueModuleRoots = ArrayList<String>()
+        for (module in moduleManager.modules) {
+            val contentRoots = module.rootManager.contentRoots
+            if (contentRoots.isEmpty()) {
+                continue
+            }
+            val moduleBasePath = contentRoots[0]?.path ?: continue
+
+            if (uniqueModuleRoots.isEmpty()) {
+                uniqueModuleRoots.add(moduleBasePath)
+                continue
+            }
+
+            for (root in uniqueModuleRoots) {
+                if (moduleBasePath.contains(root) || root.contains(moduleBasePath)) {
+                    if (moduleBasePath.length < root.length) {
+                        uniqueModuleRoots.remove(root)
+                        uniqueModuleRoots.add(moduleBasePath)
+                    }
+                    continue
+                }
+            }
+
+            uniqueModuleRoots.add(moduleBasePath)
+        }
+
+        return uniqueModuleRoots
+    }
+
+    fun removeModulePath(filePath: String, modulePaths: List<String>): String {
+        var res: String = filePath
+        for (modulePath in modulePaths) {
+            if (filePath.contains(modulePath)) {
+                res = filePath.removePrefix(modulePath)
+                break
+            }
+        }
+        return res;
     }
 
     /**
