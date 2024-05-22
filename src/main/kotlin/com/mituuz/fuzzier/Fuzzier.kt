@@ -119,9 +119,9 @@ open class Fuzzier : FuzzyAction() {
             var i = min(editorHistory.size - 1, limit)
             while (i >= 0) {
                 val file = editorHistory[i]
-                val filePath = fuzzierUtil.removeModulePath(file.path, modulePaths)
+                val filePathAndModule = fuzzierUtil.removeModulePath(file.path, modulePaths)
                 val fuzzyMatchContainer =
-                    FuzzyMatchContainer.createOrderedContainer(i, filePath, file.name)
+                    FuzzyMatchContainer.createOrderedContainer(i, filePathAndModule.first, filePathAndModule.second, file.name)
                 listModel.addElement(fuzzyMatchContainer)
                 i--
             }

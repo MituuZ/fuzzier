@@ -27,11 +27,14 @@ import com.intellij.openapi.components.service
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 
 class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filename: String, private var module: String = "") {
+    private var initialPath: String? = null
     companion object {
-        fun createOrderedContainer(order: Int, filePath: String, filename: String): FuzzyMatchContainer {
+        fun createOrderedContainer(order: Int, filePath: String, initialPath:String, filename: String): FuzzyMatchContainer {
             val fuzzyScore = FuzzyScore()
             fuzzyScore.filenameScore = order
-            return FuzzyMatchContainer(fuzzyScore, filePath, filename)
+            val fuzzyMatchContainer = FuzzyMatchContainer(fuzzyScore, filePath, filename)
+            fuzzyMatchContainer.initialPath = initialPath
+            return fuzzyMatchContainer
         }
     }
 
@@ -52,6 +55,9 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
         val basePath = service<FuzzierSettingsService>().state.modules[module]
         if (basePath != null) {
             return "$basePath$filePath"
+        }
+        if (initialPath != null && initialPath != "") {
+            return "$initialPath$filePath"
         }
         return filePath
     }
