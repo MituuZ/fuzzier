@@ -108,6 +108,9 @@ open class Fuzzier : FuzzyAction() {
         }
     }
 
+    /**
+     * Populates the file list with recently opened files
+     */
     private fun createInitialView(project: Project) {
         ApplicationManager.getApplication().executeOnPooledThread {
             val editorHistory = EditorHistoryManager.getInstance(project).fileList
@@ -116,11 +119,8 @@ open class Fuzzier : FuzzyAction() {
             var i = min(editorHistory.size - 1, limit)
             while (i >= 0) {
                 val file = editorHistory[i]
-
-                val fuzzyScore = FuzzyMatchContainer.FuzzyScore()
-                fuzzyScore.filenameScore = 1
                 val fuzzyMatchContainer =
-                    FuzzyMatchContainer(fuzzyScore, file.path, file.name)
+                    FuzzyMatchContainer.createOrderedContainer(i, file.path, file.name)
                 listModel.addElement(fuzzyMatchContainer)
                 i--
             }

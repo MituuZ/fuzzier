@@ -27,6 +27,14 @@ import com.intellij.openapi.components.service
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 
 class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filename: String, private var module: String = "") {
+    companion object {
+        fun createOrderedContainer(order: Int, filePath: String, filename: String): FuzzyMatchContainer {
+            val fuzzyScore = FuzzyScore()
+            fuzzyScore.filenameScore = order
+            return FuzzyMatchContainer(fuzzyScore, filePath, filename)
+        }
+    }
+
     fun toString(filenameType: FilenameType): String {
         return when (filenameType) {
             FilenameType.FILENAME_ONLY -> filename
