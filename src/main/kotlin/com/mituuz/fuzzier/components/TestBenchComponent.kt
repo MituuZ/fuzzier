@@ -139,7 +139,7 @@ class TestBenchComponent : JPanel() {
             val projectFileIndex = ProjectFileIndex.getInstance(project)
             val projectBasePath = project.basePath
 
-            val contentIterator = projectBasePath?.let { stringEvaluator.getContentIterator(it, searchString, false, project.name, listModel) }
+            val contentIterator = projectBasePath?.let { stringEvaluator.getContentIterator(it, project.name, false, searchString, listModel) }
             
             val scoreCalculator = stringEvaluator.scoreCalculator
             scoreCalculator.setMultiMatch(liveSettingsComponent.multiMatchActive.getCheckBox().isSelected)
@@ -158,11 +158,8 @@ class TestBenchComponent : JPanel() {
             }.toTypedArray()
 
             val tableModel = DefaultTableModel(data, columnNames)
-
-           ApplicationManager.getApplication().invokeLater {
-                table.model = tableModel
-                table.setPaintBusy(false)
-            }
+            table.model = tableModel
+            table.setPaintBusy(false)
         }
     }
 }
