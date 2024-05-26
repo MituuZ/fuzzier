@@ -52,7 +52,6 @@ import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
 import java.util.HashMap
 import javax.swing.*
-import kotlin.math.min
 
 open class Fuzzier : FuzzyAction() {
     private var defaultDoc: Document? = null
