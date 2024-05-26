@@ -32,6 +32,8 @@ import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import java.util.*
 import javax.swing.DefaultListModel
 import kotlin.collections.ArrayList
+import com.intellij.openapi.module.Module
+import kotlin.collections.HashMap
 
 class FuzzierUtil {
     private var settingsState = service<FuzzierSettingsService>().state
@@ -159,4 +161,34 @@ class FuzzierUtil {
         return false
     }
 
+    /**
+     * Parse all modules in the project and add unique root paths to the module map
+     */
+    fun parseModules(project: Project) {
+        val moduleManager = ModuleManager.getInstance(project)
+
+        // Gather all modules and paths into a map
+        val moduleMap = HashMap<String, String>()
+        for (module in moduleManager.modules) {
+            val modulePath = getModulePath(module) ?: continue
+            moduleMap[module.name] = modulePath
+        }
+
+        val sortedMap = moduleMap.toSortedMap()
+
+        for ((key, value) in moduleMap.toSortedMap(compareBy { it}))
+
+        // Process each entry in the map, ordered by the value
+        // This allows us to only consider the previous and
+        // current path when checking for unique module paths
+        service<FuzzierSettingsService>().state.modules = moduleMap
+    }
+
+    private fun getModulePath(module: Module): String? {
+        val contentRoots = module.rootManager.contentRoots
+        if (contentRoots.isEmpty()) {
+            return null
+        }
+        return contentRoots.firstOrNull()?.path
+    }
 }

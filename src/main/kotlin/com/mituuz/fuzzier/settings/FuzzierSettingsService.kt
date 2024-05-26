@@ -67,4 +67,8 @@ class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.S
     override fun loadState(p0: State) {
         this.state = p0
     }
+
+    fun isMultiModuleProject(): Boolean {
+        return state.modules.size > 1;
+    }
 }
