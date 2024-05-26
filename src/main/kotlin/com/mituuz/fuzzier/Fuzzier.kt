@@ -102,7 +102,9 @@ open class Fuzzier : FuzzyAction() {
                         fuzzierSettingsService.state.splitPosition
                 }
 
-                createInitialView(project)
+                if (fuzzierSettingsService.state.showRecentFiles) {
+                    createInitialView(project)
+                }
             }
         }
     }

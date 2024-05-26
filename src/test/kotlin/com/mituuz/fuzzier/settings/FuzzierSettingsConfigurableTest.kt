@@ -38,6 +38,7 @@ class FuzzierSettingsConfigurableTest {
     fun `Test is modified with no changes`() {
         state.exclusionSet = setOf("Hello", "There")
         state.newTab = true
+        state.showRecentFiles = false
         state.prioritizeShorterDirPaths = false
         state.debouncePeriod = 140
         state.filenameType = FuzzyMatchContainer.FilenameType.FILENAME_WITH_PATH_STYLED
@@ -61,6 +62,7 @@ class FuzzierSettingsConfigurableTest {
     fun `Test is modified with a single change`() {
         state.exclusionSet = setOf("Hello", "There")
         state.newTab = true
+        state.showRecentFiles = true
         state.debouncePeriod = 140
         state.filenameType = FuzzyMatchContainer.FilenameType.FILENAME_WITH_PATH_STYLED
         state.fileListLimit = 200

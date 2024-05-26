@@ -56,6 +56,11 @@ class FuzzierSettingsComponent {
 
     val newTabSelect = SettingsComponent(JBCheckBox(), "Open files in a new tab")
 
+    val showRecentFiles = SettingsComponent(JBCheckBox(), "Show recent files", """
+        Show recent files when opening a search window. Only includes files that are found from the project.
+    """.trimIndent(),
+        false)
+
     val prioritizeShortDirs = SettingsComponent(JBCheckBox(), "Prioritize shorter dir paths", """
         When having a directory selector active, prioritize shorter file paths over pure score calculation.
     """.trimIndent(),
@@ -176,6 +181,7 @@ class FuzzierSettingsComponent {
             .addComponent(exclusionSet)
             .addSeparator()
             .addComponent(newTabSelect)
+            .addComponent(showRecentFiles)
             .addComponent(prioritizeShortDirs)
             .addComponent(debounceTimerValue)
             .addComponent(filenameTypeSelector)
