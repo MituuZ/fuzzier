@@ -116,8 +116,10 @@ open class Fuzzier : FuzzyAction() {
             val editorHistory = EditorHistoryManager.getInstance(project).fileList
             val listModel = DefaultListModel<FuzzyMatchContainer>()
             val limit = fuzzierSettingsService.state.fileListLimit
-            var i = min(editorHistory.size - 1, limit)
-            while (listModel.size < i || i >= 0) {
+
+            // Start from the end of editor history (most recent file)
+            var i = editorHistory.size - 1
+            while (i >= 0 && listModel.size() < limit) {
                 val file = editorHistory[i]
                 val filePathAndModule = fuzzierUtil.removeModulePath(file.path, modulePaths, project.basePath)
                 // Don't add files that do not have a module path in the project

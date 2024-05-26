@@ -84,7 +84,7 @@ class FuzzierUtil {
     fun getUniqueModulePaths(project: Project): List<String> {
         val moduleManager = ModuleManager.getInstance(project)
         val uniqueModuleRoots = ArrayList<String>()
-        for (module in moduleManager.modules) {
+        moduleLoop@ for (module in moduleManager.modules) {
             val contentRoots = module.rootManager.contentRoots
             if (contentRoots.isEmpty()) {
                 continue
@@ -102,7 +102,7 @@ class FuzzierUtil {
                         uniqueModuleRoots.remove(root)
                         uniqueModuleRoots.add(moduleBasePath)
                     }
-                    continue
+                    continue@moduleLoop
                 }
             }
 
