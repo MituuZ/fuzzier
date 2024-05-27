@@ -192,9 +192,18 @@ class FuzzierUtil {
             prevModule = currentModule
         }
 
-        val moduleMap = listToMap(moduleList)
+        if (moduleList.map { it.basePath }.distinct().size > 1) {
+            shortenModulePaths(moduleList)
+        }
 
+        val moduleMap = listToMap(moduleList)
         service<FuzzierSettingsService>().state.modules = moduleMap
+    }
+
+    private fun shortenModulePaths(modules: List<ModuleContainer>) {
+        for (module in modules) {
+            module.basePath = module.basePath.substringBeforeLast("/")
+        }
     }
 
     private fun getModulePath(module: Module): String? {
