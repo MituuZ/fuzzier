@@ -35,7 +35,7 @@ import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType.FILE_PATH_ON
 )
 class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.State> {
     class State {
-        var modules: HashMap<String, String> = HashMap()
+        var modules: Map<String, String> = HashMap()
         var showRecentFiles = true
 
         var splitPosition: Int = 300
@@ -66,9 +66,5 @@ class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.S
 
     override fun loadState(p0: State) {
         this.state = p0
-    }
-
-    fun isMultiModuleProject(): Boolean {
-        return state.modules.size > 1;
     }
 }
