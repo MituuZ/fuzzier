@@ -162,25 +162,38 @@ class FuzzierUtil {
     }
 
     /**
-     * Parse all modules in the project and add unique root paths to the module map
+     * Parse all modules in the project and find the shortest base path for each of them
      */
     fun parseModules(project: Project) {
         val moduleManager = ModuleManager.getInstance(project)
 
-        // Gather all modules and paths into a map
-        val moduleMap = HashMap<String, String>()
+        // Gather all modules and paths into a list
+        val moduleList: MutableList<ModuleContainer> = ArrayList()
         for (module in moduleManager.modules) {
             val modulePath = getModulePath(module) ?: continue
-            moduleMap[module.name] = modulePath
+            moduleList.add(ModuleContainer(module.name, modulePath))
         }
 
-        val sortedMap = moduleMap.toSortedMap()
+        var prevModule: ModuleContainer? = null
+        for (currentModule in moduleList.sortedBy { it.basePath }) {
+            if (prevModule == null) {
+                prevModule = currentModule
+                continue
+            }
 
-        for ((key, value) in moduleMap.toSortedMap(compareBy { it}))
+            if (currentModule.basePath.contains(prevModule.basePath) || prevModule.basePath.contains(currentModule.basePath)) {
+                if (currentModule.basePath.length > prevModule.basePath.length) {
+                    currentModule.basePath = prevModule.basePath;
+                } else {
+                    prevModule.basePath = currentModule.basePath;
+                }
+            }
 
-        // Process each entry in the map, ordered by the value
-        // This allows us to only consider the previous and
-        // current path when checking for unique module paths
+            prevModule = currentModule
+        }
+
+        val moduleMap = listToMap(moduleList)
+
         service<FuzzierSettingsService>().state.modules = moduleMap
     }
 
@@ -190,5 +203,11 @@ class FuzzierUtil {
             return null
         }
         return contentRoots.firstOrNull()?.path
+    }
+
+    data class ModuleContainer(val name:String, var basePath:String)
+
+    private fun listToMap(modules: List<ModuleContainer>): Map<String, String> {
+        return modules.associateBy({ it.name }, { it.basePath })
     }
 }
