@@ -33,7 +33,6 @@ import java.util.*
 import javax.swing.DefaultListModel
 import kotlin.collections.ArrayList
 import com.intellij.openapi.module.Module
-import kotlin.collections.HashMap
 
 class FuzzierUtil {
     private var settingsState = service<FuzzierSettingsService>().state
