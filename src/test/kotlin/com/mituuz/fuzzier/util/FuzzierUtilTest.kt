@@ -23,11 +23,13 @@ SOFTWARE.
 */
 package com.mituuz.fuzzier.util
 
+import com.intellij.openapi.components.service
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.testFramework.TestApplicationManager
 import com.mituuz.fuzzier.TestUtil
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FuzzyScore
+import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -39,10 +41,20 @@ class FuzzierUtilTest {
     private val fuzzierUtil = FuzzierUtil()
     private val listModel = DefaultListModel<FuzzyMatchContainer>()
     private lateinit var result: DefaultListModel<FuzzyMatchContainer>
+    private val testUtil = TestUtil()
 
     @BeforeEach
     fun setUp() {
         listModel.clear()
+    }
+
+    @Test
+    fun parseModules() {
+        val myFixture = testUtil.setUpMultiModuleProject(listOf("src1", "/src1/file1"), listOf("src2", "/src2/file2"), listOf("src3", "/src3/file3"))
+        fuzzierUtil.parseModules(myFixture.project)
+
+        val modules = service<FuzzierSettingsService>().state.modules
+        assertEquals(3, modules.size)
     }
 
     @Test
@@ -145,14 +157,14 @@ class FuzzierUtilTest {
     @Test
     fun `Has multiple modules, two modules with different paths`() {
         val testUtil = TestUtil()
-        val myFixture = testUtil.setUpMultiModuleProject(listOf("/src1/file1"), listOf("/src2/file"))
+        val myFixture = testUtil.setUpDuoModuleProject(listOf("/src1/file1"), listOf("/src2/file"))
         assertTrue(fuzzierUtil.hasMultipleUniqueRootPaths(ModuleManager.getInstance(myFixture.project)))
     }
 
     @Test
     fun `Has multiple modules, two modules with same paths`() {
         val testUtil = TestUtil()
-        val myFixture = testUtil.setUpMultiModuleProject(listOf("/src1/file1"), listOf("/src1/submodule/file"), "src1/submodule")
+        val myFixture = testUtil.setUpDuoModuleProject(listOf("/src1/file1"), listOf("/src1/submodule/file"), "src1/submodule")
         assertFalse(fuzzierUtil.hasMultipleUniqueRootPaths(ModuleManager.getInstance(myFixture.project)))
     }
 

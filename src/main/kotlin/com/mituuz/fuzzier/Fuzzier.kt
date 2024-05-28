@@ -197,7 +197,7 @@ open class Fuzzier : FuzzyAction() {
                 var moduleBasePath = contentRoots[0]?.path
                 if (moduleBasePath != null) {
                     moduleBasePath = moduleBasePath.substringBeforeLast("/")
-                    state.modules[module.name] = moduleBasePath
+                    // state.modules[module.name] = moduleBasePath
                     val contentIterator =
                         stringEvaluator.getContentIterator(moduleBasePath, module.name, true, searchString, listModel)
                     moduleFileIndex.iterateContent(contentIterator)
@@ -211,7 +211,7 @@ open class Fuzzier : FuzzyAction() {
         val projectFileIndex = ProjectFileIndex.getInstance(project)
         val projectBasePath = project.basePath
         if (projectBasePath != null) {
-            state.modules[project.name] = projectBasePath
+            // state.modules[project.name] = projectBasePath
             val contentIterator = stringEvaluator.getContentIterator(projectBasePath, project.name, false, searchString, listModel)
             projectFileIndex.iterateContent(contentIterator)
         }

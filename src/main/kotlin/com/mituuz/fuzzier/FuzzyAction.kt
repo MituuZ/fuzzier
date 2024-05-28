@@ -65,12 +65,6 @@ abstract class FuzzyAction : AnAction() {
     var currentTask: Future<*>? = null
     val fuzzierUtil = FuzzierUtil()
 
-    companion object {
-        fun setUp() {
-            service<FuzzierSettingsService>().parseModules();
-        }
-    }
-
     override fun actionPerformed(actionEvent: AnActionEvent) {
         // Necessary override
     }

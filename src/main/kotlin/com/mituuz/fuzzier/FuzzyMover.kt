@@ -228,7 +228,7 @@ class FuzzyMover : FuzzyAction() {
         val projectFileIndex = ProjectFileIndex.getInstance(project)
         val projectBasePath = project.basePath
         if (projectBasePath != null) {
-            state.modules[project.name] = projectBasePath
+            // state.modules[project.name] = projectBasePath
 
             val contentIterator = if (!component.isDirSelector) {
                 stringEvaluator.getContentIterator(projectBasePath, project.name, false, searchString, listModel)
@@ -249,7 +249,7 @@ class FuzzyMover : FuzzyAction() {
                 var moduleBasePath = contentRoots[0]?.path
                 if (moduleBasePath != null) {
                     moduleBasePath = moduleBasePath.substringBeforeLast("/")
-                    state.modules[module.name] = moduleBasePath
+                    // state.modules[module.name] = moduleBasePath
 
                     val contentIterator = if (!component.isDirSelector) {
                         stringEvaluator.getContentIterator(moduleBasePath, module.name, true, searchString, listModel)

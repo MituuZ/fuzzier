@@ -108,7 +108,7 @@ class TestUtil {
         return myFixture
     }
 
-    fun setUpMultiModuleProject(module1Files: List<String>, module2Files: List<String>, customModule2Path: String = "src2"): CodeInsightTestFixture {
+    fun setUpMultiModuleProject(vararg moduleList: List<String>): CodeInsightTestFixture {
         val factory = IdeaTestFixtureFactory.getFixtureFactory()
         val fixtureBuilder = factory.createFixtureBuilder("Test")
         val fixture = fixtureBuilder.fixture
@@ -116,20 +116,15 @@ class TestUtil {
         myFixture.setUp()
         val project = myFixture.project
 
-        addFiles(module1Files, myFixture)
-        addFiles(module2Files, myFixture)
+        for (moduleFiles in moduleList) {
+            addFiles(moduleFiles.drop(1), myFixture)
 
-        val module1Path = myFixture.findFileInTempDir("src1")
-        val module2Path = myFixture.findFileInTempDir(customModule2Path)
-
-        val module1 = WriteAction.computeAndWait<Module, RuntimeException> {
-            ModuleManager.getInstance(project).newModule(module1Path.path, "Empty")
+            val modulePath = myFixture.findFileInTempDir(moduleFiles[0])
+            val module = WriteAction.computeAndWait<Module, RuntimeException> {
+                ModuleManager.getInstance(project).newModule(modulePath.path, "Empty")
+            }
+            PsiTestUtil.addSourceRoot(module, modulePath)
         }
-        PsiTestUtil.addSourceRoot(module1, module1Path)
-        val module2 = WriteAction.computeAndWait<Module, RuntimeException> {
-            ModuleManager.getInstance(project).newModule(module2Path.path, "Empty")
-        }
-        PsiTestUtil.addSourceRoot(module2, module2Path)
 
         runInEdtAndWait {
             PsiDocumentManager.getInstance(fixture.project).commitAllDocuments()
@@ -137,6 +132,18 @@ class TestUtil {
         DumbService.getInstance(fixture.project).waitForSmartMode()
 
         return myFixture
+    }
+    
+    fun setUpDuoModuleProject(module1Files: List<String>, module2Files: List<String>, customModule2Path: String = "src2"): CodeInsightTestFixture {
+        val module2List: MutableList<String> = ArrayList()
+        module2List.add(customModule2Path)
+        module2List.addAll(module2Files)
+
+        val module1List: MutableList<String> = ArrayList()
+        module1List.add("src1")
+        module1List.addAll(module1Files)
+
+        return setUpMultiModuleProject(module1List, module2List)
     }
 
     private fun addFiles(files: List<String>, myFixture: CodeInsightTestFixture) {
