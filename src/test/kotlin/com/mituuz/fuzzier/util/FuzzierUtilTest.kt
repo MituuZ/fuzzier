@@ -49,12 +49,21 @@ class FuzzierUtilTest {
     }
 
     @Test
-    fun parseModules() {
+    fun parseModulesMultipleModules() {
         val myFixture = testUtil.setUpMultiModuleProject(listOf("src1", "/src1/file1"), listOf("src2", "/src2/file2"), listOf("src3", "/src3/file3"))
         fuzzierUtil.parseModules(myFixture.project)
 
         val modules = service<FuzzierSettingsService>().state.modules
         assertEquals(3, modules.size)
+    }
+
+    @Test
+    fun parseModulesSingleModule() {
+        val myFixture = testUtil.setUpMultiModuleProject(listOf("src1", "/src1/file1"))
+        fuzzierUtil.parseModules(myFixture.project)
+
+        val modules = service<FuzzierSettingsService>().state.modules
+        assertEquals(1, modules.size)
     }
 
     @Test
