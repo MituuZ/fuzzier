@@ -29,15 +29,8 @@
   </extensions>
 
   <change-notes><![CDATA[
-  <h2>Version 0.22.2</h2>
-  - Fix test bench not working correctly<br>
-
-  <h2>Version 0.22.1</h2>
-  - Add setting to prioritize shorter file paths for file mover<br>
-  - Handle root path "/" separately for file mover<br>
-  - Upgrade to gradle 8.7<br>
-  - Multi module support for finder and mover<br>
-  - Enable remapping list movement
+  <h2>Version 0.23.0</h2>
+  - Fix mover not working correctly<br>
   ]]>
   </change-notes>
 
