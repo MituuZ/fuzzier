@@ -49,12 +49,29 @@ class FuzzierUtilTest {
     }
 
     @Test
-    fun parseModulesMultipleModules() {
+    fun parseModulesMultipleModulesAndRoots() {
         val myFixture = testUtil.setUpMultiModuleProject(listOf("src1", "/src1/file1"), listOf("src2", "/src2/file2"), listOf("src3", "/src3/file3"))
         fuzzierUtil.parseModules(myFixture.project)
 
         val modules = service<FuzzierSettingsService>().state.modules
         assertEquals(3, modules.size)
+
+        // The base path should not include the module dir itself, because it is shown in the file path
+        assertEquals(modules["src1"], modules["src2"])
+        assertEquals(modules["src1"], modules["src3"])
+    }
+
+    @Test
+    fun parseModulesMultipleModulesWithSingleRoot() {
+        val myFixture = testUtil.setUpMultiModuleProject(listOf("src1", "/src1/file1"), listOf("src1/module1", "/src1/module1/file1"), listOf("src1/module2", "/src1/module2/file1"))
+        fuzzierUtil.parseModules(myFixture.project)
+
+        val modules = service<FuzzierSettingsService>().state.modules
+
+        // All submodules should share the same base path with the root module
+        assertEquals(3, modules.size)
+        assertEquals(modules["src1"], modules["module1"])
+        assertEquals(modules["src1"], modules["module2"])
     }
 
     @Test

@@ -175,12 +175,8 @@ class FuzzierUtil {
 
         var prevModule: ModuleContainer? = null
         for (currentModule in moduleList.sortedBy { it.basePath }) {
-            if (prevModule == null) {
-                prevModule = currentModule
-                continue
-            }
-
-            if (currentModule.basePath.contains(prevModule.basePath) || prevModule.basePath.contains(currentModule.basePath)) {
+            if (prevModule != null && (currentModule.basePath.startsWith(prevModule.basePath)
+                        || prevModule.basePath.startsWith(currentModule.basePath))) {
                 if (currentModule.basePath.length > prevModule.basePath.length) {
                     currentModule.basePath = prevModule.basePath;
                 } else {
