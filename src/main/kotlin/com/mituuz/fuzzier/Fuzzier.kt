@@ -37,6 +37,7 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.rootManager
 import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
@@ -60,52 +61,57 @@ open class Fuzzier : FuzzyAction() {
     // Used by FuzzierVCS to check if files are tracked by the VCS
     protected var changeListManager: ChangeListManager? = null
 
-    override fun actionPerformed(actionEvent: AnActionEvent) {
+    override fun runAction(project: Project, actionEvent: AnActionEvent) {
         setCustomHandlers()
         ApplicationManager.getApplication().invokeLater {
             defaultDoc = EditorFactory.getInstance().createDocument("")
-            actionEvent.project?.let { project ->
-                component = FuzzyFinderComponent(project)
-                createListeners(project)
-                createSharedListeners(project)
+            component = FuzzyFinderComponent(project)
+            createListeners(project)
+            createSharedListeners(project)
 
-                val mainWindow = WindowManager.getInstance().getIdeFrame(actionEvent.project)?.component
-                mainWindow?.let {
-                    popup = JBPopupFactory
-                        .getInstance()
-                        .createComponentPopupBuilder(component, component.searchField)
-                        .setFocusable(true)
-                        .setRequestFocus(true)
-                        .setResizable(true)
-                        .setDimensionServiceKey(project, fuzzyDimensionKey, true)
-                        .setTitle(title)
-                        .setMovable(true)
-                        .setShowBorder(true)
-                        .createPopup()
+            val mainWindow = WindowManager.getInstance().getIdeFrame(actionEvent.project)?.component
+            mainWindow?.let {
+                popup = createPopup(project)
 
-                    popup?.addListener(object : JBPopupListener {
-                        override fun onClosed(event: LightweightWindowEvent) {
-                            fuzzierSettingsService.state.splitPosition =
-                                (component as FuzzyFinderComponent).splitPane.dividerLocation
-                            resetOriginalHandlers()
-                            super.onClosed(event)
-                        }
-                    })
-                    if (fuzzierSettingsService.state.resetWindow) {
-                        DimensionService.getInstance().setSize(fuzzyDimensionKey, null, project)
-                        DimensionService.getInstance().setLocation(fuzzyDimensionKey, null, project)
-                        fuzzierSettingsService.state.resetWindow = false
-                    }
-                    popup!!.showInCenterOf(it)
-                    (component as FuzzyFinderComponent).splitPane.dividerLocation =
-                        fuzzierSettingsService.state.splitPosition
+                if (fuzzierSettingsService.state.resetWindow) {
+                    DimensionService.getInstance().setSize(fuzzyDimensionKey, null, project)
+                    DimensionService.getInstance().setLocation(fuzzyDimensionKey, null, project)
+                    fuzzierSettingsService.state.resetWindow = false
                 }
+                popup!!.showInCenterOf(it)
+                (component as FuzzyFinderComponent).splitPane.dividerLocation =
+                    fuzzierSettingsService.state.splitPosition
+            }
 
-                if (fuzzierSettingsService.state.showRecentFiles) {
-                    createInitialView(project)
-                }
+            if (fuzzierSettingsService.state.showRecentFiles) {
+                createInitialView(project)
             }
         }
+    }
+
+    private fun createPopup(project: Project): JBPopup {
+        val popup: JBPopup = JBPopupFactory
+            .getInstance()
+            .createComponentPopupBuilder(component, component.searchField)
+            .setFocusable(true)
+            .setRequestFocus(true)
+            .setResizable(true)
+            .setDimensionServiceKey(project, fuzzyDimensionKey, true)
+            .setTitle(title)
+            .setMovable(true)
+            .setShowBorder(true)
+            .createPopup()
+
+        popup.addListener(object : JBPopupListener {
+            override fun onClosed(event: LightweightWindowEvent) {
+                fuzzierSettingsService.state.splitPosition =
+                    (component as FuzzyFinderComponent).splitPane.dividerLocation
+                resetOriginalHandlers()
+                super.onClosed(event)
+            }
+        })
+
+        return popup
     }
 
     /**
