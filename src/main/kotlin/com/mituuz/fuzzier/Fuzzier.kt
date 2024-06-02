@@ -25,7 +25,6 @@ package com.mituuz.fuzzier
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.fileEditor.FileEditorManager
@@ -36,7 +35,6 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.rootManager
-import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.JBPopupListener
@@ -48,10 +46,8 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
-import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
-import java.util.HashMap
 import javax.swing.*
 
 open class Fuzzier : FuzzyAction() {
@@ -119,7 +115,6 @@ open class Fuzzier : FuzzyAction() {
      */
     private fun createInitialView(project: Project) {
         ApplicationManager.getApplication().executeOnPooledThread {
-            val modulePaths = fuzzierUtil.getUniqueModulePaths(project)
             val editorHistory = EditorHistoryManager.getInstance(project).fileList
             val listModel = DefaultListModel<FuzzyMatchContainer>()
             val limit = fuzzierSettingsService.state.fileListLimit
@@ -128,7 +123,7 @@ open class Fuzzier : FuzzyAction() {
             var i = editorHistory.size - 1
             while (i >= 0 && listModel.size() < limit) {
                 val file = editorHistory[i]
-                val filePathAndModule = fuzzierUtil.removeModulePath(file.path, modulePaths, project.basePath)
+                val filePathAndModule = fuzzierUtil.removeModulePath(file.path)
                 // Don't add files that do not have a module path in the project
                 if (filePathAndModule.second == "") {
                     i--
@@ -172,9 +167,8 @@ open class Fuzzier : FuzzyAction() {
             )
 
             // Reset modules before creating the content iterator
-            val state = service<FuzzierSettingsService>().state
             val moduleManager = ModuleManager.getInstance(project)
-            processModules(moduleManager, state, stringEvaluator, searchString, listModel)
+            processModules(moduleManager, stringEvaluator, searchString, listModel)
 
             listModel = fuzzierUtil.sortAndLimit(listModel)
 
@@ -189,9 +183,8 @@ open class Fuzzier : FuzzyAction() {
         }
     }
 
-    private fun processModules(moduleManager: ModuleManager, state: FuzzierSettingsService.State,
-                               stringEvaluator: StringEvaluator, searchString: String,
-                               listModel: DefaultListModel<FuzzyMatchContainer>) {
+    private fun processModules(moduleManager: ModuleManager, stringEvaluator: StringEvaluator,
+                               searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
         for (module in moduleManager.modules) {
             val moduleFileIndex = module.rootManager.fileIndex
             val contentRoots = module.rootManager.contentRoots
@@ -204,17 +197,6 @@ open class Fuzzier : FuzzyAction() {
                     moduleFileIndex.iterateContent(contentIterator)
                 }
             }
-        }
-    }
-
-    private fun processProject(project: Project, state: FuzzierSettingsService.State, stringEvaluator: StringEvaluator,
-                               searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
-        val projectFileIndex = ProjectFileIndex.getInstance(project)
-        val projectBasePath = project.basePath
-        if (projectBasePath != null) {
-            // state.modules[project.name] = projectBasePath
-            val contentIterator = stringEvaluator.getContentIterator(projectBasePath, project.name, false, searchString, listModel)
-            projectFileIndex.iterateContent(contentIterator)
         }
     }
 

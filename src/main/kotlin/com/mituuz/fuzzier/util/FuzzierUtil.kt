@@ -82,45 +82,13 @@ class FuzzierUtil {
         this.prioritizeShorterDirPaths = prioritizeShortedFilePaths;
     }
 
-    fun getUniqueModulePaths(project: Project): List<String> {
-        val moduleManager = ModuleManager.getInstance(project)
-        val uniqueModuleRoots = ArrayList<String>()
-        moduleLoop@ for (module in moduleManager.modules) {
-            val contentRoots = module.rootManager.contentRoots
-            if (contentRoots.isEmpty()) {
-                continue
-            }
-            val moduleBasePath = contentRoots[0]?.path ?: continue
-
-            if (uniqueModuleRoots.isEmpty()) {
-                uniqueModuleRoots.add(moduleBasePath)
-                continue
-            }
-
-            for (root in uniqueModuleRoots) {
-                if (moduleBasePath.contains(root) || root.contains(moduleBasePath)) {
-                    if (moduleBasePath.length < root.length) {
-                        uniqueModuleRoots.remove(root)
-                        uniqueModuleRoots.add(moduleBasePath)
-                    }
-                    continue@moduleLoop
-                }
-            }
-
-            uniqueModuleRoots.add(moduleBasePath)
-        }
-
-        return uniqueModuleRoots
-    }
-
-    fun removeModulePath(filePath: String, modulePaths: List<String>, projectBasePath: String?): Pair<String, String> {
-        for (modulePath in modulePaths) {
+    fun removeModulePath(filePath: String): Pair<String, String> {
+        val modules = settingsState.modules
+        for (modulePath in modules.values) {
             if (filePath.contains(modulePath)) {
-                return Pair(filePath.removePrefix(modulePath), modulePath)
+                val file = filePath.removePrefix(modulePath)
+                return Pair(file, modulePath)
             }
-        }
-        if (projectBasePath != null && filePath.contains(projectBasePath)) {
-            return Pair(filePath.removePrefix(projectBasePath), projectBasePath)
         }
         return Pair(filePath, "")
     }
