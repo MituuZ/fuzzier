@@ -29,12 +29,10 @@ import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
-import com.intellij.openapi.components.service
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.rootManager
-import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.JBPopupListener
@@ -49,7 +47,6 @@ import com.intellij.psi.PsiManager
 import com.intellij.refactoring.move.moveFilesOrDirectories.MoveFilesOrDirectoriesUtil
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
-import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
 import java.util.concurrent.CompletableFuture
@@ -207,10 +204,8 @@ class FuzzyMover : FuzzyAction() {
                 fuzzierSettingsService.state.modules
             )
 
-            val state = service<FuzzierSettingsService>().state
-
             val moduleManager = ModuleManager.getInstance(project)
-            processModules(moduleManager, state, stringEvaluator, searchString, listModel)
+            processModules(moduleManager, stringEvaluator, searchString, listModel)
 
             listModel = fuzzierUtil.sortAndLimit(listModel, true)
 
@@ -225,25 +220,8 @@ class FuzzyMover : FuzzyAction() {
         }
     }
 
-    private fun processProject(project: Project, state: FuzzierSettingsService.State, stringEvaluator: StringEvaluator,
+    private fun processModules(moduleManager: ModuleManager, stringEvaluator: StringEvaluator,
                                searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
-        val projectFileIndex = ProjectFileIndex.getInstance(project)
-        val projectBasePath = project.basePath
-        if (projectBasePath != null) {
-            // state.modules[project.name] = projectBasePath
-
-            val contentIterator = if (!component.isDirSelector) {
-                stringEvaluator.getContentIterator(projectBasePath, project.name, false, searchString, listModel)
-            } else {
-                stringEvaluator.getDirIterator(projectBasePath, project.name, false, searchString, listModel)
-            }
-
-            projectFileIndex.iterateContent(contentIterator)
-        }
-    }
-
-    private fun processModules(moduleManager: ModuleManager, state: FuzzierSettingsService.State,
-                               stringEvaluator: StringEvaluator, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
         for (module in moduleManager.modules) {
             val moduleFileIndex = module.rootManager.fileIndex
             val contentRoots = module.rootManager.contentRoots
