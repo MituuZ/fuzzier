@@ -161,7 +161,10 @@ class FuzzierUtil {
     }
 
     /**
-     * Parse all modules in the project and find the shortest base path for each of them
+     * Parse all modules in the project and find the shortest base path for each of them.
+     * Combines similar module paths to the shortest possible form.
+     *
+     * Populates `FuzzierSettings.state.modules`-field
      */
     fun parseModules(project: Project) {
         val moduleManager = ModuleManager.getInstance(project)

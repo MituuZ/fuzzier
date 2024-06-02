@@ -72,6 +72,7 @@ class TestUtil {
         myFixture.setUp()
         addFilesToProject(filesToAdd, myFixture, fixture)
 
+        // Create the module map manually, as with test modules the physical path is the second content root
         val map = HashMap<String, String>()
         val module = myFixture.project.modules[0]
         map[module.name] = module.rootManager.contentRoots[1].path
