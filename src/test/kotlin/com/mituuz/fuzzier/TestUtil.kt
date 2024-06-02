@@ -27,7 +27,8 @@ import com.intellij.openapi.application.WriteAction
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.DumbService
-import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.openapi.project.modules
+import com.intellij.openapi.project.rootManager
 import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiDocumentManager
@@ -60,7 +61,7 @@ class TestUtil {
         DumbService.getInstance(fixture.project).waitForSmartMode()
     }
 
-    fun setUpProjectFileIndex(filesToAdd: List<String>, exclusionList: Set<String>, ignoredFiles: List<String>? = null) : DefaultListModel<FuzzyMatchContainer> {
+    fun setUpModuleFileIndex(filesToAdd: List<String>, exclusionList: Set<String>, ignoredFiles: List<String>? = null) : DefaultListModel<FuzzyMatchContainer> {
         val filePathContainer = DefaultListModel<FuzzyMatchContainer>()
         val factory = IdeaTestFixtureFactory.getFixtureFactory()
         val fixtureBuilder = factory.createLightFixtureBuilder(null, "Test")
@@ -71,6 +72,10 @@ class TestUtil {
         myFixture.setUp()
         addFilesToProject(filesToAdd, myFixture, fixture)
 
+        val map = HashMap<String, String>()
+        val module = myFixture.project.modules[0]
+        map[module.name] = module.rootManager.contentRoots[1].path
+
         if (ignoredFiles !== null) {
             val changeListManager = Mockito.mock(ChangeListManager::class.java)
             Mockito.`when`(changeListManager.isIgnoredFile(any<VirtualFile>())).thenAnswer { invocation ->
@@ -78,14 +83,14 @@ class TestUtil {
                 val tempDirPath = myFixture.tempDirPath
                 ignoredFiles.any{ ("$tempDirPath/$it") == file.path }
             }
-            stringEvaluator = StringEvaluator(exclusionList, changeListManager)
+            stringEvaluator = StringEvaluator(exclusionList, map, changeListManager)
         } else {
-            stringEvaluator = StringEvaluator(exclusionList)
+            stringEvaluator = StringEvaluator(exclusionList, map)
         }
 
         val basePath = myFixture.findFileInTempDir("src").canonicalPath
-        val contentIterator = basePath?.let { stringEvaluator.getContentIterator(it, "", false, "", filePathContainer) }
-        val index = ProjectFileIndex.getInstance(fixture.project)
+        val contentIterator = basePath?.let { stringEvaluator.getContentIterator(it, myFixture.module.name, false, "", filePathContainer) }
+        val index = myFixture.module.rootManager.fileIndex
         runInEdtAndWait {
             if (contentIterator != null) {
                 index.iterateContent(contentIterator)

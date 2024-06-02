@@ -204,17 +204,13 @@ class FuzzyMover : FuzzyAction() {
 
             val stringEvaluator = StringEvaluator(
                 fuzzierSettingsService.state.exclusionSet,
+                fuzzierSettingsService.state.modules
             )
 
             val state = service<FuzzierSettingsService>().state
-            state.modules = HashMap()
 
             val moduleManager = ModuleManager.getInstance(project)
-            if (fuzzierUtil.hasMultipleUniqueRootPaths(moduleManager)) {
-                processModules(moduleManager, state, stringEvaluator, searchString, listModel)
-            } else {
-                processProject(project, state, stringEvaluator, searchString, listModel)
-            }
+            processModules(moduleManager, state, stringEvaluator, searchString, listModel)
 
             listModel = fuzzierUtil.sortAndLimit(listModel, true)
 
@@ -255,7 +251,6 @@ class FuzzyMover : FuzzyAction() {
                 var moduleBasePath = contentRoots[0]?.path
                 if (moduleBasePath != null) {
                     moduleBasePath = moduleBasePath.substringBeforeLast("/")
-                    // state.modules[module.name] = moduleBasePath
 
                     val contentIterator = if (!component.isDirSelector) {
                         stringEvaluator.getContentIterator(moduleBasePath, module.name, true, searchString, listModel)

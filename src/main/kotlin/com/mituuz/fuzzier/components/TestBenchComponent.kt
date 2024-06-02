@@ -128,6 +128,7 @@ class TestBenchComponent : JPanel() {
             .toSet()
         val stringEvaluator = StringEvaluator(
             newSet,
+            mapOf()
         )
 
         currentTask?.takeIf { !it.isDone }?.cancel(true)

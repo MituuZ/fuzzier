@@ -37,6 +37,7 @@ import javax.swing.DefaultListModel
  */
 class StringEvaluator(
     private var exclusionList: Set<String>,
+    private var modules: Map<String, String>,
     private var changeListManager: ChangeListManager? = null
 ) {
     lateinit var scoreCalculator: ScoreCalculator
@@ -45,7 +46,9 @@ class StringEvaluator(
         scoreCalculator = ScoreCalculator(searchString)
         return ContentIterator { file: VirtualFile ->
             if (!file.isDirectory) {
-                val filePath = basePath.let { it1 -> file.path.removePrefix(it1) }
+                val moduleBasePath = modules[moduleName] ?: return@ContentIterator true
+
+                val filePath = file.path.removePrefix(moduleBasePath)
                 if (isExcluded(file, filePath, isMultiModal)) {
                     return@ContentIterator true
                 }
@@ -104,18 +107,14 @@ class StringEvaluator(
      * @return true if file should be excluded
      */
     private fun isExcluded(file: VirtualFile, filePath: String, isMultiModal: Boolean): Boolean {
-        var evPath = filePath
-        if (isMultiModal) {
-            evPath = "/" + evPath.split("/").drop(2).joinToString("/")
-        }
         if (changeListManager !== null) {
             return changeListManager!!.isIgnoredFile(file)
         }
         return exclusionList.any { e ->
             when {
-                e.startsWith("*") -> evPath.endsWith(e.substring(1))
-                e.endsWith("*") -> evPath.startsWith(e.substring(0, e.length - 1))
-                else -> evPath.contains(e)
+                e.startsWith("*") -> filePath.endsWith(e.substring(1))
+                e.endsWith("*") -> filePath.startsWith(e.substring(0, e.length - 1))
+                else -> filePath.contains(e)
             }
         }
     }
