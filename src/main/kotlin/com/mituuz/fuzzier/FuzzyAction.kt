@@ -50,8 +50,6 @@ import java.util.*
 import java.util.Timer
 import java.util.concurrent.Future
 import javax.swing.*
-import javax.swing.event.ListSelectionEvent
-import javax.swing.event.ListSelectionListener
 import kotlin.concurrent.schedule
 
 abstract class FuzzyAction : AnAction() {

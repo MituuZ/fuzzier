@@ -36,6 +36,7 @@ import com.mituuz.fuzzier.components.FuzzierSettingsComponent.SettingsComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType.*
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
+import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode
 import java.awt.Component
 import javax.swing.*
 import javax.swing.border.LineBorder
@@ -56,8 +57,8 @@ class FuzzierSettingsComponent {
 
     val newTabSelect = SettingsComponent(JBCheckBox(), "Open files in a new tab")
 
-    val showRecentFiles = SettingsComponent(JBCheckBox(), "Show recent files", """
-        Show recent files when opening a search window. Only includes files that are found from the project.
+    val recentFileModeSelector = SettingsComponent(ComboBox<RecentFilesMode>(), "Show recent files on start", """
+        Show recent files when opening a search window.
     """.trimIndent(),
         false)
 
@@ -181,7 +182,7 @@ class FuzzierSettingsComponent {
             .addComponent(exclusionSet)
             .addSeparator()
             .addComponent(newTabSelect)
-            .addComponent(showRecentFiles)
+            .addComponent(recentFileModeSelector)
             .addComponent(prioritizeShortDirs)
             .addComponent(debounceTimerValue)
             .addComponent(filenameTypeSelector)
@@ -214,6 +215,20 @@ class FuzzierSettingsComponent {
             service<FuzzierSettingsService>().state.resetWindow = true
         }
 
+        recentFileModeSelector.getRecentFilesTypeComboBox().renderer = object : DefaultListCellRenderer() {
+            override fun getListCellRendererComponent(
+                list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean
+            ): Component {
+                val renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) as JLabel
+                val filesMode = value as RecentFilesMode
+                renderer.text = filesMode.text
+                return renderer
+            }
+        }
+        for (recentFilesMode in RecentFilesMode.entries) {
+            recentFileModeSelector.getRecentFilesTypeComboBox().addItem(recentFilesMode)
+        }
+
         filenameTypeSelector.getFilenameTypeComboBox().renderer = object : DefaultListCellRenderer() {
             override fun getListCellRendererComponent(list: JList<*>?, value: Any?, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
                 val renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) as JLabel
@@ -222,7 +237,7 @@ class FuzzierSettingsComponent {
                 return renderer
             }
         }
-        for (filenameType in entries) {
+        for (filenameType in FilenameType.entries) {
             filenameTypeSelector.getFilenameTypeComboBox().addItem(filenameType)
         }
 
@@ -276,6 +291,11 @@ class FuzzierSettingsComponent {
         fun getFilenameTypeComboBox(): ComboBox<FilenameType> {
             @Suppress("UNCHECKED_CAST")
             return component as ComboBox<FilenameType>
+        }
+
+        fun getRecentFilesTypeComboBox(): ComboBox<RecentFilesMode> {
+            @Suppress("UNCHECKED_CAST")
+            return component as ComboBox<RecentFilesMode>
         }
 
         fun getButton(): JButton {

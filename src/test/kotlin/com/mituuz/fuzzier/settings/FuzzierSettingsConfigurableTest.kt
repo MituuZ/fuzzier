@@ -25,7 +25,9 @@ package com.mituuz.fuzzier.settings
 
 import com.intellij.openapi.components.service
 import com.intellij.testFramework.TestApplicationManager
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType.FILENAME_WITH_PATH_STYLED
+import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.NONE
+import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.RECENT_PROJECT_FILES
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -38,10 +40,10 @@ class FuzzierSettingsConfigurableTest {
     fun `Test is modified with no changes`() {
         state.exclusionSet = setOf("Hello", "There")
         state.newTab = true
-        state.showRecentFiles = false
+        state.recentFilesMode = NONE
         state.prioritizeShorterDirPaths = false
         state.debouncePeriod = 140
-        state.filenameType = FuzzyMatchContainer.FilenameType.FILENAME_WITH_PATH_STYLED
+        state.filenameType = FILENAME_WITH_PATH_STYLED
         state.fileListLimit = 200
         state.fontSize = 15
         state.fileListSpacing = 2
@@ -62,9 +64,9 @@ class FuzzierSettingsConfigurableTest {
     fun `Test is modified with a single change`() {
         state.exclusionSet = setOf("Hello", "There")
         state.newTab = true
-        state.showRecentFiles = true
+        state.recentFilesMode = RECENT_PROJECT_FILES
         state.debouncePeriod = 140
-        state.filenameType = FuzzyMatchContainer.FilenameType.FILENAME_WITH_PATH_STYLED
+        state.filenameType = FILENAME_WITH_PATH_STYLED
         state.fileListLimit = 200
         state.fontSize = 15
         state.fileListSpacing = 2

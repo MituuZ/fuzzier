@@ -46,6 +46,8 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
+import com.mituuz.fuzzier.settings.FuzzierSettingsService
+import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.NONE
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
 import javax.swing.*
@@ -79,7 +81,7 @@ open class Fuzzier : FuzzyAction() {
                     fuzzierSettingsService.state.splitPosition
             }
 
-            if (fuzzierSettingsService.state.showRecentFiles) {
+            if (fuzzierSettingsService.state.recentFilesMode != NONE) {
                 createInitialView(project)
             }
         }

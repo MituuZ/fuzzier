@@ -27,6 +27,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
 import com.mituuz.fuzzier.components.FuzzierSettingsComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType
+import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode
 import javax.swing.JComponent
 
 class FuzzierSettingsConfigurable : Configurable {
@@ -42,7 +43,7 @@ class FuzzierSettingsConfigurable : Configurable {
         val combinedString = state.exclusionSet.joinToString("\n")
         component.exclusionSet.getJBTextArea().text = combinedString
         component.newTabSelect.getCheckBox().isSelected = state.newTab
-        component.showRecentFiles.getCheckBox().isSelected = state.showRecentFiles
+        component.recentFileModeSelector.getRecentFilesTypeComboBox().selectedIndex = state.recentFilesMode.ordinal
         component.prioritizeShortDirs.getCheckBox().isSelected = state.prioritizeShorterDirPaths
         component.debounceTimerValue.getIntSpinner().value = state.debouncePeriod
         component.filenameTypeSelector.getFilenameTypeComboBox().selectedIndex = state.filenameType.ordinal
@@ -68,7 +69,7 @@ class FuzzierSettingsConfigurable : Configurable {
 
         return state.exclusionSet != newSet
                 || state.newTab != component.newTabSelect.getCheckBox().isSelected
-                || state.showRecentFiles != component.showRecentFiles.getCheckBox().isSelected
+                || state.recentFilesMode != component.recentFileModeSelector.getRecentFilesTypeComboBox().selectedItem
                 || state.prioritizeShorterDirPaths != component.prioritizeShortDirs.getCheckBox().isSelected
                 || state.debouncePeriod != component.debounceTimerValue.getIntSpinner().value
                 || state.filenameType != component.filenameTypeSelector.getFilenameTypeComboBox().selectedItem
@@ -91,7 +92,7 @@ class FuzzierSettingsConfigurable : Configurable {
             .toSet()
         state.exclusionSet = newSet as MutableSet<String>
         state.newTab = component.newTabSelect.getCheckBox().isSelected
-        state.showRecentFiles = component.showRecentFiles.getCheckBox().isSelected
+        state.recentFilesMode = RecentFilesMode.entries.toTypedArray()[component.recentFileModeSelector.getRecentFilesTypeComboBox().selectedIndex]
         state.prioritizeShorterDirPaths = component.prioritizeShortDirs.getCheckBox().isSelected
         state.debouncePeriod = component.debounceTimerValue.getIntSpinner().value as Int
         state.filenameType = FilenameType.entries.toTypedArray()[component.filenameTypeSelector.getFilenameTypeComboBox().selectedIndex]
