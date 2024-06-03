@@ -24,7 +24,6 @@ SOFTWARE.
 package com.mituuz.fuzzier.util
 
 import com.intellij.openapi.components.service
-import com.intellij.openapi.module.ModuleManager
 import com.intellij.testFramework.TestApplicationManager
 import com.mituuz.fuzzier.TestUtil
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
@@ -49,7 +48,7 @@ class FuzzierUtilTest {
     }
 
     @Test
-    fun parseModulesMultipleModulesAndRoots() {
+    fun `Parse modules multiple modules and roots`() {
         val myFixture = testUtil.setUpMultiModuleProject(listOf("src1", "/src1/file1"), listOf("src2", "/src2/file2"), listOf("src3", "/src3/file3"))
         fuzzierUtil.parseModules(myFixture.project)
 
@@ -62,7 +61,21 @@ class FuzzierUtilTest {
     }
 
     @Test
-    fun parseModulesMultipleModulesWithSingleRoot() {
+    fun `Parse modules multiple modules and unique roots`() {
+        val myFixture = testUtil.setUpMultiModuleProject(listOf("path/src1", "/path/src1/file1"), listOf("to/src2", "/to/src2/file2"), listOf("module/src3", "/module/src3/file3"))
+        fuzzierUtil.parseModules(myFixture.project)
+
+        val modules = service<FuzzierSettingsService>().state.modules
+        assertEquals(3, modules.size)
+
+        // When each module is in a separate path, the root should contain up to the module directory
+        assertNotEquals(modules["src1"], modules["src2"])
+        assertNotEquals(modules["src1"], modules["src3"])
+        assertNotEquals(modules["src2"], modules["src3"])
+    }
+
+    @Test
+    fun `Parse modules multiple modules with single root`() {
         val myFixture = testUtil.setUpMultiModuleProject(listOf("src1", "/src1/file1"), listOf("src1/module1", "/src1/module1/file1"), listOf("src1/module2", "/src1/module2/file1"))
         fuzzierUtil.parseModules(myFixture.project)
 
@@ -72,6 +85,47 @@ class FuzzierUtilTest {
         assertEquals(3, modules.size)
         assertEquals(modules["src1"], modules["module1"])
         assertEquals(modules["src1"], modules["module2"])
+    }
+
+    @Test
+    fun `Remove module paths, include module dir on multi module project`() {
+        val myFixture = testUtil.setUpMultiModuleProject(listOf("path/src1", "/path/src1/file1"), listOf("to/src2", "/to/src2/file2"), listOf("module/src3", "/module/src3/file3"))
+        fuzzierUtil.parseModules(myFixture.project)
+
+        val modules = service<FuzzierSettingsService>().state.modules
+        assertEquals(3, modules.size)
+
+        var file = myFixture.findFileInTempDir("/path/src1/file1")
+        assertEquals("/src1/file1", fuzzierUtil.removeModulePath(file.path).first)
+
+        file = myFixture.findFileInTempDir("/to/src2/file2")
+        assertEquals("/src2/file2", fuzzierUtil.removeModulePath(file.path).first)
+
+        file = myFixture.findFileInTempDir("/module/src3/file3")
+        assertEquals("/src3/file3", fuzzierUtil.removeModulePath(file.path).first)
+    }
+
+    @Test
+    fun `Remove module paths, point only to project root`() {
+        val myFixture = testUtil.setUpMultiModuleProject(listOf("path/src1", "/path/src1/file1"))
+        fuzzierUtil.parseModules(myFixture.project)
+
+        val modules = service<FuzzierSettingsService>().state.modules
+        assertEquals(1, modules.size)
+
+        val file = myFixture.findFileInTempDir("/path/src1/file1")
+        assertEquals("/file1", fuzzierUtil.removeModulePath(file.path).first)
+    }
+
+    @Test
+    fun `Remove module paths, file not included`() {
+        val myFixture = testUtil.setUpMultiModuleProject(listOf("path/src1", "/path/src1/file1"))
+        fuzzierUtil.parseModules(myFixture.project)
+
+        val modules = service<FuzzierSettingsService>().state.modules
+        assertEquals(1, modules.size)
+
+        assertEquals(Pair("/no/such/file", ""), fuzzierUtil.removeModulePath("/no/such/file"))
     }
 
     @Test
@@ -171,27 +225,6 @@ class FuzzierUtilTest {
         assertEquals("file2", result[1].filename)
         assertEquals("file4", result[2].filename)
         assertEquals("file3", result[3].filename)
-    }
-
-    @Test
-    fun `Has multiple modules, single module`() {
-        val testUtil = TestUtil()
-        val myFixture = testUtil.setUpProject(listOf("/src"))
-        assertFalse(fuzzierUtil.hasMultipleUniqueRootPaths(ModuleManager.getInstance(myFixture.project)))
-    }
-
-    @Test
-    fun `Has multiple modules, two modules with different paths`() {
-        val testUtil = TestUtil()
-        val myFixture = testUtil.setUpDuoModuleProject(listOf("/src1/file1"), listOf("/src2/file"))
-        assertTrue(fuzzierUtil.hasMultipleUniqueRootPaths(ModuleManager.getInstance(myFixture.project)))
-    }
-
-    @Test
-    fun `Has multiple modules, two modules with same paths`() {
-        val testUtil = TestUtil()
-        val myFixture = testUtil.setUpDuoModuleProject(listOf("/src1/file1"), listOf("/src1/submodule/file"), "src1/submodule")
-        assertFalse(fuzzierUtil.hasMultipleUniqueRootPaths(ModuleManager.getInstance(myFixture.project)))
     }
 
     private fun addElement(score: Int, fileName: String) {
