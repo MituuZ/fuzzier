@@ -166,7 +166,6 @@ open class Fuzzier : FuzzyAction() {
                 changeListManager
             )
 
-            // Reset modules before creating the content iterator
             val moduleManager = ModuleManager.getInstance(project)
             processModules(moduleManager, stringEvaluator, searchString, listModel)
 
@@ -187,16 +186,8 @@ open class Fuzzier : FuzzyAction() {
                                searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
         for (module in moduleManager.modules) {
             val moduleFileIndex = module.rootManager.fileIndex
-            val contentRoots = module.rootManager.contentRoots
-            if (contentRoots.isNotEmpty()) {
-                var moduleBasePath = contentRoots[0]?.path
-                if (moduleBasePath != null) {
-                    moduleBasePath = moduleBasePath.substringBeforeLast("/")
-                    val contentIterator =
-                        stringEvaluator.getContentIterator(moduleBasePath, module.name, true, searchString, listModel)
-                    moduleFileIndex.iterateContent(contentIterator)
-                }
-            }
+            val contentIterator = stringEvaluator.getContentIterator(module.name, searchString, listModel)
+            moduleFileIndex.iterateContent(contentIterator)
         }
     }
 

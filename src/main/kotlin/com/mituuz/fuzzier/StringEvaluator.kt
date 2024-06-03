@@ -42,14 +42,14 @@ class StringEvaluator(
 ) {
     lateinit var scoreCalculator: ScoreCalculator
 
-    fun getContentIterator(basePath: String, moduleName: String, isMultiModal: Boolean, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
+    fun getContentIterator(moduleName: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
         scoreCalculator = ScoreCalculator(searchString)
         return ContentIterator { file: VirtualFile ->
             if (!file.isDirectory) {
                 val moduleBasePath = modules[moduleName] ?: return@ContentIterator true
 
                 val filePath = file.path.removePrefix(moduleBasePath)
-                if (isExcluded(file, filePath, isMultiModal)) {
+                if (isExcluded(file, filePath)) {
                     return@ContentIterator true
                 }
                 if (filePath.isNotBlank()) {
@@ -63,12 +63,13 @@ class StringEvaluator(
         }
     }
 
-    fun getDirIterator(basePath: String, moduleName: String, isMultiModal: Boolean, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
+    fun getDirIterator(moduleName: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
         scoreCalculator = ScoreCalculator(searchString)
         return ContentIterator { file: VirtualFile ->
             if (file.isDirectory) {
-                val filePath = getDirPath(file, basePath, moduleName)
-                if (isExcluded(file, filePath, isMultiModal)) {
+                val moduleBasePath = modules[moduleName] ?: return@ContentIterator true
+                val filePath = getDirPath(file, moduleBasePath, moduleName)
+                if (isExcluded(file, filePath)) {
                     return@ContentIterator true
                 }
                 if (filePath.isNotBlank()) {
@@ -106,7 +107,7 @@ class StringEvaluator(
      *
      * @return true if file should be excluded
      */
-    private fun isExcluded(file: VirtualFile, filePath: String, isMultiModal: Boolean): Boolean {
+    private fun isExcluded(file: VirtualFile, filePath: String): Boolean {
         if (changeListManager !== null) {
             return changeListManager!!.isIgnoredFile(file)
         }

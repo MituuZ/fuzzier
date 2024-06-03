@@ -224,20 +224,13 @@ class FuzzyMover : FuzzyAction() {
                                searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
         for (module in moduleManager.modules) {
             val moduleFileIndex = module.rootManager.fileIndex
-            val contentRoots = module.rootManager.contentRoots
-            if (contentRoots.isNotEmpty()) {
-                var moduleBasePath = contentRoots[0]?.path
-                if (moduleBasePath != null) {
-                    moduleBasePath = moduleBasePath.substringBeforeLast("/")
 
-                    val contentIterator = if (!component.isDirSelector) {
-                        stringEvaluator.getContentIterator(moduleBasePath, module.name, true, searchString, listModel)
-                    } else {
-                        stringEvaluator.getDirIterator(moduleBasePath, module.name, true, searchString, listModel)
-                    }
-                    moduleFileIndex.iterateContent(contentIterator)
-                }
+            val contentIterator = if (!component.isDirSelector) {
+                stringEvaluator.getContentIterator(module.name, searchString, listModel)
+            } else {
+                stringEvaluator.getDirIterator(module.name, searchString, listModel)
             }
+            moduleFileIndex.iterateContent(contentIterator)
         }
     }
 }

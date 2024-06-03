@@ -89,13 +89,10 @@ class TestUtil {
             stringEvaluator = StringEvaluator(exclusionList, map)
         }
 
-        val basePath = myFixture.findFileInTempDir("src").canonicalPath
-        val contentIterator = basePath?.let { stringEvaluator.getContentIterator(it, myFixture.module.name, false, "", filePathContainer) }
+        val contentIterator = stringEvaluator.getContentIterator(myFixture.module.name, "", filePathContainer)
         val index = myFixture.module.rootManager.fileIndex
         runInEdtAndWait {
-            if (contentIterator != null) {
-                index.iterateContent(contentIterator)
-            }
+            index.iterateContent(contentIterator)
         }
         // Handle clearing ProjectFileIndex between tests
         myFixture.tearDown()
