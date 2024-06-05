@@ -75,6 +75,7 @@ class ScoreCalculator(searchString: String) {
             searchStringIndex = 0
             searchStringLength = part.length
             filePathIndex = 0
+            currentStreak = 0
 
             if (!processString(part)) {
                 return null
