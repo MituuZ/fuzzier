@@ -52,7 +52,11 @@ class FuzzierUtil {
      * @return a sorted and sized list model
      */
     fun sortAndLimit(listModel: DefaultListModel<FuzzyMatchContainer>, isDirSort: Boolean = false): DefaultListModel<FuzzyMatchContainer> {
-        val priorityQueue = PriorityQueue(listLimit + 1, compareBy(FuzzyMatchContainer::getScore))
+        prioritizeShorterDirPaths = settingsState.prioritizeShorterDirPaths
+        val useShortDirPath = isDirSort && prioritizeShorterDirPaths
+
+        var comparator = getComparator(useShortDirPath, false)
+        val priorityQueue = PriorityQueue(listLimit + 1, comparator)
 
         var minimumScore = -1
         listModel.elements().toList().forEach {
@@ -64,14 +68,27 @@ class FuzzierUtil {
             }
         }
 
+        comparator = getComparator(useShortDirPath, true)
         val result = DefaultListModel<FuzzyMatchContainer>()
-        if (isDirSort && prioritizeShorterDirPaths) {
-            result.addAll(priorityQueue.toList().sortedByDescending { it.getScoreWithDirLength() })
-        } else {
-            result.addAll(priorityQueue.toList().sortedByDescending { it.getScore() })
-        }
+        result.addAll(priorityQueue.toList().sortedWith(comparator))
 
         return result
+    }
+
+    private fun getComparator(useShortDirPath: Boolean, isDescending: Boolean): Comparator<FuzzyMatchContainer> {
+        return if (isDescending) {
+            if (useShortDirPath) {
+                compareByDescending { it.getScoreWithDirLength() }
+            } else {
+                compareByDescending { it.getScore() }
+            }
+        } else {
+            if (useShortDirPath) {
+                compareBy { it.getScoreWithDirLength() }
+            } else {
+                compareBy { it.getScore() }
+            }
+        }
     }
 
     fun setListLimit(listLimit: Int) {
