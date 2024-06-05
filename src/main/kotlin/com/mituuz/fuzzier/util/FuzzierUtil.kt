@@ -58,12 +58,13 @@ class FuzzierUtil {
         var comparator = getComparator(useShortDirPath, false)
         val priorityQueue = PriorityQueue(listLimit + 1, comparator)
 
-        var minimumScore = -1
+        var minimumScore: Int? = null
         listModel.elements().toList().forEach {
-            if (it.getScore() > minimumScore) {
+            if (minimumScore == null || it.getScore() > minimumScore!!) {
                 priorityQueue.add(it)
                 if (priorityQueue.size > listLimit) {
-                    minimumScore = priorityQueue.remove().getScore()
+                    priorityQueue.remove()
+                    minimumScore = priorityQueue.peek().getScore()
                 }
             }
         }
