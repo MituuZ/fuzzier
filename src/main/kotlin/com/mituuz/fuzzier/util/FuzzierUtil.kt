@@ -53,7 +53,6 @@ class FuzzierUtil {
      */
     fun sortAndLimit(listModel: DefaultListModel<FuzzyMatchContainer>, isDirSort: Boolean = false): DefaultListModel<FuzzyMatchContainer> {
         val useShortDirPath = isDirSort && prioritizeShorterDirPaths
-
         var comparator = getComparator(useShortDirPath, false)
         val priorityQueue = PriorityQueue(listLimit + 1, comparator)
 
