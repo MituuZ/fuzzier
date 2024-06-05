@@ -90,4 +90,8 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
             return streakScore + multiMatchScore + partialPathScore + filenameScore
         }
     }
+
+    override fun toString(): String {
+        return "FuzzyMatchContainer: $filename, score: ${getScore()}, dir score: ${getScoreWithDirLength()}"
+    }
 }
