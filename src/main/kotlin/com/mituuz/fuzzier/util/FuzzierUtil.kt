@@ -77,17 +77,9 @@ class FuzzierUtil {
 
     private fun getComparator(useShortDirPath: Boolean, isDescending: Boolean): Comparator<FuzzyMatchContainer> {
         return if (isDescending) {
-            if (useShortDirPath) {
-                compareByDescending { it.getScoreWithDirLength() }
-            } else {
-                compareByDescending { it.getScore() }
-            }
+            compareByDescending { if (useShortDirPath) it.getScoreWithDirLength() else it.getScore() }
         } else {
-            if (useShortDirPath) {
-                compareBy { it.getScoreWithDirLength() }
-            } else {
-                compareBy { it.getScore() }
-            }
+            compareBy { if (useShortDirPath) it.getScoreWithDirLength() else it.getScore() }
         }
     }
 
