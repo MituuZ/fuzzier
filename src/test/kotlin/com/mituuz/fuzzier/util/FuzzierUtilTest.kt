@@ -88,6 +88,31 @@ class FuzzierUtilTest {
     }
 
     @Test
+    fun `Remove module paths, mixed set of modules`() {
+        val myFixture = testUtil.setUpMultiModuleProject(listOf("src1", "/src1/file1"),
+            listOf("src1/module1", "/src1/module1/file1"), listOf("src2", "/src2/file1"))
+        fuzzierUtil.parseModules(myFixture.project)
+
+        val modules = service<FuzzierSettingsService>().state.modules
+        assertEquals(3, modules.size)
+
+        var file = myFixture.findFileInTempDir("/src1/file1")
+        assertEquals("/src1/file1", fuzzierUtil.removeModulePath(file.path).first)
+        var finalPath = fuzzierUtil.removeModulePath(file.path).second.substringAfterLast("/");
+        assertTrue(finalPath.startsWith("unitTest"))
+
+        file = myFixture.findFileInTempDir("/src1/module1/file1")
+        assertEquals("/src1/module1/file1", fuzzierUtil.removeModulePath(file.path).first)
+        finalPath = fuzzierUtil.removeModulePath(file.path).second.substringAfterLast("/");
+        assertTrue(finalPath.startsWith("unitTest"))
+
+        file = myFixture.findFileInTempDir("/src2/file1")
+        assertEquals("/src2/file1", fuzzierUtil.removeModulePath(file.path).first)
+        finalPath = fuzzierUtil.removeModulePath(file.path).second.substringAfterLast("/");
+        assertTrue(finalPath.startsWith("unitTest"))
+    }
+
+    @Test
     fun `Remove module paths, include module dir on multi module project`() {
         val myFixture = testUtil.setUpMultiModuleProject(listOf("path/src1", "/path/src1/file1"), listOf("to/src2", "/to/src2/file2"), listOf("module/src3", "/module/src3/file3"))
         fuzzierUtil.parseModules(myFixture.project)
@@ -97,12 +122,18 @@ class FuzzierUtilTest {
 
         var file = myFixture.findFileInTempDir("/path/src1/file1")
         assertEquals("/src1/file1", fuzzierUtil.removeModulePath(file.path).first)
+        var finalPath = fuzzierUtil.removeModulePath(file.path).second.substringAfterLast("/");
+        assertTrue(finalPath.startsWith("path"))
 
         file = myFixture.findFileInTempDir("/to/src2/file2")
         assertEquals("/src2/file2", fuzzierUtil.removeModulePath(file.path).first)
+        finalPath = fuzzierUtil.removeModulePath(file.path).second.substringAfterLast("/");
+        assertTrue(finalPath.startsWith("to"))
 
         file = myFixture.findFileInTempDir("/module/src3/file3")
         assertEquals("/src3/file3", fuzzierUtil.removeModulePath(file.path).first)
+        finalPath = fuzzierUtil.removeModulePath(file.path).second.substringAfterLast("/");
+        assertTrue(finalPath.startsWith("module"))
     }
 
     @Test
