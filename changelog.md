@@ -2,6 +2,7 @@
 ## Version 0.23.0
 - Add an option to show recently used files when opening the popup
 - Fix mover not working correctly
+- Refactor module handling
 
 ## Version 0.22.2
 - Fix test bench not working correctly
