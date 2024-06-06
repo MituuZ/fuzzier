@@ -154,6 +154,9 @@ class FuzzyActionTest {
             override fun actionPerformed(actionEvent: AnActionEvent) {
             }
 
+            override fun runAction(project: Project, actionEvent: AnActionEvent) {
+            }
+
             override fun updateListContents(project: Project, searchString: String) {
             }
         }

@@ -24,11 +24,13 @@ SOFTWARE.
 package com.mituuz.fuzzier.components
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
-import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.openapi.project.rootManager
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextArea
@@ -37,13 +39,14 @@ import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
 import com.mituuz.fuzzier.StringEvaluator
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
+import com.mituuz.fuzzier.settings.FuzzierSettingsService
+import com.mituuz.fuzzier.util.FuzzierUtil
 import org.apache.commons.lang3.StringUtils
 import java.awt.Dimension
 import java.util.*
 import java.util.concurrent.Future
 import javax.swing.DefaultListModel
 import javax.swing.JPanel
-import javax.swing.SwingUtilities
 import javax.swing.table.DefaultTableModel
 import kotlin.concurrent.schedule
 
@@ -57,6 +60,11 @@ class TestBenchComponent : JPanel() {
     private lateinit var liveSettingsComponent: FuzzierSettingsComponent
 
     fun fill(settingsComponent: FuzzierSettingsComponent) {
+        val project = ProjectManager.getInstance().openProjects[0]
+
+        val fuzzierUtil = FuzzierUtil()
+        fuzzierUtil.parseModules(project)
+
         liveSettingsComponent = settingsComponent
         layout = GridLayoutManager(2, 1)
         val scrollPane = JBScrollPane()
@@ -102,7 +110,6 @@ class TestBenchComponent : JPanel() {
         // Add a listener that updates the search list every time a change is made
         val document = searchField.document
 
-        val project = ProjectManager.getInstance().openProjects[0]
         document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
                 debounceTimer?.cancel()
@@ -128,6 +135,7 @@ class TestBenchComponent : JPanel() {
             .toSet()
         val stringEvaluator = StringEvaluator(
             newSet,
+            service<FuzzierSettingsService>().state.modules
         )
 
         currentTask?.takeIf { !it.isDone }?.cancel(true)
@@ -136,21 +144,9 @@ class TestBenchComponent : JPanel() {
             table.setPaintBusy(true)
             val listModel = DefaultListModel<FuzzyMatchContainer>()
 
-            val projectFileIndex = ProjectFileIndex.getInstance(project)
-            val projectBasePath = project.basePath
+            val moduleManager = ModuleManager.getInstance(project)
+            processModules(moduleManager, stringEvaluator, searchString, listModel)
 
-            val contentIterator = projectBasePath?.let { stringEvaluator.getContentIterator(it, project.name, false, searchString, listModel) }
-            
-            val scoreCalculator = stringEvaluator.scoreCalculator
-            scoreCalculator.setMultiMatch(liveSettingsComponent.multiMatchActive.getCheckBox().isSelected)
-            scoreCalculator.setMatchWeightSingleChar(liveSettingsComponent.matchWeightSingleChar.getIntSpinner().value as Int)
-            scoreCalculator.setMatchWeightStreakModifier(liveSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int)
-            scoreCalculator.setMatchWeightPartialPath(liveSettingsComponent.matchWeightPartialPath.getIntSpinner().value as Int)
-            scoreCalculator.setFilenameMatchWeight(liveSettingsComponent.matchWeightFilename.getIntSpinner().value as Int)
-
-            if (contentIterator != null) {
-                projectFileIndex.iterateContent(contentIterator)
-            }
             val sortedList = listModel.elements().toList().sortedByDescending { it.getScore() }
             val data = sortedList.map {
                 arrayOf(it.filename, it.filePath, it.score.streakScore, it.score.multiMatchScore,
@@ -160,6 +156,23 @@ class TestBenchComponent : JPanel() {
             val tableModel = DefaultTableModel(data, columnNames)
             table.model = tableModel
             table.setPaintBusy(false)
+        }
+    }
+
+    private fun processModules(moduleManager: ModuleManager, stringEvaluator: StringEvaluator,
+                               searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
+        for (module in moduleManager.modules) {
+            val moduleFileIndex = module.rootManager.fileIndex
+            val contentIterator = stringEvaluator.getContentIterator(module.name, searchString, listModel)
+
+            val scoreCalculator = stringEvaluator.scoreCalculator
+            scoreCalculator.setMultiMatch(liveSettingsComponent.multiMatchActive.getCheckBox().isSelected)
+            scoreCalculator.setMatchWeightSingleChar(liveSettingsComponent.matchWeightSingleChar.getIntSpinner().value as Int)
+            scoreCalculator.setMatchWeightStreakModifier(liveSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int)
+            scoreCalculator.setMatchWeightPartialPath(liveSettingsComponent.matchWeightPartialPath.getIntSpinner().value as Int)
+            scoreCalculator.setFilenameMatchWeight(liveSettingsComponent.matchWeightFilename.getIntSpinner().value as Int)
+
+            moduleFileIndex.iterateContent(contentIterator)
         }
     }
 }

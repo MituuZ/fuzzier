@@ -25,17 +25,17 @@ package com.mituuz.fuzzier
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.fileEditor.impl.EditorHistoryManager
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.rootManager
-import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
@@ -47,9 +47,9 @@ import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
+import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.NONE
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
-import java.util.HashMap
 import javax.swing.*
 
 open class Fuzzier : FuzzyAction() {
@@ -59,45 +59,90 @@ open class Fuzzier : FuzzyAction() {
     // Used by FuzzierVCS to check if files are tracked by the VCS
     protected var changeListManager: ChangeListManager? = null
 
-    override fun actionPerformed(actionEvent: AnActionEvent) {
+    override fun runAction(project: Project, actionEvent: AnActionEvent) {
         setCustomHandlers()
         ApplicationManager.getApplication().invokeLater {
             defaultDoc = EditorFactory.getInstance().createDocument("")
-            actionEvent.project?.let { project ->
-                component = FuzzyFinderComponent(project)
-                createListeners(project)
-                createSharedListeners(project)
+            component = FuzzyFinderComponent(project)
+            createListeners(project)
+            createSharedListeners(project)
 
-                val mainWindow = WindowManager.getInstance().getIdeFrame(actionEvent.project)?.component
-                mainWindow?.let {
-                    popup = JBPopupFactory
-                        .getInstance()
-                        .createComponentPopupBuilder(component, component.searchField)
-                        .setFocusable(true)
-                        .setRequestFocus(true)
-                        .setResizable(true)
-                        .setDimensionServiceKey(project, fuzzyDimensionKey, true)
-                        .setTitle(title)
-                        .setMovable(true)
-                        .setShowBorder(true)
-                        .createPopup()
+            val mainWindow = WindowManager.getInstance().getIdeFrame(actionEvent.project)?.component
+            mainWindow?.let {
+                popup = createPopup(project)
 
-                    popup?.addListener(object : JBPopupListener {
-                        override fun onClosed(event: LightweightWindowEvent) {
-                            fuzzierSettingsService.state.splitPosition =
-                                (component as FuzzyFinderComponent).splitPane.dividerLocation
-                            resetOriginalHandlers()
-                            super.onClosed(event)
-                        }
-                    })
-                    if (fuzzierSettingsService.state.resetWindow) {
-                        DimensionService.getInstance().setSize(fuzzyDimensionKey, null, project)
-                        DimensionService.getInstance().setLocation(fuzzyDimensionKey, null, project)
-                        fuzzierSettingsService.state.resetWindow = false
-                    }
-                    popup!!.showInCenterOf(it)
-                    (component as FuzzyFinderComponent).splitPane.dividerLocation =
-                        fuzzierSettingsService.state.splitPosition
+                if (fuzzierSettingsService.state.resetWindow) {
+                    DimensionService.getInstance().setSize(fuzzyDimensionKey, null, project)
+                    DimensionService.getInstance().setLocation(fuzzyDimensionKey, null, project)
+                    fuzzierSettingsService.state.resetWindow = false
+                }
+                popup!!.showInCenterOf(it)
+                (component as FuzzyFinderComponent).splitPane.dividerLocation =
+                    fuzzierSettingsService.state.splitPosition
+            }
+
+            if (fuzzierSettingsService.state.recentFilesMode != NONE) {
+                createInitialView(project)
+            }
+        }
+    }
+
+    private fun createPopup(project: Project): JBPopup {
+        val popup: JBPopup = JBPopupFactory
+            .getInstance()
+            .createComponentPopupBuilder(component, component.searchField)
+            .setFocusable(true)
+            .setRequestFocus(true)
+            .setResizable(true)
+            .setDimensionServiceKey(project, fuzzyDimensionKey, true)
+            .setTitle(title)
+            .setMovable(true)
+            .setShowBorder(true)
+            .createPopup()
+
+        popup.addListener(object : JBPopupListener {
+            override fun onClosed(event: LightweightWindowEvent) {
+                fuzzierSettingsService.state.splitPosition =
+                    (component as FuzzyFinderComponent).splitPane.dividerLocation
+                resetOriginalHandlers()
+                super.onClosed(event)
+            }
+        })
+
+        return popup
+    }
+
+    /**
+     * Populates the file list with recently opened files
+     */
+    private fun createInitialView(project: Project) {
+        ApplicationManager.getApplication().executeOnPooledThread {
+            val editorHistory = EditorHistoryManager.getInstance(project).fileList
+            val listModel = DefaultListModel<FuzzyMatchContainer>()
+            val limit = fuzzierSettingsService.state.fileListLimit
+
+            // Start from the end of editor history (most recent file)
+            var i = editorHistory.size - 1
+            while (i >= 0 && listModel.size() < limit) {
+                val file = editorHistory[i]
+                val filePathAndModule = fuzzierUtil.removeModulePath(file.path)
+                // Don't add files that do not have a module path in the project
+                if (filePathAndModule.second == "") {
+                    i--
+                    continue
+                }
+                val fuzzyMatchContainer =
+                    FuzzyMatchContainer.createOrderedContainer(i, filePathAndModule.first, filePathAndModule.second, file.name)
+                listModel.addElement(fuzzyMatchContainer)
+                i--
+            }
+
+            ApplicationManager.getApplication().invokeLater {
+                component.fileList.model = listModel
+                component.fileList.cellRenderer = getCellRenderer()
+                component.fileList.setPaintBusy(false)
+                if (!component.fileList.isEmpty) {
+                    component.fileList.setSelectedValue(listModel[0], true)
                 }
             }
         }
@@ -119,18 +164,12 @@ open class Fuzzier : FuzzyAction() {
 
             val stringEvaluator = StringEvaluator(
                 fuzzierSettingsService.state.exclusionSet,
+                fuzzierSettingsService.state.modules,
                 changeListManager
             )
 
-            // Reset modules before creating the content iterator
-            val state = service<FuzzierSettingsService>().state
-            state.modules = HashMap()
             val moduleManager = ModuleManager.getInstance(project)
-            if (fuzzierUtil.hasMultipleUniqueRootPaths(moduleManager)) {
-                processModules(moduleManager, state, stringEvaluator, searchString, listModel)
-            } else {
-                processProject(project, state, stringEvaluator, searchString, listModel)
-            }
+            processModules(moduleManager, stringEvaluator, searchString, listModel)
 
             listModel = fuzzierUtil.sortAndLimit(listModel)
 
@@ -145,33 +184,12 @@ open class Fuzzier : FuzzyAction() {
         }
     }
 
-    private fun processModules(moduleManager: ModuleManager, state: FuzzierSettingsService.State,
-                               stringEvaluator: StringEvaluator, searchString: String,
-                               listModel: DefaultListModel<FuzzyMatchContainer>) {
+    private fun processModules(moduleManager: ModuleManager, stringEvaluator: StringEvaluator,
+                               searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
         for (module in moduleManager.modules) {
             val moduleFileIndex = module.rootManager.fileIndex
-            val contentRoots = module.rootManager.contentRoots
-            if (contentRoots.isNotEmpty()) {
-                var moduleBasePath = contentRoots[0]?.path
-                if (moduleBasePath != null) {
-                    moduleBasePath = moduleBasePath.substringBeforeLast("/")
-                    state.modules[module.name] = moduleBasePath
-                    val contentIterator =
-                        stringEvaluator.getContentIterator(moduleBasePath, module.name, true, searchString, listModel)
-                    moduleFileIndex.iterateContent(contentIterator)
-                }
-            }
-        }
-    }
-
-    private fun processProject(project: Project, state: FuzzierSettingsService.State, stringEvaluator: StringEvaluator,
-                               searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
-        val projectFileIndex = ProjectFileIndex.getInstance(project)
-        val projectBasePath = project.basePath
-        if (projectBasePath != null) {
-            state.modules[project.name] = projectBasePath
-            val contentIterator = stringEvaluator.getContentIterator(projectBasePath, project.name, false, searchString, listModel)
-            projectFileIndex.iterateContent(contentIterator)
+            val contentIterator = stringEvaluator.getContentIterator(module.name, searchString, listModel)
+            moduleFileIndex.iterateContent(contentIterator)
         }
     }
 

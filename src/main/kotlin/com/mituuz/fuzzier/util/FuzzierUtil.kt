@@ -25,11 +25,14 @@ package com.mituuz.fuzzier.util
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.module.ModuleManager
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.rootManager
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import java.util.*
 import javax.swing.DefaultListModel
+import kotlin.collections.ArrayList
+import com.intellij.openapi.module.Module
 
 class FuzzierUtil {
     private var settingsState = service<FuzzierSettingsService>().state
@@ -49,26 +52,34 @@ class FuzzierUtil {
      * @return a sorted and sized list model
      */
     fun sortAndLimit(listModel: DefaultListModel<FuzzyMatchContainer>, isDirSort: Boolean = false): DefaultListModel<FuzzyMatchContainer> {
-        val priorityQueue = PriorityQueue(listLimit + 1, compareBy(FuzzyMatchContainer::getScore))
+        val useShortDirPath = isDirSort && prioritizeShorterDirPaths
+        var comparator = getComparator(useShortDirPath, false)
+        val priorityQueue = PriorityQueue(listLimit + 1, comparator)
 
-        var minimumScore = -1
+        var minimumScore: Int? = null
         listModel.elements().toList().forEach {
-            if (it.getScore() > minimumScore) {
+            if (minimumScore == null || it.getScore() > minimumScore!!) {
                 priorityQueue.add(it)
                 if (priorityQueue.size > listLimit) {
-                    minimumScore = priorityQueue.remove().getScore()
+                    priorityQueue.remove()
+                    minimumScore = priorityQueue.peek().getScore()
                 }
             }
         }
 
+        comparator = getComparator(useShortDirPath, true)
         val result = DefaultListModel<FuzzyMatchContainer>()
-        if (isDirSort && prioritizeShorterDirPaths) {
-            result.addAll(priorityQueue.toList().sortedByDescending { it.getScoreWithDirLength() })
-        } else {
-            result.addAll(priorityQueue.toList().sortedByDescending { it.getScore() })
-        }
+        result.addAll(priorityQueue.toList().sortedWith(comparator))
 
         return result
+    }
+
+    private fun getComparator(useShortDirPath: Boolean, isDescending: Boolean): Comparator<FuzzyMatchContainer> {
+        return if (isDescending) {
+            compareByDescending { if (useShortDirPath) it.getScoreWithDirLength() else it.getScore() }
+        } else {
+            compareBy { if (useShortDirPath) it.getScoreWithDirLength() else it.getScore() }
+        }
     }
 
     fun setListLimit(listLimit: Int) {
@@ -79,39 +90,72 @@ class FuzzierUtil {
         this.prioritizeShorterDirPaths = prioritizeShortedFilePaths;
     }
 
-    /**
-     * Calculate the number of unique root paths in the project by comparing module paths against each other
-     * Handles cases where some modules are nested under a single project root
-     *
-     * @return true if at least one module has a non-compatible root path, false if all paths can be merged
-     */
-    fun hasMultipleUniqueRootPaths(moduleManager: ModuleManager): Boolean {
-        var currentRoot: String? = null
-        for (module in moduleManager.modules) {
-            val contentRoots = module.rootManager.contentRoots
-            if (contentRoots.isEmpty()) {
-                continue
-            }
-            val moduleBasePath = contentRoots[0]?.path ?: continue
-
-            // Initial case, set the first root
-            if (currentRoot == null) {
-                currentRoot = moduleBasePath
-                continue
-            }
-
-            // Check if either root is contained in the other
-            if (currentRoot.contains(moduleBasePath) || moduleBasePath.contains(currentRoot)) {
-                // Update current root if new root is shorter
-                if (moduleBasePath.length < currentRoot.length) {
-                    currentRoot = moduleBasePath
-                }
-            } else {
-                // Root wasn't contained, multiple root paths are present
-                return true
+    fun removeModulePath(filePath: String): Pair<String, String> {
+        val modules = settingsState.modules
+        for (modulePath in modules.values) {
+            if (filePath.contains(modulePath)) {
+                val file = filePath.removePrefix(modulePath)
+                return Pair(file, modulePath)
             }
         }
-        return false
+        return Pair(filePath, "")
     }
 
+    /**
+     * Parse all modules in the project and find the shortest base path for each of them.
+     * Combines similar module paths to the shortest possible form.
+     *
+     * Populates `FuzzierSettings.state.modules`-field
+     */
+    fun parseModules(project: Project) {
+        val moduleManager = ModuleManager.getInstance(project)
+
+        // Gather all modules and paths into a list
+        val moduleList: MutableList<ModuleContainer> = ArrayList()
+        for (module in moduleManager.modules) {
+            val modulePath = getModulePath(module) ?: continue
+            moduleList.add(ModuleContainer(module.name, modulePath))
+        }
+
+        var prevModule: ModuleContainer? = null
+        for (currentModule in moduleList.sortedBy { it.basePath }) {
+            if (prevModule != null && (currentModule.basePath.startsWith(prevModule.basePath)
+                        || prevModule.basePath.startsWith(currentModule.basePath))) {
+                if (currentModule.basePath.length > prevModule.basePath.length) {
+                    currentModule.basePath = prevModule.basePath;
+                } else {
+                    prevModule.basePath = currentModule.basePath;
+                }
+            }
+
+            prevModule = currentModule
+        }
+
+        if (moduleList.map { it.basePath }.distinct().size > 1) {
+            shortenModulePaths(moduleList)
+        }
+
+        val moduleMap = listToMap(moduleList)
+        service<FuzzierSettingsService>().state.modules = moduleMap
+    }
+
+    private fun shortenModulePaths(modules: List<ModuleContainer>) {
+        for (module in modules) {
+            module.basePath = module.basePath.substringBeforeLast("/")
+        }
+    }
+
+    private fun getModulePath(module: Module): String? {
+        val contentRoots = module.rootManager.contentRoots
+        if (contentRoots.isEmpty()) {
+            return null
+        }
+        return contentRoots.firstOrNull()?.path
+    }
+
+    data class ModuleContainer(val name:String, var basePath:String)
+
+    private fun listToMap(modules: List<ModuleContainer>): Map<String, String> {
+        return modules.associateBy({ it.name }, { it.basePath })
+    }
 }

@@ -1,9 +1,8 @@
 # Changelog
-## Earlier Versions
-- Prior to version 0.19.0, numerous features and improvements were made, laying the foundation for the current version. This includes initial development, various enhancements, and bug fixes. For detailed history, please refer to commit logs or release notes.
-
 ## Version 0.23.0
+- Add an option to show recently used files when opening the popup
 - Fix mover not working correctly
+- Refactor module handling
 
 ## Version 0.22.2
 - Fix test bench not working correctly
@@ -39,3 +38,6 @@
   - Huge thanks to [ramonvermeulen](https://github.com/ramonvermeulen) for implementing this feature
 - Change versioning scheme to more clearly indicate development status
   - Version 0.19.0 is the first release under the new scheme
+
+## Earlier Versions
+- Prior to version 0.19.0, numerous features and improvements were made, laying the foundation for the current version. This includes initial development, various enhancements, and bug fixes. For detailed history, please refer to commit logs or release notes.

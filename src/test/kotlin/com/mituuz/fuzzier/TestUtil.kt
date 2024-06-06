@@ -27,7 +27,8 @@ import com.intellij.openapi.application.WriteAction
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.DumbService
-import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.openapi.project.modules
+import com.intellij.openapi.project.rootManager
 import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiDocumentManager
@@ -60,7 +61,7 @@ class TestUtil {
         DumbService.getInstance(fixture.project).waitForSmartMode()
     }
 
-    fun setUpProjectFileIndex(filesToAdd: List<String>, exclusionList: Set<String>, ignoredFiles: List<String>? = null) : DefaultListModel<FuzzyMatchContainer> {
+    fun setUpModuleFileIndex(filesToAdd: List<String>, exclusionList: Set<String>, ignoredFiles: List<String>? = null) : DefaultListModel<FuzzyMatchContainer> {
         val filePathContainer = DefaultListModel<FuzzyMatchContainer>()
         val factory = IdeaTestFixtureFactory.getFixtureFactory()
         val fixtureBuilder = factory.createLightFixtureBuilder(null, "Test")
@@ -71,6 +72,11 @@ class TestUtil {
         myFixture.setUp()
         addFilesToProject(filesToAdd, myFixture, fixture)
 
+        // Create the module map manually, as with test modules the physical path is the second content root
+        val map = HashMap<String, String>()
+        val module = myFixture.project.modules[0]
+        map[module.name] = module.rootManager.contentRoots[1].path
+
         if (ignoredFiles !== null) {
             val changeListManager = Mockito.mock(ChangeListManager::class.java)
             Mockito.`when`(changeListManager.isIgnoredFile(any<VirtualFile>())).thenAnswer { invocation ->
@@ -78,18 +84,15 @@ class TestUtil {
                 val tempDirPath = myFixture.tempDirPath
                 ignoredFiles.any{ ("$tempDirPath/$it") == file.path }
             }
-            stringEvaluator = StringEvaluator(exclusionList, changeListManager)
+            stringEvaluator = StringEvaluator(exclusionList, map, changeListManager)
         } else {
-            stringEvaluator = StringEvaluator(exclusionList)
+            stringEvaluator = StringEvaluator(exclusionList, map)
         }
 
-        val basePath = myFixture.findFileInTempDir("src").canonicalPath
-        val contentIterator = basePath?.let { stringEvaluator.getContentIterator(it, "", false, "", filePathContainer) }
-        val index = ProjectFileIndex.getInstance(fixture.project)
+        val contentIterator = stringEvaluator.getContentIterator(myFixture.module.name, "", filePathContainer)
+        val index = myFixture.module.rootManager.fileIndex
         runInEdtAndWait {
-            if (contentIterator != null) {
-                index.iterateContent(contentIterator)
-            }
+            index.iterateContent(contentIterator)
         }
         // Handle clearing ProjectFileIndex between tests
         myFixture.tearDown()
@@ -108,7 +111,7 @@ class TestUtil {
         return myFixture
     }
 
-    fun setUpMultiModuleProject(module1Files: List<String>, module2Files: List<String>, customModule2Path: String = "src2"): CodeInsightTestFixture {
+    fun setUpMultiModuleProject(vararg moduleList: List<String>): CodeInsightTestFixture {
         val factory = IdeaTestFixtureFactory.getFixtureFactory()
         val fixtureBuilder = factory.createFixtureBuilder("Test")
         val fixture = fixtureBuilder.fixture
@@ -116,20 +119,15 @@ class TestUtil {
         myFixture.setUp()
         val project = myFixture.project
 
-        addFiles(module1Files, myFixture)
-        addFiles(module2Files, myFixture)
+        for (moduleFiles in moduleList) {
+            addFiles(moduleFiles.drop(1), myFixture)
 
-        val module1Path = myFixture.findFileInTempDir("src1")
-        val module2Path = myFixture.findFileInTempDir(customModule2Path)
-
-        val module1 = WriteAction.computeAndWait<Module, RuntimeException> {
-            ModuleManager.getInstance(project).newModule(module1Path.path, "Empty")
+            val modulePath = myFixture.findFileInTempDir(moduleFiles[0])
+            val module = WriteAction.computeAndWait<Module, RuntimeException> {
+                ModuleManager.getInstance(project).newModule(modulePath.path, "Empty")
+            }
+            PsiTestUtil.addSourceRoot(module, modulePath)
         }
-        PsiTestUtil.addSourceRoot(module1, module1Path)
-        val module2 = WriteAction.computeAndWait<Module, RuntimeException> {
-            ModuleManager.getInstance(project).newModule(module2Path.path, "Empty")
-        }
-        PsiTestUtil.addSourceRoot(module2, module2Path)
 
         runInEdtAndWait {
             PsiDocumentManager.getInstance(fixture.project).commitAllDocuments()
@@ -137,6 +135,18 @@ class TestUtil {
         DumbService.getInstance(fixture.project).waitForSmartMode()
 
         return myFixture
+    }
+    
+    fun setUpDuoModuleProject(module1Files: List<String>, module2Files: List<String>, customModule2Path: String = "src2"): CodeInsightTestFixture {
+        val module2List: MutableList<String> = ArrayList()
+        module2List.add(customModule2Path)
+        module2List.addAll(module2Files)
+
+        val module1List: MutableList<String> = ArrayList()
+        module1List.add("src1")
+        module1List.addAll(module1Files)
+
+        return setUpMultiModuleProject(module1List, module2List)
     }
 
     private fun addFiles(files: List<String>, myFixture: CodeInsightTestFixture) {

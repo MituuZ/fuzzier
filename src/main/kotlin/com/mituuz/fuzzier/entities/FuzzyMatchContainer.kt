@@ -27,6 +27,17 @@ import com.intellij.openapi.components.service
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 
 class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filename: String, private var module: String = "") {
+    private var initialPath: String? = null
+    companion object {
+        fun createOrderedContainer(order: Int, filePath: String, initialPath:String, filename: String): FuzzyMatchContainer {
+            val fuzzyScore = FuzzyScore()
+            fuzzyScore.filenameScore = order
+            val fuzzyMatchContainer = FuzzyMatchContainer(fuzzyScore, filePath, filename)
+            fuzzyMatchContainer.initialPath = initialPath
+            return fuzzyMatchContainer
+        }
+    }
+
     fun toString(filenameType: FilenameType): String {
         return when (filenameType) {
             FilenameType.FILENAME_ONLY -> filename
@@ -44,6 +55,9 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
         val basePath = service<FuzzierSettingsService>().state.modules[module]
         if (basePath != null) {
             return "$basePath$filePath"
+        }
+        if (initialPath != null && initialPath != "") {
+            return "$initialPath$filePath"
         }
         return filePath
     }
@@ -75,5 +89,9 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
         fun getTotalScore(): Int {
             return streakScore + multiMatchScore + partialPathScore + filenameScore
         }
+    }
+
+    override fun toString(): String {
+        return "FuzzyMatchContainer: $filename, score: ${getScore()}, dir score: ${getScoreWithDirLength()}"
     }
 }

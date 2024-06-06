@@ -28,6 +28,7 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType.FILE_PATH_ONLY
+import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.RECENT_PROJECT_FILES
 
 @State(
     name = "com.mituuz.fuzzier.FuzzierSettings",
@@ -35,7 +36,8 @@ import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType.FILE_PATH_ON
 )
 class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.State> {
     class State {
-        var modules: HashMap<String, String> = HashMap()
+        var modules: Map<String, String> = HashMap()
+        var recentFilesMode: RecentFilesMode = RECENT_PROJECT_FILES
 
         var splitPosition: Int = 300
         var exclusionSet: Set<String> = setOf("/.idea/*", "/.git/*", "/target/*", "/build/*", "/.gradle/*", "/.run/*")
@@ -65,5 +67,10 @@ class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.S
 
     override fun loadState(p0: State) {
         this.state = p0
+    }
+
+    enum class RecentFilesMode(val text: String) {
+        NONE("None"),
+        RECENT_PROJECT_FILES("Recent project files")
     }
 }

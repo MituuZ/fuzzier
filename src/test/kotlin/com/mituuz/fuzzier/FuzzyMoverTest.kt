@@ -106,7 +106,7 @@ class FuzzyMoverTest {
     fun `Multi module test move to same module`() {
         val module1Files = listOf("src1/main.kt", "src1/test/app.log")
         val module2Files = listOf("src2/tool.kt")
-        val myFixture: CodeInsightTestFixture = testUtil.setUpMultiModuleProject(module1Files, module2Files)
+        val myFixture: CodeInsightTestFixture = testUtil.setUpDuoModuleProject(module1Files, module2Files)
         val project = myFixture.project
 
         assertEquals(2, project.modules.size)
@@ -139,7 +139,7 @@ class FuzzyMoverTest {
     fun `Multi module test move to different module`() {
         val module1Files = listOf("src1/MoveMe.kt", "src1/test/app.log")
         val module2Files = listOf("src2/tool.kt", "src2/target/test.kt")
-        val myFixture: CodeInsightTestFixture = testUtil.setUpMultiModuleProject(module1Files, module2Files)
+        val myFixture: CodeInsightTestFixture = testUtil.setUpDuoModuleProject(module1Files, module2Files)
         val project = myFixture.project
 
         assertEquals(2, project.modules.size)

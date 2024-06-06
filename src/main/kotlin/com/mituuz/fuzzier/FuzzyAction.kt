@@ -64,8 +64,14 @@ abstract class FuzzyAction : AnAction() {
     val fuzzierUtil = FuzzierUtil()
 
     override fun actionPerformed(actionEvent: AnActionEvent) {
-        // Necessary override
+        val project = actionEvent.project
+        if (project != null) {
+            fuzzierUtil.parseModules(project)
+            runAction(project, actionEvent)
+        }
     }
+
+    abstract fun runAction(project: Project, actionEvent: AnActionEvent)
 
     fun createSharedListeners(project: Project) {
         val inputMap = component.searchField.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
