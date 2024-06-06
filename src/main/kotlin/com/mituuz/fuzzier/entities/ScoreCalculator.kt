@@ -39,7 +39,7 @@ class ScoreCalculator(searchString: String) {
     var filePathIndex: Int = 0
     private var filenameIndex: Int = 0
 
-    // Set up the settings
+    // Set up match settings
     private val settings = service<FuzzierSettingsService>().state
     private var tolerance = settings.tolerance
     private var multiMatch = settings.multiMatch
