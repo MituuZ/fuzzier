@@ -30,7 +30,7 @@ import java.awt.Color
 
 class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filename: String, private var module: String = "") {
     private val color = JBColor.YELLOW
-    private val sm: String = "<font style='background-color: ${colorToHtml(color)};'>"
+    private val sm: String = "<font style='background-color: ${colorAsHex(color)};'>"
     private val em: String = "</font>"
     private var initialPath: String? = null
     companion object {
@@ -42,7 +42,7 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
             return fuzzyMatchContainer
         }
 
-        fun colorToHtml(color: Color): String {
+        fun colorAsHex(color: Color): String {
             return String.format("#%02x%02x%02x", color.red, color.green, color.blue)
         }
     }

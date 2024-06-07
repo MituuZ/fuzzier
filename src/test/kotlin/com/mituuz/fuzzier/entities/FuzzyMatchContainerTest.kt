@@ -25,7 +25,7 @@ package com.mituuz.fuzzier.entities
 
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.ui.JBColor
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer.Companion.colorToHtml
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer.Companion.colorAsHex
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FuzzyScore
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -40,7 +40,7 @@ class FuzzyMatchContainerTest {
 
     @BeforeEach
     fun setUp() {
-        yellow = colorToHtml(JBColor.YELLOW)
+        yellow = colorAsHex(JBColor.YELLOW)
         startTag = "<font style='background-color: $yellow;'>"
     }
 
@@ -66,7 +66,7 @@ class FuzzyMatchContainerTest {
         s.highlightCharacters.add(18) // r
 
         val f = FuzzyMatchContainer(s, "", "FuzzyMatchContainerTest.kt")
-        yellow = colorToHtml(JBColor.YELLOW)
+        yellow = colorAsHex(JBColor.YELLOW)
         val res = f.highlight(f.filename)
         val sb = StringBuilder()
 
