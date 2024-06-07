@@ -41,10 +41,10 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
             fuzzyMatchContainer.initialPath = initialPath
             return fuzzyMatchContainer
         }
-    }
 
-    fun colorToHtml(color: Color): String {
-        return String.format("#%02x%02x%02x", color.red, color.green, color.blue)
+        fun colorToHtml(color: Color): String {
+            return String.format("#%02x%02x%02x", color.red, color.green, color.blue)
+        }
     }
 
     fun toString(filenameType: FilenameType): String {
@@ -59,7 +59,7 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
     fun highlight(source: String): String {
         val stringBuilder: StringBuilder = StringBuilder(source)
         var offset = 0
-        for (i in score.highlightCharacters) {
+        for (i in score.highlightCharacters.sorted()) {
             if (i < source.length) {
                 stringBuilder.insert(i + offset, sm)
                 offset += sm.length
