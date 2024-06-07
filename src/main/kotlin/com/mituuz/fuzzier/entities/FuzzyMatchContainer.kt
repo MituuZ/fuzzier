@@ -51,13 +51,12 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
         return when (filenameType) {
             FilenameType.FILENAME_ONLY -> filename
             FilenameType.FILE_PATH_ONLY -> filePath
-            FilenameType.FILENAME_WITH_PATH -> "$filename   (${highlight(filePath)})"
+            FilenameType.FILENAME_WITH_PATH -> "$filename   ($filePath)"
             FilenameType.FILENAME_WITH_PATH_STYLED -> getFilenameWithPathStyled()
         }
     }
 
     fun highlight(source: String): String {
-        println(color)
         val stringBuilder: StringBuilder = StringBuilder(source)
         var offset = 0
         for (i in score.highlightCharacters) {
@@ -72,7 +71,6 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
     }
 
     private fun getFilenameWithPathStyled(): String {
-        println("Parsed name: <html><strong>${highlight(filename)}</strong>  <i>($filePath</i></html>")
         return "<html><strong>${highlight(filename)}</strong>  <i>($filePath</i></html>"
     }
 
