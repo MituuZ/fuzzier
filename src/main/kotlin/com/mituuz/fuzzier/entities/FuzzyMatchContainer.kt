@@ -43,12 +43,8 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
         }
     }
 
-    private fun colorToHtml(color: Color?): String {
-        return if (color != null) {
-            String.format("#%02x%02x%02x", color.red, color.green, color.blue)
-        } else {
-            "yellow"
-        }
+    fun colorToHtml(color: Color): String {
+        return String.format("#%02x%02x%02x", color.red, color.green, color.blue)
     }
 
     fun toString(filenameType: FilenameType): String {
