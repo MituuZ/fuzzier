@@ -57,10 +57,10 @@ class FuzzyMatchContainerTest {
     @Test
     fun `Test highlight indexing complex case`() {
         val s = FuzzyScore()
-        s.highlightCharacters.add(0) // f
-        s.highlightCharacters.add(1) // u
-        s.highlightCharacters.add(2) // z
-        s.highlightCharacters.add(3) // z
+        s.highlightCharacters.add(0)  // f
+        s.highlightCharacters.add(1)  // u
+        s.highlightCharacters.add(2)  // z
+        s.highlightCharacters.add(3)  // z
         s.highlightCharacters.add(15) // i
         s.highlightCharacters.add(17) // e
         s.highlightCharacters.add(18) // r
