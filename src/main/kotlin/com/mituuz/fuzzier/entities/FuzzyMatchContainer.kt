@@ -27,6 +27,10 @@ import com.intellij.openapi.components.service
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 
 class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filename: String, private var module: String = "") {
+    private val sm: String = "<font style='background-color: yellow;'>"
+    private val em: String = "</font>"
+//    private val sm: String = "<mark>"
+//    private val em: String = "</mark>"
     private var initialPath: String? = null
     companion object {
         fun createOrderedContainer(order: Int, filePath: String, initialPath:String, filename: String): FuzzyMatchContainer {
@@ -42,13 +46,27 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
         return when (filenameType) {
             FilenameType.FILENAME_ONLY -> filename
             FilenameType.FILE_PATH_ONLY -> filePath
-            FilenameType.FILENAME_WITH_PATH -> "$filename   ($filePath)"
+            FilenameType.FILENAME_WITH_PATH -> "$filename   (${highlight(filePath)})"
             FilenameType.FILENAME_WITH_PATH_STYLED -> getFilenameWithPathStyled()
         }
     }
 
+    fun highlight(source: String): String {
+        val stringBuilder: StringBuilder = StringBuilder(source)
+        var offset = 0
+        for (i in score.highlightCharacters) {
+            if (i < source.length) {
+                stringBuilder.insert(i + offset, sm)
+                stringBuilder.insert(i + offset + 41, em) // 7
+                offset += 6 + 41 // 7
+            }
+        }
+        return stringBuilder.toString()
+    }
+
     private fun getFilenameWithPathStyled(): String {
-        return "<html><strong>$filename</strong>  <i>($filePath)</i></html>"
+        println("Parsed name: <html><strong>${highlight(filename)}</strong>  <i>($filePath</i></html>")
+        return "<html><strong>${highlight(filename)}</strong>  <i>($filePath</i></html>"
     }
 
     fun getFileUri(): String {
@@ -85,6 +103,7 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
         var multiMatchScore = 0
         var partialPathScore = 0
         var filenameScore = 0
+        val highlightCharacters: MutableSet<Int> = HashSet()
 
         fun getTotalScore(): Int {
             return streakScore + multiMatchScore + partialPathScore + filenameScore
