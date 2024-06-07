@@ -24,10 +24,14 @@ SOFTWARE.
 package com.mituuz.fuzzier.entities
 
 import com.intellij.openapi.components.service
+import com.intellij.openapi.editor.colors.EditorColors
+import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
+import java.awt.Color
 
 class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filename: String, private var module: String = "") {
-    private val sm: String = "<font style='background-color: yellow;'>"
+    private val color = EditorColorsManager.getInstance().globalScheme.getColor(EditorColors.CHANGED_LINES_POPUP)
+    private val sm: String = "<font style='background-color: ${colorToHtml(color)};'>"
     private val em: String = "</font>"
     private var initialPath: String? = null
     companion object {
@@ -37,6 +41,15 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
             val fuzzyMatchContainer = FuzzyMatchContainer(fuzzyScore, filePath, filename)
             fuzzyMatchContainer.initialPath = initialPath
             return fuzzyMatchContainer
+        }
+    }
+
+    private fun colorToHtml(color: Color?): String {
+        return if (color != null) {
+            val darkColor = color.darker()
+            String.format("#%02x%02x%02x", darkColor.red, darkColor.green, darkColor.blue)
+        } else {
+            "yellow"
         }
     }
 
@@ -50,6 +63,7 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
     }
 
     fun highlight(source: String): String {
+        println(color)
         val stringBuilder: StringBuilder = StringBuilder(source)
         var offset = 0
         for (i in score.highlightCharacters) {
