@@ -29,8 +29,6 @@ import com.mituuz.fuzzier.settings.FuzzierSettingsService
 class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filename: String, private var module: String = "") {
     private val sm: String = "<font style='background-color: yellow;'>"
     private val em: String = "</font>"
-//    private val sm: String = "<mark>"
-//    private val em: String = "</mark>"
     private var initialPath: String? = null
     companion object {
         fun createOrderedContainer(order: Int, filePath: String, initialPath:String, filename: String): FuzzyMatchContainer {
@@ -57,8 +55,9 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
         for (i in score.highlightCharacters) {
             if (i < source.length) {
                 stringBuilder.insert(i + offset, sm)
-                stringBuilder.insert(i + offset + 41, em) // 7
-                offset += 6 + 41 // 7
+                offset += sm.length
+                stringBuilder.insert(i + offset + 1, em)
+                offset += em.length
             }
         }
         return stringBuilder.toString()

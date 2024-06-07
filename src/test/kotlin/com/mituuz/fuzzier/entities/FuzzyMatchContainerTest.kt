@@ -11,7 +11,6 @@ class FuzzyMatchContainerTest {
         s.highlightCharacters.add(0)
         s.highlightCharacters.add(4)
         val f = FuzzyMatchContainer(s, "", "Hello")
-        // assertEquals("<mark>H</mark>ell<mark>o</mark>", f.highlight(f.filename))
         assertEquals("<font style='background-color: yellow;'>H</font>ell<font style='background-color: yellow;'>o</font>", f.highlight(f.filename))
     }
 }
