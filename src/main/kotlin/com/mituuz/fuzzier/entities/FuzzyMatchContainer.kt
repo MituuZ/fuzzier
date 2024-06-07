@@ -24,13 +24,12 @@ SOFTWARE.
 package com.mituuz.fuzzier.entities
 
 import com.intellij.openapi.components.service
-import com.intellij.openapi.editor.colors.EditorColors
-import com.intellij.openapi.editor.colors.EditorColorsManager
+import com.intellij.ui.JBColor
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import java.awt.Color
 
 class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filename: String, private var module: String = "") {
-    private val color = EditorColorsManager.getInstance().globalScheme.getColor(EditorColors.CHANGED_LINES_POPUP)
+    private val color = JBColor.YELLOW
     private val sm: String = "<font style='background-color: ${colorToHtml(color)};'>"
     private val em: String = "</font>"
     private var initialPath: String? = null
@@ -46,8 +45,7 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
 
     private fun colorToHtml(color: Color?): String {
         return if (color != null) {
-            val darkColor = color.darker()
-            String.format("#%02x%02x%02x", darkColor.red, darkColor.green, darkColor.blue)
+            String.format("#%02x%02x%02x", color.red, color.green, color.blue)
         } else {
             "yellow"
         }
