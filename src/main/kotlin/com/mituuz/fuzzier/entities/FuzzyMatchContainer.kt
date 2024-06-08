@@ -59,14 +59,26 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
     fun highlight(source: String): String {
         val stringBuilder: StringBuilder = StringBuilder(source)
         var offset = 0
-        for (i in score.highlightCharacters.sorted()) {
-            if (i < source.length) {
-                stringBuilder.insert(i + offset, sm)
+        val hlIndexes = score.highlightCharacters.sorted()
+        var i = 0
+        while (i < hlIndexes.size) {
+            val ind = hlIndexes[i]
+            if (ind < source.length) {
+                stringBuilder.insert(ind + offset, sm)
                 offset += sm.length
-                stringBuilder.insert(i + offset + 1, em)
+                stringBuilder.insert(ind + offset + 1, em)
                 offset += em.length
             }
+            i++
         }
+//        for (i in score.highlightCharacters.sorted()) {
+//            if (i < source.length) {
+//                stringBuilder.insert(i + offset, sm)
+//                offset += sm.length
+//                stringBuilder.insert(i + offset + 1, em)
+//                offset += em.length
+//            }
+//        }
         return stringBuilder.toString()
     }
 
