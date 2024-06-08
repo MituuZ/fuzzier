@@ -46,28 +46,28 @@ class FuzzyMatchContainerTest {
 
     @Test
     fun `Test highlight indexing simple case`() {
-        val s = FuzzyScore()
-        s.highlightCharacters.add(0)
-        s.highlightCharacters.add(4)
-        val f = FuzzyMatchContainer(s, "", "Hello")
-        val res = f.highlight(f.filename)
+        val score = FuzzyScore()
+        score.highlightCharacters.add(0)
+        score.highlightCharacters.add(4)
+        val container = FuzzyMatchContainer(score, "", "Hello")
+        val res = container.highlight(container.filename)
         assertEquals("${startTag}H${endTag}ell${startTag}o$endTag", res)
     }
 
     @Test
     fun `Test highlight indexing complex case`() {
-        val s = FuzzyScore()
-        s.highlightCharacters.add(0)  // f
-        s.highlightCharacters.add(1)  // u
-        s.highlightCharacters.add(2)  // z
-        s.highlightCharacters.add(3)  // z
-        s.highlightCharacters.add(15) // i
-        s.highlightCharacters.add(17) // e
-        s.highlightCharacters.add(18) // r
+        val score = FuzzyScore()
+        score.highlightCharacters.add(0)  // f
+        score.highlightCharacters.add(1)  // u
+        score.highlightCharacters.add(2)  // z
+        score.highlightCharacters.add(3)  // z
+        score.highlightCharacters.add(15) // i
+        score.highlightCharacters.add(17) // e
+        score.highlightCharacters.add(18) // r
 
-        val f = FuzzyMatchContainer(s, "", "FuzzyMatchContainerTest.kt")
+        val container = FuzzyMatchContainer(score, "", "FuzzyMatchContainerTest.kt")
         yellow = colorAsHex(JBColor.YELLOW)
-        val res = f.highlight(f.filename)
+        val res = container.highlight(container.filename)
         val sb = StringBuilder()
 
         sb.append(startTag, "F", endTag)
