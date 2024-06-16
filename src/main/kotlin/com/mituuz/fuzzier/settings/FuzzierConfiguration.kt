@@ -31,7 +31,6 @@ object FuzzierConfiguration {
     const val END_STYLE_TAG: String = "</font>"
 
     private fun createStartStyleTag(): String {
-        println("Create base style tag")
         val color = JBColor.YELLOW
         return "<font style='background-color: ${colorAsHex(color)};'>"
     }
