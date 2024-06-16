@@ -110,9 +110,24 @@ class FuzzyActionTest {
     }
 
     @Test
-    fun `Check renderer with styled path`() {
+    fun `Check renderer with styled path, no highlight`() {
         val action = getAction()
         action.setFiletype(FILENAME_WITH_PATH_STYLED)
+        action.setHighlight(false)
+        action.component = SimpleFinderComponent()
+        val renderer = action.getCellRenderer()
+        val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd")
+        val dummyList = JList<FuzzyMatchContainer>()
+        val component = renderer.getListCellRendererComponent(dummyList, container, 0, false, false) as JLabel
+        assertNotNull(component)
+        assertEquals("<html><strong>asd</strong>  <i>(/src/asd)</i></html>", component.text)
+    }
+
+    @Test
+    fun `Check renderer with styled path, with highlight but no values`() {
+        val action = getAction()
+        action.setFiletype(FILENAME_WITH_PATH_STYLED)
+        action.setHighlight(true)
         action.component = SimpleFinderComponent()
         val renderer = action.getCellRenderer()
         val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd")

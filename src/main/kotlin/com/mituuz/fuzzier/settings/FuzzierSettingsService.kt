@@ -48,6 +48,7 @@ class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.S
         var fileListLimit: Int = 50
 
         var filenameType: FilenameType = FILE_PATH_ONLY
+        var highlightFilename = false
         var fileListFontSize = 14
         var previewFontSize = 0
         var fileListSpacing = 0

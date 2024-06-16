@@ -30,9 +30,10 @@ import java.awt.Color
 
 class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filename: String, private var module: String = "") {
     private val color = JBColor.YELLOW
-    private val sm: String = "<font style='background-color: ${colorAsHex(color)};'>"
-    private val em: String = "</font>"
+    private val startStyleTag: String = "<font style='background-color: ${colorAsHex(color)};'>"
+    private val endStyleTag: String = "</font>"
     private var initialPath: String? = null
+
     companion object {
         fun createOrderedContainer(order: Int, filePath: String, initialPath:String, filename: String): FuzzyMatchContainer {
             val fuzzyScore = FuzzyScore()
@@ -47,13 +48,20 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
         }
     }
 
-    fun toString(filenameType: FilenameType): String {
+    fun toString(filenameType: FilenameType, highlight: Boolean): String {
         return when (filenameType) {
             FilenameType.FILENAME_ONLY -> filename
             FilenameType.FILE_PATH_ONLY -> filePath
             FilenameType.FILENAME_WITH_PATH -> "$filename   ($filePath)"
-            FilenameType.FILENAME_WITH_PATH_STYLED -> getFilenameWithPathStyled()
+            FilenameType.FILENAME_WITH_PATH_STYLED -> getFilenameWithPathStyled(highlight)
         }
+    }
+
+    private fun getStyledFilename(highlight: Boolean): String {
+        if (highlight) {
+            return highlight(filename)
+        }
+        return filename
     }
 
     fun highlight(source: String): String {
@@ -62,17 +70,17 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
         val hlIndexes = score.highlightCharacters.sorted()
         for (i in hlIndexes) {
             if (i < source.length) {
-                stringBuilder.insert(i + offset, sm)
-                offset += sm.length
-                stringBuilder.insert(i + offset + 1, em)
-                offset += em.length
+                stringBuilder.insert(i + offset, startStyleTag)
+                offset += startStyleTag.length
+                stringBuilder.insert(i + offset + 1, endStyleTag)
+                offset += endStyleTag.length
             }
         }
         return stringBuilder.toString()
     }
 
-    private fun getFilenameWithPathStyled(): String {
-        return "<html><strong>${highlight(filename)}</strong>  <i>($filePath</i></html>"
+    private fun getFilenameWithPathStyled(highlight: Boolean): String {
+        return "<html><strong>${getStyledFilename(highlight)}</strong>  <i>($filePath)</i></html>"
     }
 
     fun getFileUri(): String {

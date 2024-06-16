@@ -100,6 +100,16 @@ class FuzzierSettingsComponent {
     """.trimIndent(),
         false)
 
+    val highlightFilename = SettingsComponent(JBCheckBox(), "Highlight filename in file list*",
+        """
+            This is still experimental and may cause some performance issues.
+            <br><br>
+            Toggles highlighting of the filename on the file list.
+            <br>
+            Only works with styled file list, which supports html styling.
+        """.trimIndent(),
+        false)
+
     val fileListLimit = SettingsComponent(JBIntSpinner(50, 1, 5000), "File list limit",
         """
             Controls how many files are shown and listed on the popup.
@@ -194,11 +204,12 @@ class FuzzierSettingsComponent {
             .addComponent(recentFileModeSelector)
             .addComponent(prioritizeShortDirs)
             .addComponent(debounceTimerValue)
-            .addComponent(filenameTypeSelector)
             .addComponent(fileListLimit)
 
             .addSeparator()
             .addComponent(JBLabel("<html><strong>Popup styling</strong></html>"))
+            .addComponent(filenameTypeSelector)
+            .addComponent(highlightFilename)
             .addComponent(fileListFontSize)
             .addComponent(previewFontSize)
             .addComponent(fileListSpacing)
@@ -255,6 +266,9 @@ class FuzzierSettingsComponent {
         }
         for (filenameType in FilenameType.entries) {
             filenameTypeSelector.getFilenameTypeComboBox().addItem(filenameType)
+        }
+        filenameTypeSelector.getFilenameTypeComboBox().addItemListener {
+            highlightFilename.getCheckBox().isEnabled = it.item == FilenameType.FILENAME_WITH_PATH_STYLED
         }
 
         startTestBench.getButton().addActionListener {
