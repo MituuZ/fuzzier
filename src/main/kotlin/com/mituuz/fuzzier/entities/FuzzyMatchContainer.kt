@@ -29,12 +29,16 @@ import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import java.awt.Color
 
 class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filename: String, private var module: String = "") {
-    private val color = JBColor.YELLOW
-    private val startStyleTag: String = "<font style='background-color: ${colorAsHex(color)};'>"
-    private val endStyleTag: String = "</font>"
     private var initialPath: String? = null
 
     companion object {
+        const val END_STYLE_TAG: String = "</font>"
+
+        val startStyleTag: String by lazy {
+            val color = JBColor.YELLOW
+            "<font style='background-color: ${colorAsHex(color)};'>"
+        }
+
         fun createOrderedContainer(order: Int, filePath: String, initialPath:String, filename: String): FuzzyMatchContainer {
             val fuzzyScore = FuzzyScore()
             fuzzyScore.filenameScore = order
@@ -72,8 +76,8 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
             if (i < source.length) {
                 stringBuilder.insert(i + offset, startStyleTag)
                 offset += startStyleTag.length
-                stringBuilder.insert(i + offset + 1, endStyleTag)
-                offset += endStyleTag.length
+                stringBuilder.insert(i + offset + 1, END_STYLE_TAG)
+                offset += END_STYLE_TAG.length
             }
         }
         return stringBuilder.toString()

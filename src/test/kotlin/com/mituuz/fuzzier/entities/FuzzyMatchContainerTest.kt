@@ -24,25 +24,15 @@ SOFTWARE.
 package com.mituuz.fuzzier.entities
 
 import com.intellij.testFramework.TestApplicationManager
-import com.intellij.ui.JBColor
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer.Companion.colorAsHex
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer.Companion.END_STYLE_TAG
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer.Companion.startStyleTag
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FuzzyScore
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class FuzzyMatchContainerTest {
     @Suppress("unused")
     private val testManager = TestApplicationManager.getInstance()
-    private lateinit var yellow: String
-    private lateinit var startTag: String
-    private var endTag = "</font>"
-
-    @BeforeEach
-    fun setUp() {
-        yellow = colorAsHex(JBColor.YELLOW)
-        startTag = "<font style='background-color: $yellow;'>"
-    }
 
     @Test
     fun `Test highlight indexing simple case`() {
@@ -51,7 +41,7 @@ class FuzzyMatchContainerTest {
         score.highlightCharacters.add(4)
         val container = FuzzyMatchContainer(score, "", "Hello")
         val res = container.highlight(container.filename)
-        assertEquals("${startTag}H${endTag}ell${startTag}o$endTag", res)
+        assertEquals("${startStyleTag}H${END_STYLE_TAG}ell${startStyleTag}o$END_STYLE_TAG", res)
     }
 
     @Test
@@ -66,19 +56,18 @@ class FuzzyMatchContainerTest {
         score.highlightCharacters.add(18) // r
 
         val container = FuzzyMatchContainer(score, "", "FuzzyMatchContainerTest.kt")
-        yellow = colorAsHex(JBColor.YELLOW)
         val res = container.highlight(container.filename)
         val sb = StringBuilder()
 
-        sb.append(startTag, "F", endTag)
-        sb.append(startTag, "u", endTag)
-        sb.append(startTag, "z", endTag)
-        sb.append(startTag, "z", endTag)
+        sb.append(startStyleTag, "F", END_STYLE_TAG)
+        sb.append(startStyleTag, "u", END_STYLE_TAG)
+        sb.append(startStyleTag, "z", END_STYLE_TAG)
+        sb.append(startStyleTag, "z", END_STYLE_TAG)
         sb.append("yMatchConta")
-        sb.append(startTag, "i", endTag)
+        sb.append(startStyleTag, "i", END_STYLE_TAG)
         sb.append("n")
-        sb.append(startTag, "e", endTag)
-        sb.append(startTag, "r", endTag)
+        sb.append(startStyleTag, "e", END_STYLE_TAG)
+        sb.append(startStyleTag, "r", END_STYLE_TAG)
         sb.append("Test.kt")
         var i = 0
         while (i < res.length) {
