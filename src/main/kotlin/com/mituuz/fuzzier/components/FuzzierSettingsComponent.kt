@@ -106,13 +106,13 @@ class FuzzierSettingsComponent {
         """.trimIndent(),
         false)
 
-    val fileListFontSize = SettingsComponent(JBIntSpinner(14, 4, 20), "File list font size",
+    val fileListFontSize = SettingsComponent(JBIntSpinner(14, 4, 30), "File list font size",
         """
             Controls the font size of the file list in the search and selector popups.
         """.trimIndent(),
         false)
 
-    val previewFontSize = SettingsComponent(JBIntSpinner(0, 0, 20), "Preview font size",
+    val previewFontSize = SettingsComponent(JBIntSpinner(0, 0, 30), "Preview font size",
         """
             Controls the font size of the preview in the search and selector popups.
             <br>
