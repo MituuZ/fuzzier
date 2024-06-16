@@ -24,31 +24,20 @@ SOFTWARE.
 package com.mituuz.fuzzier.entities
 
 import com.intellij.openapi.components.service
-import com.intellij.ui.JBColor
+import com.mituuz.fuzzier.settings.FuzzierConfiguration.END_STYLE_TAG
+import com.mituuz.fuzzier.settings.FuzzierConfiguration.startStyleTag
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
-import java.awt.Color
 
 class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filename: String, private var module: String = "") {
     private var initialPath: String? = null
 
     companion object {
-        const val END_STYLE_TAG: String = "</font>"
-
-        val startStyleTag: String by lazy {
-            val color = JBColor.YELLOW
-            "<font style='background-color: ${colorAsHex(color)};'>"
-        }
-
         fun createOrderedContainer(order: Int, filePath: String, initialPath:String, filename: String): FuzzyMatchContainer {
             val fuzzyScore = FuzzyScore()
             fuzzyScore.filenameScore = order
             val fuzzyMatchContainer = FuzzyMatchContainer(fuzzyScore, filePath, filename)
             fuzzyMatchContainer.initialPath = initialPath
             return fuzzyMatchContainer
-        }
-
-        private fun colorAsHex(color: Color): String {
-            return String.format("#%02x%02x%02x", color.red, color.green, color.blue)
         }
     }
 

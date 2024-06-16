@@ -24,9 +24,9 @@ SOFTWARE.
 package com.mituuz.fuzzier.entities
 
 import com.intellij.testFramework.TestApplicationManager
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer.Companion.END_STYLE_TAG
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer.Companion.startStyleTag
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FuzzyScore
+import com.mituuz.fuzzier.settings.FuzzierConfiguration.END_STYLE_TAG
+import com.mituuz.fuzzier.settings.FuzzierConfiguration.startStyleTag
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
