@@ -1,10 +1,10 @@
 plugins {
-  id("org.jetbrains.kotlin.jvm") version "1.9.23"
-  id("org.jetbrains.intellij") version "1.17.3"
+  id("org.jetbrains.kotlin.jvm") version "2.0.0"
+  id("org.jetbrains.intellij") version "1.17.4"
 }
 
 group = "com.mituuz"
-version = "0.23.0"
+version = "0.24.0"
 
 repositories {
   mavenCentral()
@@ -12,7 +12,7 @@ repositories {
 
 dependencies {
   testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
-  testImplementation("org.mockito:mockito-core:5.11.0")
+  testImplementation("org.mockito:mockito-core:5.12.0")
 
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
 }

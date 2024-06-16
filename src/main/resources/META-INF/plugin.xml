@@ -29,10 +29,9 @@
   </extensions>
 
   <change-notes><![CDATA[
-  <h2>Version 0.23.0</h2>
-  - Add an option to show recently used files when opening the popup<br>
-  - Fix mover not working correctly<br>
-  - Refactor module handling<br>
+  <h2>Version 0.24.0</h2>
+  - Add an option to change the font size for the preview window<br>
+  - Some dependency updates<br>
   ]]>
   </change-notes>
 
