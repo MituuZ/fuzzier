@@ -32,6 +32,7 @@
   <h2>Version 0.24.0</h2>
   - Add an option to change the font size for the preview window<br>
   - Some dependency updates<br>
+  - Separate settings<br>
   ]]>
   </change-notes>
 
