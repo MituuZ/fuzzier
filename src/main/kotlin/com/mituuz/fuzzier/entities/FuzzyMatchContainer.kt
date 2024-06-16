@@ -47,7 +47,7 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
             return fuzzyMatchContainer
         }
 
-        fun colorAsHex(color: Color): String {
+        private fun colorAsHex(color: Color): String {
             return String.format("#%02x%02x%02x", color.red, color.green, color.blue)
         }
     }
