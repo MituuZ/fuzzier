@@ -34,7 +34,6 @@ import com.intellij.util.ui.FormBuilder
 import com.intellij.openapi.ui.ComboBox
 import com.mituuz.fuzzier.components.FuzzierSettingsComponent.SettingsComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType.*
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode
 import java.awt.Component
@@ -107,9 +106,17 @@ class FuzzierSettingsComponent {
         """.trimIndent(),
         false)
 
-    val fontSize = SettingsComponent(JBIntSpinner(14, 4, 20), "File list font size",
+    val fileListFontSize = SettingsComponent(JBIntSpinner(14, 4, 30), "File list font size",
         """
             Controls the font size of the file list in the search and selector popups.
+        """.trimIndent(),
+        false)
+
+    val previewFontSize = SettingsComponent(JBIntSpinner(0, 0, 30), "Preview font size",
+        """
+            Controls the font size of the preview in the search and selector popups.
+            <br>
+            When value is zero, use the current font size of the editor.
         """.trimIndent(),
         false)
 
@@ -179,7 +186,9 @@ class FuzzierSettingsComponent {
     init {
         setupComponents()
         jPanel = FormBuilder.createFormBuilder()
+            .addComponent(JBLabel("<html><strong>General settings</strong></html>"))
             .addComponent(exclusionSet)
+
             .addSeparator()
             .addComponent(newTabSelect)
             .addComponent(recentFileModeSelector)
@@ -187,7 +196,11 @@ class FuzzierSettingsComponent {
             .addComponent(debounceTimerValue)
             .addComponent(filenameTypeSelector)
             .addComponent(fileListLimit)
-            .addComponent(fontSize)
+
+            .addSeparator()
+            .addComponent(JBLabel("<html><strong>Popup styling</strong></html>"))
+            .addComponent(fileListFontSize)
+            .addComponent(previewFontSize)
             .addComponent(fileListSpacing)
 
             .addSeparator()
@@ -199,9 +212,12 @@ class FuzzierSettingsComponent {
             .addComponent(matchWeightStreakModifier)
             .addComponent(matchWeightFilename)
 
+            .addSeparator()
             .addComponent(startTestBench)
             .addComponent(testBench)
             .addComponentFillVertically(JPanel(), 0)
+
+            .addSeparator()
             .addComponent(resetWindowDimension)
             .panel
     }

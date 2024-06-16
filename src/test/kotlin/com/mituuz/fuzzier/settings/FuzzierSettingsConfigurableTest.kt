@@ -45,7 +45,8 @@ class FuzzierSettingsConfigurableTest {
         state.debouncePeriod = 140
         state.filenameType = FILENAME_WITH_PATH_STYLED
         state.fileListLimit = 200
-        state.fontSize = 15
+        state.fileListFontSize = 15
+        state.previewFontSize = 0
         state.fileListSpacing = 2
 
         state.tolerance = 4
@@ -68,7 +69,8 @@ class FuzzierSettingsConfigurableTest {
         state.debouncePeriod = 140
         state.filenameType = FILENAME_WITH_PATH_STYLED
         state.fileListLimit = 200
-        state.fontSize = 15
+        state.fileListFontSize = 15
+        state.previewFontSize = 0
         state.fileListSpacing = 2
 
         state.tolerance = 4
@@ -80,7 +82,7 @@ class FuzzierSettingsConfigurableTest {
 
         val settingsConfigurable = FuzzierSettingsConfigurable()
         settingsConfigurable.createComponent()
-        state.fontSize = 16
+        state.fileListFontSize = 16
         assertTrue(settingsConfigurable.isModified())
     }
 }

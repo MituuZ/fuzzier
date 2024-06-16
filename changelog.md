@@ -1,4 +1,9 @@
 # Changelog
+## Version 0.24.0
+- Add an option to change the font size for the preview window
+- Some dependency updates
+- Separate settings sections
+
 ## Version 0.23.0
 - Add an option to show recently used files when opening the popup
 - Fix mover not working correctly
