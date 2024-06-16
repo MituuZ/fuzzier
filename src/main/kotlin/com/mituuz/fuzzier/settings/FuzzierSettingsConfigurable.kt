@@ -48,7 +48,8 @@ class FuzzierSettingsConfigurable : Configurable {
         component.debounceTimerValue.getIntSpinner().value = state.debouncePeriod
         component.filenameTypeSelector.getFilenameTypeComboBox().selectedIndex = state.filenameType.ordinal
         component.fileListLimit.getIntSpinner().value = state.fileListLimit
-        component.fontSize.getIntSpinner().value = state.fontSize
+        component.fileListFontSize.getIntSpinner().value = state.fileListFontSize
+        component.previewFontSize.getIntSpinner().value = state.previewFontSize
         component.fileListSpacing.getIntSpinner().value = state.fileListSpacing
 
         component.tolerance.getIntSpinner().value = state.tolerance
@@ -74,7 +75,8 @@ class FuzzierSettingsConfigurable : Configurable {
                 || state.debouncePeriod != component.debounceTimerValue.getIntSpinner().value
                 || state.filenameType != component.filenameTypeSelector.getFilenameTypeComboBox().selectedItem
                 || state.fileListLimit != component.fileListLimit.getIntSpinner().value
-                || state.fontSize != component.fontSize.getIntSpinner().value
+                || state.fileListFontSize != component.fileListFontSize.getIntSpinner().value
+                || state.previewFontSize != component.previewFontSize.getIntSpinner().value
                 || state.fileListSpacing != component.fileListSpacing.getIntSpinner().value
 
                 || state.tolerance != component.tolerance.getIntSpinner().value
@@ -97,7 +99,8 @@ class FuzzierSettingsConfigurable : Configurable {
         state.debouncePeriod = component.debounceTimerValue.getIntSpinner().value as Int
         state.filenameType = FilenameType.entries.toTypedArray()[component.filenameTypeSelector.getFilenameTypeComboBox().selectedIndex]
         state.fileListLimit = component.fileListLimit.getIntSpinner().value as Int
-        state.fontSize = component.fontSize.getIntSpinner().value as Int
+        state.fileListFontSize = component.fileListFontSize.getIntSpinner().value as Int
+        state.previewFontSize = component.previewFontSize.getIntSpinner().value as Int
         state.fileListSpacing = component.fileListSpacing.getIntSpinner().value as Int
 
         state.tolerance = component.tolerance.getIntSpinner().value as Int

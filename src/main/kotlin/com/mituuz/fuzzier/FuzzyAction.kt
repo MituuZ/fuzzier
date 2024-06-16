@@ -187,7 +187,7 @@ abstract class FuzzyAction : AnAction() {
                 fuzzierSettingsService.state.fileListSpacing.let {
                     renderer.border = BorderFactory.createEmptyBorder(it, 0, it, 0)
                 }
-                fuzzierSettingsService.state.fontSize.let {
+                fuzzierSettingsService.state.fileListFontSize.let {
                     renderer.font = renderer.font.deriveFont(it.toFloat())
                 }
                 return renderer
