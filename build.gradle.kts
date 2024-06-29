@@ -1,10 +1,12 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
   id("org.jetbrains.kotlin.jvm") version "2.0.0"
   id("org.jetbrains.intellij") version "1.17.4"
 }
 
 group = "com.mituuz"
-version = "0.24.0"
+version = "0.25.0"
 
 repositories {
   mavenCentral()
@@ -30,7 +32,7 @@ intellij {
 
 tasks {
   withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions.jvmTarget = "17"
+    compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
   }
 
   patchPluginXml {

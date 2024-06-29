@@ -102,8 +102,6 @@ class FuzzierSettingsComponent {
 
     val highlightFilename = SettingsComponent(JBCheckBox(), "Highlight filename in file list*",
         """
-            This is still experimental and may cause some performance issues.
-            <br><br>
             Toggles highlighting of the filename on the file list.
             <br>
             Only works with styled file list, which supports html styling.
