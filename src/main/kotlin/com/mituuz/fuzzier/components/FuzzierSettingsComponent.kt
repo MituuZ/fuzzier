@@ -268,6 +268,7 @@ class FuzzierSettingsComponent {
         filenameTypeSelector.getFilenameTypeComboBox().addItemListener {
             highlightFilename.getCheckBox().isEnabled = it.item == FilenameType.FILENAME_WITH_PATH_STYLED
         }
+        highlightFilename.getCheckBox().isEnabled = filenameTypeSelector.getFilenameTypeComboBox().item == FilenameType.FILENAME_WITH_PATH_STYLED
 
         startTestBench.getButton().addActionListener {
             startTestBench.getButton().isEnabled = false
