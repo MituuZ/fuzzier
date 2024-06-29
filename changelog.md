@@ -1,4 +1,7 @@
 # Changelog
+## Version 0.25.1
+- Fix task cancellation, making lower debounce time feel much better
+
 ## Version 0.25.0
 - Clear up settings grouping
 - Add option to highlight filename matches in the file list

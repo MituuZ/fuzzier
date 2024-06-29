@@ -30,7 +30,6 @@ import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.impl.EditorHistoryManager
 import com.intellij.openapi.module.ModuleManager
-import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -47,9 +46,7 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
-import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.NONE
-import kotlinx.coroutines.*
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
 import javax.swing.*
@@ -160,12 +157,11 @@ open class Fuzzier : FuzzyAction() {
             return
         }
 
-        if (currentTask != null) {
-            println("Task is running, try to cancel")
-            currentTask!!.cancel()
-        }
-        currentTask = CoroutineScope(Dispatchers.IO).launch {
+        currentTask?.takeIf { !it.isDone }?.cancel(true)
+        currentTask = ApplicationManager.getApplication().executeOnPooledThread {
             try {
+                // Create a reference to the current task to check if it has been cancelled
+                val task = currentTask
                 component.fileList.setPaintBusy(true)
                 var listModel = DefaultListModel<FuzzyMatchContainer>()
 
@@ -174,13 +170,17 @@ open class Fuzzier : FuzzyAction() {
                     fuzzierSettingsService.state.modules,
                     changeListManager
                 )
-                yield()
+
+                if (task?.isCancelled == true) throw CancellationException()
 
                 val moduleManager = ModuleManager.getInstance(project)
                 processModules(moduleManager, stringEvaluator, searchString, listModel)
 
-                yield()
+                if (task?.isCancelled == true) throw CancellationException()
+
                 listModel = fuzzierUtil.sortAndLimit(listModel)
+
+                if (task?.isCancelled == true) throw CancellationException()
 
                 ApplicationManager.getApplication().invokeLater {
                     component.fileList.model = listModel

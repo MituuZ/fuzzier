@@ -29,6 +29,8 @@
   </extensions>
 
   <change-notes><![CDATA[
+  <h2>Version 0.25.1</h2>
+  - Fix task cancellation, making lower debounce time feel much better<br>
   <h2>Version 0.25.0</h2>
   - Clear up settings grouping<br>
   - Add option to highlight filename matches in the file list<br>
