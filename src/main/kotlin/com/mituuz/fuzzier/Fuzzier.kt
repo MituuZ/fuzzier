@@ -30,6 +30,7 @@ import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.impl.EditorHistoryManager
 import com.intellij.openapi.module.ModuleManager
+import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -48,9 +49,11 @@ import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.NONE
+import kotlinx.coroutines.*
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
 import javax.swing.*
+import kotlin.coroutines.cancellation.CancellationException
 
 open class Fuzzier : FuzzyAction() {
     private var defaultDoc: Document? = null
@@ -157,29 +160,38 @@ open class Fuzzier : FuzzyAction() {
             return
         }
 
-        currentTask?.takeIf { !it.isDone }?.cancel(true)
-        currentTask = ApplicationManager.getApplication().executeOnPooledThread {
-            component.fileList.setPaintBusy(true)
-            var listModel = DefaultListModel<FuzzyMatchContainer>()
+        if (currentTask != null) {
+            println("Task is running, try to cancel")
+            currentTask!!.cancel()
+        }
+        currentTask = CoroutineScope(Dispatchers.IO).launch {
+            try {
+                component.fileList.setPaintBusy(true)
+                var listModel = DefaultListModel<FuzzyMatchContainer>()
 
-            val stringEvaluator = StringEvaluator(
-                fuzzierSettingsService.state.exclusionSet,
-                fuzzierSettingsService.state.modules,
-                changeListManager
-            )
+                val stringEvaluator = StringEvaluator(
+                    fuzzierSettingsService.state.exclusionSet,
+                    fuzzierSettingsService.state.modules,
+                    changeListManager
+                )
+                yield()
 
-            val moduleManager = ModuleManager.getInstance(project)
-            processModules(moduleManager, stringEvaluator, searchString, listModel)
+                val moduleManager = ModuleManager.getInstance(project)
+                processModules(moduleManager, stringEvaluator, searchString, listModel)
 
-            listModel = fuzzierUtil.sortAndLimit(listModel)
+                yield()
+                listModel = fuzzierUtil.sortAndLimit(listModel)
 
-            ApplicationManager.getApplication().invokeLater {
-                component.fileList.model = listModel
-                component.fileList.cellRenderer = getCellRenderer()
-                component.fileList.setPaintBusy(false)
-                if (!component.fileList.isEmpty) {
-                    component.fileList.setSelectedValue(listModel[0], true)
+                ApplicationManager.getApplication().invokeLater {
+                    component.fileList.model = listModel
+                    component.fileList.cellRenderer = getCellRenderer()
+                    component.fileList.setPaintBusy(false)
+                    if (!component.fileList.isEmpty) {
+                        component.fileList.setSelectedValue(listModel[0], true)
+                    }
                 }
+            } catch (e: CancellationException) {
+                // Do nothing
             }
         }
     }
