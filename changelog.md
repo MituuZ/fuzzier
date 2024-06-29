@@ -1,4 +1,8 @@
 # Changelog
+## Version 0.25.0
+- Clear up settings grouping
+- Add option to highlight filename matches in the file list
+
 ## Version 0.24.0
 - Add an option to change the font size for the preview window
 - Some dependency updates

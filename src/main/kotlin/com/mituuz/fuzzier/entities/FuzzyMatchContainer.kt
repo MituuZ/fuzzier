@@ -24,10 +24,13 @@ SOFTWARE.
 package com.mituuz.fuzzier.entities
 
 import com.intellij.openapi.components.service
+import com.mituuz.fuzzier.settings.FuzzierConfiguration.END_STYLE_TAG
+import com.mituuz.fuzzier.settings.FuzzierConfiguration.startStyleTag
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 
 class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filename: String, private var module: String = "") {
     private var initialPath: String? = null
+
     companion object {
         fun createOrderedContainer(order: Int, filePath: String, initialPath:String, filename: String): FuzzyMatchContainer {
             val fuzzyScore = FuzzyScore()
@@ -38,17 +41,39 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
         }
     }
 
-    fun toString(filenameType: FilenameType): String {
+    fun toString(filenameType: FilenameType, highlight: Boolean): String {
         return when (filenameType) {
             FilenameType.FILENAME_ONLY -> filename
             FilenameType.FILE_PATH_ONLY -> filePath
             FilenameType.FILENAME_WITH_PATH -> "$filename   ($filePath)"
-            FilenameType.FILENAME_WITH_PATH_STYLED -> getFilenameWithPathStyled()
+            FilenameType.FILENAME_WITH_PATH_STYLED -> getFilenameWithPathStyled(highlight)
         }
     }
 
-    private fun getFilenameWithPathStyled(): String {
-        return "<html><strong>$filename</strong>  <i>($filePath)</i></html>"
+    private fun getStyledFilename(highlight: Boolean): String {
+        if (highlight) {
+            return highlight(filename)
+        }
+        return filename
+    }
+
+    fun highlight(source: String): String {
+        val stringBuilder: StringBuilder = StringBuilder(source)
+        var offset = 0
+        val hlIndexes = score.highlightCharacters.sorted()
+        for (i in hlIndexes) {
+            if (i < source.length) {
+                stringBuilder.insert(i + offset, startStyleTag)
+                offset += startStyleTag.length
+                stringBuilder.insert(i + offset + 1, END_STYLE_TAG)
+                offset += END_STYLE_TAG.length
+            }
+        }
+        return stringBuilder.toString()
+    }
+
+    private fun getFilenameWithPathStyled(highlight: Boolean): String {
+        return "<html><strong>${getStyledFilename(highlight)}</strong>  <i>($filePath)</i></html>"
     }
 
     fun getFileUri(): String {
@@ -85,6 +110,7 @@ class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filen
         var multiMatchScore = 0
         var partialPathScore = 0
         var filenameScore = 0
+        val highlightCharacters: MutableSet<Int> = HashSet()
 
         fun getTotalScore(): Int {
             return streakScore + multiMatchScore + partialPathScore + filenameScore

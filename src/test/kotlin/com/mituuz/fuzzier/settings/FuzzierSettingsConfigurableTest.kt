@@ -43,8 +43,10 @@ class FuzzierSettingsConfigurableTest {
         state.recentFilesMode = NONE
         state.prioritizeShorterDirPaths = false
         state.debouncePeriod = 140
-        state.filenameType = FILENAME_WITH_PATH_STYLED
         state.fileListLimit = 200
+
+        state.filenameType = FILENAME_WITH_PATH_STYLED
+        state.highlightFilename = false
         state.fileListFontSize = 15
         state.previewFontSize = 0
         state.fileListSpacing = 2
@@ -67,8 +69,10 @@ class FuzzierSettingsConfigurableTest {
         state.newTab = true
         state.recentFilesMode = RECENT_PROJECT_FILES
         state.debouncePeriod = 140
-        state.filenameType = FILENAME_WITH_PATH_STYLED
         state.fileListLimit = 200
+
+        state.filenameType = FILENAME_WITH_PATH_STYLED
+        state.highlightFilename = false
         state.fileListFontSize = 15
         state.previewFontSize = 0
         state.fileListSpacing = 2

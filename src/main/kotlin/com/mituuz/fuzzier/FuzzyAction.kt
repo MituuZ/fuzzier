@@ -183,7 +183,7 @@ abstract class FuzzyAction : AnAction() {
                 } else {
                     fuzzierSettingsService.state.filenameType
                 }
-                renderer.text = container.toString(filenameType)
+                renderer.text = container.toString(filenameType, fuzzierSettingsService.state.highlightFilename)
                 fuzzierSettingsService.state.fileListSpacing.let {
                     renderer.border = BorderFactory.createEmptyBorder(it, 0, it, 0)
                 }
@@ -198,5 +198,9 @@ abstract class FuzzyAction : AnAction() {
     // Used for testing
     fun setFiletype(filenameType: FilenameType) {
         fuzzierSettingsService.state.filenameType = filenameType
+    }
+
+    fun setHighlight(highlight: Boolean) {
+        fuzzierSettingsService.state.highlightFilename = highlight
     }
 }

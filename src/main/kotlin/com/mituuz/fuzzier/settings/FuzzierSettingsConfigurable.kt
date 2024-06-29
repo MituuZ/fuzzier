@@ -46,8 +46,10 @@ class FuzzierSettingsConfigurable : Configurable {
         component.recentFileModeSelector.getRecentFilesTypeComboBox().selectedIndex = state.recentFilesMode.ordinal
         component.prioritizeShortDirs.getCheckBox().isSelected = state.prioritizeShorterDirPaths
         component.debounceTimerValue.getIntSpinner().value = state.debouncePeriod
-        component.filenameTypeSelector.getFilenameTypeComboBox().selectedIndex = state.filenameType.ordinal
         component.fileListLimit.getIntSpinner().value = state.fileListLimit
+
+        component.filenameTypeSelector.getFilenameTypeComboBox().selectedIndex = state.filenameType.ordinal
+        component.highlightFilename.getCheckBox().isSelected = state.highlightFilename
         component.fileListFontSize.getIntSpinner().value = state.fileListFontSize
         component.previewFontSize.getIntSpinner().value = state.previewFontSize
         component.fileListSpacing.getIntSpinner().value = state.fileListSpacing
@@ -73,8 +75,10 @@ class FuzzierSettingsConfigurable : Configurable {
                 || state.recentFilesMode != component.recentFileModeSelector.getRecentFilesTypeComboBox().selectedItem
                 || state.prioritizeShorterDirPaths != component.prioritizeShortDirs.getCheckBox().isSelected
                 || state.debouncePeriod != component.debounceTimerValue.getIntSpinner().value
-                || state.filenameType != component.filenameTypeSelector.getFilenameTypeComboBox().selectedItem
                 || state.fileListLimit != component.fileListLimit.getIntSpinner().value
+
+                || state.filenameType != component.filenameTypeSelector.getFilenameTypeComboBox().selectedItem
+                || state.highlightFilename != component.highlightFilename.getCheckBox().isSelected
                 || state.fileListFontSize != component.fileListFontSize.getIntSpinner().value
                 || state.previewFontSize != component.previewFontSize.getIntSpinner().value
                 || state.fileListSpacing != component.fileListSpacing.getIntSpinner().value
@@ -97,8 +101,10 @@ class FuzzierSettingsConfigurable : Configurable {
         state.recentFilesMode = RecentFilesMode.entries.toTypedArray()[component.recentFileModeSelector.getRecentFilesTypeComboBox().selectedIndex]
         state.prioritizeShorterDirPaths = component.prioritizeShortDirs.getCheckBox().isSelected
         state.debouncePeriod = component.debounceTimerValue.getIntSpinner().value as Int
-        state.filenameType = FilenameType.entries.toTypedArray()[component.filenameTypeSelector.getFilenameTypeComboBox().selectedIndex]
         state.fileListLimit = component.fileListLimit.getIntSpinner().value as Int
+
+        state.filenameType = FilenameType.entries.toTypedArray()[component.filenameTypeSelector.getFilenameTypeComboBox().selectedIndex]
+        state.highlightFilename = component.highlightFilename.getCheckBox().isSelected
         state.fileListFontSize = component.fileListFontSize.getIntSpinner().value as Int
         state.previewFontSize = component.previewFontSize.getIntSpinner().value as Int
         state.fileListSpacing = component.fileListSpacing.getIntSpinner().value as Int

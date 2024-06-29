@@ -164,6 +164,7 @@ class ScoreCalculator(searchString: String) {
     private fun processFilenameChar(searchStringPartChar: Char) {
         val filePathPartChar = currentFilePath[filePathIndex]
         if (searchStringPartChar == filePathPartChar) {
+            fuzzyScore.highlightCharacters.add(filePathIndex - filenameIndex)
             searchStringIndex++
             currentFilenameStreak++
             if (currentFilenameStreak > longestFilenameStreak) {
