@@ -43,7 +43,7 @@ class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.S
         var exclusionSet: Set<String> = setOf("/.idea/*", "/.git/*", "/target/*", "/build/*", "/.gradle/*", "/.run/*")
         var newTab: Boolean = false
         var prioritizeShorterDirPaths = true
-        var debouncePeriod: Int = 50
+        var debouncePeriod: Int = 80
         var resetWindow = false
         var fileListLimit: Int = 50
 
