@@ -100,7 +100,7 @@ class FuzzierSettingsComponent {
     """.trimIndent(),
         false)
 
-    val highlightFilename = SettingsComponent(JBCheckBox(), "Highlight filename in file list*",
+    val highlightFilename = SettingsComponent(JBCheckBox(), "Highlight filename in file list",
         """
             Toggles highlighting of the filename on the file list.
             <br>
