@@ -44,6 +44,11 @@
       <override-text place="MainMenu" text="Fuzzy File Search (Only VCS Tracked Files)"/>
       <add-to-group group-id="ToolsMenu" />
     </action>
+    <action id="com.mituuz.fuzzier.FuzzierFS"
+            class="com.mituuz.fuzzier.FuzzierFS"
+            text="Fuzzy Search File Structure"
+            description="Search file structure objects using a basic fuzzy search">
+    </action>
     <action id="com.mituuz.fuzzier.FuzzyMover"
             class="com.mituuz.fuzzier.FuzzyMover"
             text="Fuzzy File Mover"
