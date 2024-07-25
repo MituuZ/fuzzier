@@ -1,7 +1,11 @@
 package com.mituuz.fuzzier
 
+import com.intellij.ide.structureView.StructureViewModel
+import com.intellij.ide.structureView.TreeBasedStructureViewBuilder
 import com.intellij.ide.util.FileStructureFilter
+import com.intellij.ide.util.FileStructurePopup
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.editor.ex.util.EditorUtil
 import com.intellij.openapi.fileChooser.impl.FileTreeStructure
 
 import com.intellij.openapi.fileEditor.FileEditorManager
@@ -12,6 +16,9 @@ import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.testFramework.utils.vfs.getPsiFile
+import com.intellij.ui.speedSearch.ElementFilter
+import com.intellij.ui.tree.StructureTreeModel
+import com.intellij.ui.treeStructure.filtered.FilteringTreeStructure
 
 class FuzzierFS : Fuzzier() {
     override var title: String = "Fuzzy Search (File Structure)"
@@ -24,6 +31,8 @@ class FuzzierFS : Fuzzier() {
         if (currentEditor != null) {
             ApplicationManager.getApplication().runReadAction() {
                 val psiFile: PsiFile? = currentEditor.file.findPsiFile(project)
+                val builder: TreeBasedStructureViewBuilder = currentEditor.structureViewBuilder as TreeBasedStructureViewBuilder
+                val treeModel: StructureViewModel = builder.createStructureViewModel(EditorUtil.getEditorEx(currentEditor));
                 if (psiFile != null) {
 //                    val elements = PsiTreeUtil.getChildrenOfAnyType(psiFile, KtClass::class.java, KtNamedFunction::class.java, KtProperty::class.java)
 //                    for (element in elements) {
