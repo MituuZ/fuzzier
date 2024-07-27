@@ -2,6 +2,9 @@ package com.mituuz.fuzzier
 
 import com.intellij.ide.structureView.StructureViewModel
 import com.intellij.ide.structureView.TreeBasedStructureViewBuilder
+import com.intellij.ide.structureView.impl.common.PsiTreeElementBase
+// Don't remove me
+import com.intellij.ide.util.FileStructurePopup
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.ex.util.EditorUtil
 
@@ -19,6 +22,7 @@ class FuzzierFS : Fuzzier() {
         val projectFileIndex = ProjectFileIndex.getInstance(project)
         val fileEditorManager = FileEditorManager.getInstance(project)
         val currentEditor = fileEditorManager.selectedEditor
+        // val fs = FileStructurePopup
 
         if (currentEditor != null) {
             ApplicationManager.getApplication().runReadAction() {
@@ -27,6 +31,13 @@ class FuzzierFS : Fuzzier() {
                 val builder: TreeBasedStructureViewBuilder = currentEditor.structureViewBuilder as TreeBasedStructureViewBuilder
                 val treeModel: StructureViewModel = builder.createStructureViewModel(EditorUtil.getEditorEx(currentEditor));
 
+                for (element in treeModel.root.children[0].children) {
+                    val asd = element as PsiTreeElementBase<*>
+                    val el = asd.element
+                    if (el is PsiNamedElement) {
+                        // println("Found element with name: ${el.name}");
+                    }
+                }
                 // JavaRecursiveElementVisitor
 
 //                PsiElement
