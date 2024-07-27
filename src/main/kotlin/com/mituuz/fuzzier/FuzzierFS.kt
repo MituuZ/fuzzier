@@ -13,7 +13,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.psi.*
-import org.jetbrains.uast.toUElement
+import org.jetbrains.uast.*
+import org.jetbrains.uast.visitor.AbstractUastVisitor
 
 class FuzzierFS : Fuzzier() {
     override var title: String = "Fuzzy Search (File Structure)"
@@ -27,6 +28,41 @@ class FuzzierFS : Fuzzier() {
         if (currentEditor != null) {
             ApplicationManager.getApplication().runReadAction() {
                 val psiFile: PsiFile? = currentEditor.file.findPsiFile(project)
+
+                if (psiFile != null) {
+                    val uFile = UastFacade.convertElementWithParent(psiFile, UFile::class.java)
+                    uFile?.accept(object : AbstractUastVisitor() {
+                        override fun visitClass(node: UClass): Boolean {
+                            val textRange = node.textRange
+                            var offset = ""
+                            if (textRange != null) {
+                                offset = textRange.startOffset.toString()
+                            }
+                            println("Found class: ${node.name} at offset: ${offset}")
+                            return super.visitClass(node)
+                        }
+
+                        override fun visitMethod(node: UMethod): Boolean {
+                            val textRange = node.textRange
+                            var offset = ""
+                            if (textRange != null) {
+                                offset = textRange.startOffset.toString()
+                            }
+                            println("Found method: ${node.name} at offset: ${offset}")
+                            return super.visitMethod(node)
+                        }
+
+                        override fun visitVariable(node: UVariable): Boolean {
+                            val textRange = node.textRange
+                            var offset = ""
+                            if (textRange != null) {
+                                offset = textRange.startOffset.toString()
+                            }
+                            println("Found variable: ${node.name} at offset: ${offset}")
+                            return super.visitVariable(node)
+                        }
+                    })
+                }
 
                 val builder: TreeBasedStructureViewBuilder = currentEditor.structureViewBuilder as TreeBasedStructureViewBuilder
                 val treeModel: StructureViewModel = builder.createStructureViewModel(EditorUtil.getEditorEx(currentEditor));
@@ -61,18 +97,18 @@ class FuzzierFS : Fuzzier() {
                     val elements = psiFile.children[6].children[2].children // as KtNamedFunction
                     for (element in elements) {
                         val asd = element.toUElement();
-                        println(asd)
+                        // println(asd)
                     }
                 }
                 psiFile?.processChildren { c ->
                     c.processChildren {
-                        println("Found another child $c")
+                        // println("Found another child $c")
                         true
                     }
-                    println("Found child $c")
+                    // println("Found child $c")
                     true
                 }
-                println(psiFile)
+                // println(psiFile)
             }
             // PsiTreeUtil.findChildOfAnyType(currentEditor.file.getPsiFile(project), )
 
