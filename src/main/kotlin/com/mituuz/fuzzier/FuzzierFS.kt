@@ -9,12 +9,15 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.ex.util.EditorUtil
 
 import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.psi.*
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import org.jetbrains.uast.*
 import org.jetbrains.uast.visitor.AbstractUastVisitor
+import javax.swing.DefaultListModel
 
 class FuzzierFS : Fuzzier() {
     override var title: String = "Fuzzy Search (File Structure)"
@@ -23,6 +26,8 @@ class FuzzierFS : Fuzzier() {
         val projectFileIndex = ProjectFileIndex.getInstance(project)
         val fileEditorManager = FileEditorManager.getInstance(project)
         val currentEditor = fileEditorManager.selectedEditor
+
+        val listModel = DefaultListModel<FuzzyMatchContainer>()
         // val fs = FileStructurePopup
 
         if (currentEditor != null) {
@@ -38,7 +43,12 @@ class FuzzierFS : Fuzzier() {
                             if (textRange != null) {
                                 offset = textRange.startOffset.toString()
                             }
-                            println("Found class: ${node.name} at offset: ${offset}")
+                            val fs = FuzzyMatchContainer.FuzzyScore()
+                            val name = node.name
+                            if (!name.isNullOrBlank() && offset.isNotBlank()) {
+                                val fuzzyMatchContainer = FuzzyMatchContainer(fs, "Class $name at $offset", name, "")
+                                listModel.addElement(fuzzyMatchContainer)
+                            }
                             return super.visitClass(node)
                         }
 
@@ -48,7 +58,12 @@ class FuzzierFS : Fuzzier() {
                             if (textRange != null) {
                                 offset = textRange.startOffset.toString()
                             }
-                            println("Found method: ${node.name} at offset: ${offset}")
+                            val fs = FuzzyMatchContainer.FuzzyScore()
+                            val name = node.name
+                            if (name.isNotBlank() && offset.isNotBlank()) {
+                                val fuzzyMatchContainer = FuzzyMatchContainer(fs, "Method $name at $offset", name, "")
+                                listModel.addElement(fuzzyMatchContainer)
+                            }
                             return super.visitMethod(node)
                         }
 
@@ -58,10 +73,24 @@ class FuzzierFS : Fuzzier() {
                             if (textRange != null) {
                                 offset = textRange.startOffset.toString()
                             }
-                            println("Found variable: ${node.name} at offset: ${offset}")
+                            val fs = FuzzyMatchContainer.FuzzyScore()
+                            val name = node.name
+                            if (!name.isNullOrBlank() && offset.isNotBlank()) {
+                                val fuzzyMatchContainer = FuzzyMatchContainer(fs, "Variable $name at $offset", name, "")
+                                listModel.addElement(fuzzyMatchContainer)
+                            }
                             return super.visitVariable(node)
                         }
                     })
+
+                    ProgressManager.getInstance().run {
+                        component.fileList.model = listModel
+                        component.fileList.cellRenderer = getCellRenderer()
+                        component.fileList.setPaintBusy(false)
+                        if (!component.fileList.isEmpty) {
+                            component.fileList.setSelectedValue(listModel[0], true)
+                        }
+                    }
                 }
 
                 val builder: TreeBasedStructureViewBuilder = currentEditor.structureViewBuilder as TreeBasedStructureViewBuilder
@@ -115,7 +144,6 @@ class FuzzierFS : Fuzzier() {
         }
 
         // com.intellij.psi.SyntaxTraverser could be used for more powerful tree navigation
-        super.updateListContents(project, searchString)
     }
 
     class Visitor : PsiRecursiveElementWalkingVisitor() {
