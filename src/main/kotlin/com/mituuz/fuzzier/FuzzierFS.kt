@@ -13,6 +13,7 @@ import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.psi.*
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FuzzyScore
+import com.mituuz.fuzzier.entities.ScoreCalculator
 import org.jetbrains.uast.*
 import org.jetbrains.uast.visitor.AbstractUastVisitor
 import javax.swing.DefaultListModel
@@ -32,7 +33,7 @@ class FuzzierFS : Fuzzier() {
 
                 if (psiFile != null) {
                     val uFile = UastFacade.convertElementWithParent(psiFile, UFile::class.java)
-                    uFile?.accept(getVisitor(listModel))
+                    uFile?.accept(getVisitor(listModel, searchString))
 
                     ProgressManager.getInstance().run {
                         component.fileList.model = listModel
@@ -48,7 +49,7 @@ class FuzzierFS : Fuzzier() {
         }
     }
 
-    private fun getVisitor(listModel: DefaultListModel<FuzzyMatchContainer>): AbstractUastVisitor {
+    private fun getVisitor(listModel: DefaultListModel<FuzzyMatchContainer>, searchString: String): AbstractUastVisitor {
         return object : AbstractUastVisitor() {
             override fun visitClass(node: UClass): Boolean {
                 val textRange = node.sourcePsi?.textRange
@@ -57,7 +58,7 @@ class FuzzierFS : Fuzzier() {
                     offset = textRange.startOffset.toString()
                 }
                 val name = node.name
-                createContainer(listModel, "Class", name, offset)
+                createContainer(listModel, searchString, "Class", name, offset)
                 return super.visitClass(node)
             }
 
@@ -68,7 +69,7 @@ class FuzzierFS : Fuzzier() {
                     offset = textRange.startOffset.toString()
                 }
                 val name = node.name
-                createContainer(listModel, "Method", name, offset)
+                createContainer(listModel, searchString, "Method", name, offset)
                 return super.visitMethod(node)
             }
 
@@ -79,19 +80,22 @@ class FuzzierFS : Fuzzier() {
                     offset = textRange.startOffset.toString()
                 }
                 val name = node.name
-                createContainer(listModel, "Variable", name, offset)
+                createContainer(listModel, searchString, "Variable", name, offset)
                 return super.visitVariable(node)
             }
         }
     }
 
-    private fun createContainer(listModel: DefaultListModel<FuzzyMatchContainer>, type: String, name: String?,
-                                offset: String) {
+    private fun createContainer(listModel: DefaultListModel<FuzzyMatchContainer>, searchString: String,
+                                type: String, name: String?, offset: String) {
         if (name.isNullOrBlank() || offset.isBlank()) {
             return
         }
-        val fs = FuzzyScore()
-        val container = FuzzyMatchContainer(fs, "$type $name at $offset", name, "")
-        listModel.addElement(container)
+        val scoreCalculator = ScoreCalculator(searchString)
+        val fs = scoreCalculator.calculateScore(name)
+        if (fs != null) {
+            val container = FuzzyMatchContainer(fs, "$type $name at $offset", name, "")
+            listModel.addElement(container)
+        }
     }
 }
