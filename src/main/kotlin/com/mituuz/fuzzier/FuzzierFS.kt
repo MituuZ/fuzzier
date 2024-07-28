@@ -113,8 +113,8 @@ class FuzzierFS : Fuzzier() {
                 val returnType = node.returnType
                 if (returnType != null && returnType.presentableText != "void") {
                     name = "$name: ${returnType.presentableText}"
+                    createContainer(offset, name, "Method", listModel)
                 }
-                createContainer(offset, name, "Method", listModel)
                 return super.visitMethod(node)
             }
 
@@ -151,8 +151,8 @@ class FuzzierFS : Fuzzier() {
                 val returnType = node.returnType
                 if (returnType != null && returnType.presentableText != "void") {
                     name = "$name: ${returnType.presentableText}"
+                    createContainer(listModel, searchString, "Method", name, offset)
                 }
-                createContainer(listModel, searchString, "Method", name, offset)
                 return super.visitMethod(node)
             }
 
