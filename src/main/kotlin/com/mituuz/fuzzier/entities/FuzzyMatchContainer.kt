@@ -30,7 +30,6 @@ import com.mituuz.fuzzier.settings.FuzzierSettingsService
 
 class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filename: String, private var module: String = "") {
     private var initialPath: String? = null
-    private var displayString: String = ""
 
     companion object {
         /**
