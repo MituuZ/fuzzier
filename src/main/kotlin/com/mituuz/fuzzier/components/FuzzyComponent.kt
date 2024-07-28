@@ -32,4 +32,5 @@ open class FuzzyComponent : JPanel() {
     var fileList = JBList<FuzzyMatchContainer?>()
     var searchField = EditorTextField()
     var isDirSelector = false
+    var isFs = false
 }
