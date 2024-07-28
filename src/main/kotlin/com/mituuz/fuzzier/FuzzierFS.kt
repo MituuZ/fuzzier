@@ -131,7 +131,9 @@ class FuzzierFS : Fuzzier() {
 
             override fun visitVariable(node: UVariable): Boolean {
                 val offset = node.sourcePsi?.textRange?.startOffset?.toString() ?: ""
-                val name = node.name
+                var name = node.name
+                val type = node.type.presentableText
+                name = "$name: $type"
                 createContainer(offset, name, "Variable", listModel)
                 return super.visitVariable(node)
             }
@@ -179,7 +181,9 @@ class FuzzierFS : Fuzzier() {
 
             override fun visitVariable(node: UVariable): Boolean {
                 val offset = node.sourcePsi?.textRange?.startOffset?.toString() ?: ""
-                val name = node.name
+                var name = node.name
+                val type = node.type.presentableText
+                name = "$name: $type"
                 createContainer(listModel, searchString, "Variable", name, offset)
                 return super.visitVariable(node)
             }
