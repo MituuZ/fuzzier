@@ -123,7 +123,7 @@ open class Fuzzier : FuzzyAction() {
     /**
      * Populates the file list with recently opened files
      */
-    private fun createInitialView(project: Project) {
+    open fun createInitialView(project: Project) {
         ApplicationManager.getApplication().executeOnPooledThread {
             val editorHistory = EditorHistoryManager.getInstance(project).fileList
             val listModel = DefaultListModel<FuzzyMatchContainer>()
