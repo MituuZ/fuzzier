@@ -178,8 +178,9 @@ abstract class FuzzyAction : AnAction() {
                 val renderer =
                     super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) as JLabel
                 val container = value as FuzzyMatchContainer
-                val filenameType: FilenameType = if (component.isDirSelector) {
-                    FILE_PATH_ONLY // Directories are always shown as full paths
+                val filenameType: FilenameType = if (component.isDirSelector || component.isFs) {
+                    // Directories and file structures are always shown as full paths
+                    FILE_PATH_ONLY
                 } else {
                     fuzzierSettingsService.state.filenameType
                 }
