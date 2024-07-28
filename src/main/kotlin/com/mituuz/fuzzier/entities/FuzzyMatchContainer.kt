@@ -30,8 +30,14 @@ import com.mituuz.fuzzier.settings.FuzzierSettingsService
 
 class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filename: String, private var module: String = "") {
     private var initialPath: String? = null
+    private var displayString: String = ""
 
     companion object {
+        /**
+         * Used for showing recent files
+         *
+         * Creates a fuzzy match container with explicitly specified score.
+         */
         fun createOrderedContainer(order: Int, filePath: String, initialPath:String, filename: String): FuzzyMatchContainer {
             val fuzzyScore = FuzzyScore()
             fuzzyScore.filenameScore = order
