@@ -4,16 +4,23 @@ import com.intellij.ide.structureView.StructureViewModel
 import com.intellij.ide.structureView.TreeBasedStructureViewBuilder
 import com.intellij.ide.structureView.impl.common.PsiTreeElementBase
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.EDT
 import com.intellij.openapi.editor.ex.util.EditorUtil
+import com.intellij.openapi.fileEditor.FileEditor
 
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.psi.*
+import com.intellij.util.ui.ScrollUtil.scrollVertically
+import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FuzzyScore
 import com.mituuz.fuzzier.entities.ScoreCalculator
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.jetbrains.uast.*
 import org.jetbrains.uast.visitor.AbstractUastVisitor
 import javax.swing.DefaultListModel
@@ -21,7 +28,7 @@ import javax.swing.DefaultListModel
 class FuzzierFS : Fuzzier() {
     override var title: String = "Fuzzy Search (File Structure)"
     override fun updateListContents(project: Project, searchString: String) {
-        println("Hello from the file struct")
+        component.isFs = true
         val fileEditorManager = FileEditorManager.getInstance(project)
         val currentEditor = fileEditorManager.selectedEditor
 
@@ -45,7 +52,6 @@ class FuzzierFS : Fuzzier() {
                     }
                 }
             }
-
         }
     }
 
