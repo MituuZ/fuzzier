@@ -30,6 +30,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.psi.*
+import com.intellij.psi.impl.source.PsiClassReferenceType
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FuzzyScore
 import com.mituuz.fuzzier.entities.ScoreCalculator
@@ -113,8 +114,18 @@ class FuzzierFS : Fuzzier() {
                 val returnType = node.returnType
                 if (returnType != null && returnType.presentableText != "void") {
                     name = "$name: ${returnType.presentableText}"
-                    createContainer(offset, name, "Method", listModel)
                 }
+                val params: List<UParameter> = node.uastParameters
+                if (params.isNotEmpty()) {
+                    var paramString = "("
+                    for (param in params) {
+                        paramString = "$paramString${param.name}: ${(param.type as PsiClassReferenceType).name}, "
+                    }
+                    paramString = paramString.removeSuffix(", ")
+                    paramString = "$paramString)"
+                    name = "$name$paramString"
+                }
+                createContainer(offset, name, "Method", listModel)
                 return super.visitMethod(node)
             }
 
@@ -151,8 +162,18 @@ class FuzzierFS : Fuzzier() {
                 val returnType = node.returnType
                 if (returnType != null && returnType.presentableText != "void") {
                     name = "$name: ${returnType.presentableText}"
-                    createContainer(listModel, searchString, "Method", name, offset)
                 }
+                val params: List<UParameter> = node.uastParameters
+                if (params.isNotEmpty()) {
+                    var paramString = "("
+                    for (param: UParameter in params) {
+                        paramString = "$paramString${param.name}: ${(param.type as PsiClassReferenceType).name}, "
+                    }
+                    paramString = paramString.removeSuffix(", ")
+                    paramString = "$paramString)"
+                    name = "$name$paramString"
+                }
+                createContainer(listModel, searchString, "Method", name, offset)
                 return super.visitMethod(node)
             }
 
