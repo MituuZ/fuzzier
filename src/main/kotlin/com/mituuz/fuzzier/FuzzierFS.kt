@@ -31,7 +31,9 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.psi.*
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FuzzyScore
 import com.mituuz.fuzzier.entities.ScoreCalculator
+import kotlinx.html.currentTimeMillis
 import org.jetbrains.uast.*
 import org.jetbrains.uast.visitor.AbstractUastVisitor
 import javax.swing.DefaultListModel
@@ -66,7 +68,71 @@ class FuzzierFS : Fuzzier() {
         }
     }
 
-    private fun getVisitor(listModel: DefaultListModel<FuzzyMatchContainer>, searchString: String): AbstractUastVisitor {
+    override fun createInitialView(project: Project) {
+        ApplicationManager.getApplication().executeOnPooledThread {
+            component.isFs = true
+            val fileEditorManager = FileEditorManager.getInstance(project)
+            val currentEditor = fileEditorManager.selectedEditor
+
+            val listModel = DefaultListModel<FuzzyMatchContainer>()
+
+            if (currentEditor != null) {
+                ApplicationManager.getApplication().runReadAction() {
+                    val psiFile: PsiFile? = currentEditor.file.findPsiFile(project)
+
+                    if (psiFile != null) {
+                        val uFile = UastFacade.convertElementWithParent(psiFile, UFile::class.java)
+                        uFile?.accept(getOpenVisitor(listModel))
+
+                        ProgressManager.getInstance().run {
+                            component.fileList.model = listModel
+                            component.fileList.cellRenderer = getCellRenderer()
+                            component.fileList.setPaintBusy(false)
+                            if (!component.fileList.isEmpty) {
+                                component.fileList.setSelectedValue(listModel[0], true)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getOpenVisitor(listModel: DefaultListModel<FuzzyMatchContainer>): AbstractUastVisitor {
+        return object : AbstractUastVisitor() {
+            override fun visitClass(node: UClass): Boolean {
+                val offset = node.sourcePsi?.textRange?.startOffset?.toString() ?: ""
+                val name = node.name
+                createContainer(offset, name, "Class", listModel)
+                return super.visitClass(node)
+            }
+
+            override fun visitMethod(node: UMethod): Boolean {
+                val offset = node.sourcePsi?.textRange?.startOffset?.toString() ?: ""
+                val name = node.name
+                createContainer(offset, name, "Method", listModel)
+                return super.visitMethod(node)
+            }
+
+            override fun visitVariable(node: UVariable): Boolean {
+                val offset = node.sourcePsi?.textRange?.startOffset?.toString() ?: ""
+                val name = node.name
+                createContainer(offset, name, "Variable", listModel)
+                return super.visitVariable(node)
+            }
+        }
+    }
+
+    private fun createContainer(offset: String, name: String?, type: String,
+                                listModel: DefaultListModel<FuzzyMatchContainer>) {
+        if (offset.isNotBlank() && !name.isNullOrBlank()) {
+            val container = FuzzyMatchContainer(FuzzyScore(), "$type $name at $offset", name)
+            listModel.addElement(container)
+        }
+    }
+
+    private fun getVisitor(listModel: DefaultListModel<FuzzyMatchContainer>,
+                           searchString: String = ""): AbstractUastVisitor {
         return object : AbstractUastVisitor() {
             override fun visitClass(node: UClass): Boolean {
                 val offset = node.sourcePsi?.textRange?.startOffset?.toString() ?: ""
@@ -99,7 +165,7 @@ class FuzzierFS : Fuzzier() {
         val scoreCalculator = ScoreCalculator(searchString)
         val fs = scoreCalculator.calculateScore(name)
         if (fs != null) {
-            val container = FuzzyMatchContainer(fs, "$type $name at $offset", name, "")
+            val container = FuzzyMatchContainer(fs, "$type $name at $offset", name)
             listModel.addElement(container)
         }
     }
