@@ -27,6 +27,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.psi.*
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
@@ -68,33 +69,21 @@ class FuzzierFS : Fuzzier() {
     private fun getVisitor(listModel: DefaultListModel<FuzzyMatchContainer>, searchString: String): AbstractUastVisitor {
         return object : AbstractUastVisitor() {
             override fun visitClass(node: UClass): Boolean {
-                val textRange = node.sourcePsi?.textRange
-                var offset = ""
-                if (textRange != null) {
-                    offset = textRange.startOffset.toString()
-                }
+                val offset = node.sourcePsi?.textRange?.startOffset?.toString() ?: ""
                 val name = node.name
                 createContainer(listModel, searchString, "Class", name, offset)
                 return super.visitClass(node)
             }
 
             override fun visitMethod(node: UMethod): Boolean {
-                val textRange = node.sourcePsi?.textRange
-                var offset = ""
-                if (textRange != null) {
-                    offset = textRange.startOffset.toString()
-                }
+                val offset = node.sourcePsi?.textRange?.startOffset?.toString() ?: ""
                 val name = node.name
                 createContainer(listModel, searchString, "Method", name, offset)
                 return super.visitMethod(node)
             }
 
             override fun visitVariable(node: UVariable): Boolean {
-                val textRange = node.sourcePsi?.textRange
-                var offset = ""
-                if (textRange != null) {
-                    offset = textRange.startOffset.toString()
-                }
+                val offset = node.sourcePsi?.textRange?.startOffset?.toString() ?: ""
                 val name = node.name
                 createContainer(listModel, searchString, "Variable", name, offset)
                 return super.visitVariable(node)
