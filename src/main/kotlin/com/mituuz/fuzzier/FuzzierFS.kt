@@ -112,19 +112,21 @@ class FuzzierFS : Fuzzier() {
             override fun visitMethod(node: UMethod): Boolean {
                 val offset = node.sourcePsi?.textRange?.startOffset?.toString() ?: ""
                 var name = node.name
-                val returnType = node.returnType
-                if (returnType != null && returnType.presentableText != "void") {
-                    name = "$name: ${returnType.presentableText}"
-                }
                 val params: List<UParameter> = node.uastParameters
                 if (params.isNotEmpty()) {
                     var paramString = "("
-                    for (param in params) {
+                    for (param: UParameter in params) {
                         paramString = "$paramString${param.name}: ${(param.type as PsiClassReferenceType).name}, "
                     }
                     paramString = paramString.removeSuffix(", ")
                     paramString = "$paramString)"
                     name = "$name$paramString"
+                } else {
+                    name = "$name()"
+                }
+                val returnType = node.returnType
+                if (returnType != null && returnType.presentableText != "void") {
+                    name = "$name: ${returnType.presentableText}"
                 }
                 createContainer(offset, name, METHOD.text, listModel)
                 return super.visitMethod(node)
@@ -162,10 +164,6 @@ class FuzzierFS : Fuzzier() {
             override fun visitMethod(node: UMethod): Boolean {
                 val offset = node.sourcePsi?.textRange?.startOffset?.toString() ?: ""
                 var name = node.name
-                val returnType = node.returnType
-                if (returnType != null && returnType.presentableText != "void") {
-                    name = "$name: ${returnType.presentableText}"
-                }
                 val params: List<UParameter> = node.uastParameters
                 if (params.isNotEmpty()) {
                     var paramString = "("
@@ -175,6 +173,12 @@ class FuzzierFS : Fuzzier() {
                     paramString = paramString.removeSuffix(", ")
                     paramString = "$paramString)"
                     name = "$name$paramString"
+                } else {
+                    name = "$name()"
+                }
+                val returnType = node.returnType
+                if (returnType != null && returnType.presentableText != "void") {
+                    name = "$name: ${returnType.presentableText}"
                 }
                 createContainer(listModel, searchString, METHOD.text, name, offset)
                 return super.visitMethod(node)
@@ -205,8 +209,8 @@ class FuzzierFS : Fuzzier() {
     }
 
     enum class StructureType(val text: String) {
-        CLASS(   "Class    : "),
-        METHOD(  "Method   : "),
-        VARIABLE("Variable : ")
+        CLASS("Class: "),
+        METHOD("Method: "),
+        VARIABLE("Variable: ")
     }
 }
