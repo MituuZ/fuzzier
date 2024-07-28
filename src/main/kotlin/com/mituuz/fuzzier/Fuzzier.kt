@@ -301,7 +301,7 @@ open class Fuzzier : FuzzyAction() {
         popup?.cancel()
     }
 
-    private fun createListeners(project: Project) {
+    open fun createListeners(project: Project) {
         // Add a listener that updates the contents of the preview pane
         component.fileList.addListSelectionListener { event ->
             if (!event.valueIsAdjusting) {

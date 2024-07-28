@@ -24,13 +24,18 @@ SOFTWARE.
 package com.mituuz.fuzzier
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.psi.*
 import com.intellij.psi.impl.source.PsiClassReferenceType
 import com.mituuz.fuzzier.FuzzierFS.StructureType.*
+import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FuzzyScore
 import com.mituuz.fuzzier.entities.ScoreCalculator
@@ -64,6 +69,32 @@ class FuzzierFS : Fuzzier() {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    override fun createListeners(project: Project) {
+        // Add a listener that updates the contents of the preview pane
+        component.fileList.addListSelectionListener { event ->
+            if (!event.valueIsAdjusting) {
+                if (component.fileList.isEmpty) {
+                    ApplicationManager.getApplication().invokeLater {
+                        val previewPane = (component as FuzzyFinderComponent).previewPane
+                        previewPane.updateFile(EditorFactory.getInstance().createDocument(""))
+                    }
+                    return@addListSelectionListener
+                }
+                val selectedValue = component.fileList.selectedValue
+                val fileUrl = "file://${selectedValue?.getFileUri()}"
+
+                ProgressManager.getInstance().run(object : Task.Backgroundable(null, "Loading file", false) {
+                    override fun run(indicator: ProgressIndicator) {
+                        val file = VirtualFileManager.getInstance().findFileByUrl(fileUrl)
+                        file?.let {
+                            (component as FuzzyFinderComponent).previewPane.updateFile(file)
+                        }
+                    }
+                })
             }
         }
     }
@@ -103,7 +134,7 @@ class FuzzierFS : Fuzzier() {
             override fun visitClass(node: UClass): Boolean {
                 val offset = node.sourcePsi?.textRange?.startOffset?.toString() ?: ""
                 val name = node.name
-                createContainer(offset, name, CLASS.text, listModel)
+                createStaticContainer(offset, name, CLASS.text, listModel)
                 return super.visitClass(node)
             }
 
@@ -127,7 +158,7 @@ class FuzzierFS : Fuzzier() {
                     name = "$name: ${returnType.presentableText}"
                 }
                 if (name != "()") {
-                    createContainer(offset, name, METHOD.text, listModel)
+                    createStaticContainer(offset, name, METHOD.text, listModel)
                 }
                 return super.visitMethod(node)
             }
@@ -137,14 +168,14 @@ class FuzzierFS : Fuzzier() {
                 var name = node.name
                 val type = node.type.presentableText
                 name = "$name: $type"
-                createContainer(offset, name, VARIABLE.text, listModel)
+                createStaticContainer(offset, name, VARIABLE.text, listModel)
                 return super.visitVariable(node)
             }
         }
     }
 
-    private fun createContainer(offset: String, name: String?, type: String,
-                                listModel: DefaultListModel<FuzzyMatchContainer>) {
+    private fun createStaticContainer(offset: String, name: String?, type: String,
+                                      listModel: DefaultListModel<FuzzyMatchContainer>) {
         if (offset.isNotBlank() && !name.isNullOrBlank()) {
             val container = FuzzyMatchContainer(FuzzyScore(), "$type $name", name)
             listModel.addElement(container)
@@ -155,46 +186,65 @@ class FuzzierFS : Fuzzier() {
                            searchString: String = ""): AbstractUastVisitor {
         return object : AbstractUastVisitor() {
             override fun visitClass(node: UClass): Boolean {
-                val offset = node.sourcePsi?.textRange?.startOffset?.toString() ?: ""
                 val name = node.name
-                createContainer(listModel, searchString, CLASS.text, name, offset)
+                if (!name.isNullOrBlank()) {
+                    val displayString = getTextRepresentation(node, name)
+                    if (displayString != null) createContainer(listModel, searchString, displayString, name)
+                }
                 return super.visitClass(node)
             }
 
             override fun visitMethod(node: UMethod): Boolean {
-                val offset = node.sourcePsi?.textRange?.startOffset?.toString() ?: ""
-                var name = node.name
-                val params: List<UParameter> = node.uastParameters
-                if (params.isNotEmpty()) {
-                    var paramString = "("
-                    for (param: UParameter in params) {
-                        paramString = "$paramString${param.name}: ${(param.type as PsiClassReferenceType).name}, "
-                    }
-                    paramString = paramString.removeSuffix(", ")
-                    paramString = "$paramString)"
-                    name = "$name$paramString"
-                } else {
-                    name = "$name()"
-                }
-                val returnType = node.returnType
-                if (returnType != null && returnType.presentableText != "void") {
-                    name = "$name: ${returnType.presentableText}"
-                }
-                if (name != "()") {
-                    createContainer(listModel, searchString, METHOD.text, name, offset)
+                val name = node.name
+                val displayString = getTextRepresentation(node, name)
+                if (name.isNotBlank() && displayString != null) {
+                    createContainer(listModel, searchString, displayString, name)
                 }
                 return super.visitMethod(node)
             }
 
             override fun visitVariable(node: UVariable): Boolean {
-                val offset = node.sourcePsi?.textRange?.startOffset?.toString() ?: ""
-                var name = node.name
-                val type = node.type.presentableText
-                name = "$name: $type"
-                createContainer(listModel, searchString, VARIABLE.text, name, offset)
+                val name = node.name
+                val displayString = getTextRepresentation(node, name)
+                if (!name.isNullOrBlank() && displayString != null) {
+                    createContainer(listModel, searchString, VARIABLE.text, name)
+                }
                 return super.visitVariable(node)
             }
         }
+    }
+
+    private fun getTextRepresentation(uElement: UElement, name: String?): String? {
+        if (name.isNullOrBlank()) {
+            return null;
+        }
+        when (uElement) {
+            is UVariable -> {
+                val type = uElement.type.presentableText
+                return "Variable: $name: $type"
+            }
+            is UMethod -> {
+                val params: List<UParameter> = uElement.uastParameters
+                var paramString = ""
+                var returnString = ""
+                if (params.isNotEmpty()) {
+                    paramString = "("
+                    for (param: UParameter in params) {
+                        paramString = "$paramString${param.name}: ${(param.type as PsiClassReferenceType).name}, "
+                    }
+                    paramString = paramString.removeSuffix(", ")
+                } else {
+                    paramString = "()"
+                }
+                val returnType = uElement.returnType
+                if (returnType != null && returnType.presentableText != "void") {
+                    returnString = ": ${returnType.presentableText}"
+                }
+                return "Method: $name$paramString$returnString"
+            }
+            is UClass -> return "Class: $name"
+        }
+        return null
     }
 
     private fun createContainer(listModel: DefaultListModel<FuzzyMatchContainer>, searchString: String,
@@ -206,6 +256,16 @@ class FuzzierFS : Fuzzier() {
         val fs = scoreCalculator.calculateScore(name)
         if (fs != null) {
             val container = FuzzyMatchContainer(fs, "$type $name", name)
+            listModel.addElement(container)
+        }
+    }
+
+    private fun createContainer(listModel: DefaultListModel<FuzzyMatchContainer>, searchString: String,
+                                displayString: String, name: String) {
+        val scoreCalculator = ScoreCalculator(searchString)
+        val fs = scoreCalculator.calculateScore(name)
+        if (fs != null) {
+            val container = FuzzyMatchContainer(fs, displayString, name)
             listModel.addElement(container)
         }
     }
