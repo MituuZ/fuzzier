@@ -133,38 +133,33 @@ class FuzzierFS : Fuzzier() {
             override fun visitClass(node: UClass): Boolean {
                 val name = node.name
                 val displayString = getTextRepresentation(node, name)
-                if (!name.isNullOrBlank() && displayString != null) {
-                    createStaticContainer(listModel, name, displayString)
-                }
+                createStaticContainer(listModel, name, displayString)
                 return super.visitClass(node)
             }
 
             override fun visitMethod(node: UMethod): Boolean {
                 val name = node.name
                 val displayString = getTextRepresentation(node, name)
-                if (name.isNotBlank() && displayString != null) {
-                    createStaticContainer(listModel, name, displayString)
-                }
+                createStaticContainer(listModel, name, displayString)
                 return super.visitMethod(node)
             }
 
             override fun visitVariable(node: UVariable): Boolean {
                 val name = node.name
                 val displayString = getTextRepresentation(node, name)
-                if (!name.isNullOrBlank() && displayString != null) {
-                    createStaticContainer(listModel, name, displayString)
-                }
+                createStaticContainer(listModel, name, displayString)
                 return super.visitVariable(node)
             }
         }
     }
 
     private fun createStaticContainer(listModel: DefaultListModel<FuzzyMatchContainer>,
-                                      name: String?, displayString: String) {
-        if (!name.isNullOrBlank()) {
-            val container = FuzzyMatchContainer(FuzzyScore(), displayString, name)
-            listModel.addElement(container)
+                                      name: String?, displayString: String?) {
+        if (name.isNullOrBlank() || displayString == null) {
+            return
         }
+        val container = FuzzyMatchContainer(FuzzyScore(), displayString, name)
+        listModel.addElement(container)
     }
 
     private fun getVisitor(listModel: DefaultListModel<FuzzyMatchContainer>,
@@ -172,28 +167,22 @@ class FuzzierFS : Fuzzier() {
         return object : AbstractUastVisitor() {
             override fun visitClass(node: UClass): Boolean {
                 val name = node.name
-                if (!name.isNullOrBlank()) {
-                    val displayString = getTextRepresentation(node, name)
-                    if (displayString != null) createContainer(listModel, searchString, displayString, name)
-                }
+                val displayString = getTextRepresentation(node, name)
+                createContainer(listModel, searchString, displayString, name)
                 return super.visitClass(node)
             }
 
             override fun visitMethod(node: UMethod): Boolean {
                 val name = node.name
                 val displayString = getTextRepresentation(node, name)
-                if (name.isNotBlank() && displayString != null) {
-                    createContainer(listModel, searchString, displayString, name)
-                }
+                createContainer(listModel, searchString, displayString, name)
                 return super.visitMethod(node)
             }
 
             override fun visitVariable(node: UVariable): Boolean {
                 val name = node.name
                 val displayString = getTextRepresentation(node, name)
-                if (!name.isNullOrBlank() && displayString != null) {
-                    createContainer(listModel, searchString, displayString, name)
-                }
+                createContainer(listModel, searchString, displayString, name)
                 return super.visitVariable(node)
             }
         }
@@ -234,7 +223,10 @@ class FuzzierFS : Fuzzier() {
     }
 
     private fun createContainer(listModel: DefaultListModel<FuzzyMatchContainer>, searchString: String,
-                                displayString: String, name: String) {
+                                displayString: String?, name: String?) {
+        if (name.isNullOrBlank() || displayString == null) {
+            return;
+        }
         val scoreCalculator = ScoreCalculator(searchString)
         val fs = scoreCalculator.calculateScore(name)
         if (fs != null) {
