@@ -28,7 +28,9 @@ import com.mituuz.fuzzier.settings.FuzzierConfiguration.END_STYLE_TAG
 import com.mituuz.fuzzier.settings.FuzzierConfiguration.startStyleTag
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 
-class FuzzyMatchContainer(val score: FuzzyScore, var filePath: String, var filename: String, private var module: String = "") {
+class FuzzyMatchContainer(val score: FuzzyScore,
+                          var filePath: String,
+                          var filename: String, private var module: String = "") {
     private var initialPath: String? = null
 
     companion object {
