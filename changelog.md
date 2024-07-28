@@ -1,4 +1,7 @@
 # Changelog
+## Version 0.26.0
+- Default to initial view when clearing the search string
+
 ## Version 0.25.1
 - Fix task cancellation, making lower debounce time feel much better
 - Lower default debounce time

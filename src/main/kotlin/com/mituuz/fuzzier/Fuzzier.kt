@@ -150,9 +150,13 @@ open class Fuzzier : FuzzyAction() {
 
     override fun updateListContents(project: Project, searchString: String) {
         if (StringUtils.isBlank(searchString)) {
-            ApplicationManager.getApplication().invokeLater {
-                component.fileList.model = DefaultListModel()
-                defaultDoc?.let { (component as FuzzyFinderComponent).previewPane.updateFile(it) }
+            if (fuzzierSettingsService.state.recentFilesMode != NONE) {
+                createInitialView(project)
+            } else {
+                ApplicationManager.getApplication().invokeLater {
+                    component.fileList.model = DefaultListModel()
+                    defaultDoc?.let { (component as FuzzyFinderComponent).previewPane.updateFile(it) }
+                }
             }
             return
         }
