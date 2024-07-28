@@ -31,6 +31,7 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.psi.*
 import com.intellij.psi.impl.source.PsiClassReferenceType
+import com.mituuz.fuzzier.FuzzierFS.StructureType.*
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FuzzyScore
 import com.mituuz.fuzzier.entities.ScoreCalculator
@@ -104,7 +105,7 @@ class FuzzierFS : Fuzzier() {
             override fun visitClass(node: UClass): Boolean {
                 val offset = node.sourcePsi?.textRange?.startOffset?.toString() ?: ""
                 val name = node.name
-                createContainer(offset, name, "Class", listModel)
+                createContainer(offset, name, CLASS.text, listModel)
                 return super.visitClass(node)
             }
 
@@ -125,7 +126,7 @@ class FuzzierFS : Fuzzier() {
                     paramString = "$paramString)"
                     name = "$name$paramString"
                 }
-                createContainer(offset, name, "Method", listModel)
+                createContainer(offset, name, METHOD.text, listModel)
                 return super.visitMethod(node)
             }
 
@@ -134,7 +135,7 @@ class FuzzierFS : Fuzzier() {
                 var name = node.name
                 val type = node.type.presentableText
                 name = "$name: $type"
-                createContainer(offset, name, "Variable", listModel)
+                createContainer(offset, name, VARIABLE.text, listModel)
                 return super.visitVariable(node)
             }
         }
@@ -154,7 +155,7 @@ class FuzzierFS : Fuzzier() {
             override fun visitClass(node: UClass): Boolean {
                 val offset = node.sourcePsi?.textRange?.startOffset?.toString() ?: ""
                 val name = node.name
-                createContainer(listModel, searchString, "Class", name, offset)
+                createContainer(listModel, searchString, CLASS.text, name, offset)
                 return super.visitClass(node)
             }
 
@@ -175,7 +176,7 @@ class FuzzierFS : Fuzzier() {
                     paramString = "$paramString)"
                     name = "$name$paramString"
                 }
-                createContainer(listModel, searchString, "Method", name, offset)
+                createContainer(listModel, searchString, METHOD.text, name, offset)
                 return super.visitMethod(node)
             }
 
@@ -184,7 +185,7 @@ class FuzzierFS : Fuzzier() {
                 var name = node.name
                 val type = node.type.presentableText
                 name = "$name: $type"
-                createContainer(listModel, searchString, "Variable", name, offset)
+                createContainer(listModel, searchString, VARIABLE.text, name, offset)
                 return super.visitVariable(node)
             }
         }
@@ -203,10 +204,9 @@ class FuzzierFS : Fuzzier() {
         }
     }
 
-    // TODO: Delete or use
     enum class StructureType(val text: String) {
-        CLASS("Class"),
-        METHOD("Method"),
-        VARIABLE("Variable")
+        CLASS(   "Class    : "),
+        METHOD(  "Method   : "),
+        VARIABLE("Variable : ")
     }
 }
