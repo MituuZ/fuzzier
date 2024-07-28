@@ -34,7 +34,6 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.psi.*
 import com.intellij.psi.impl.source.PsiClassReferenceType
-import com.mituuz.fuzzier.FuzzierFS.StructureType.*
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FuzzyScore
@@ -132,52 +131,38 @@ class FuzzierFS : Fuzzier() {
     private fun getOpenVisitor(listModel: DefaultListModel<FuzzyMatchContainer>): AbstractUastVisitor {
         return object : AbstractUastVisitor() {
             override fun visitClass(node: UClass): Boolean {
-                val offset = node.sourcePsi?.textRange?.startOffset?.toString() ?: ""
                 val name = node.name
-                createStaticContainer(offset, name, CLASS.text, listModel)
+                val displayString = getTextRepresentation(node, name)
+                if (!name.isNullOrBlank() && displayString != null) {
+                    createStaticContainer(listModel, name, displayString)
+                }
                 return super.visitClass(node)
             }
 
             override fun visitMethod(node: UMethod): Boolean {
-                val offset = node.sourcePsi?.textRange?.startOffset?.toString() ?: ""
-                var name = node.name
-                val params: List<UParameter> = node.uastParameters
-                if (params.isNotEmpty()) {
-                    var paramString = "("
-                    for (param: UParameter in params) {
-                        paramString = "$paramString${param.name}: ${(param.type as PsiClassReferenceType).name}, "
-                    }
-                    paramString = paramString.removeSuffix(", ")
-                    paramString = "$paramString)"
-                    name = "$name$paramString"
-                } else {
-                    name = "$name()"
-                }
-                val returnType = node.returnType
-                if (returnType != null && returnType.presentableText != "void") {
-                    name = "$name: ${returnType.presentableText}"
-                }
-                if (name != "()") {
-                    createStaticContainer(offset, name, METHOD.text, listModel)
+                val name = node.name
+                val displayString = getTextRepresentation(node, name)
+                if (name.isNotBlank() && displayString != null) {
+                    createStaticContainer(listModel, name, displayString)
                 }
                 return super.visitMethod(node)
             }
 
             override fun visitVariable(node: UVariable): Boolean {
-                val offset = node.sourcePsi?.textRange?.startOffset?.toString() ?: ""
-                var name = node.name
-                val type = node.type.presentableText
-                name = "$name: $type"
-                createStaticContainer(offset, name, VARIABLE.text, listModel)
+                val name = node.name
+                val displayString = getTextRepresentation(node, name)
+                if (!name.isNullOrBlank() && displayString != null) {
+                    createStaticContainer(listModel, name, displayString)
+                }
                 return super.visitVariable(node)
             }
         }
     }
 
-    private fun createStaticContainer(offset: String, name: String?, type: String,
-                                      listModel: DefaultListModel<FuzzyMatchContainer>) {
-        if (offset.isNotBlank() && !name.isNullOrBlank()) {
-            val container = FuzzyMatchContainer(FuzzyScore(), "$type $name", name)
+    private fun createStaticContainer(listModel: DefaultListModel<FuzzyMatchContainer>,
+                                      name: String?, displayString: String) {
+        if (!name.isNullOrBlank()) {
+            val container = FuzzyMatchContainer(FuzzyScore(), displayString, name)
             listModel.addElement(container)
         }
     }
@@ -207,7 +192,7 @@ class FuzzierFS : Fuzzier() {
                 val name = node.name
                 val displayString = getTextRepresentation(node, name)
                 if (!name.isNullOrBlank() && displayString != null) {
-                    createContainer(listModel, searchString, VARIABLE.text, name)
+                    createContainer(listModel, searchString, displayString, name)
                 }
                 return super.visitVariable(node)
             }
@@ -233,6 +218,7 @@ class FuzzierFS : Fuzzier() {
                         paramString = "$paramString${param.name}: ${(param.type as PsiClassReferenceType).name}, "
                     }
                     paramString = paramString.removeSuffix(", ")
+                    paramString = "$paramString)"
                 } else {
                     paramString = "()"
                 }
@@ -248,19 +234,6 @@ class FuzzierFS : Fuzzier() {
     }
 
     private fun createContainer(listModel: DefaultListModel<FuzzyMatchContainer>, searchString: String,
-                                type: String, name: String?, offset: String) {
-        if (name.isNullOrBlank() || offset.isBlank()) {
-            return
-        }
-        val scoreCalculator = ScoreCalculator(searchString)
-        val fs = scoreCalculator.calculateScore(name)
-        if (fs != null) {
-            val container = FuzzyMatchContainer(fs, "$type $name", name)
-            listModel.addElement(container)
-        }
-    }
-
-    private fun createContainer(listModel: DefaultListModel<FuzzyMatchContainer>, searchString: String,
                                 displayString: String, name: String) {
         val scoreCalculator = ScoreCalculator(searchString)
         val fs = scoreCalculator.calculateScore(name)
@@ -268,11 +241,5 @@ class FuzzierFS : Fuzzier() {
             val container = FuzzyMatchContainer(fs, displayString, name)
             listModel.addElement(container)
         }
-    }
-
-    enum class StructureType(val text: String) {
-        CLASS("Class: "),
-        METHOD("Method: "),
-        VARIABLE("Variable: ")
     }
 }
