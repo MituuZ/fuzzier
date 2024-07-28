@@ -45,7 +45,6 @@ class FuzzyMatchContainer(
 ) : Serializable {
     @Transient
     private var initialPath: String? = null
-    private var displayString: String = ""
 
     companion object {
         /**
