@@ -128,7 +128,9 @@ class FuzzierFS : Fuzzier() {
                 if (returnType != null && returnType.presentableText != "void") {
                     name = "$name: ${returnType.presentableText}"
                 }
-                createContainer(offset, name, METHOD.text, listModel)
+                if (name != "()") {
+                    createContainer(offset, name, METHOD.text, listModel)
+                }
                 return super.visitMethod(node)
             }
 
@@ -146,7 +148,7 @@ class FuzzierFS : Fuzzier() {
     private fun createContainer(offset: String, name: String?, type: String,
                                 listModel: DefaultListModel<FuzzyMatchContainer>) {
         if (offset.isNotBlank() && !name.isNullOrBlank()) {
-            val container = FuzzyMatchContainer(FuzzyScore(), "$type $name at $offset", name)
+            val container = FuzzyMatchContainer(FuzzyScore(), "$type $name", name)
             listModel.addElement(container)
         }
     }
@@ -180,7 +182,9 @@ class FuzzierFS : Fuzzier() {
                 if (returnType != null && returnType.presentableText != "void") {
                     name = "$name: ${returnType.presentableText}"
                 }
-                createContainer(listModel, searchString, METHOD.text, name, offset)
+                if (name != "()") {
+                    createContainer(listModel, searchString, METHOD.text, name, offset)
+                }
                 return super.visitMethod(node)
             }
 
@@ -203,7 +207,7 @@ class FuzzierFS : Fuzzier() {
         val scoreCalculator = ScoreCalculator(searchString)
         val fs = scoreCalculator.calculateScore(name)
         if (fs != null) {
-            val container = FuzzyMatchContainer(fs, "$type $name at $offset", name)
+            val container = FuzzyMatchContainer(fs, "$type $name", name)
             listModel.addElement(container)
         }
     }
