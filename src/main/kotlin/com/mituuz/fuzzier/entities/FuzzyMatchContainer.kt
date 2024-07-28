@@ -45,14 +45,15 @@ class FuzzyMatchContainer(
 ) : Serializable {
     @Transient
     private var initialPath: String? = null
+    private var displayString: String = ""
 
     companion object {
-        fun createOrderedContainer(
-            order: Int,
-            filePath: String,
-            initialPath: String,
-            filename: String
-        ): FuzzyMatchContainer {
+        /**
+         * Used for showing recent files
+         *
+         * Creates a fuzzy match container with explicitly specified score.
+         */
+        fun createOrderedContainer(order: Int, filePath: String, initialPath:String, filename: String): FuzzyMatchContainer {
             val fuzzyScore = FuzzyScore()
             fuzzyScore.filenameScore = order
             val fuzzyMatchContainer = FuzzyMatchContainer(fuzzyScore, filePath, filename)
