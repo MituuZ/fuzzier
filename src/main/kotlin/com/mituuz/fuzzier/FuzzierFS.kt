@@ -109,7 +109,11 @@ class FuzzierFS : Fuzzier() {
 
             override fun visitMethod(node: UMethod): Boolean {
                 val offset = node.sourcePsi?.textRange?.startOffset?.toString() ?: ""
-                val name = node.name
+                var name = node.name
+                val returnType = node.returnType
+                if (returnType != null && returnType.presentableText != "void") {
+                    name = "$name: ${returnType.presentableText}"
+                }
                 createContainer(offset, name, "Method", listModel)
                 return super.visitMethod(node)
             }
@@ -143,7 +147,11 @@ class FuzzierFS : Fuzzier() {
 
             override fun visitMethod(node: UMethod): Boolean {
                 val offset = node.sourcePsi?.textRange?.startOffset?.toString() ?: ""
-                val name = node.name
+                var name = node.name
+                val returnType = node.returnType
+                if (returnType != null && returnType.presentableText != "void") {
+                    name = "$name: ${returnType.presentableText}"
+                }
                 createContainer(listModel, searchString, "Method", name, offset)
                 return super.visitMethod(node)
             }
@@ -168,5 +176,12 @@ class FuzzierFS : Fuzzier() {
             val container = FuzzyMatchContainer(fs, "$type $name at $offset", name)
             listModel.addElement(container)
         }
+    }
+
+    // TODO: Delete or use
+    enum class StructureType(val text: String) {
+        CLASS("Class"),
+        METHOD("Method"),
+        VARIABLE("Variable")
     }
 }
