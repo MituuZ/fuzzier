@@ -56,8 +56,12 @@ class PreviewEditor(project: Project?) : EditorTextField(
     }
 
     override fun createEditor(): EditorEx {
-        val editor = super.createEditor()
-        editor.setVerticalScrollbarVisible(true)
+        val editor = super.createEditor() // TODO: Exception in thread com.intellij.openapi.diagnostic.RuntimeExceptionWithAttachments: Access is allowed from Event Dispatch Thread (EDT) only; see https://jb.gg/ij-platform-threading for details editor.setVerticalScrollbarVisible(true)
+        /*
+            at com.mituuz.fuzzier.components.PreviewEditor.updateFile(PreviewEditor.kt:78)
+            at com.mituuz.fuzzier.Fuzzier.createListeners$lambda$12(Fuzzier.kt:234)
+            at com.mituuz.fuzzier.FuzzierFS.updateListContents$lambda$1(FuzzierFS.kt:39)
+         */
         editor.setHorizontalScrollbarVisible(true)
         editor.isOneLineMode = false
         editor.isViewer = true

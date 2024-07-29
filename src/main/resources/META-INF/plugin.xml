@@ -11,7 +11,12 @@
 
   <!-- Product and plugin compatibility requirements.
        Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
-  <depends>com.intellij.modules.platform</depends>
+  <depends>
+    com.intellij.modules.platform
+  </depends>
+  <depends>
+    com.intellij.modules.java
+  </depends>
 
   <!-- Extension points defined by the plugin.
        Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
@@ -49,6 +54,11 @@
             description="Search files using a basic fuzzy search on only VCS tracked files">
       <override-text place="MainMenu" text="Fuzzy File Search (Only VCS Tracked Files)"/>
       <add-to-group group-id="ToolsMenu" />
+    </action>
+    <action id="com.mituuz.fuzzier.FuzzierFS"
+            class="com.mituuz.fuzzier.FuzzierFS"
+            text="Fuzzy Search File Structure"
+            description="Search file structure objects using a basic fuzzy search">
     </action>
     <action id="com.mituuz.fuzzier.FuzzyMover"
             class="com.mituuz.fuzzier.FuzzyMover"
