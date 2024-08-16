@@ -1,4 +1,7 @@
 # Changelog
+## Version 0.26.1
+- Update version support to include 242
+
 ## Version 0.26.0
 - Default to initial view when clearing the search string
 

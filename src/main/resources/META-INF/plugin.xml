@@ -29,8 +29,8 @@
   </extensions>
 
   <change-notes><![CDATA[
-  <h2>Version 0.26.0</h2>
-  - Default to initial view when clearing the search string<br>
+  <h2>Version 0.26.1</h2>
+  - Update version support to include 242
   ]]>
   </change-notes>
 
