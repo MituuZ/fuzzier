@@ -135,6 +135,11 @@ class FuzzierUtil {
             shortenModulePaths(moduleList)
         }
 
+        if (moduleList.isEmpty() && project.basePath != null) {
+            moduleList.add(ModuleContainer(project.name, project.basePath!!))
+            service<FuzzierSettingsService>().state.isProject = true
+        }
+
         val moduleMap = listToMap(moduleList)
         service<FuzzierSettingsService>().state.modules = moduleMap
     }

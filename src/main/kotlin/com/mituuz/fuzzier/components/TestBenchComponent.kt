@@ -31,6 +31,7 @@ import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.project.rootManager
+import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextArea
@@ -145,7 +146,11 @@ class TestBenchComponent : JPanel() {
             val listModel = DefaultListModel<FuzzyMatchContainer>()
 
             val moduleManager = ModuleManager.getInstance(project)
-            processModules(moduleManager, stringEvaluator, searchString, listModel)
+            if (service<FuzzierSettingsService>().state.isProject) {
+                processProject(project, stringEvaluator, searchString, listModel)
+            } else {
+                processModules(moduleManager, stringEvaluator, searchString, listModel)
+            }
 
             val sortedList = listModel.elements().toList().sortedByDescending { it.getScore() }
             val data = sortedList.map {
@@ -157,6 +162,19 @@ class TestBenchComponent : JPanel() {
             table.model = tableModel
             table.setPaintBusy(false)
         }
+    }
+
+    private fun processProject(project: Project, stringEvaluator: StringEvaluator,
+                               searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
+        val contentIterator = stringEvaluator.getContentIterator(project.name, searchString, listModel)
+
+        val scoreCalculator = stringEvaluator.scoreCalculator
+        scoreCalculator.setMultiMatch(liveSettingsComponent.multiMatchActive.getCheckBox().isSelected)
+        scoreCalculator.setMatchWeightSingleChar(liveSettingsComponent.matchWeightSingleChar.getIntSpinner().value as Int)
+        scoreCalculator.setMatchWeightStreakModifier(liveSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int)
+        scoreCalculator.setMatchWeightPartialPath(liveSettingsComponent.matchWeightPartialPath.getIntSpinner().value as Int)
+        scoreCalculator.setFilenameMatchWeight(liveSettingsComponent.matchWeightFilename.getIntSpinner().value as Int)
+        ProjectFileIndex.getInstance(project).iterateContent(contentIterator)
     }
 
     private fun processModules(moduleManager: ModuleManager, stringEvaluator: StringEvaluator,
