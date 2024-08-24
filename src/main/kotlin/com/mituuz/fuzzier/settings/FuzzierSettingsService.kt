@@ -37,6 +37,7 @@ import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.RECENT
 class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.State> {
     class State {
         var modules: Map<String, String> = HashMap()
+        var isProject = false
         var recentFilesMode: RecentFilesMode = RECENT_PROJECT_FILES
 
         var splitPosition: Int = 300

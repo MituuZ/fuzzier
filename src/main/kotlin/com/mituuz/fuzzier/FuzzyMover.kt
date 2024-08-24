@@ -33,6 +33,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.rootManager
+import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.JBPopupListener
@@ -210,7 +211,11 @@ class FuzzyMover : FuzzyAction() {
                 if (task?.isCancelled == true) throw CancellationException()
 
                 val moduleManager = ModuleManager.getInstance(project)
-                processModules(moduleManager, stringEvaluator, searchString, listModel)
+                if (fuzzierSettingsService.state.isProject) {
+                    processProject(project, stringEvaluator, searchString, listModel)
+                } else {
+                    processModules(moduleManager, stringEvaluator, searchString, listModel)
+                }
 
                 if (task?.isCancelled == true) throw CancellationException()
 
@@ -230,6 +235,16 @@ class FuzzyMover : FuzzyAction() {
                 // Do nothing
             }
         }
+    }
+    
+    private fun processProject(project: Project, stringEvaluator: StringEvaluator,
+                               searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
+        val contentIterator = if (!component.isDirSelector) {
+            stringEvaluator.getContentIterator(project.name, searchString, listModel)
+        } else {
+            stringEvaluator.getDirIterator(project.name, searchString, listModel)
+        }
+        ProjectFileIndex.getInstance(project).iterateContent(contentIterator)
     }
 
     private fun processModules(moduleManager: ModuleManager, stringEvaluator: StringEvaluator,

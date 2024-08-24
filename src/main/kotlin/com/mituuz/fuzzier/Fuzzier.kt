@@ -35,6 +35,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.rootManager
+import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.JBPopupListener
@@ -178,7 +179,11 @@ open class Fuzzier : FuzzyAction() {
                 if (task?.isCancelled == true) throw CancellationException()
 
                 val moduleManager = ModuleManager.getInstance(project)
-                processModules(moduleManager, stringEvaluator, searchString, listModel)
+                if (fuzzierSettingsService.state.isProject) {
+                    processProject(project, stringEvaluator, searchString, listModel)
+                } else {
+                    processModules(moduleManager, stringEvaluator, searchString, listModel)
+                }
 
                 if (task?.isCancelled == true) throw CancellationException()
 
@@ -198,6 +203,12 @@ open class Fuzzier : FuzzyAction() {
                 // Do nothing
             }
         }
+    }
+    
+    private fun processProject(project: Project, stringEvaluator: StringEvaluator,
+                               searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
+        val contentIterator = stringEvaluator.getContentIterator(project.name, searchString, listModel)
+        ProjectFileIndex.getInstance(project).iterateContent(contentIterator)
     }
 
     private fun processModules(moduleManager: ModuleManager, stringEvaluator: StringEvaluator,
