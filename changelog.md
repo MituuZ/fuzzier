@@ -1,4 +1,7 @@
 # Changelog
+## Version 0.26.2
+- Re-implement project file handling as a backup if no modules are present
+
 ## Version 0.26.1
 - Update version support to include 242
 

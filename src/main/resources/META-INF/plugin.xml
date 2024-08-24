@@ -29,8 +29,8 @@
   </extensions>
 
   <change-notes><![CDATA[
-  <h2>Version 0.26.1</h2>
-  - Update version support to include 242
+  <h2>Version 0.26.2</h2>
+  - Re-implement project file handling as a backup if no modules are present
   ]]>
   </change-notes>
 
