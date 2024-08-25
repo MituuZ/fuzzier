@@ -30,6 +30,8 @@ dependencies {
     instrumentationTools()
     
     testFramework(TestFrameworkType.Platform)
+
+    bundledPlugin("com.intellij.java")
   }
   
   testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
