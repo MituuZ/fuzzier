@@ -1,18 +1,31 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
   id("org.jetbrains.kotlin.jvm") version "2.0.0"
-  id("org.jetbrains.intellij") version "1.17.4"
+  id("org.jetbrains.intellij.platform") version "2.0.1"
 }
 
-group = "com.mituuz"
-version = "0.26.2"
+// Use same version and group for the jar and the plugin
+val currentVersion = "0.26.2"
+val myGroup = "com.mituuz"
+version = currentVersion
+group = myGroup
 
 repositories {
   mavenCentral()
+  
+  intellijPlatform {
+    defaultRepositories()
+  }
 }
 
 dependencies {
+  intellijPlatform {
+    intellijIdeaCommunity("2024.2.0.1")
+    
+    pluginVerifier()
+    zipSigner()
+    instrumentationTools()
+  }
+  
   testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
   testImplementation("org.mockito:mockito-core:5.12.0")
 
@@ -23,30 +36,29 @@ tasks.test {
   useJUnitPlatform()
 }
 
-// Configure Gradle IntelliJ Plugin
-// Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
-intellij {
-  version.set("2024.1")
-  plugins.set(listOf(/* Plugin Dependencies */))
-}
-
-tasks {
-  withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
+intellijPlatform {
+  pluginConfiguration {
+    version = currentVersion
+    group = myGroup
+    
+    changeNotes = """
+    <h2>Version $currentVersion</h2>
+    - Re-implement project file handling as a backup if no modules are present<br>
+    - Migrate IntelliJ Platform Gradle Plugin to 2.x
+    """.trimIndent()
+    
+    ideaVersion {
+      sinceBuild = "242"
+    }
   }
-
-  patchPluginXml {
-    sinceBuild.set("241")
-    untilBuild.set("242.*")
+  
+  publishing {
+    token.set(System.getenv("PUBLISH_TOKEN"))
   }
-
-  signPlugin {
+  
+  signing {
     certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
     privateKey.set(System.getenv("PRIVATE_KEY"))
     password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
-  }
-
-  publishPlugin {
-    token.set(System.getenv("PUBLISH_TOKEN"))
   }
 }

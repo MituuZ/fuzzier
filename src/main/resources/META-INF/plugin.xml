@@ -28,12 +28,6 @@
                        isLogByDefault="true"/>
   </extensions>
 
-  <change-notes><![CDATA[
-  <h2>Version 0.26.2</h2>
-  - Re-implement project file handling as a backup if no modules are present
-  ]]>
-  </change-notes>
-
   <actions>
     <action
             id="com.mituuz.fuzzier.Fuzzier"
