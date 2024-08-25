@@ -4,7 +4,7 @@ plugins {
 }
 
 // Use same version and group for the jar and the plugin
-val currentVersion = "0.26.2"
+val currentVersion = "1.0.0"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
