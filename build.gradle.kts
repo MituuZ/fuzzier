@@ -32,6 +32,8 @@ dependencies {
     zipSigner()
 
     testFramework(TestFrameworkType.Platform)
+
+    bundledPlugin("com.intellij.java")
   }
   
   testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.4")
