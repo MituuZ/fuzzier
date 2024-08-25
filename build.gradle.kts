@@ -1,8 +1,9 @@
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("org.jetbrains.kotlin.jvm") version "2.0.0"
+  id("org.jetbrains.kotlin.jvm") version "2.0.20"
   id("org.jetbrains.intellij.platform") version "2.0.1"
 }
 
@@ -27,12 +28,18 @@ dependencies {
     pluginVerifier()
     zipSigner()
     instrumentationTools()
+    
+    testFramework(TestFrameworkType.Platform)
   }
   
   testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
   testImplementation("org.mockito:mockito-core:5.12.0")
 
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
+  
+  // Required to fix issue where JUnit5 Test Framework refers to JUnit4
+  // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-faq.html#junit5-test-framework-refers-to-junit4
+  testRuntimeOnly("junit:junit:4.13.2")
 }
 
 tasks.test {
