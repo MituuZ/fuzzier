@@ -3,6 +3,10 @@ plugins {
   id("org.jetbrains.intellij.platform") version "2.0.1"
 }
 
+java {
+  sourceCompatibility = JavaVersion.VERSION_21
+}
+
 // Use same version and group for the jar and the plugin
 val currentVersion = "1.0.0"
 val myGroup = "com.mituuz"
