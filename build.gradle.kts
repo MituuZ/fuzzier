@@ -1,10 +1,9 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
   id("org.jetbrains.kotlin.jvm") version "2.0.0"
   id("org.jetbrains.intellij.platform") version "2.0.1"
-}
-
-java {
-  sourceCompatibility = JavaVersion.VERSION_21
 }
 
 // Use same version and group for the jar and the plugin
@@ -38,6 +37,14 @@ dependencies {
 
 tasks.test {
   useJUnitPlatform()
+}
+
+tasks.withType<KotlinCompile> {
+  compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
+}
+
+java {
+  sourceCompatibility = JavaVersion.VERSION_21
 }
 
 intellijPlatform {
