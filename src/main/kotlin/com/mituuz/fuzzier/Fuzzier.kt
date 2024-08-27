@@ -246,6 +246,7 @@ open class Fuzzier : FuzzyAction() {
             if (!event.valueIsAdjusting) {
                 if (component.fileList.isEmpty) {
                     ApplicationManager.getApplication().invokeLater {
+                        // This can throw slow operation on ETD (previewPane.updateFile)
                         defaultDoc?.let { (component as FuzzyFinderComponent).previewPane.updateFile(it) }
                     }
                     return@addListSelectionListener
