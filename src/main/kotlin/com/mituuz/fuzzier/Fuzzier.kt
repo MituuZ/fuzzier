@@ -45,6 +45,7 @@ import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
+import com.jetbrains.rd.util.ConcurrentHashMap
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.NONE
@@ -210,13 +211,24 @@ open class Fuzzier : FuzzyAction() {
         val contentIterator = stringEvaluator.getContentIterator(project.name, searchString, listModel)
         ProjectFileIndex.getInstance(project).iterateContent(contentIterator)
     }
+    
+    data class IterationFile(val file: VirtualFile, val module: String)
 
     private fun processModules(moduleManager: ModuleManager, stringEvaluator: StringEvaluator,
                                searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
+        val filesToIterate = ConcurrentHashMap.newKeySet<IterationFile>()
         for (module in moduleManager.modules) {
             val moduleFileIndex = module.rootManager.fileIndex
-            val contentIterator = stringEvaluator.getContentIterator(module.name, searchString, listModel)
-            moduleFileIndex.iterateContent(contentIterator)
+            moduleFileIndex.iterateContent { file ->
+                if (!file.isDirectory) {
+                    filesToIterate.add(IterationFile(file, module.name))
+                }
+                true
+            }
+        }
+        
+        filesToIterate.forEach { iterationFile ->
+            stringEvaluator.processFile(iterationFile, listModel, searchString)
         }
     }
 

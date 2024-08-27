@@ -62,6 +62,27 @@ class StringEvaluator(
             true
         }
     }
+    
+    fun processFile(iterationFile: Fuzzier.IterationFile, listModel: DefaultListModel<FuzzyMatchContainer>,
+                    searchString: String) {
+        scoreCalculator = ScoreCalculator(searchString)
+        val file = iterationFile.file
+        val moduleName = iterationFile.module
+        if (!file.isDirectory) {
+            val moduleBasePath = modules[moduleName] ?: return
+
+            val filePath = file.path.removePrefix(moduleBasePath)
+            if (isExcluded(file, filePath)) {
+                return
+            }
+            if (filePath.isNotBlank()) {
+                val fuzzyMatchContainer = createFuzzyContainer(filePath, moduleName)
+                if (fuzzyMatchContainer != null) {
+                    listModel.addElement(fuzzyMatchContainer)
+                }
+            }
+        }
+    }
 
     fun getDirIterator(moduleName: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
         scoreCalculator = ScoreCalculator(searchString)
