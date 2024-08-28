@@ -35,6 +35,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.rootManager
+import com.intellij.openapi.roots.ModuleFileIndex
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
@@ -49,6 +50,10 @@ import com.jetbrains.rd.util.ConcurrentHashMap
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.NONE
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
 import javax.swing.*
@@ -218,7 +223,8 @@ open class Fuzzier : FuzzyAction() {
                                searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
         val filesToIterate = ConcurrentHashMap.newKeySet<IterationFile>()
         for (module in moduleManager.modules) {
-            val moduleFileIndex = module.rootManager.fileIndex
+            // This could be a method
+            val moduleFileIndex: ModuleFileIndex = module.rootManager.fileIndex
             moduleFileIndex.iterateContent { file ->
                 if (!file.isDirectory) {
                     filesToIterate.add(IterationFile(file, module.name))
