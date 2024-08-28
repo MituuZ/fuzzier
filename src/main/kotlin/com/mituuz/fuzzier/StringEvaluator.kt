@@ -24,6 +24,8 @@ SOFTWARE.
 package com.mituuz.fuzzier
 
 import com.intellij.openapi.roots.ContentIterator
+import com.intellij.openapi.vcs.FilePath
+import com.intellij.openapi.vcs.LocalFilePath
 import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.intellij.openapi.vfs.VirtualFile
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
@@ -38,7 +40,8 @@ import javax.swing.DefaultListModel
 class StringEvaluator(
     private var exclusionList: Set<String>,
     private var modules: Map<String, String>,
-    private var changeListManager: ChangeListManager? = null
+    private var changeListManager: ChangeListManager? = null,
+    private var vcsPathContainer: List<FilePath>? = null
 ) {
     lateinit var scoreCalculator: ScoreCalculator
 
@@ -129,8 +132,9 @@ class StringEvaluator(
      * @return true if file should be excluded
      */
     private fun isExcluded(file: VirtualFile, filePath: String): Boolean {
-        if (changeListManager !== null) {
-            return changeListManager!!.isIgnoredFile(file)
+        if (!vcsPathContainer.isNullOrEmpty()) {
+            val fp = LocalFilePath(file.path, false)
+            return vcsPathContainer!!.contains(fp)
         }
         return exclusionList.any { e ->
             when {
