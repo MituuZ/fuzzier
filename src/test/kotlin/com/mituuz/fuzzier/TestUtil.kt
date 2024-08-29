@@ -29,8 +29,9 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.modules
 import com.intellij.openapi.project.rootManager
-import com.intellij.openapi.vcs.changes.ChangeListManager
-import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.vcs.FilePath
+import com.intellij.openapi.vcs.LocalFilePath
+import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.testFramework.PsiTestUtil
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
@@ -38,9 +39,7 @@ import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.runInEdtAndWait
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
-import org.mockito.ArgumentMatchers.any
 import javax.swing.DefaultListModel
-import org.mockito.Mockito
 
 class TestUtil {
     private fun addFilesToProject(filesToAdd: List<String>, myFixture: CodeInsightTestFixture, fixture: IdeaProjectTestFixture) {
@@ -78,13 +77,13 @@ class TestUtil {
         map[module.name] = module.rootManager.contentRoots[1].path
 
         if (ignoredFiles !== null) {
-            val changeListManager = Mockito.mock(ChangeListManager::class.java)
-            Mockito.`when`(changeListManager.isIgnoredFile(any<VirtualFile>())).thenAnswer { invocation ->
-                val file = invocation.getArgument<VirtualFile>(0)
-                val tempDirPath = myFixture.tempDirPath
-                ignoredFiles.any{ ("$tempDirPath/$it") == file.path }
+            val ignoredFilePaths: MutableList<FilePath> = mutableListOf()
+            for (file in ignoredFiles) {
+                var path = map[module.name] + file
+                path = path.replace("srcsrc", "src")
+                ignoredFilePaths.add(LocalFilePath(path, false))
             }
-            stringEvaluator = StringEvaluator(exclusionList, map, changeListManager)
+            stringEvaluator = StringEvaluator(exclusionList, map, ignoredFilePaths)
         } else {
             stringEvaluator = StringEvaluator(exclusionList, map)
         }
