@@ -33,11 +33,27 @@ import java.util.*
 import javax.swing.DefaultListModel
 import kotlin.collections.ArrayList
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.roots.FileIndex
+import com.intellij.openapi.vfs.VirtualFile
+import com.mituuz.fuzzier.Fuzzier
+import java.util.concurrent.ConcurrentHashMap
 
 class FuzzierUtil {
     private var settingsState = service<FuzzierSettingsService>().state
     private var listLimit: Int = settingsState.fileListLimit
     private var prioritizeShorterDirPaths = settingsState.prioritizeShorterDirPaths
+
+    data class IterationFile(val file: VirtualFile, val module: String)
+    
+    companion object fun fileIndexToIterationFiles(iterationFiles: ConcurrentHashMap.KeySetView<IterationFile, Boolean>, 
+                                  fileIndex: FileIndex, moduleName: String) {
+        fileIndex.iterateContent { file ->
+            if (!file.isDirectory) {
+                iterationFiles.add(IterationFile(file, moduleName))
+            }
+            true
+        }
+    }
 
     /**
      * Process all the elements in the listModel with a priority queue to limit the size

@@ -50,6 +50,7 @@ import com.jetbrains.rd.util.ConcurrentHashMap
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.NONE
+import com.mituuz.fuzzier.util.FuzzierUtil
 import kotlinx.coroutines.*
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
@@ -211,26 +212,28 @@ open class Fuzzier : FuzzyAction() {
     
     private fun processProject(project: Project, stringEvaluator: StringEvaluator,
                                searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
-        val contentIterator = stringEvaluator.getContentIterator(project.name, searchString, listModel)
-        ProjectFileIndex.getInstance(project).iterateContent(contentIterator)
+        val filesToIterate = ConcurrentHashMap.newKeySet<FuzzierUtil.IterationFile>()
+        FuzzierUtil().fileIndexToIterationFiles(filesToIterate, ProjectFileIndex.getInstance(project), project.name)
+        
+        processFiles(filesToIterate, stringEvaluator, listModel, searchString)
     }
-    
-    data class IterationFile(val file: VirtualFile, val module: String)
 
     private fun processModules(moduleManager: ModuleManager, stringEvaluator: StringEvaluator,
                                searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
-        val filesToIterate = ConcurrentHashMap.newKeySet<IterationFile>()
+        val filesToIterate = ConcurrentHashMap.newKeySet<FuzzierUtil.IterationFile>()
         for (module in moduleManager.modules) {
-            // This could be a method
-            val moduleFileIndex: ModuleFileIndex = module.rootManager.fileIndex
-            moduleFileIndex.iterateContent { file ->
-                if (!file.isDirectory) {
-                    filesToIterate.add(IterationFile(file, module.name))
-                }
-                true
-            }
+            FuzzierUtil().fileIndexToIterationFiles(filesToIterate, module.rootManager.fileIndex, module.name)
         }
         
+        processFiles(filesToIterate, stringEvaluator, listModel, searchString)
+    }
+    
+    private fun processFiles(
+        filesToIterate: java.util.concurrent.ConcurrentHashMap.KeySetView<FuzzierUtil.IterationFile, Boolean>,
+        stringEvaluator: StringEvaluator,
+        listModel: DefaultListModel<FuzzyMatchContainer>,
+        searchString: String
+    ) {
         runBlocking {
             withContext(Dispatchers.IO) {
                 filesToIterate.forEach { iterationFile ->
