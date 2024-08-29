@@ -204,6 +204,8 @@ open class Fuzzier : FuzzyAction() {
                         component.fileList.setSelectedValue(listModel[0], true)
                     }
                 }
+            } catch (e: InterruptedException) {
+                throw CancellationException()
             } catch (e: CancellationException) {
                 // Do nothing
             }
