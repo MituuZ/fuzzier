@@ -168,7 +168,7 @@ class TestBenchComponent : JPanel() {
                                searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
         val contentIterator = stringEvaluator.getContentIterator(project.name, searchString, listModel)
 
-        val scoreCalculator = stringEvaluator.scoreCalculator
+        val scoreCalculator = stringEvaluator.calculator
         scoreCalculator.setMultiMatch(liveSettingsComponent.multiMatchActive.getCheckBox().isSelected)
         scoreCalculator.setMatchWeightSingleChar(liveSettingsComponent.matchWeightSingleChar.getIntSpinner().value as Int)
         scoreCalculator.setMatchWeightStreakModifier(liveSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int)
@@ -183,7 +183,7 @@ class TestBenchComponent : JPanel() {
             val moduleFileIndex = module.rootManager.fileIndex
             val contentIterator = stringEvaluator.getContentIterator(module.name, searchString, listModel)
 
-            val scoreCalculator = stringEvaluator.scoreCalculator
+            val scoreCalculator = stringEvaluator.calculator
             scoreCalculator.setMultiMatch(liveSettingsComponent.multiMatchActive.getCheckBox().isSelected)
             scoreCalculator.setMatchWeightSingleChar(liveSettingsComponent.matchWeightSingleChar.getIntSpinner().value as Int)
             scoreCalculator.setMatchWeightStreakModifier(liveSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int)

@@ -50,10 +50,7 @@ import com.jetbrains.rd.util.ConcurrentHashMap
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.NONE
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
 import javax.swing.*
@@ -234,8 +231,14 @@ open class Fuzzier : FuzzyAction() {
             }
         }
         
-        filesToIterate.forEach { iterationFile ->
-            stringEvaluator.processFile(iterationFile, listModel, searchString)
+        runBlocking {
+            withContext(Dispatchers.IO) {
+                filesToIterate.forEach { iterationFile ->
+                    launch {
+                        stringEvaluator.processFile(iterationFile, listModel, searchString)
+                    }
+                }
+            }
         }
     }
 
