@@ -35,7 +35,6 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.rootManager
-import com.intellij.openapi.roots.ModuleFileIndex
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
@@ -217,7 +216,6 @@ open class Fuzzier : FuzzyAction() {
                                searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
         val filesToIterate = ConcurrentHashMap.newKeySet<FuzzierUtil.IterationFile>()
         FuzzierUtil.fileIndexToIterationFiles(filesToIterate, ProjectFileIndex.getInstance(project), project.name)
-        
         processFiles(filesToIterate, stringEvaluator, listModel, searchString)
     }
 
@@ -227,7 +225,6 @@ open class Fuzzier : FuzzyAction() {
         for (module in moduleManager.modules) {
             FuzzierUtil.fileIndexToIterationFiles(filesToIterate, module.rootManager.fileIndex, module.name)
         }
-        
         processFiles(filesToIterate, stringEvaluator, listModel, searchString)
     }
     
