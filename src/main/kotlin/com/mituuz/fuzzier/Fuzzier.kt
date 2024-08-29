@@ -176,7 +176,6 @@ open class Fuzzier : FuzzyAction() {
                 val stringEvaluator = StringEvaluator(
                     fuzzierSettingsService.state.exclusionSet,
                     fuzzierSettingsService.state.modules,
-                    changeListManager,
                     changeListManager?.ignoredFilePaths
                 )
 
