@@ -35,7 +35,6 @@ import kotlin.collections.ArrayList
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.roots.FileIndex
 import com.intellij.openapi.vfs.VirtualFile
-import com.mituuz.fuzzier.Fuzzier
 import java.util.concurrent.ConcurrentHashMap
 
 class FuzzierUtil {

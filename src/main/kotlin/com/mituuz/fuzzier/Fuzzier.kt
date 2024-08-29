@@ -205,9 +205,10 @@ open class Fuzzier : FuzzyAction() {
                     }
                 }
             } catch (e: InterruptedException) {
+                Thread.currentThread().interrupt()
                 throw CancellationException()
             } catch (e: CancellationException) {
-                // Do nothing
+                // Do nothing, because each task starts over with a clean listModel
             }
         }
     }
