@@ -30,6 +30,7 @@ import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.intellij.openapi.vfs.VirtualFile
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.ScoreCalculator
+import com.mituuz.fuzzier.util.FuzzierUtil
 import javax.swing.DefaultListModel
 
 /**
@@ -66,7 +67,7 @@ class StringEvaluator(
         }
     }
     
-    fun processFile(iterationFile: Fuzzier.IterationFile, listModel: DefaultListModel<FuzzyMatchContainer>,
+    fun processFile(iterationFile: FuzzierUtil.IterationFile, listModel: DefaultListModel<FuzzyMatchContainer>,
                     searchString: String) {
         val scoreCalculator = ScoreCalculator(searchString)
         val file = iterationFile.file
