@@ -169,11 +169,11 @@ class TestBenchComponent : JPanel() {
         val contentIterator = stringEvaluator.getContentIterator(project.name, searchString, listModel)
 
         val scoreCalculator = stringEvaluator.calculator
-        scoreCalculator.setMultiMatch(liveSettingsComponent.multiMatchActive.getCheckBox().isSelected)
-        scoreCalculator.setMatchWeightSingleChar(liveSettingsComponent.matchWeightSingleChar.getIntSpinner().value as Int)
-        scoreCalculator.setMatchWeightStreakModifier(liveSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int)
-        scoreCalculator.setMatchWeightPartialPath(liveSettingsComponent.matchWeightPartialPath.getIntSpinner().value as Int)
-        scoreCalculator.setFilenameMatchWeight(liveSettingsComponent.matchWeightFilename.getIntSpinner().value as Int)
+        scoreCalculator?.setMultiMatch(liveSettingsComponent.multiMatchActive.getCheckBox().isSelected)
+        scoreCalculator?.setMatchWeightSingleChar(liveSettingsComponent.matchWeightSingleChar.getIntSpinner().value as Int)
+        scoreCalculator?.setMatchWeightStreakModifier(liveSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int)
+        scoreCalculator?.setMatchWeightPartialPath(liveSettingsComponent.matchWeightPartialPath.getIntSpinner().value as Int)
+        scoreCalculator?.setFilenameMatchWeight(liveSettingsComponent.matchWeightFilename.getIntSpinner().value as Int)
         ProjectFileIndex.getInstance(project).iterateContent(contentIterator)
     }
 
@@ -184,11 +184,11 @@ class TestBenchComponent : JPanel() {
             val contentIterator = stringEvaluator.getContentIterator(module.name, searchString, listModel)
 
             val scoreCalculator = stringEvaluator.calculator
-            scoreCalculator.setMultiMatch(liveSettingsComponent.multiMatchActive.getCheckBox().isSelected)
-            scoreCalculator.setMatchWeightSingleChar(liveSettingsComponent.matchWeightSingleChar.getIntSpinner().value as Int)
-            scoreCalculator.setMatchWeightStreakModifier(liveSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int)
-            scoreCalculator.setMatchWeightPartialPath(liveSettingsComponent.matchWeightPartialPath.getIntSpinner().value as Int)
-            scoreCalculator.setFilenameMatchWeight(liveSettingsComponent.matchWeightFilename.getIntSpinner().value as Int)
+            scoreCalculator?.setMultiMatch(liveSettingsComponent.multiMatchActive.getCheckBox().isSelected)
+            scoreCalculator?.setMatchWeightSingleChar(liveSettingsComponent.matchWeightSingleChar.getIntSpinner().value as Int)
+            scoreCalculator?.setMatchWeightStreakModifier(liveSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int)
+            scoreCalculator?.setMatchWeightPartialPath(liveSettingsComponent.matchWeightPartialPath.getIntSpinner().value as Int)
+            scoreCalculator?.setFilenameMatchWeight(liveSettingsComponent.matchWeightFilename.getIntSpinner().value as Int)
 
             moduleFileIndex.iterateContent(contentIterator)
         }

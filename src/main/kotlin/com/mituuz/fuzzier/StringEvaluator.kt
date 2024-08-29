@@ -35,19 +35,22 @@ import javax.swing.DefaultListModel
 
 /**
  * Handles creating the content iterators used for string handling and excluding files
- * @param exclusionList exclusion list from settings
- * @param changeListManager handles VCS check if file is being tracked. Null if VCS search should not be used
+ * @param exclusionList Exclusion list from settings
+ * @param vcsPathContainer Handles the VCS check; if a file is being tracked. Null if VCS search should not be used
  */
 class StringEvaluator(
     private var exclusionList: Set<String>,
     private var modules: Map<String, String>,
-    private var changeListManager: ChangeListManager? = null,
     private var vcsPathContainer: List<FilePath>? = null
 ) {
-    lateinit var calculator: ScoreCalculator
+    // Used for testing and test bench
+    var calculator: ScoreCalculator? = null
 
     fun getContentIterator(moduleName: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
-        val scoreCalculator = ScoreCalculator(searchString)
+        var scoreCalculator = ScoreCalculator(searchString)
+        if (calculator is ScoreCalculator) {
+            scoreCalculator = calculator as ScoreCalculator
+        }
         return ContentIterator { file: VirtualFile ->
             if (!file.isDirectory) {
                 val moduleBasePath = modules[moduleName] ?: return@ContentIterator true
