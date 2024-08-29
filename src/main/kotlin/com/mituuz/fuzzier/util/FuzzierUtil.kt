@@ -45,13 +45,15 @@ class FuzzierUtil {
 
     data class IterationFile(val file: VirtualFile, val module: String)
     
-    companion object fun fileIndexToIterationFiles(iterationFiles: ConcurrentHashMap.KeySetView<IterationFile, Boolean>, 
+    companion object {
+        fun fileIndexToIterationFiles(iterationFiles: ConcurrentHashMap.KeySetView<IterationFile, Boolean>, 
                                   fileIndex: FileIndex, moduleName: String) {
-        fileIndex.iterateContent { file ->
-            if (!file.isDirectory) {
-                iterationFiles.add(IterationFile(file, moduleName))
+            fileIndex.iterateContent { file ->
+                if (!file.isDirectory) {
+                    iterationFiles.add(IterationFile(file, moduleName))
+                }
+                true
             }
-            true
         }
     }
 

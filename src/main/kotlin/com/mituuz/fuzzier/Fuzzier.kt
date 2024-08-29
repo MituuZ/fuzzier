@@ -213,7 +213,7 @@ open class Fuzzier : FuzzyAction() {
     private fun processProject(project: Project, stringEvaluator: StringEvaluator,
                                searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
         val filesToIterate = ConcurrentHashMap.newKeySet<FuzzierUtil.IterationFile>()
-        FuzzierUtil().fileIndexToIterationFiles(filesToIterate, ProjectFileIndex.getInstance(project), project.name)
+        FuzzierUtil.fileIndexToIterationFiles(filesToIterate, ProjectFileIndex.getInstance(project), project.name)
         
         processFiles(filesToIterate, stringEvaluator, listModel, searchString)
     }
@@ -222,7 +222,7 @@ open class Fuzzier : FuzzyAction() {
                                searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
         val filesToIterate = ConcurrentHashMap.newKeySet<FuzzierUtil.IterationFile>()
         for (module in moduleManager.modules) {
-            FuzzierUtil().fileIndexToIterationFiles(filesToIterate, module.rootManager.fileIndex, module.name)
+            FuzzierUtil.fileIndexToIterationFiles(filesToIterate, module.rootManager.fileIndex, module.name)
         }
         
         processFiles(filesToIterate, stringEvaluator, listModel, searchString)
