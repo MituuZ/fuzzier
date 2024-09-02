@@ -28,6 +28,7 @@ import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.intellij.openapi.vfs.VirtualFile
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.ScoreCalculator
+import java.util.concurrent.Future
 import javax.swing.DefaultListModel
 
 /**
@@ -42,9 +43,13 @@ class StringEvaluator(
 ) {
     lateinit var scoreCalculator: ScoreCalculator
 
-    fun getContentIterator(moduleName: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
+    fun getContentIterator(moduleName: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>,
+                           task: Future<*>?): ContentIterator {
         scoreCalculator = ScoreCalculator(searchString)
         return ContentIterator { file: VirtualFile ->
+            if (task?.isCancelled == true) {
+                return@ContentIterator false
+            }
             if (!file.isDirectory) {
                 val moduleBasePath = modules[moduleName] ?: return@ContentIterator true
 
@@ -63,9 +68,13 @@ class StringEvaluator(
         }
     }
 
-    fun getDirIterator(moduleName: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>): ContentIterator {
+    fun getDirIterator(moduleName: String, searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>,
+                       task: Future<*>?): ContentIterator {
         scoreCalculator = ScoreCalculator(searchString)
         return ContentIterator { file: VirtualFile ->
+            if (task?.isCancelled == true) {
+                return@ContentIterator false
+            }
             if (file.isDirectory) {
                 val moduleBasePath = modules[moduleName] ?: return@ContentIterator true
                 val filePath = getDirPath(file, moduleBasePath, moduleName)

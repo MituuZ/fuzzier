@@ -51,6 +51,7 @@ import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Future
 import javax.swing.*
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -208,7 +209,7 @@ class FuzzyMover : FuzzyAction() {
                     fuzzierSettingsService.state.modules
                 )
 
-                if (task?.isCancelled == true) throw CancellationException()
+                if (task?.isCancelled == true) return@executeOnPooledThread
 
                 val moduleManager = ModuleManager.getInstance(project)
                 if (fuzzierSettingsService.state.isProject) {
@@ -217,11 +218,11 @@ class FuzzyMover : FuzzyAction() {
                     processModules(moduleManager, stringEvaluator, searchString, listModel)
                 }
 
-                if (task?.isCancelled == true) throw CancellationException()
+                if (task?.isCancelled == true) return@executeOnPooledThread
 
                 listModel = fuzzierUtil.sortAndLimit(listModel, true)
 
-                if (task?.isCancelled == true) throw CancellationException()
+                if (task?.isCancelled == true) return@executeOnPooledThread
 
                 ApplicationManager.getApplication().invokeLater {
                     component.fileList.model = listModel
@@ -231,8 +232,10 @@ class FuzzyMover : FuzzyAction() {
                         component.fileList.setSelectedValue(listModel[0], true)
                     }
                 }
+            } catch (e: InterruptedException) {
+                return@executeOnPooledThread
             } catch (e: CancellationException) {
-                // Do nothing
+                return@executeOnPooledThread
             }
         }
     }
@@ -240,9 +243,9 @@ class FuzzyMover : FuzzyAction() {
     private fun processProject(project: Project, stringEvaluator: StringEvaluator,
                                searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
         val contentIterator = if (!component.isDirSelector) {
-            stringEvaluator.getContentIterator(project.name, searchString, listModel)
+            stringEvaluator.getContentIterator(project.name, searchString, listModel, null)
         } else {
-            stringEvaluator.getDirIterator(project.name, searchString, listModel)
+            stringEvaluator.getDirIterator(project.name, searchString, listModel, null)
         }
         ProjectFileIndex.getInstance(project).iterateContent(contentIterator)
     }
@@ -253,9 +256,9 @@ class FuzzyMover : FuzzyAction() {
             val moduleFileIndex = module.rootManager.fileIndex
 
             val contentIterator = if (!component.isDirSelector) {
-                stringEvaluator.getContentIterator(module.name, searchString, listModel)
+                stringEvaluator.getContentIterator(module.name, searchString, listModel, null)
             } else {
-                stringEvaluator.getDirIterator(module.name, searchString, listModel)
+                stringEvaluator.getDirIterator(module.name, searchString, listModel, null)
             }
             moduleFileIndex.iterateContent(contentIterator)
         }
