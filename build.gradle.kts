@@ -8,7 +8,7 @@ plugins {
 }
 
 // Use same version and group for the jar and the plugin
-val currentVersion = "1.0.0"
+val currentVersion = "1.1.0"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -61,8 +61,7 @@ intellijPlatform {
     
     changeNotes = """
     <h2>Version $currentVersion</h2>
-    - Re-implement project file handling as a backup if no modules are present<br>
-    - Migrate IntelliJ Platform Gradle Plugin to 2.x
+    - Improve task cancelling to avoid InterruptedException and reduce cancelling delay<br>
     """.trimIndent()
     
     ideaVersion {
