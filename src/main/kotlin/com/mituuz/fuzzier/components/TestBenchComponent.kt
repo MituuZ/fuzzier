@@ -145,12 +145,7 @@ class TestBenchComponent : JPanel() {
             table.setPaintBusy(true)
             val listModel = DefaultListModel<FuzzyMatchContainer>()
 
-            val moduleManager = ModuleManager.getInstance(project)
-            if (service<FuzzierSettingsService>().state.isProject) {
-                processProject(project, stringEvaluator, searchString, listModel)
-            } else {
-                processModules(moduleManager, stringEvaluator, searchString, listModel)
-            }
+            process(project, stringEvaluator, searchString, listModel)
 
             val sortedList = listModel.elements().toList().sortedByDescending { it.getScore() }
             val data = sortedList.map {
@@ -163,10 +158,20 @@ class TestBenchComponent : JPanel() {
             table.setPaintBusy(false)
         }
     }
+    
+    private fun process(project: Project, stringEvaluator: StringEvaluator, searchString: String, 
+                        listModel: DefaultListModel<FuzzyMatchContainer>) {
+        val moduleManager = ModuleManager.getInstance(project)
+        if (service<FuzzierSettingsService>().state.isProject) {
+            processProject(project, stringEvaluator, searchString, listModel)
+        } else {
+            processModules(moduleManager, stringEvaluator, searchString, listModel)
+        }
+    }
 
     private fun processProject(project: Project, stringEvaluator: StringEvaluator,
                                searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
-        val contentIterator = stringEvaluator.getContentIterator(project.name, searchString, listModel)
+        val contentIterator = stringEvaluator.getContentIterator(project.name, searchString, listModel, null)
 
         val scoreCalculator = stringEvaluator.scoreCalculator
         scoreCalculator.setMultiMatch(liveSettingsComponent.multiMatchActive.getCheckBox().isSelected)
@@ -181,7 +186,7 @@ class TestBenchComponent : JPanel() {
                                searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
         for (module in moduleManager.modules) {
             val moduleFileIndex = module.rootManager.fileIndex
-            val contentIterator = stringEvaluator.getContentIterator(module.name, searchString, listModel)
+            val contentIterator = stringEvaluator.getContentIterator(module.name, searchString, listModel, null)
 
             val scoreCalculator = stringEvaluator.scoreCalculator
             scoreCalculator.setMultiMatch(liveSettingsComponent.multiMatchActive.getCheckBox().isSelected)

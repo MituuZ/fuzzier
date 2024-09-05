@@ -89,7 +89,7 @@ class TestUtil {
             stringEvaluator = StringEvaluator(exclusionList, map)
         }
 
-        val contentIterator = stringEvaluator.getContentIterator(myFixture.module.name, "", filePathContainer)
+        val contentIterator = stringEvaluator.getContentIterator(myFixture.module.name, "", filePathContainer, null)
         val index = myFixture.module.rootManager.fileIndex
         runInEdtAndWait {
             index.iterateContent(contentIterator)

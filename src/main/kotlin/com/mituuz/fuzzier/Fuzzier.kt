@@ -50,6 +50,7 @@ import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.NONE
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
+import java.util.concurrent.Future
 import javax.swing.*
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -151,14 +152,7 @@ open class Fuzzier : FuzzyAction() {
 
     override fun updateListContents(project: Project, searchString: String) {
         if (StringUtils.isBlank(searchString)) {
-            if (fuzzierSettingsService.state.recentFilesMode != NONE) {
-                createInitialView(project)
-            } else {
-                ApplicationManager.getApplication().invokeLater {
-                    component.fileList.model = DefaultListModel()
-                    defaultDoc?.let { (component as FuzzyFinderComponent).previewPane.updateFile(it) }
-                }
-            }
+            handleEmptySearchString(project)
             return
         }
 
@@ -170,26 +164,17 @@ open class Fuzzier : FuzzyAction() {
                 component.fileList.setPaintBusy(true)
                 var listModel = DefaultListModel<FuzzyMatchContainer>()
 
-                val stringEvaluator = StringEvaluator(
-                    fuzzierSettingsService.state.exclusionSet,
-                    fuzzierSettingsService.state.modules,
-                    changeListManager
-                )
+                val stringEvaluator = getStringEvaluator()
 
-                if (task?.isCancelled == true) throw CancellationException()
+                if (task?.isCancelled == true) return@executeOnPooledThread
 
-                val moduleManager = ModuleManager.getInstance(project)
-                if (fuzzierSettingsService.state.isProject) {
-                    processProject(project, stringEvaluator, searchString, listModel)
-                } else {
-                    processModules(moduleManager, stringEvaluator, searchString, listModel)
-                }
+                process(project, stringEvaluator, searchString, listModel, task)
 
-                if (task?.isCancelled == true) throw CancellationException()
+                if (task?.isCancelled == true) return@executeOnPooledThread
 
                 listModel = fuzzierUtil.sortAndLimit(listModel)
 
-                if (task?.isCancelled == true) throw CancellationException()
+                if (task?.isCancelled == true) return@executeOnPooledThread
 
                 ApplicationManager.getApplication().invokeLater {
                     component.fileList.model = listModel
@@ -199,23 +184,54 @@ open class Fuzzier : FuzzyAction() {
                         component.fileList.setSelectedValue(listModel[0], true)
                     }
                 }
+            } catch (e: InterruptedException) {
+                return@executeOnPooledThread
             } catch (e: CancellationException) {
-                // Do nothing
+                return@executeOnPooledThread
             }
         }
     }
     
+    private fun handleEmptySearchString(project: Project) {
+        if (fuzzierSettingsService.state.recentFilesMode != NONE) {
+            createInitialView(project)
+        } else {
+            ApplicationManager.getApplication().invokeLater {
+                component.fileList.model = DefaultListModel()
+                defaultDoc?.let { (component as FuzzyFinderComponent).previewPane.updateFile(it) }
+            }
+        }
+    }
+    
+    private fun getStringEvaluator(): StringEvaluator {
+        return StringEvaluator(
+            fuzzierSettingsService.state.exclusionSet,
+            fuzzierSettingsService.state.modules,
+            changeListManager
+        )
+    }
+    
+    private fun process(project: Project, stringEvaluator: StringEvaluator, searchString: String,
+                        listModel: DefaultListModel<FuzzyMatchContainer>, task: Future<*>?) {
+        val moduleManager = ModuleManager.getInstance(project)
+        if (fuzzierSettingsService.state.isProject) {
+            processProject(project, stringEvaluator, searchString, listModel, task)
+        } else {
+            processModules(moduleManager, stringEvaluator, searchString, listModel, task)
+        }
+    }
+    
     private fun processProject(project: Project, stringEvaluator: StringEvaluator,
-                               searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
-        val contentIterator = stringEvaluator.getContentIterator(project.name, searchString, listModel)
+                               searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>, task: Future<*>?) {
+        val contentIterator = stringEvaluator.getContentIterator(project.name, searchString, listModel, task)
         ProjectFileIndex.getInstance(project).iterateContent(contentIterator)
     }
 
     private fun processModules(moduleManager: ModuleManager, stringEvaluator: StringEvaluator,
-                               searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
+                               searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>, task: Future<*>?) {
         for (module in moduleManager.modules) {
             val moduleFileIndex = module.rootManager.fileIndex
-            val contentIterator = stringEvaluator.getContentIterator(module.name, searchString, listModel)
+            val contentIterator = stringEvaluator.getContentIterator(module.name, searchString, listModel, task)
             moduleFileIndex.iterateContent(contentIterator)
         }
     }
