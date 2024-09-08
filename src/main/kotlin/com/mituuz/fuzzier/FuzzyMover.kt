@@ -224,9 +224,9 @@ class FuzzyMover : FuzzyAction() {
                         component.fileList.setSelectedValue(listModel[0], true)
                     }
                 }
-            } catch (e: InterruptedException) {
+            } catch (_: InterruptedException) {
                 return@executeOnPooledThread
-            } catch (e: CancellationException) {
+            } catch (_: CancellationException) {
                 return@executeOnPooledThread
             }
         }
