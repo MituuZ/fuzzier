@@ -62,6 +62,7 @@ intellijPlatform {
     changeNotes = """
     <h2>Version $currentVersion</h2>
     - Improve task cancelling to avoid InterruptedException and reduce cancelling delay<br>
+    - Run searches with concurrency<br>
     """.trimIndent()
     
     ideaVersion {
