@@ -48,9 +48,11 @@ import com.intellij.psi.PsiManager
 import com.intellij.refactoring.move.moveFilesOrDirectories.MoveFilesOrDirectoriesUtil
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
+import com.mituuz.fuzzier.util.FuzzierUtil
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.*
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Future
 import javax.swing.*
 import kotlin.coroutines.cancellation.CancellationException
@@ -224,9 +226,9 @@ class FuzzyMover : FuzzyAction() {
                         component.fileList.setSelectedValue(listModel[0], true)
                     }
                 }
-            } catch (e: InterruptedException) {
+            } catch (_: InterruptedException) {
                 return@executeOnPooledThread
-            } catch (e: CancellationException) {
+            } catch (_: CancellationException) {
                 return@executeOnPooledThread
             }
         }
