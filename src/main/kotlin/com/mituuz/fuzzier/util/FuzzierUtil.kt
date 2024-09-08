@@ -31,13 +31,34 @@ import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import java.util.*
 import javax.swing.DefaultListModel
-import kotlin.collections.ArrayList
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.roots.FileIndex
+import com.intellij.openapi.vfs.VirtualFile
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Future
 
 class FuzzierUtil {
     private var settingsState = service<FuzzierSettingsService>().state
     private var listLimit: Int = settingsState.fileListLimit
     private var prioritizeShorterDirPaths = settingsState.prioritizeShorterDirPaths
+    
+    data class IterationFile(val file: VirtualFile, val module: String)
+    
+    companion object {
+        fun fileIndexToIterationFile(iterationFiles: ConcurrentHashMap.KeySetView<IterationFile, Boolean>,
+                                     fileIndex: FileIndex, moduleName: String, task: Future<*>?, 
+                                     isDir: Boolean = false) {
+            fileIndex.iterateContent { file ->
+                if (task?.isCancelled == true) {
+                    return@iterateContent false
+                }
+                if (file.isDirectory == isDir) {
+                    iterationFiles.add(IterationFile(file, moduleName))
+                }
+                true
+            }
+        }
+    }
 
     /**
      * Process all the elements in the listModel with a priority queue to limit the size
@@ -58,7 +79,7 @@ class FuzzierUtil {
 
         var minimumScore: Int? = null
         listModel.elements().toList().forEach {
-            if (minimumScore == null || it.getScore() > minimumScore!!) {
+            if (minimumScore == null || it.getScore() > minimumScore) {
                 priorityQueue.add(it)
                 if (priorityQueue.size > listLimit) {
                     priorityQueue.remove()
