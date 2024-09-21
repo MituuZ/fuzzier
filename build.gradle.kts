@@ -65,8 +65,7 @@ intellijPlatform {
     <h2>Version 1.1.0</h2>
     - Improve task cancelling to avoid InterruptedException and reduce cancelling delay<br>
     - Run searches with concurrency<br><br>
-    To have the most fluid experience it is recommended to NOT use the styled filename type and use a lower
-    debounce period (10 feels pretty good for me).
+    To have the most fluid experience it is recommended to NOT highlight filenames in file list and use a low debounce period.
     """.trimIndent()
     
     ideaVersion {
