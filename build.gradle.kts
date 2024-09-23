@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
   id("org.jetbrains.kotlin.jvm") version "2.0.20"
   id("org.jetbrains.intellij.platform") version "2.0.1"
-  jacoco
+  id("org.jetbrains.kotlinx.kover") version "0.9.0-RC"
 }
 
 // Use same version and group for the jar and the plugin
@@ -43,21 +43,9 @@ dependencies {
   testRuntimeOnly("junit:junit:4.13.2")
 }
 
-jacoco {
-  toolVersion = "0.8.12"
-}
-
-tasks.jacocoTestReport {
-  dependsOn(tasks.test) // tests are required to run before generating the report
-
-  sourceDirectories.setFrom(files("src/main/kotlin"))
-  classDirectories.setFrom(files("build/classes/kotlin/main"))
-  executionData.setFrom(files("build/jacoco/test.exec"))
-}
-
 tasks.test {
   useJUnitPlatform()
-  finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
+  finalizedBy(tasks.koverHtmlReport) // report is always generated after tests run
 }
 
 tasks.withType<KotlinCompile> {
