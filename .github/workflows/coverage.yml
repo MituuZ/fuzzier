@@ -3,6 +3,9 @@ name: Test coverage
 on:
   pull_request:
 
+permissions:
+  pull-requests: write
+
 jobs:
 
   collect_coverage:
