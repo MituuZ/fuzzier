@@ -16,6 +16,9 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
+      - name: Run coverage
+        run: ./gradlew koverXmlReport
+
       - name: Add coverage report to PR
         id: kover
         uses: mi-kas/kover-report@v1
