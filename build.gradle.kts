@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
   id("org.jetbrains.kotlin.jvm") version "2.0.20"
   id("org.jetbrains.intellij.platform") version "2.0.1"
+  id("org.jetbrains.kotlinx.kover") version "0.9.0-RC"
 }
 
 // Use same version and group for the jar and the plugin
@@ -44,6 +45,7 @@ dependencies {
 
 tasks.test {
   useJUnitPlatform()
+  finalizedBy(tasks.koverHtmlReport) // report is always generated after tests run
 }
 
 tasks.withType<KotlinCompile> {
