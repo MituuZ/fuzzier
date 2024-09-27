@@ -32,6 +32,7 @@ class FuzzyMatchContainer(val score: FuzzyScore,
                           var filePath: String,
                           var filename: String, private var module: String = "") {
     private var initialPath: String? = null
+    var fileOffset: Int? = null
 
     companion object {
         /**

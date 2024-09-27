@@ -24,7 +24,7 @@ repositories {
 
 dependencies {
   intellijPlatform {
-    intellijIdeaCommunity("2024.2.1")
+    intellijIdeaCommunity("2024.2.2")
     
     pluginVerifier()
     zipSigner()
