@@ -63,6 +63,7 @@ class PreviewEditor(project: Project?) : EditorTextField(
             at com.mituuz.fuzzier.Fuzzier.createListeners$lambda$12(Fuzzier.kt:234)
             at com.mituuz.fuzzier.FuzzierFS.updateListContents$lambda$1(FuzzierFS.kt:39)
          */
+        editor.setVerticalScrollbarVisible(true)
         editor.setHorizontalScrollbarVisible(true)
         editor.isOneLineMode = false
         editor.isViewer = true
