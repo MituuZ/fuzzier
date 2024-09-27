@@ -90,19 +90,7 @@ class FuzzierFS : Fuzzier() {
                     override fun run(indicator: ProgressIndicator) {
                         ApplicationManager.getApplication().invokeLater {
                             val previewPane = (component as FuzzyFinderComponent).previewPane
-                            previewPane.updateFile(currentFile)
-                            if (selectedValue?.fileOffset != null) {
-                                previewPane.moveCursor(selectedValue.fileOffset!!)
-                            }
-//                            val editor = (component as FuzzyFinderComponent).previewPane.editor
-//                            if (selectedValue?.fileOffset != null) {
-//                                ApplicationManager.getApplication().invokeLater {
-//                                    editor?.caretModel?.moveToOffset(selectedValue.fileOffset!!)
-//                                    editor?.scrollingModel?.run {
-//                                        scrollToCaret(ScrollType.CENTER)
-//                                    }
-//                                }
-//                            }
+                            previewPane.updateFile(currentFile, selectedValue?.fileOffset)
                         }
                     }
                 })
