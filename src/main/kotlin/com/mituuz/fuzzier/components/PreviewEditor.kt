@@ -85,7 +85,7 @@ class PreviewEditor(project: Project?) : EditorTextField(
         this.fileType = PlainTextFileType.INSTANCE
     }
 
-    fun updateFile(virtualFile: VirtualFile?) {
+    fun updateFile(virtualFile: VirtualFile?, offset: Int? = null) {
         ApplicationManager.getApplication().executeOnPooledThread {
             val sourceDocument = ApplicationManager.getApplication().runReadAction<Document?> {
                 virtualFile?.let { FileDocumentManager.getInstance().getDocument(virtualFile) }
@@ -111,6 +111,14 @@ class PreviewEditor(project: Project?) : EditorTextField(
                                 scrollHorizontally(0)
                                 scrollVertically(0)
                             }
+                            if (offset != null) {
+                                val caret = editor?.caretModel?.primaryCaret
+                                if (caret != null) {
+                                    caret.moveToOffset(offset)
+                                    val logicalPosition = caret.logicalPosition
+                                    editor?.scrollingModel?.scrollTo(logicalPosition, ScrollType.CENTER)
+                                }
+                            }
                         }
                     }
                 } else {
@@ -119,10 +127,5 @@ class PreviewEditor(project: Project?) : EditorTextField(
                 this.fileType = fileType
             }
         }
-    }
-
-    fun moveCursor(offset: Int) {
-        editor?.caretModel?.moveToOffset(offset)
-        editor?.scrollingModel?.scrollToCaret(ScrollType.CENTER)
     }
 }
