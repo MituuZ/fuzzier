@@ -28,6 +28,7 @@ import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.EditorFactory
+import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.fileEditor.FileDocumentManager
@@ -117,5 +118,10 @@ class PreviewEditor(project: Project?) : EditorTextField(
                 this.fileType = fileType
             }
         }
+    }
+
+    fun moveCursor(offset: Int) {
+        editor?.caretModel?.moveToOffset(offset)
+        editor?.scrollingModel?.scrollToCaret(ScrollType.CENTER)
     }
 }

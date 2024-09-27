@@ -25,12 +25,12 @@ package com.mituuz.fuzzier
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.EditorFactory
+import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.psi.*
 import com.intellij.psi.impl.source.PsiClassReferenceType
@@ -84,13 +84,25 @@ class FuzzierFS : Fuzzier() {
                     return@addListSelectionListener
                 }
                 val selectedValue = component.fileList.selectedValue
-                val fileUrl = "file://${selectedValue?.getFileUri()}"
+                val currentFile = FileEditorManager.getInstance(project).selectedEditor?.file
 
                 ProgressManager.getInstance().run(object : Task.Backgroundable(null, "Loading file", false) {
                     override fun run(indicator: ProgressIndicator) {
-                        val file = VirtualFileManager.getInstance().findFileByUrl(fileUrl)
-                        file?.let {
-                            (component as FuzzyFinderComponent).previewPane.updateFile(file)
+                        ApplicationManager.getApplication().invokeLater {
+                            val previewPane = (component as FuzzyFinderComponent).previewPane
+                            previewPane.updateFile(currentFile)
+                            if (selectedValue?.fileOffset != null) {
+                                previewPane.moveCursor(selectedValue.fileOffset!!)
+                            }
+//                            val editor = (component as FuzzyFinderComponent).previewPane.editor
+//                            if (selectedValue?.fileOffset != null) {
+//                                ApplicationManager.getApplication().invokeLater {
+//                                    editor?.caretModel?.moveToOffset(selectedValue.fileOffset!!)
+//                                    editor?.scrollingModel?.run {
+//                                        scrollToCaret(ScrollType.CENTER)
+//                                    }
+//                                }
+//                            }
                         }
                     }
                 })
@@ -133,32 +145,35 @@ class FuzzierFS : Fuzzier() {
             override fun visitClass(node: UClass): Boolean {
                 val name = node.name
                 val displayString = getTextRepresentation(node, name)
-                createStaticContainer(listModel, name, displayString)
+                createStaticContainer(listModel, name, displayString, node.textRange)
                 return super.visitClass(node)
             }
 
             override fun visitMethod(node: UMethod): Boolean {
                 val name = node.name
                 val displayString = getTextRepresentation(node, name)
-                createStaticContainer(listModel, name, displayString)
+                createStaticContainer(listModel, name, displayString, node.textRange)
                 return super.visitMethod(node)
             }
 
             override fun visitVariable(node: UVariable): Boolean {
                 val name = node.name
                 val displayString = getTextRepresentation(node, name)
-                createStaticContainer(listModel, name, displayString)
+                createStaticContainer(listModel, name, displayString, node.textRange)
                 return super.visitVariable(node)
             }
         }
     }
 
-    private fun createStaticContainer(listModel: DefaultListModel<FuzzyMatchContainer>,
-                                      name: String?, displayString: String?) {
+    private fun createStaticContainer(listModel: DefaultListModel<FuzzyMatchContainer>, name: String?,
+                                      displayString: String?, textRange: com.intellij.openapi.util.TextRange?) {
         if (name.isNullOrBlank() || displayString == null) {
             return
         }
         val container = FuzzyMatchContainer(FuzzyScore(), displayString, name)
+        if (textRange != null) {
+            container.fileOffset = textRange.startOffset
+        }
         listModel.addElement(container)
     }
 
