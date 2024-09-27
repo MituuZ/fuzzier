@@ -24,13 +24,15 @@ repositories {
 
 dependencies {
   intellijPlatform {
-    intellijIdeaCommunity("2024.2.1")
+    intellijIdeaCommunity("2024.2.2")
     
     pluginVerifier()
     zipSigner()
     instrumentationTools()
     
     testFramework(TestFrameworkType.Platform)
+
+    bundledPlugin("com.intellij.java")
   }
   
   testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
