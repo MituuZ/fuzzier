@@ -171,21 +171,21 @@ class FuzzierFS : Fuzzier() {
             override fun visitClass(node: UClass): Boolean {
                 val name = node.name
                 val displayString = getTextRepresentation(node, name)
-                createContainer(listModel, searchString, displayString, name)
+                createContainer(listModel, searchString, displayString, name, node.textRange)
                 return super.visitClass(node)
             }
 
             override fun visitMethod(node: UMethod): Boolean {
                 val name = node.name
                 val displayString = getTextRepresentation(node, name)
-                createContainer(listModel, searchString, displayString, name)
+                createContainer(listModel, searchString, displayString, name, node.textRange)
                 return super.visitMethod(node)
             }
 
             override fun visitVariable(node: UVariable): Boolean {
                 val name = node.name
                 val displayString = getTextRepresentation(node, name)
-                createContainer(listModel, searchString, displayString, name)
+                createContainer(listModel, searchString, displayString, name, node.textRange)
                 return super.visitVariable(node)
             }
         }
@@ -226,7 +226,7 @@ class FuzzierFS : Fuzzier() {
     }
 
     private fun createContainer(listModel: DefaultListModel<FuzzyMatchContainer>, searchString: String,
-                                displayString: String?, name: String?) {
+                                displayString: String?, name: String?, textRange: com.intellij.openapi.util.TextRange?) {
         if (name.isNullOrBlank() || displayString == null) {
             return;
         }
@@ -234,6 +234,9 @@ class FuzzierFS : Fuzzier() {
         val fs = scoreCalculator.calculateScore(name)
         if (fs != null) {
             val container = FuzzyMatchContainer(fs, displayString, name)
+            if (textRange != null) {
+                container.fileOffset = textRange.startOffset
+            }
             listModel.addElement(container)
         }
     }
