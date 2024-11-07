@@ -107,17 +107,9 @@ class PreviewEditor(project: Project?) : EditorTextField(
                             this.document = sourceDocument
                         }
                         ApplicationManager.getApplication().invokeLater {
-                            editor?.scrollingModel?.run {
-                                scrollHorizontally(0)
-                                scrollVertically(0)
-                            }
+                            scrollTo0()
                             if (offset != null) {
-                                val caret = editor?.caretModel?.primaryCaret
-                                if (caret != null) {
-                                    caret.moveToOffset(offset)
-                                    val logicalPosition = caret.logicalPosition
-                                    editor?.scrollingModel?.scrollTo(logicalPosition, ScrollType.CENTER)
-                                }
+                                moveCaretToOffset(offset)
                             }
                         }
                     }
@@ -126,6 +118,22 @@ class PreviewEditor(project: Project?) : EditorTextField(
                 }
                 this.fileType = fileType
             }
+        }
+    }
+
+    fun scrollTo0() {
+        editor?.scrollingModel?.run {
+            scrollHorizontally(0)
+            scrollVertically(0)
+        }
+    }
+
+    fun moveCaretToOffset(offset: Int) {
+        val caret = editor?.caretModel?.primaryCaret
+        if (caret != null) {
+            caret.moveToOffset(offset)
+            val logicalPosition = caret.logicalPosition
+            editor?.scrollingModel?.scrollTo(logicalPosition, ScrollType.CENTER)
         }
     }
 }
