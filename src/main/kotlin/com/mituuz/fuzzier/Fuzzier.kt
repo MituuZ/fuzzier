@@ -49,11 +49,13 @@ import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.NONE
 import com.mituuz.fuzzier.util.FuzzierUtil
+import com.mituuz.fuzzier.util.FuzzierUtil.Companion.createDimensionKey
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.apache.commons.lang3.StringUtils
+import java.awt.Point
 import java.awt.event.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Future
@@ -77,14 +79,20 @@ open class Fuzzier : FuzzyAction() {
 
             val mainWindow = WindowManager.getInstance().getIdeFrame(actionEvent.project)?.component
             mainWindow?.let {
-                popup = createPopup(project)
+                val screenBounds = it.graphicsConfiguration.bounds
+                val dimensionKey = createDimensionKey(fuzzyDimensionKey, screenBounds)
+                popup = createPopup(dimensionKey)
 
                 if (fuzzierSettingsService.state.resetWindow) {
-                    DimensionService.getInstance().setSize(fuzzyDimensionKey, null, project)
-                    DimensionService.getInstance().setLocation(fuzzyDimensionKey, null, project)
+                    DimensionService.getInstance().setSize(dimensionKey, null, null)
+                    DimensionService.getInstance().setLocation(dimensionKey, null, null)
                     fuzzierSettingsService.state.resetWindow = false
                 }
-                popup!!.showInCenterOf(it)
+
+                val centerX = screenBounds.x + screenBounds.width / 2
+                val centerY = screenBounds.y + screenBounds.height / 2
+                popup!!.showInScreenCoordinates(it, Point(centerX, centerY))
+
                 (component as FuzzyFinderComponent).splitPane.dividerLocation =
                     fuzzierSettingsService.state.splitPosition
             }
@@ -95,14 +103,14 @@ open class Fuzzier : FuzzyAction() {
         }
     }
 
-    private fun createPopup(project: Project): JBPopup {
+    private fun createPopup(dimensionKey: String): JBPopup {
         val popup: JBPopup = JBPopupFactory
             .getInstance()
             .createComponentPopupBuilder(component, component.searchField)
             .setFocusable(true)
             .setRequestFocus(true)
             .setResizable(true)
-            .setDimensionServiceKey(project, fuzzyDimensionKey, true)
+            .setDimensionServiceKey(null, dimensionKey, true)
             .setTitle(title)
             .setMovable(true)
             .setShowBorder(true)

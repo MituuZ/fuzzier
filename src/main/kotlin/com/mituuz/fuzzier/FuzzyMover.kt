@@ -48,17 +48,17 @@ import com.intellij.psi.PsiManager
 import com.intellij.refactoring.move.moveFilesOrDirectories.MoveFilesOrDirectoriesUtil
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
-import com.mituuz.fuzzier.util.FuzzierUtil
+import com.mituuz.fuzzier.util.FuzzierUtil.Companion.createDimensionKey
 import org.apache.commons.lang3.StringUtils
+import java.awt.Point
 import java.awt.event.*
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Future
 import javax.swing.*
 import kotlin.coroutines.cancellation.CancellationException
 
 class FuzzyMover : FuzzyAction() {
-    private val dimensionKey: String = "FuzzyMoverPopup"
+    private val moverDimensionKey: String = "FuzzyMoverPopup"
     lateinit var movableFile: PsiFile
     lateinit var currentFile: VirtualFile
 
@@ -71,7 +71,9 @@ class FuzzyMover : FuzzyAction() {
 
             val mainWindow = WindowManager.getInstance().getIdeFrame(actionEvent.project)?.component
             mainWindow?.let {
-                popup = createPopup(project)
+                val screenBounds = it.graphicsConfiguration.bounds
+                val dimensionKey = createDimensionKey(moverDimensionKey, screenBounds)
+                popup = createPopup(dimensionKey)
 
                 val currentEditor = FileEditorManager.getInstance(project).selectedTextEditor
                 if (currentEditor != null) {
@@ -80,23 +82,26 @@ class FuzzyMover : FuzzyAction() {
                 }
 
                 if (fuzzierSettingsService.state.resetWindow) {
-                    DimensionService.getInstance().setSize(dimensionKey, null, project)
-                    DimensionService.getInstance().setLocation(dimensionKey, null, project)
+                    DimensionService.getInstance().setSize(dimensionKey, null, null)
+                    DimensionService.getInstance().setLocation(dimensionKey, null, null)
                     fuzzierSettingsService.state.resetWindow = false
                 }
-                popup!!.showInCenterOf(it)
+
+                val centerX = screenBounds.x + screenBounds.width / 2
+                val centerY = screenBounds.y + screenBounds.height / 2
+                popup!!.showInScreenCoordinates(it, Point(centerX, centerY))
             }
         }
     }
 
-    private fun createPopup(project: Project): JBPopup {
+    private fun createPopup(dimensionKey: String): JBPopup {
         val popup = JBPopupFactory
             .getInstance()
             .createComponentPopupBuilder(component, component.searchField)
             .setFocusable(true)
             .setRequestFocus(true)
             .setResizable(true)
-            .setDimensionServiceKey(project, dimensionKey, true)
+            .setDimensionServiceKey(null, dimensionKey, true)
             .setTitle("Fuzzy File Mover")
             .setMovable(true)
             .setShowBorder(true)

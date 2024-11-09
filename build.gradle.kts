@@ -3,13 +3,13 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("org.jetbrains.kotlin.jvm") version "2.0.20"
-  id("org.jetbrains.intellij.platform") version "2.0.1"
+  id("org.jetbrains.kotlin.jvm") version "2.1.0-RC"
+  id("org.jetbrains.intellij.platform") version "2.1.0"
   id("org.jetbrains.kotlinx.kover") version "0.9.0-RC"
 }
 
 // Use same version and group for the jar and the plugin
-val currentVersion = "1.1.1"
+val currentVersion = "1.2.0"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -63,11 +63,10 @@ intellijPlatform {
     
     changeNotes = """
     <h2>Version $currentVersion</h2>
-    - Use open version support from 2024.2 onwards<br><br>
-    <h2>Version 1.1.0</h2>
-    - Improve task cancelling to avoid InterruptedException and reduce cancelling delay<br>
-    - Run searches with concurrency<br><br>
-    To have the most fluid experience it is recommended to NOT highlight filenames in file list and use a low debounce period.
+    - Make popup dimensions persistent across projects<br>
+    &emsp;- Popup dimensions are saved per screen bounds (location and size)<br>
+    - Improve popup location consistency (fixes right screen, left half issue)<br>
+    - Update kotlin-jvm and intellij-platform plugins to 2.1.0
     """.trimIndent()
     
     ideaVersion {
