@@ -34,6 +34,7 @@ import javax.swing.DefaultListModel
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.roots.FileIndex
 import com.intellij.openapi.vfs.VirtualFile
+import java.awt.Rectangle
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Future
 
@@ -45,6 +46,14 @@ class FuzzierUtil {
     data class IterationFile(val file: VirtualFile, val module: String)
     
     companion object {
+        /**
+         * Create a dimension key for a specific screen bounds
+         * Takes the screen position and size into account
+         */
+        fun createDimensionKey(baseDimensionKey: String, screenBounds: Rectangle): String {
+            return "${baseDimensionKey}_${screenBounds.width}_${screenBounds.height}_${screenBounds.x}_${screenBounds.y}"
+        }
+
         fun fileIndexToIterationFile(iterationFiles: ConcurrentHashMap.KeySetView<IterationFile, Boolean>,
                                      fileIndex: FileIndex, moduleName: String, task: Future<*>?, 
                                      isDir: Boolean = false) {

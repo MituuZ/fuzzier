@@ -48,6 +48,7 @@ import com.intellij.psi.PsiManager
 import com.intellij.refactoring.move.moveFilesOrDirectories.MoveFilesOrDirectoriesUtil
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
+import com.mituuz.fuzzier.util.FuzzierUtil.Companion.createDimensionKey
 import org.apache.commons.lang3.StringUtils
 import java.awt.Point
 import java.awt.event.*
@@ -57,7 +58,7 @@ import javax.swing.*
 import kotlin.coroutines.cancellation.CancellationException
 
 class FuzzyMover : FuzzyAction() {
-    private val dimensionKey: String = "FuzzyMoverPopup"
+    private val moverDimensionKey: String = "FuzzyMoverPopup"
     lateinit var movableFile: PsiFile
     lateinit var currentFile: VirtualFile
 
@@ -70,7 +71,9 @@ class FuzzyMover : FuzzyAction() {
 
             val mainWindow = WindowManager.getInstance().getIdeFrame(actionEvent.project)?.component
             mainWindow?.let {
-                popup = createPopup(project)
+                val screenBounds = it.graphicsConfiguration.bounds
+                val dimensionKey = createDimensionKey(moverDimensionKey, screenBounds)
+                popup = createPopup(dimensionKey)
 
                 val currentEditor = FileEditorManager.getInstance(project).selectedTextEditor
                 if (currentEditor != null) {
@@ -84,7 +87,6 @@ class FuzzyMover : FuzzyAction() {
                     fuzzierSettingsService.state.resetWindow = false
                 }
 
-                val screenBounds = it.graphicsConfiguration.bounds
                 val centerX = screenBounds.x + screenBounds.width / 2
                 val centerY = screenBounds.y + screenBounds.height / 2
                 popup!!.showInScreenCoordinates(it, Point(centerX, centerY))
@@ -92,7 +94,7 @@ class FuzzyMover : FuzzyAction() {
         }
     }
 
-    private fun createPopup(project: Project): JBPopup {
+    private fun createPopup(dimensionKey: String): JBPopup {
         val popup = JBPopupFactory
             .getInstance()
             .createComponentPopupBuilder(component, component.searchField)
