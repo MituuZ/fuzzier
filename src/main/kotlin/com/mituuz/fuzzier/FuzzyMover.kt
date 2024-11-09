@@ -79,8 +79,8 @@ class FuzzyMover : FuzzyAction() {
                 }
 
                 if (fuzzierSettingsService.state.resetWindow) {
-                    DimensionService.getInstance().setSize(dimensionKey, null, project)
-                    DimensionService.getInstance().setLocation(dimensionKey, null, project)
+                    DimensionService.getInstance().setSize(dimensionKey, null, null)
+                    DimensionService.getInstance().setLocation(dimensionKey, null, null)
                     fuzzierSettingsService.state.resetWindow = false
                 }
 
@@ -99,7 +99,7 @@ class FuzzyMover : FuzzyAction() {
             .setFocusable(true)
             .setRequestFocus(true)
             .setResizable(true)
-            .setDimensionServiceKey(project, dimensionKey, true)
+            .setDimensionServiceKey(null, dimensionKey, true)
             .setTitle("Fuzzy File Mover")
             .setMovable(true)
             .setShowBorder(true)

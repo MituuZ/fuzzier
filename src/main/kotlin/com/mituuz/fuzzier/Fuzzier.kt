@@ -81,8 +81,8 @@ open class Fuzzier : FuzzyAction() {
                 popup = createPopup(project)
 
                 if (fuzzierSettingsService.state.resetWindow) {
-                    DimensionService.getInstance().setSize(fuzzyDimensionKey, null, project)
-                    DimensionService.getInstance().setLocation(fuzzyDimensionKey, null, project)
+                    DimensionService.getInstance().setSize(fuzzyDimensionKey, null, null)
+                    DimensionService.getInstance().setLocation(fuzzyDimensionKey, null, null)
                     fuzzierSettingsService.state.resetWindow = false
                 }
 
@@ -108,7 +108,7 @@ open class Fuzzier : FuzzyAction() {
             .setFocusable(true)
             .setRequestFocus(true)
             .setResizable(true)
-            .setDimensionServiceKey(project, fuzzyDimensionKey, true)
+            .setDimensionServiceKey(null, fuzzyDimensionKey, true)
             .setTitle(title)
             .setMovable(true)
             .setShowBorder(true)
