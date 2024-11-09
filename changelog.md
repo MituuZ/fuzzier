@@ -2,6 +2,7 @@
 ## Version 1.2.0
 - Make popup dimensions persistent across projects
 - Improve popup location consistency (fixes right screen, left half issue)
+- Update kotlin-jvm and intellij-platform plugins to 2.1.0
 
 ## Version 1.1.1
 - Use open version support from 2024.2 onwards<br><br>

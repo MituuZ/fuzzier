@@ -3,8 +3,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("org.jetbrains.kotlin.jvm") version "2.0.20"
-  id("org.jetbrains.intellij.platform") version "2.0.1"
+  id("org.jetbrains.kotlin.jvm") version "2.1.0-RC"
+  id("org.jetbrains.intellij.platform") version "2.1.0"
   id("org.jetbrains.kotlinx.kover") version "0.9.0-RC"
 }
 
@@ -64,7 +64,8 @@ intellijPlatform {
     changeNotes = """
     <h2>Version $currentVersion</h2>
     - Make popup dimensions persistent across projects<br>
-    - Improve popup location consistency (fixes right screen, left half issue)
+    - Improve popup location consistency (fixes right screen, left half issue)<br>
+    - Update kotlin-jvm and intellij-platform plugins to 2.1.0
     """.trimIndent()
     
     ideaVersion {
