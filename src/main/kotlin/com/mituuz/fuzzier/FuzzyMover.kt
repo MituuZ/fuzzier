@@ -48,11 +48,10 @@ import com.intellij.psi.PsiManager
 import com.intellij.refactoring.move.moveFilesOrDirectories.MoveFilesOrDirectoriesUtil
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
-import com.mituuz.fuzzier.util.FuzzierUtil
 import org.apache.commons.lang3.StringUtils
+import java.awt.Point
 import java.awt.event.*
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Future
 import javax.swing.*
 import kotlin.coroutines.cancellation.CancellationException
@@ -84,7 +83,11 @@ class FuzzyMover : FuzzyAction() {
                     DimensionService.getInstance().setLocation(dimensionKey, null, project)
                     fuzzierSettingsService.state.resetWindow = false
                 }
-                popup!!.showInCenterOf(it)
+
+                val screenBounds = it.graphicsConfiguration.bounds
+                val centerX = screenBounds.x + screenBounds.width / 2
+                val centerY = screenBounds.y + screenBounds.height / 2
+                popup!!.showInScreenCoordinates(it, Point(centerX, centerY))
             }
         }
     }

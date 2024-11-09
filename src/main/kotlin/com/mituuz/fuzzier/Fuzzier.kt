@@ -54,6 +54,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.apache.commons.lang3.StringUtils
+import java.awt.Point
 import java.awt.event.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Future
@@ -84,7 +85,12 @@ open class Fuzzier : FuzzyAction() {
                     DimensionService.getInstance().setLocation(fuzzyDimensionKey, null, project)
                     fuzzierSettingsService.state.resetWindow = false
                 }
-                popup!!.showInCenterOf(it)
+
+                val screenBounds = it.graphicsConfiguration.bounds
+                val centerX = screenBounds.x + screenBounds.width / 2
+                val centerY = screenBounds.y + screenBounds.height / 2
+                popup!!.showInScreenCoordinates(it, Point(centerX, centerY))
+
                 (component as FuzzyFinderComponent).splitPane.dividerLocation =
                     fuzzierSettingsService.state.splitPosition
             }
