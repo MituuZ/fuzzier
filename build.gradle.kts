@@ -64,6 +64,7 @@ intellijPlatform {
     changeNotes = """
     <h2>Version $currentVersion</h2>
     - Make popup dimensions persistent across projects<br>
+    &emsp;- Popup dimensions are saved per screen bounds (location and size)<br>
     - Improve popup location consistency (fixes right screen, left half issue)<br>
     - Update kotlin-jvm and intellij-platform plugins to 2.1.0
     """.trimIndent()
