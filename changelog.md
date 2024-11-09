@@ -1,4 +1,19 @@
 # Changelog
+## Version 1.2.0
+- Make popup dimensions persistent across projects
+- Improve popup location consistency (fixes right screen, left half issue)
+
+## Version 1.1.1
+- Use open version support from 2024.2 onwards<br><br>
+
+## Version 1.1.0
+- Improve task cancelling to avoid InterruptedException and reduce cancelling delay<br>
+- Run searches with concurrency<br><br>
+
+## Version 1.0.0
+- Re-implement project file handling as a backup if no modules are present
+- Migrate IntelliJ Platform Gradle Plugin to 2.x
+
 ## Version 0.26.2
 - Re-implement project file handling as a backup if no modules are present
 
