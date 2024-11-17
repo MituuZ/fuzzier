@@ -14,10 +14,7 @@
 A simple plugin to allow "fuzzy" file search with the UI inspired by [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
 
 If you are interested in plugin development you can check out my write-up about creating Fuzzier in 
-[here.](https://mituuz.com/content/fuzzier_development.html)
-
-Does **not** support true fuzzy finding. All search characters must be present and in correct order in the file path, 
-but do not need to be sequential.
+[here.](https://mituuz.com/content/fuzzier_development.html).
 
 Supports spaces in the search string, splitting the string and searching for both parts separately. 
 e.g. parts do not need to be in the correct order, as long as both succeed on their own.
@@ -36,8 +33,8 @@ Double-clicking a list item opens the file
 
 When focused on the search field, you can use:
 - Arrow keys to move up and down
-- CTRL + j to move down (modifiable)
-- CTRL + k to move up (modifiable)
+- CTRL + j to move down (modifiable through keymap)
+- CTRL + k to move up (modifiable through keymap)
 - Enter to open the currently selected file
 
 List movement can be remapped from settings -> keymaps, but do not support chorded shortcuts.
