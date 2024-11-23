@@ -300,16 +300,12 @@ open class Fuzzier : FuzzyAction() {
         popup?.cancel()
     }
 
-    private fun addFileToRecentlySearchedFiles(fuzzyMatchContainer: FuzzyMatchContainer) {
+    fun addFileToRecentlySearchedFiles(fuzzyMatchContainer: FuzzyMatchContainer) {
         var listModel: DefaultListModel<FuzzyMatchContainer>? = fuzzierSettingsService.state.recentlySearchedFiles
 
         if (listModel == null) {
             listModel = DefaultListModel<FuzzyMatchContainer>()
             fuzzierSettingsService.state.recentlySearchedFiles = listModel
-        }
-
-        while (listModel.size > fuzzierSettingsService.state.fileListLimit) {
-            listModel.remove(listModel.size)
         }
 
         var i = 0
@@ -319,6 +315,10 @@ open class Fuzzier : FuzzyAction() {
             } else {
                 i++
             }
+        }
+
+        while (listModel.size > fuzzierSettingsService.state.fileListLimit - 1) {
+            listModel.remove(listModel.size - 1)
         }
 
         listModel.addElement(fuzzyMatchContainer)

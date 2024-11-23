@@ -32,7 +32,6 @@ import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.RECENT
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import javax.swing.DefaultListModel
 
 class FuzzierSettingsConfigurableTest {
     @Suppress("unused")
