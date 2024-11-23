@@ -97,18 +97,18 @@ class FuzzierUtilTest {
         assertEquals(3, modules.size)
 
         var file = myFixture.findFileInTempDir("/src1/file1")
-        assertEquals("/src1/file1", fuzzierUtil.removeModulePath(file.path).first)
-        var finalPath = fuzzierUtil.removeModulePath(file.path).second.substringAfterLast("/");
+        assertEquals("/src1/file1", fuzzierUtil.extractModulePath(file.path).first)
+        var finalPath = fuzzierUtil.extractModulePath(file.path).second.substringAfterLast("/");
         assertTrue(finalPath.startsWith("unitTest"))
 
         file = myFixture.findFileInTempDir("/src1/module1/file1")
-        assertEquals("/src1/module1/file1", fuzzierUtil.removeModulePath(file.path).first)
-        finalPath = fuzzierUtil.removeModulePath(file.path).second.substringAfterLast("/");
+        assertEquals("/src1/module1/file1", fuzzierUtil.extractModulePath(file.path).first)
+        finalPath = fuzzierUtil.extractModulePath(file.path).second.substringAfterLast("/");
         assertTrue(finalPath.startsWith("unitTest"))
 
         file = myFixture.findFileInTempDir("/src2/file1")
-        assertEquals("/src2/file1", fuzzierUtil.removeModulePath(file.path).first)
-        finalPath = fuzzierUtil.removeModulePath(file.path).second.substringAfterLast("/");
+        assertEquals("/src2/file1", fuzzierUtil.extractModulePath(file.path).first)
+        finalPath = fuzzierUtil.extractModulePath(file.path).second.substringAfterLast("/");
         assertTrue(finalPath.startsWith("unitTest"))
     }
 
@@ -121,18 +121,18 @@ class FuzzierUtilTest {
         assertEquals(3, modules.size)
 
         var file = myFixture.findFileInTempDir("/path/src1/file1")
-        assertEquals("/src1/file1", fuzzierUtil.removeModulePath(file.path).first)
-        var finalPath = fuzzierUtil.removeModulePath(file.path).second.substringAfterLast("/");
+        assertEquals("/src1/file1", fuzzierUtil.extractModulePath(file.path).first)
+        var finalPath = fuzzierUtil.extractModulePath(file.path).second.substringAfterLast("/");
         assertTrue(finalPath.startsWith("path"))
 
         file = myFixture.findFileInTempDir("/to/src2/file2")
-        assertEquals("/src2/file2", fuzzierUtil.removeModulePath(file.path).first)
-        finalPath = fuzzierUtil.removeModulePath(file.path).second.substringAfterLast("/");
+        assertEquals("/src2/file2", fuzzierUtil.extractModulePath(file.path).first)
+        finalPath = fuzzierUtil.extractModulePath(file.path).second.substringAfterLast("/");
         assertTrue(finalPath.startsWith("to"))
 
         file = myFixture.findFileInTempDir("/module/src3/file3")
-        assertEquals("/src3/file3", fuzzierUtil.removeModulePath(file.path).first)
-        finalPath = fuzzierUtil.removeModulePath(file.path).second.substringAfterLast("/");
+        assertEquals("/src3/file3", fuzzierUtil.extractModulePath(file.path).first)
+        finalPath = fuzzierUtil.extractModulePath(file.path).second.substringAfterLast("/");
         assertTrue(finalPath.startsWith("module"))
     }
 
@@ -145,7 +145,7 @@ class FuzzierUtilTest {
         assertEquals(1, modules.size)
 
         val file = myFixture.findFileInTempDir("/path/src1/file1")
-        assertEquals("/file1", fuzzierUtil.removeModulePath(file.path).first)
+        assertEquals("/file1", fuzzierUtil.extractModulePath(file.path).first)
     }
 
     @Test
@@ -156,7 +156,7 @@ class FuzzierUtilTest {
         val modules = service<FuzzierSettingsService>().state.modules
         assertEquals(1, modules.size)
 
-        assertEquals(Pair("/no/such/file", ""), fuzzierUtil.removeModulePath("/no/such/file"))
+        assertEquals(Pair("/no/such/file", ""), fuzzierUtil.extractModulePath("/no/such/file"))
     }
 
     @Test

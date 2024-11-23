@@ -28,6 +28,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.fileEditor.impl.EditorHistoryManager
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
@@ -137,11 +138,13 @@ open class Fuzzier : FuzzyAction() {
      */
     private fun createInitialView(project: Project) {
         ApplicationManager.getApplication().executeOnPooledThread {
+            val editorHistoryManager = EditorHistoryManager.getInstance(project)
+
             val listModel = when (fuzzierSettingsService.state.recentFilesMode) {
                 RECENT_PROJECT_FILES -> InitialViewHandler.getRecentProjectFiles(
-                    project,
                     fuzzierSettingsService,
-                    fuzzierUtil
+                    fuzzierUtil,
+                    editorHistoryManager
                 )
 
                 RECENTLY_SEARCHED_FILES -> InitialViewHandler.getRecentlySearchedFiles(fuzzierSettingsService)

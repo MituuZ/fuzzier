@@ -1,7 +1,6 @@
 package com.mituuz.fuzzier.util
 
 import com.intellij.openapi.fileEditor.impl.EditorHistoryManager
-import com.intellij.openapi.project.Project
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import javax.swing.DefaultListModel
@@ -9,9 +8,10 @@ import javax.swing.DefaultListModel
 class InitialViewHandler {
     companion object {
         fun getRecentProjectFiles(
-            project: Project, fuzzierSettingsService: FuzzierSettingsService, fuzzierUtil: FuzzierUtil
+            fuzzierSettingsService: FuzzierSettingsService, fuzzierUtil: FuzzierUtil,
+            editorHistoryManager: EditorHistoryManager
         ): DefaultListModel<FuzzyMatchContainer> {
-            val editorHistory = EditorHistoryManager.getInstance(project).fileList
+            val editorHistory = editorHistoryManager.fileList
             val listModel = DefaultListModel<FuzzyMatchContainer>()
             val limit = fuzzierSettingsService.state.fileListLimit
 
@@ -19,7 +19,7 @@ class InitialViewHandler {
             var i = editorHistory.size - 1
             while (i >= 0 && listModel.size() < limit) {
                 val file = editorHistory[i]
-                val filePathAndModule = fuzzierUtil.removeModulePath(file.path)
+                val filePathAndModule = fuzzierUtil.extractModulePath(file.path)
                 // Don't add files that do not have a module path in the project
                 if (filePathAndModule.second == "") {
                     i--
