@@ -52,7 +52,17 @@ class InitialViewHandler {
                 }
             }
 
-            return listModel
+            // Reverse the list to show the most recent searches first
+            var result = DefaultListModel<FuzzyMatchContainer>()
+
+            var j = 0
+            while (j < listModel.size) {
+                val index = listModel.size - j - 1
+                result.addElement(listModel.get(index))
+                j++
+            }
+
+            return result
         }
     }
 }

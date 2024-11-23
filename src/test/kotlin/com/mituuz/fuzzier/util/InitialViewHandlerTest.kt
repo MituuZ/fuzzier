@@ -93,6 +93,21 @@ class InitialViewHandlerTest {
     }
 
     @Test
+    fun `Recently searched files - Order of multiple files`() {
+        val fuzzyMatchContainer1 = mock(FuzzyMatchContainer::class.java)
+        val fuzzyMatchContainer2 = mock(FuzzyMatchContainer::class.java)
+        val listModel = DefaultListModel<FuzzyMatchContainer>()
+        listModel.addElement(fuzzyMatchContainer1)
+        listModel.addElement(fuzzyMatchContainer2)
+        `when`(fuzzierSettingsService.state.recentlySearchedFiles).thenReturn(listModel)
+
+        val result = InitialViewHandler.getRecentlySearchedFiles(fuzzierSettingsService)
+
+        assertEquals(fuzzyMatchContainer2, result[0])
+        assertEquals(fuzzyMatchContainer1, result[1])
+    }
+
+    @Test
     fun `Recently searched files - Remove null elements from the list`() {
         val fuzzyMatchContainer = mock(FuzzyMatchContainer::class.java)
         val listModel = DefaultListModel<FuzzyMatchContainer>()
