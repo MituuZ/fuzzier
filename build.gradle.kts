@@ -9,7 +9,7 @@ plugins {
 }
 
 // Use same version and group for the jar and the plugin
-val currentVersion = "1.2.0"
+val currentVersion = "1.3.0"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -33,10 +33,10 @@ dependencies {
     testFramework(TestFrameworkType.Platform)
   }
   
-  testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
-  testImplementation("org.mockito:mockito-core:5.12.0")
+  testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.3")
+  testImplementation("org.mockito:mockito-core:5.14.2")
 
-  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
+  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.3")
   
   // Required to fix issue where JUnit5 Test Framework refers to JUnit4
   // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-faq.html#junit5-test-framework-refers-to-junit4
@@ -63,10 +63,8 @@ intellijPlatform {
     
     changeNotes = """
     <h2>Version $currentVersion</h2>
-    - Make popup dimensions persistent across projects<br>
-    &emsp;- Popup dimensions are saved per screen bounds (location and size)<br>
-    - Improve popup location consistency (fixes right screen, left half issue)<br>
-    - Update kotlin-jvm and intellij-platform plugins to 2.1.0
+    - Add option to list recently searched files on popup open<br>
+    - Update some dependencies
     """.trimIndent()
     
     ideaVersion {

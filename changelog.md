@@ -1,4 +1,8 @@
 # Changelog
+## Version 1.3.0
+- Add option to list recently searched files on popup open
+- Update some dependencies
+
 ## Version 1.2.0
 - Make popup dimensions persistent across projects
 - Improve popup location consistency (fixes right screen, left half issue)
