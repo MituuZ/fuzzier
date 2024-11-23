@@ -21,13 +21,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-package com.mituuz.fuzzier
+package com.mituuz.fuzzier.entities
 
 import com.intellij.openapi.roots.ContentIterator
 import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.intellij.openapi.vfs.VirtualFile
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer
-import com.mituuz.fuzzier.entities.ScoreCalculator
 import com.mituuz.fuzzier.util.FuzzierUtil
 import java.util.concurrent.Future
 import javax.swing.DefaultListModel
@@ -92,7 +90,7 @@ class StringEvaluator(
             true
         }
     }
-    
+
     fun evaluateFile(iterationFile: FuzzierUtil.IterationFile, listModel: DefaultListModel<FuzzyMatchContainer>,
                      searchString: String) {
         val scoreCalculator = ScoreCalculator(searchString)

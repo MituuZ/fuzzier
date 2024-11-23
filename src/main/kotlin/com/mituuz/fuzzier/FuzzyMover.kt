@@ -48,6 +48,7 @@ import com.intellij.psi.PsiManager
 import com.intellij.refactoring.move.moveFilesOrDirectories.MoveFilesOrDirectoriesUtil
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
+import com.mituuz.fuzzier.entities.StringEvaluator
 import com.mituuz.fuzzier.util.FuzzierUtil.Companion.createDimensionKey
 import org.apache.commons.lang3.StringUtils
 import java.awt.Point

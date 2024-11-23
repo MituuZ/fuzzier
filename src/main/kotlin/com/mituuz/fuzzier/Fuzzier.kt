@@ -47,9 +47,13 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
+import com.mituuz.fuzzier.entities.StringEvaluator
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.NONE
+import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.RECENTLY_SEARCHED_FILES
+import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.RECENT_PROJECT_FILES
 import com.mituuz.fuzzier.util.FuzzierUtil
 import com.mituuz.fuzzier.util.FuzzierUtil.Companion.createDimensionKey
+import com.mituuz.fuzzier.util.InitialViewHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -66,6 +70,7 @@ open class Fuzzier : FuzzyAction() {
     private var defaultDoc: Document? = null
     open var title: String = "Fuzzy Search"
     private val fuzzyDimensionKey: String = "FuzzySearchPopup"
+
     // Used by FuzzierVCS to check if files are tracked by the VCS
     protected var changeListManager: ChangeListManager? = null
 
@@ -133,24 +138,19 @@ open class Fuzzier : FuzzyAction() {
      */
     private fun createInitialView(project: Project) {
         ApplicationManager.getApplication().executeOnPooledThread {
-            val editorHistory = EditorHistoryManager.getInstance(project).fileList
-            val listModel = DefaultListModel<FuzzyMatchContainer>()
-            val limit = fuzzierSettingsService.state.fileListLimit
+            val editorHistoryManager = EditorHistoryManager.getInstance(project)
 
-            // Start from the end of editor history (most recent file)
-            var i = editorHistory.size - 1
-            while (i >= 0 && listModel.size() < limit) {
-                val file = editorHistory[i]
-                val filePathAndModule = fuzzierUtil.removeModulePath(file.path)
-                // Don't add files that do not have a module path in the project
-                if (filePathAndModule.second == "") {
-                    i--
-                    continue
+            val listModel = when (fuzzierSettingsService.state.recentFilesMode) {
+                RECENT_PROJECT_FILES -> InitialViewHandler.getRecentProjectFiles(
+                    fuzzierSettingsService,
+                    fuzzierUtil,
+                    editorHistoryManager
+                )
+
+                RECENTLY_SEARCHED_FILES -> InitialViewHandler.getRecentlySearchedFiles(fuzzierSettingsService)
+                else -> {
+                    DefaultListModel<FuzzyMatchContainer>()
                 }
-                val fuzzyMatchContainer =
-                    FuzzyMatchContainer.createOrderedContainer(i, filePathAndModule.first, filePathAndModule.second, file.name)
-                listModel.addElement(fuzzyMatchContainer)
-                i--
             }
 
             ApplicationManager.getApplication().invokeLater {
@@ -205,7 +205,7 @@ open class Fuzzier : FuzzyAction() {
             }
         }
     }
-    
+
     private fun handleEmptySearchString(project: Project) {
         if (fuzzierSettingsService.state.recentFilesMode != NONE) {
             createInitialView(project)
@@ -216,7 +216,7 @@ open class Fuzzier : FuzzyAction() {
             }
         }
     }
-    
+
     private fun getStringEvaluator(): StringEvaluator {
         return StringEvaluator(
             fuzzierSettingsService.state.exclusionSet,
@@ -224,9 +224,11 @@ open class Fuzzier : FuzzyAction() {
             changeListManager
         )
     }
-    
-    private fun process(project: Project, stringEvaluator: StringEvaluator, searchString: String,
-                        listModel: DefaultListModel<FuzzyMatchContainer>, task: Future<*>?) {
+
+    private fun process(
+        project: Project, stringEvaluator: StringEvaluator, searchString: String,
+        listModel: DefaultListModel<FuzzyMatchContainer>, task: Future<*>?
+    ) {
         val moduleManager = ModuleManager.getInstance(project)
         if (fuzzierSettingsService.state.isProject) {
             processProject(project, stringEvaluator, searchString, listModel, task)
@@ -234,16 +236,20 @@ open class Fuzzier : FuzzyAction() {
             processModules(moduleManager, stringEvaluator, searchString, listModel, task)
         }
     }
-    
-    private fun processProject(project: Project, stringEvaluator: StringEvaluator,
-                               searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>, task: Future<*>?) {
+
+    private fun processProject(
+        project: Project, stringEvaluator: StringEvaluator,
+        searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>, task: Future<*>?
+    ) {
         val filesToIterate = ConcurrentHashMap.newKeySet<FuzzierUtil.IterationFile>()
         FuzzierUtil.fileIndexToIterationFile(filesToIterate, ProjectFileIndex.getInstance(project), project.name, task)
         processFiles(filesToIterate, stringEvaluator, listModel, searchString, task)
     }
 
-    private fun processModules(moduleManager: ModuleManager, stringEvaluator: StringEvaluator,
-                               searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>, task: Future<*>?) {
+    private fun processModules(
+        moduleManager: ModuleManager, stringEvaluator: StringEvaluator,
+        searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>, task: Future<*>?
+    ) {
         val filesToIterate = ConcurrentHashMap.newKeySet<FuzzierUtil.IterationFile>()
         for (module in moduleManager.modules) {
             FuzzierUtil.fileIndexToIterationFile(filesToIterate, module.rootManager.fileIndex, module.name, task)
@@ -271,7 +277,7 @@ open class Fuzzier : FuzzyAction() {
         }
     }
 
-    private fun openFile(project: Project, virtualFile: VirtualFile) {
+    private fun openFile(project: Project, fuzzyMatchContainer: FuzzyMatchContainer?, virtualFile: VirtualFile) {
         val fileEditorManager = FileEditorManager.getInstance(project)
         val currentEditor = fileEditorManager.selectedTextEditor
         val previousFile = currentEditor?.virtualFile
@@ -287,6 +293,9 @@ open class Fuzzier : FuzzyAction() {
                     }
                 }
             }
+        }
+        if (fuzzyMatchContainer != null) {
+            InitialViewHandler.addFileToRecentlySearchedFiles(fuzzyMatchContainer, fuzzierSettingsService)
         }
         popup?.cancel()
     }
@@ -324,7 +333,7 @@ open class Fuzzier : FuzzyAction() {
                         VirtualFileManager.getInstance().findFileByUrl("file://${selectedValue?.getFileUri()}")
                     // Open the file in the editor
                     virtualFile?.let {
-                        openFile(project, it)
+                        openFile(project, selectedValue, it)
                     }
                 }
             }
@@ -341,7 +350,7 @@ open class Fuzzier : FuzzyAction() {
                 val virtualFile =
                     VirtualFileManager.getInstance().findFileByUrl("file://${selectedValue?.getFileUri()}")
                 virtualFile?.let {
-                    openFile(project, it)
+                    openFile(project, selectedValue, it)
                 }
             }
         })

@@ -120,7 +120,11 @@ class FuzzierUtil {
         this.prioritizeShorterDirPaths = prioritizeShortedFilePaths;
     }
 
-    fun removeModulePath(filePath: String): Pair<String, String> {
+    /**
+     * For each module in the project, check if the file path contains the module path.
+     * @return a pair of the file path (with the module path removed) and the module path
+     */
+    fun extractModulePath(filePath: String): Pair<String, String> {
         val modules = settingsState.modules
         for (modulePath in modules.values) {
             if (filePath.contains(modulePath)) {

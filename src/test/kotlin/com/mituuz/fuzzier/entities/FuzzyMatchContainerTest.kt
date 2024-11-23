@@ -29,6 +29,11 @@ import com.mituuz.fuzzier.settings.FuzzierConfiguration.END_STYLE_TAG
 import com.mituuz.fuzzier.settings.FuzzierConfiguration.startStyleTag
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
+import javax.swing.DefaultListModel
 
 class FuzzyMatchContainerTest {
     @Suppress("unused")
@@ -74,5 +79,41 @@ class FuzzyMatchContainerTest {
             assertEquals(sb.toString()[i], res[i])
             i++
         }
+    }
+
+    @Test
+    fun `Test serialization`() {
+        val score = FuzzyScore()
+        val container = FuzzyMatchContainer(score, "", "FuzzyMatchContainerTest.kt")
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        ObjectOutputStream(byteArrayOutputStream).use { it.writeObject(container) }
+
+        val byteArrayInputStream = ByteArrayInputStream(byteArrayOutputStream.toByteArray())
+        val deserialized = ObjectInputStream(byteArrayInputStream).use { it.readObject() as FuzzyMatchContainer }
+        assertEquals("", deserialized.filePath)
+        assertEquals("FuzzyMatchContainerTest.kt", deserialized.filename)
+    }
+
+    @Test
+    fun `Test default list serialization`() {
+        val list = DefaultListModel<FuzzyMatchContainer>()
+        val score = FuzzyScore()
+        val container = FuzzyMatchContainer(score, "", "FuzzyMatchContainerTest.kt")
+        list.addElement(container)
+
+        val converter = FuzzyMatchContainer.FuzzyMatchContainerConverter()
+        val stringRep = converter.toString(list)
+
+        val deserialized: DefaultListModel<FuzzyMatchContainer> = converter.fromString(stringRep)
+        assertEquals(1, deserialized.size)
+        assertEquals("", deserialized.get(0).filePath)
+        assertEquals("FuzzyMatchContainerTest.kt", deserialized.get(0).filename)
+    }
+
+    @Test
+    fun `Deserialization fails`() {
+        val converter = FuzzyMatchContainer.FuzzyMatchContainerConverter()
+        val deserialized: DefaultListModel<FuzzyMatchContainer> = converter.fromString("This should not work")
+        assertEquals(0, deserialized.size)
     }
 }

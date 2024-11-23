@@ -38,6 +38,7 @@ import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.runInEdtAndWait
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
+import com.mituuz.fuzzier.entities.StringEvaluator
 import org.mockito.ArgumentMatchers.any
 import javax.swing.DefaultListModel
 import org.mockito.Mockito
