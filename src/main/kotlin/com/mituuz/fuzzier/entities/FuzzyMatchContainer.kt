@@ -141,6 +141,18 @@ class FuzzyMatchContainer(
         return "FuzzyMatchContainer: $filename, score: ${getScore()}, dir score: ${getScoreWithDirLength()}"
     }
 
+    /**
+     * This is necessary to persists recently used files between IDE restarts
+     *
+     * Uses a base 64 encoded string
+     *
+     * ```
+     * @OptionTag(converter = FuzzyMatchContainer.FuzzyMatchContainerConverter::class)
+     * var recentlySearchedFiles: DefaultListModel<FuzzyMatchContainer>? = DefaultListModel()
+     * ```
+     *
+     * @see FuzzierSettingsService
+     */
     class FuzzyMatchContainerConverter : Converter<DefaultListModel<FuzzyMatchContainer>>() {
         override fun fromString(value: String) : DefaultListModel<FuzzyMatchContainer> {
             // Fallback to an empty list if deserialization fails

@@ -26,14 +26,12 @@ package com.mituuz.fuzzier.settings
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
-import com.intellij.util.xmlb.Converter
 import com.intellij.util.xmlb.annotations.OptionTag
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType.FILE_PATH_ONLY
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.RECENT_PROJECT_FILES
 import javax.swing.DefaultListModel
-import kotlin.reflect.KClass
 
 @State(
     name = "com.mituuz.fuzzier.FuzzierSettings",
