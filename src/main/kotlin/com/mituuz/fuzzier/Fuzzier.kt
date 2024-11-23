@@ -47,6 +47,7 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
+import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.NONE
 import com.mituuz.fuzzier.util.FuzzierUtil
 import com.mituuz.fuzzier.util.FuzzierUtil.Companion.createDimensionKey
@@ -133,24 +134,12 @@ open class Fuzzier : FuzzyAction() {
      */
     private fun createInitialView(project: Project) {
         ApplicationManager.getApplication().executeOnPooledThread {
-            val editorHistory = EditorHistoryManager.getInstance(project).fileList
-            val listModel = DefaultListModel<FuzzyMatchContainer>()
-            val limit = fuzzierSettingsService.state.fileListLimit
-
-            // Start from the end of editor history (most recent file)
-            var i = editorHistory.size - 1
-            while (i >= 0 && listModel.size() < limit) {
-                val file = editorHistory[i]
-                val filePathAndModule = fuzzierUtil.removeModulePath(file.path)
-                // Don't add files that do not have a module path in the project
-                if (filePathAndModule.second == "") {
-                    i--
-                    continue
+            val listModel = when (fuzzierSettingsService.state.recentFilesMode) {
+                FuzzierSettingsService.RecentFilesMode.RECENT_PROJECT_FILES -> getRecentProjectFiles(project)
+                FuzzierSettingsService.RecentFilesMode.RECENTLY_SEARCHED_FILES -> getRecentlySearchedFiles()
+                else -> {
+                    DefaultListModel<FuzzyMatchContainer>()
                 }
-                val fuzzyMatchContainer =
-                    FuzzyMatchContainer.createOrderedContainer(i, filePathAndModule.first, filePathAndModule.second, file.name)
-                listModel.addElement(fuzzyMatchContainer)
-                i--
             }
 
             ApplicationManager.getApplication().invokeLater {
@@ -162,6 +151,34 @@ open class Fuzzier : FuzzyAction() {
                 }
             }
         }
+    }
+
+    private fun getRecentProjectFiles(project: Project): DefaultListModel<FuzzyMatchContainer> {
+        val editorHistory = EditorHistoryManager.getInstance(project).fileList
+        val listModel = DefaultListModel<FuzzyMatchContainer>()
+        val limit = fuzzierSettingsService.state.fileListLimit
+
+        // Start from the end of editor history (most recent file)
+        var i = editorHistory.size - 1
+        while (i >= 0 && listModel.size() < limit) {
+            val file = editorHistory[i]
+            val filePathAndModule = fuzzierUtil.removeModulePath(file.path)
+            // Don't add files that do not have a module path in the project
+            if (filePathAndModule.second == "") {
+                i--
+                continue
+            }
+            val fuzzyMatchContainer =
+                FuzzyMatchContainer.createOrderedContainer(i, filePathAndModule.first, filePathAndModule.second, file.name)
+            listModel.addElement(fuzzyMatchContainer)
+            i--
+        }
+
+        return listModel
+    }
+
+    private fun getRecentlySearchedFiles(): DefaultListModel<FuzzyMatchContainer> {
+        return fuzzierSettingsService.state.recentlySearchedFiles
     }
 
     override fun updateListContents(project: Project, searchString: String) {
@@ -271,7 +288,7 @@ open class Fuzzier : FuzzyAction() {
         }
     }
 
-    private fun openFile(project: Project, virtualFile: VirtualFile) {
+    private fun openFile(project: Project, fuzzyMatchContainer: FuzzyMatchContainer?, virtualFile: VirtualFile) {
         val fileEditorManager = FileEditorManager.getInstance(project)
         val currentEditor = fileEditorManager.selectedTextEditor
         val previousFile = currentEditor?.virtualFile
@@ -288,7 +305,20 @@ open class Fuzzier : FuzzyAction() {
                 }
             }
         }
+        if (fuzzyMatchContainer != null) {
+            addFileToRecentlySearchedFiles(fuzzyMatchContainer)
+        }
         popup?.cancel()
+    }
+
+    private fun addFileToRecentlySearchedFiles(fuzzyMatchContainer: FuzzyMatchContainer) {
+        // TODO: Handle duplicate values
+        val listModel: DefaultListModel<FuzzyMatchContainer> = fuzzierSettingsService.state.recentlySearchedFiles
+        while (listModel.size > fuzzierSettingsService.state.fileListLimit) {
+            listModel.remove(listModel.size)
+        }
+
+        listModel.addElement(fuzzyMatchContainer)
     }
 
     private fun createListeners(project: Project) {
@@ -324,7 +354,7 @@ open class Fuzzier : FuzzyAction() {
                         VirtualFileManager.getInstance().findFileByUrl("file://${selectedValue?.getFileUri()}")
                     // Open the file in the editor
                     virtualFile?.let {
-                        openFile(project, it)
+                        openFile(project, selectedValue, it)
                     }
                 }
             }
@@ -341,7 +371,7 @@ open class Fuzzier : FuzzyAction() {
                 val virtualFile =
                     VirtualFileManager.getInstance().findFileByUrl("file://${selectedValue?.getFileUri()}")
                 virtualFile?.let {
-                    openFile(project, it)
+                    openFile(project, selectedValue, it)
                 }
             }
         })
