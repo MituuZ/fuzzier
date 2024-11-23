@@ -32,7 +32,7 @@ class InitialViewHandlerTest {
     }
 
     @Test
-    fun `Verify that list is truncated when it goes over the file limit`() {
+    fun `Recent project files - Verify that list is truncated when it goes over the file limit`() {
         val virtualFile1 = mock(VirtualFile::class.java)
         val virtualFile2 = mock(VirtualFile::class.java)
         val fileList = listOf(
@@ -50,5 +50,36 @@ class InitialViewHandlerTest {
         val result = InitialViewHandler.getRecentProjectFiles(fuzzierSettingsService, fuzzierUtil, editorHistoryManager)
 
         assertEquals(1, result.size())
+    }
+
+    @Test
+    fun `Recent project files - Skip files that do not belong to the project`() {
+        val virtualFile1 = mock(VirtualFile::class.java)
+        val virtualFile2 = mock(VirtualFile::class.java)
+        val fileList = listOf(
+            virtualFile1,
+            virtualFile2
+        )
+        `when`(editorHistoryManager.fileList).thenReturn(fileList)
+        `when`(fuzzierSettingsService.state.fileListLimit).thenReturn(2)
+        `when`(virtualFile1.path).thenReturn("path")
+        `when`(virtualFile1.name).thenReturn("filename1")
+        `when`(virtualFile2.path).thenReturn("path")
+        `when`(virtualFile2.name).thenReturn("filename2")
+        `when`(fuzzierUtil.extractModulePath(anyString())).thenReturn(Pair("path", "module"), Pair("", ""))
+
+        val result = InitialViewHandler.getRecentProjectFiles(fuzzierSettingsService, fuzzierUtil, editorHistoryManager)
+
+        assertEquals(1, result.size())
+    }
+
+    @Test
+    fun `Recent project files - Empty list when no history`() {
+        `when`(editorHistoryManager.fileList).thenReturn(emptyList())
+        `when`(fuzzierSettingsService.state.fileListLimit).thenReturn(2)
+
+        val result = InitialViewHandler.getRecentProjectFiles(fuzzierSettingsService, fuzzierUtil, editorHistoryManager)
+
+        assertEquals(0, result.size())
     }
 }
