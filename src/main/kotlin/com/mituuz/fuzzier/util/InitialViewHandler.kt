@@ -68,7 +68,7 @@ class InitialViewHandler {
 
             var i = 0
             while (i < listModel.size) {
-                if (listModel.get(i) == null) {
+                if (listModel[i] == null) {
                     listModel.remove(i)
                 } else {
                     i++
@@ -81,7 +81,7 @@ class InitialViewHandler {
             var j = 0
             while (j < listModel.size) {
                 val index = listModel.size - j - 1
-                result.addElement(listModel.get(index))
+                result.addElement(listModel[index])
                 j++
             }
 
@@ -98,7 +98,7 @@ class InitialViewHandler {
 
             var i = 0
             while (i < listModel.size) {
-                if (listModel.get(i).filePath == fuzzyMatchContainer.filePath) {
+                if (listModel[i].filePath == fuzzyMatchContainer.filePath) {
                     listModel.remove(i)
                 } else {
                     i++
