@@ -1,12 +1,15 @@
 package com.mituuz.fuzzier.util
 
+import com.intellij.openapi.components.service
 import com.intellij.openapi.fileEditor.impl.EditorHistoryManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.testFramework.TestApplicationManager
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.State
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
@@ -21,6 +24,8 @@ class InitialViewHandlerTest {
     private lateinit var initialViewHandler: InitialViewHandler
     private lateinit var state: State
     private lateinit var editorHistoryManager: EditorHistoryManager
+    @Suppress("unused") // Required for add to recently used files (fuzzierSettingsServiceInstance)
+    private var testApplicationManager: TestApplicationManager = TestApplicationManager.getInstance()
 
     @BeforeEach
     fun setUp() {
@@ -119,5 +124,55 @@ class InitialViewHandlerTest {
         val result = InitialViewHandler.getRecentlySearchedFiles(fuzzierSettingsService)
 
         assertEquals(1, result.size)
+    }
+
+    @Test
+    fun `Add file to recently used files - Null list should default to empty`() {
+        val fuzzierSettingsServiceInstance: FuzzierSettingsService = service<FuzzierSettingsService>()
+        val score = FuzzyMatchContainer.FuzzyScore()
+        val container = FuzzyMatchContainer(score, "", "")
+
+        fuzzierSettingsServiceInstance.state.recentlySearchedFiles = null
+        InitialViewHandler.addFileToRecentlySearchedFiles(container, fuzzierSettingsServiceInstance)
+        assertNotNull(fuzzierSettingsServiceInstance.state.recentlySearchedFiles)
+        assertEquals(1, fuzzierSettingsServiceInstance.state.recentlySearchedFiles!!.size)
+    }
+
+    @Test
+    fun `Add file to recently used files - Too large list is truncated`() {
+        val fuzzierSettingsServiceInstance: FuzzierSettingsService = service<FuzzierSettingsService>()
+        val fileListLimit = 2
+        val score = FuzzyMatchContainer.FuzzyScore()
+        val container = FuzzyMatchContainer(score, "", "")
+
+        val largeList: DefaultListModel<FuzzyMatchContainer> = DefaultListModel()
+        for (i in 0..25) {
+            largeList.addElement(FuzzyMatchContainer(score, "" + i, "" + i))
+        }
+
+        fuzzierSettingsServiceInstance.state.fileListLimit = fileListLimit
+
+        fuzzierSettingsServiceInstance.state.recentlySearchedFiles = largeList
+        InitialViewHandler.addFileToRecentlySearchedFiles(container, fuzzierSettingsServiceInstance)
+        assertEquals(fileListLimit, fuzzierSettingsServiceInstance.state.recentlySearchedFiles!!.size)
+    }
+
+    @Test
+    fun `Add file to recently used files - Duplicate filenames are removed`() {
+        val fuzzierSettingsServiceInstance: FuzzierSettingsService = service<FuzzierSettingsService>()
+        val fileListLimit = 20
+        val score = FuzzyMatchContainer.FuzzyScore()
+        val container = FuzzyMatchContainer(score, "", "")
+
+        val largeList: DefaultListModel<FuzzyMatchContainer> = DefaultListModel()
+        for (i in 0..25) {
+            largeList.addElement(FuzzyMatchContainer(score, "", ""))
+        }
+
+        fuzzierSettingsServiceInstance.state.fileListLimit = fileListLimit
+
+        fuzzierSettingsServiceInstance.state.recentlySearchedFiles = largeList
+        InitialViewHandler.addFileToRecentlySearchedFiles(container, fuzzierSettingsServiceInstance)
+        assertEquals(1, fuzzierSettingsServiceInstance.state.recentlySearchedFiles!!.size)
     }
 }

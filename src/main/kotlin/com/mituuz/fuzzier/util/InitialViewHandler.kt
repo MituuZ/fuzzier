@@ -64,5 +64,29 @@ class InitialViewHandler {
 
             return result
         }
+
+        fun addFileToRecentlySearchedFiles(fuzzyMatchContainer: FuzzyMatchContainer, fuzzierSettingsService: FuzzierSettingsService) {
+            var listModel: DefaultListModel<FuzzyMatchContainer>? = fuzzierSettingsService.state.recentlySearchedFiles
+
+            if (listModel == null) {
+                listModel = DefaultListModel<FuzzyMatchContainer>()
+                fuzzierSettingsService.state.recentlySearchedFiles = listModel
+            }
+
+            var i = 0
+            while (i < listModel.size) {
+                if (listModel.get(i).filePath == fuzzyMatchContainer.filePath) {
+                    listModel.remove(i)
+                } else {
+                    i++
+                }
+            }
+
+            while (listModel.size > fuzzierSettingsService.state.fileListLimit - 1) {
+                listModel.remove(listModel.size - 1)
+            }
+
+            listModel.addElement(fuzzyMatchContainer)
+        }
     }
 }
