@@ -3,6 +3,7 @@ package com.mituuz.fuzzier.util
 import com.intellij.openapi.fileEditor.impl.EditorHistoryManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.State
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
+import javax.swing.DefaultListModel
 
 class InitialViewHandlerTest {
     private lateinit var project: Project
@@ -81,5 +83,26 @@ class InitialViewHandlerTest {
         val result = InitialViewHandler.getRecentProjectFiles(fuzzierSettingsService, fuzzierUtil, editorHistoryManager)
 
         assertEquals(0, result.size())
+    }
+
+    @Test
+    fun `Recently searched files - Null returns an empty list`() {
+        `when`(fuzzierSettingsService.state.recentlySearchedFiles).thenReturn(null)
+        val result = InitialViewHandler.getRecentlySearchedFiles(fuzzierSettingsService)
+        assertEquals(0, result.size())
+    }
+
+    @Test
+    fun `Recently searched files - Remove null elements from the list`() {
+        val fuzzyMatchContainer = mock(FuzzyMatchContainer::class.java)
+        val listModel = DefaultListModel<FuzzyMatchContainer>()
+        listModel.addElement(fuzzyMatchContainer)
+        listModel.addElement(null)
+        listModel.addElement(null)
+        `when`(fuzzierSettingsService.state.recentlySearchedFiles).thenReturn(listModel)
+
+        val result = InitialViewHandler.getRecentlySearchedFiles(fuzzierSettingsService)
+
+        assertEquals(1, result.size)
     }
 }
