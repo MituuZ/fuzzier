@@ -165,7 +165,7 @@ class InitialViewHandlerTest {
         val container = FuzzyMatchContainer(score, "", "")
 
         val largeList: DefaultListModel<FuzzyMatchContainer> = DefaultListModel()
-        for (i in 0..25) {
+        repeat (26) {
             largeList.addElement(FuzzyMatchContainer(score, "", ""))
         }
 
