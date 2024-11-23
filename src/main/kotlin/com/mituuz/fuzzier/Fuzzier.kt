@@ -178,7 +178,18 @@ open class Fuzzier : FuzzyAction() {
     }
 
     private fun getRecentlySearchedFiles(): DefaultListModel<FuzzyMatchContainer> {
-        return fuzzierSettingsService.state.recentlySearchedFiles
+        val listModel = fuzzierSettingsService.state.recentlySearchedFiles
+
+        var i = 0
+        while (i < listModel.size) {
+            if (listModel.get(i) == null) {
+                listModel.remove(i)
+            } else {
+                i++
+            }
+        }
+
+        return listModel
     }
 
     override fun updateListContents(project: Project, searchString: String) {
@@ -312,10 +323,18 @@ open class Fuzzier : FuzzyAction() {
     }
 
     private fun addFileToRecentlySearchedFiles(fuzzyMatchContainer: FuzzyMatchContainer) {
-        // TODO: Handle duplicate values
         val listModel: DefaultListModel<FuzzyMatchContainer> = fuzzierSettingsService.state.recentlySearchedFiles
         while (listModel.size > fuzzierSettingsService.state.fileListLimit) {
             listModel.remove(listModel.size)
+        }
+
+        var i = 0
+        while (i < listModel.size) {
+            if (listModel.get(i).filePath == fuzzyMatchContainer.filePath) {
+                listModel.remove(i)
+            } else {
+                i++
+            }
         }
 
         listModel.addElement(fuzzyMatchContainer)
