@@ -178,7 +178,12 @@ open class Fuzzier : FuzzyAction() {
     }
 
     private fun getRecentlySearchedFiles(): DefaultListModel<FuzzyMatchContainer> {
-        val listModel = fuzzierSettingsService.state.recentlySearchedFiles
+        var listModel = fuzzierSettingsService.state.recentlySearchedFiles
+
+        if (listModel == null) {
+            listModel = DefaultListModel<FuzzyMatchContainer>()
+            fuzzierSettingsService.state.recentlySearchedFiles = listModel
+        }
 
         var i = 0
         while (i < listModel.size) {
@@ -323,7 +328,13 @@ open class Fuzzier : FuzzyAction() {
     }
 
     private fun addFileToRecentlySearchedFiles(fuzzyMatchContainer: FuzzyMatchContainer) {
-        val listModel: DefaultListModel<FuzzyMatchContainer> = fuzzierSettingsService.state.recentlySearchedFiles
+        var listModel: DefaultListModel<FuzzyMatchContainer>? = fuzzierSettingsService.state.recentlySearchedFiles
+
+        if (listModel == null) {
+            listModel = DefaultListModel<FuzzyMatchContainer>()
+            fuzzierSettingsService.state.recentlySearchedFiles = listModel
+        }
+
         while (listModel.size > fuzzierSettingsService.state.fileListLimit) {
             listModel.remove(listModel.size)
         }
