@@ -52,7 +52,7 @@ import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.RECENT
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.RECENT_PROJECT_FILES
 import com.mituuz.fuzzier.util.FuzzierUtil
 import com.mituuz.fuzzier.util.FuzzierUtil.Companion.createDimensionKey
-import com.mituuz.fuzzier.util.InitialviewHandler
+import com.mituuz.fuzzier.util.InitialViewHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -138,13 +138,13 @@ open class Fuzzier : FuzzyAction() {
     private fun createInitialView(project: Project) {
         ApplicationManager.getApplication().executeOnPooledThread {
             val listModel = when (fuzzierSettingsService.state.recentFilesMode) {
-                RECENT_PROJECT_FILES -> InitialviewHandler.getRecentProjectFiles(
+                RECENT_PROJECT_FILES -> InitialViewHandler.getRecentProjectFiles(
                     project,
                     fuzzierSettingsService,
                     fuzzierUtil
                 )
 
-                RECENTLY_SEARCHED_FILES -> InitialviewHandler.getRecentlySearchedFiles(fuzzierSettingsService)
+                RECENTLY_SEARCHED_FILES -> InitialViewHandler.getRecentlySearchedFiles(fuzzierSettingsService)
                 else -> {
                     DefaultListModel<FuzzyMatchContainer>()
                 }

@@ -6,7 +6,7 @@ import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import javax.swing.DefaultListModel
 
-class InitialviewHandler {
+class InitialViewHandler {
     companion object {
         fun getRecentProjectFiles(
             project: Project, fuzzierSettingsService: FuzzierSettingsService, fuzzierUtil: FuzzierUtil
