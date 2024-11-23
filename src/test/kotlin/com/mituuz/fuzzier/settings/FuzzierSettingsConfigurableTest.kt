@@ -25,11 +25,13 @@ package com.mituuz.fuzzier.settings
 
 import com.intellij.openapi.components.service
 import com.intellij.testFramework.TestApplicationManager
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType.FILENAME_WITH_PATH_STYLED
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.NONE
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.RECENT_PROJECT_FILES
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import javax.swing.DefaultListModel
 
 class FuzzierSettingsConfigurableTest {
     @Suppress("unused")
@@ -37,12 +39,17 @@ class FuzzierSettingsConfigurableTest {
     private val state = service<FuzzierSettingsService>().state
 
     @Test
-    fun `Test is modified with no changes`() {
+    fun `Configurable is instanced with no changes`() {
         state.exclusionSet = setOf("Hello", "There")
+
+        state.isProject = false
+        state.recentFilesMode = RECENT_PROJECT_FILES
+        state.recentlySearchedFiles = DefaultListModel<FuzzyMatchContainer>()
         state.newTab = true
         state.recentFilesMode = NONE
         state.prioritizeShorterDirPaths = false
         state.debouncePeriod = 140
+        state.resetWindow = false
         state.fileListLimit = 200
 
         state.filenameType = FILENAME_WITH_PATH_STYLED
@@ -64,11 +71,15 @@ class FuzzierSettingsConfigurableTest {
     }
 
     @Test
-    fun `Test is modified with a single change`() {
+    fun `Configurable is instanced with a single change`() {
         state.exclusionSet = setOf("Hello", "There")
+        state.isProject = false
+        state.recentFilesMode = RECENT_PROJECT_FILES
+        state.recentlySearchedFiles = DefaultListModel<FuzzyMatchContainer>()
         state.newTab = true
         state.recentFilesMode = RECENT_PROJECT_FILES
         state.debouncePeriod = 140
+        state.resetWindow = false
         state.fileListLimit = 200
 
         state.filenameType = FILENAME_WITH_PATH_STYLED
