@@ -24,12 +24,11 @@ repositories {
 
 dependencies {
   intellijPlatform {
-    intellijIdeaCommunity("2024.3.1.1")
+    intellijIdeaCommunity("2024.3")
     
     pluginVerifier()
     zipSigner()
-    instrumentationTools()
-    
+
     testFramework(TestFrameworkType.Platform)
   }
   
