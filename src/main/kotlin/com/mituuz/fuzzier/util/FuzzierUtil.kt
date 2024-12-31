@@ -54,9 +54,11 @@ class FuzzierUtil {
             return "${baseDimensionKey}_${screenBounds.width}_${screenBounds.height}_${screenBounds.x}_${screenBounds.y}"
         }
 
-        fun fileIndexToIterationFile(iterationFiles: ConcurrentHashMap.KeySetView<IterationFile, Boolean>,
-                                     fileIndex: FileIndex, moduleName: String, task: Future<*>?, 
-                                     isDir: Boolean = false) {
+        fun fileIndexToIterationFile(
+            iterationFiles: ConcurrentHashMap.KeySetView<IterationFile, Boolean>,
+            fileIndex: FileIndex, moduleName: String, task: Future<*>?,
+            isDir: Boolean = false
+        ) {
             fileIndex.iterateContent { file ->
                 if (task?.isCancelled == true) {
                     return@iterateContent false
@@ -66,6 +68,15 @@ class FuzzierUtil {
                 }
                 true
             }
+        }
+
+        fun cleanSearchString(ss: String, ignoredChars: String): String {
+            var ret = ss.lowercase()
+            for (i in ignoredChars.toSet()) {
+                ret = ret.filterNot { it == i }
+            }
+
+            return ret;
         }
     }
 
@@ -81,14 +92,17 @@ class FuzzierUtil {
      *
      * @return a sorted and sized list model
      */
-    fun sortAndLimit(listModel: DefaultListModel<FuzzyMatchContainer>, isDirSort: Boolean = false): DefaultListModel<FuzzyMatchContainer> {
+    fun sortAndLimit(
+        listModel: DefaultListModel<FuzzyMatchContainer>,
+        isDirSort: Boolean = false
+    ): DefaultListModel<FuzzyMatchContainer> {
         val useShortDirPath = isDirSort && prioritizeShorterDirPaths
         var comparator = getComparator(useShortDirPath, false)
         val priorityQueue = PriorityQueue(listLimit + 1, comparator)
 
         var minimumScore: Int? = null
         listModel.elements().toList().forEach {
-            if (minimumScore == null || it.getScore() > minimumScore) {
+            if (minimumScore == null || it.getScore() > minimumScore!!) {
                 priorityQueue.add(it)
                 if (priorityQueue.size > listLimit) {
                     priorityQueue.remove()
@@ -154,7 +168,8 @@ class FuzzierUtil {
         var prevModule: ModuleContainer? = null
         for (currentModule in moduleList.sortedBy { it.basePath }) {
             if (prevModule != null && (currentModule.basePath.startsWith(prevModule.basePath)
-                        || prevModule.basePath.startsWith(currentModule.basePath))) {
+                        || prevModule.basePath.startsWith(currentModule.basePath))
+            ) {
                 if (currentModule.basePath.length > prevModule.basePath.length) {
                     currentModule.basePath = prevModule.basePath;
                 } else {
@@ -192,7 +207,7 @@ class FuzzierUtil {
         return contentRoots.firstOrNull()?.path
     }
 
-    data class ModuleContainer(val name:String, var basePath:String)
+    data class ModuleContainer(val name: String, var basePath: String)
 
     private fun listToMap(modules: List<ModuleContainer>): Map<String, String> {
         return modules.associateBy({ it.name }, { it.basePath })

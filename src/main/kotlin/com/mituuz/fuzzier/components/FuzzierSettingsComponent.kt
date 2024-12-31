@@ -59,7 +59,7 @@ class FuzzierSettingsComponent {
         """
             Exclude characters from affecting the search. Any character added here will be skipped during the search.<br>
             This could be useful for example when copy pasting similar file paths.<br><br>
-            e.g. "%" would effectively transform a search string like "%%%kot%%lin" to "kotlin"
+            e.g. "%" would transform a search string like "%%%kot%%lin" to "kotlin"
         """.trimIndent(),
         false)
 
