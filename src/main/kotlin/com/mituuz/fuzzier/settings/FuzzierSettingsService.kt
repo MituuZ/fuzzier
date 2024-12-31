@@ -47,6 +47,7 @@ class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.S
 
         var splitPosition: Int = 300
         var exclusionSet: Set<String> = setOf("/.idea/*", "/.git/*", "/target/*", "/build/*", "/.gradle/*", "/.run/*")
+        var excludedCharacters: String = ""
         var newTab: Boolean = false
         var prioritizeShorterDirPaths = true
         var debouncePeriod: Int = 80

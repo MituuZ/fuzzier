@@ -42,6 +42,7 @@ class FuzzierSettingsConfigurable : Configurable {
 
         val combinedString = state.exclusionSet.joinToString("\n")
         component.exclusionSet.getJBTextArea().text = combinedString
+        component.excludedCharacters.getJBTextField().text = state.excludedCharacters
         component.newTabSelect.getCheckBox().isSelected = state.newTab
         component.recentFileModeSelector.getRecentFilesTypeComboBox().selectedIndex = state.recentFilesMode.ordinal
         component.prioritizeShortDirs.getCheckBox().isSelected = state.prioritizeShorterDirPaths
@@ -71,6 +72,7 @@ class FuzzierSettingsConfigurable : Configurable {
             .toSet()
 
         return state.exclusionSet != newSet
+                || state.excludedCharacters != component.excludedCharacters.getJBTextField().text
                 || state.newTab != component.newTabSelect.getCheckBox().isSelected
                 || state.recentFilesMode != component.recentFileModeSelector.getRecentFilesTypeComboBox().selectedItem
                 || state.prioritizeShorterDirPaths != component.prioritizeShortDirs.getCheckBox().isSelected
@@ -97,6 +99,7 @@ class FuzzierSettingsConfigurable : Configurable {
             .filter { it.isNotBlank() }
             .toSet()
         state.exclusionSet = newSet as MutableSet<String>
+        state.excludedCharacters = component.excludedCharacters.getJBTextField().text
         state.newTab = component.newTabSelect.getCheckBox().isSelected
         state.recentFilesMode = RecentFilesMode.entries.toTypedArray()[component.recentFileModeSelector.getRecentFilesTypeComboBox().selectedIndex]
         state.prioritizeShorterDirPaths = component.prioritizeShortDirs.getCheckBox().isSelected
