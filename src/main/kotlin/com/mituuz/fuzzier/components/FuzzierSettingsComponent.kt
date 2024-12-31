@@ -58,7 +58,9 @@ class FuzzierSettingsComponent {
     val ignoredCharacters = SettingsComponent(JBTextField(), "Ignored characters",
         """
             Exclude characters from affecting the search. Any character added here will be skipped during the search.<br>
-            This could be useful for example when copy pasting similar file paths.<br><br>
+            This could be useful for example when copy pasting similar file paths.<br>
+            <strong>Note! </strong>This is case insensitive, everything is considered as lowercase
+            <br><br>
             e.g. "%" would transform a search string like "%%%kot%%lin" to "kotlin"
         """.trimIndent(),
         false)
@@ -105,7 +107,7 @@ class FuzzierSettingsComponent {
             <br>
             <strong>file</strong>  <i>(path/to/file)</i>
             <br>
-            <strong>Note!</strong>This is more performance intensive, you should not use too high file list limit with this option.
+            <strong>Note! </strong>This is more performance intensive, you should not use too high file list limit with this option.
     """.trimIndent(),
         false)
 
