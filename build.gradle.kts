@@ -3,13 +3,13 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("org.jetbrains.kotlin.jvm") version "2.1.0-RC"
-  id("org.jetbrains.intellij.platform") version "2.1.0"
-  id("org.jetbrains.kotlinx.kover") version "0.9.0-RC"
+  id("org.jetbrains.kotlin.jvm") version "2.1.0"
+  id("org.jetbrains.intellij.platform") version "2.2.1"
+  id("org.jetbrains.kotlinx.kover") version "0.9.0"
 }
 
 // Use same version and group for the jar and the plugin
-val currentVersion = "1.3.0"
+val currentVersion = "1.4.0"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -24,20 +24,21 @@ repositories {
 
 dependencies {
   intellijPlatform {
-    intellijIdeaCommunity("2024.2.1")
+    // Downgraded from 2024.3.1.1
+    // https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1838
+    intellijIdeaCommunity("2024.3")
     
     pluginVerifier()
     zipSigner()
-    instrumentationTools()
-    
+
     testFramework(TestFrameworkType.Platform)
   }
   
-  testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.3")
+  testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.4")
   testImplementation("org.mockito:mockito-core:5.14.2")
 
-  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.3")
-  
+  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.4")
+
   // Required to fix issue where JUnit5 Test Framework refers to JUnit4
   // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-faq.html#junit5-test-framework-refers-to-junit4
   testRuntimeOnly("junit:junit:4.13.2")
@@ -63,12 +64,11 @@ intellijPlatform {
     
     changeNotes = """
     <h2>Version $currentVersion</h2>
-    - Add option to list recently searched files on popup open<br>
-    - Update some dependencies
+    - Update dependencies
     """.trimIndent()
     
     ideaVersion {
-      sinceBuild = "242"
+      sinceBuild = "243"
       untilBuild = provider { null }
     }
   }

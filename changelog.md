@@ -1,4 +1,7 @@
 # Changelog
+## Version 1.4.0
+- Update dependencies
+
 ## Version 1.3.0
 - Add option to list recently searched files on popup open
 - Update some dependencies
