@@ -179,6 +179,7 @@ class TestBenchComponent : JPanel() {
         scoreCalculator.setMatchWeightStreakModifier(liveSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int)
         scoreCalculator.setMatchWeightPartialPath(liveSettingsComponent.matchWeightPartialPath.getIntSpinner().value as Int)
         scoreCalculator.setFilenameMatchWeight(liveSettingsComponent.matchWeightFilename.getIntSpinner().value as Int)
+        scoreCalculator.setIgnoredCharacters(liveSettingsComponent.ignoredCharacters.getJBTextField().text)
         ProjectFileIndex.getInstance(project).iterateContent(contentIterator)
     }
 
