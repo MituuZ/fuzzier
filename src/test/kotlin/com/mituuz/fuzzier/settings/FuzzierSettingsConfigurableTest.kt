@@ -80,7 +80,7 @@ class FuzzierSettingsConfigurableTest {
     @Test
     fun excludedCharacters() {
         pre()
-        state.excludedCharacters = "abc"
+        state.ignoredCharacters = "abc"
         assertTrue(settingsConfigurable.isModified())
     }
 

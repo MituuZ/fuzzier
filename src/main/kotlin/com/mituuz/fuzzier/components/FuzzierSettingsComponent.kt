@@ -55,7 +55,7 @@ class FuzzierSettingsComponent {
             e.g. "kt" excludes all files/file paths that contain the "kt" string. (main.<strong>kt</strong>, <strong>kt</strong>lin.java)
     """.trimIndent())
 
-    val excludedCharacters = SettingsComponent(JBTextField(), "Excluded characters",
+    val ignoredCharacters = SettingsComponent(JBTextField(), "Ignored characters",
         """
             Exclude characters from affecting the search. Any character added here will be skipped during the search.<br>
             This could be useful for example when copy pasting similar file paths.<br><br>
@@ -205,7 +205,7 @@ class FuzzierSettingsComponent {
         jPanel = FormBuilder.createFormBuilder()
             .addComponent(JBLabel("<html><strong>General settings</strong></html>"))
             .addComponent(exclusionSet)
-            .addComponent(excludedCharacters)
+            .addComponent(ignoredCharacters)
 
             .addSeparator()
             .addComponent(newTabSelect)

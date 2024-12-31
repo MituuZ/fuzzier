@@ -47,6 +47,7 @@ class ScoreCalculator(searchString: String) {
     private var matchWeightStreakModifier = settings.matchWeightStreakModifier
     private var matchWeightPartialPath = settings.matchWeightPartialPath
     private var matchWeightFilename = settings.matchWeightFilename
+    private var ignoredCharacters: Set<Char> = settings.ignoredCharacters
 
     var currentFilePath = ""
     private var longestStreak: Int = 0
