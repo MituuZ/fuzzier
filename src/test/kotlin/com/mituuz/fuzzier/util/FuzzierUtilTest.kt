@@ -258,6 +258,13 @@ class FuzzierUtilTest {
         assertEquals("file3", result[3].filename)
     }
 
+    @Test
+    fun cleanSearchString() {
+        val searchString = "HELLO/THERE/GENERAL/KENOBI"
+        val ignoredChars = "H/"
+        assertEquals("elloteregeneralkenobi", FuzzierUtil.cleanSearchString(searchString, ignoredChars))
+    }
+
     private fun addElement(score: Int, fileName: String) {
         val fuzzyScore = FuzzyScore()
         fuzzyScore.streakScore = score

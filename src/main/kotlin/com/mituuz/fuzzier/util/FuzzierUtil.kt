@@ -73,7 +73,7 @@ class FuzzierUtil {
         fun cleanSearchString(ss: String, ignoredChars: String): String {
             var ret = ss.lowercase()
             for (i in ignoredChars.toSet()) {
-                ret = ret.filterNot { it == i }
+                ret = ret.filterNot { it == i.lowercaseChar() }
             }
 
             return ret;
