@@ -24,6 +24,8 @@ repositories {
 
 dependencies {
   intellijPlatform {
+    // Downgraded from 2024.3.1.1
+    // https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1838
     intellijIdeaCommunity("2024.3")
     
     pluginVerifier()
