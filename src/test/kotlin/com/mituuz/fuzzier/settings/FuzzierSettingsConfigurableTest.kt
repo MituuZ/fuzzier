@@ -78,6 +78,13 @@ class FuzzierSettingsConfigurableTest {
     }
 
     @Test
+    fun excludedCharacters() {
+        pre()
+        state.ignoredCharacters = "abc"
+        assertTrue(settingsConfigurable.isModified())
+    }
+
+    @Test
     fun newTab() {
         pre()
         state.newTab = false

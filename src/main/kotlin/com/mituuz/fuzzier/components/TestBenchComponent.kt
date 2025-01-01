@@ -171,7 +171,8 @@ class TestBenchComponent : JPanel() {
 
     private fun processProject(project: Project, stringEvaluator: StringEvaluator,
                                searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
-        val contentIterator = stringEvaluator.getContentIterator(project.name, searchString, listModel, null)
+        val ss = FuzzierUtil.cleanSearchString(searchString, liveSettingsComponent.ignoredCharacters.getJBTextField().text)
+        val contentIterator = stringEvaluator.getContentIterator(project.name, ss, listModel, null)
 
         val scoreCalculator = stringEvaluator.scoreCalculator
         scoreCalculator.setMultiMatch(liveSettingsComponent.multiMatchActive.getCheckBox().isSelected)
@@ -186,7 +187,8 @@ class TestBenchComponent : JPanel() {
                                searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
         for (module in moduleManager.modules) {
             val moduleFileIndex = module.rootManager.fileIndex
-            val contentIterator = stringEvaluator.getContentIterator(module.name, searchString, listModel, null)
+            val ss = FuzzierUtil.cleanSearchString(searchString, liveSettingsComponent.ignoredCharacters.getJBTextField().text)
+            val contentIterator = stringEvaluator.getContentIterator(module.name, ss, listModel, null)
 
             val scoreCalculator = stringEvaluator.scoreCalculator
             scoreCalculator.setMultiMatch(liveSettingsComponent.multiMatchActive.getCheckBox().isSelected)

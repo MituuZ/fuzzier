@@ -265,12 +265,13 @@ open class Fuzzier : FuzzyAction() {
         stringEvaluator: StringEvaluator, listModel: DefaultListModel<FuzzyMatchContainer>,
         searchString: String, task: Future<*>?
     ) {
+        val ss = FuzzierUtil.cleanSearchString(searchString, fuzzierSettingsService.state.ignoredCharacters)
         runBlocking {
             withContext(Dispatchers.IO) {
                 filesToIterate.forEach { iterationFile ->
                     if (task?.isCancelled == true) return@forEach
                     launch {
-                        stringEvaluator.evaluateFile(iterationFile, listModel, searchString)
+                        stringEvaluator.evaluateFile(iterationFile, listModel, ss)
                     }
                 }
             }

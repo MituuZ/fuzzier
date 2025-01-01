@@ -49,6 +49,7 @@ import com.intellij.refactoring.move.moveFilesOrDirectories.MoveFilesOrDirectori
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.StringEvaluator
+import com.mituuz.fuzzier.util.FuzzierUtil
 import com.mituuz.fuzzier.util.FuzzierUtil.Companion.createDimensionKey
 import org.apache.commons.lang3.StringUtils
 import java.awt.Point
@@ -250,10 +251,11 @@ class FuzzyMover : FuzzyAction() {
     private fun process(project: Project, stringEvaluator: StringEvaluator, searchString: String,
                         listModel: DefaultListModel<FuzzyMatchContainer>, task: Future<*>?) {
         val moduleManager = ModuleManager.getInstance(project)
+        val ss = FuzzierUtil.cleanSearchString(searchString, fuzzierSettingsService.state.ignoredCharacters)
         if (fuzzierSettingsService.state.isProject) {
-            processProject(project, stringEvaluator, searchString, listModel, task)
+            processProject(project, stringEvaluator, ss, listModel, task)
         } else {
-            processModules(moduleManager, stringEvaluator, searchString, listModel, task)
+            processModules(moduleManager, stringEvaluator, ss, listModel, task)
         }
     }
 

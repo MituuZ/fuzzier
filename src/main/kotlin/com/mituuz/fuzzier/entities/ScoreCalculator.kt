@@ -47,6 +47,7 @@ class ScoreCalculator(searchString: String) {
     private var matchWeightStreakModifier = settings.matchWeightStreakModifier
     private var matchWeightPartialPath = settings.matchWeightPartialPath
     private var matchWeightFilename = settings.matchWeightFilename
+    private var ignoredCharacters: Set<Char> = settings.ignoredCharacters.toSet()
 
     var currentFilePath = ""
     private var longestStreak: Int = 0
@@ -221,5 +222,9 @@ class ScoreCalculator(searchString: String) {
 
     fun setTolerance(value: Int) {
         tolerance = value
+    }
+
+    fun setIgnoredCharacters(characterString: String) {
+        ignoredCharacters = characterString.toSet()
     }
 }

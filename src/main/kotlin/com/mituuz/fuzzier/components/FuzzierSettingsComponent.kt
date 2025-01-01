@@ -32,6 +32,7 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.FormBuilder
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.ui.components.JBTextField
 import com.mituuz.fuzzier.components.FuzzierSettingsComponent.SettingsComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
@@ -53,6 +54,16 @@ class FuzzierSettingsComponent {
             Supports wildcards (*) for starts with and ends with. Defaults to contains if no wildcards are present.<br><br>
             e.g. "kt" excludes all files/file paths that contain the "kt" string. (main.<strong>kt</strong>, <strong>kt</strong>lin.java)
     """.trimIndent())
+
+    val ignoredCharacters = SettingsComponent(JBTextField(), "Ignored characters",
+        """
+            Exclude characters from affecting the search. Any character added here will be skipped during the search.<br>
+            This could be useful for example when copy pasting similar file paths.<br>
+            <strong>Note! </strong>This is case insensitive, everything is considered as lowercase
+            <br><br>
+            e.g. "%" would transform a search string like "%%%kot%%lin" to "kotlin"
+        """.trimIndent(),
+        false)
 
     val newTabSelect = SettingsComponent(JBCheckBox(), "Open files in a new tab")
 
@@ -96,7 +107,7 @@ class FuzzierSettingsComponent {
             <br>
             <strong>file</strong>  <i>(path/to/file)</i>
             <br>
-            <strong>Note!</strong>This is more performance intensive, you should not use too high file list limit with this option.
+            <strong>Note! </strong>This is more performance intensive, you should not use too high file list limit with this option.
     """.trimIndent(),
         false)
 
@@ -196,6 +207,7 @@ class FuzzierSettingsComponent {
         jPanel = FormBuilder.createFormBuilder()
             .addComponent(JBLabel("<html><strong>General settings</strong></html>"))
             .addComponent(exclusionSet)
+            .addComponent(ignoredCharacters)
 
             .addSeparator()
             .addComponent(newTabSelect)
@@ -307,6 +319,10 @@ class FuzzierSettingsComponent {
 
         fun getJBTextArea(): JBTextArea {
             return component as JBTextArea
+        }
+
+        fun getJBTextField(): JBTextField {
+            return component as JBTextField
         }
 
         fun getCheckBox(): JBCheckBox {
