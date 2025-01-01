@@ -1,5 +1,6 @@
 # Changelog
 ## Version 1.4.0
+- Add option to ignore characters from search
 - Update dependencies
 
 ## Version 1.3.0
