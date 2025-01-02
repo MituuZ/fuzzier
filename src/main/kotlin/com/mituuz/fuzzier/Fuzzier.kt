@@ -136,7 +136,7 @@ open class Fuzzier : FuzzyAction() {
     /**
      * Populates the file list with recently opened files
      */
-    private fun createInitialView(project: Project) {
+    open fun createInitialView(project: Project) {
         ApplicationManager.getApplication().executeOnPooledThread {
             val editorHistoryManager = EditorHistoryManager.getInstance(project)
 
@@ -301,7 +301,7 @@ open class Fuzzier : FuzzyAction() {
         popup?.cancel()
     }
 
-    private fun createListeners(project: Project) {
+    open fun createListeners(project: Project) {
         // Add a listener that updates the contents of the preview pane
         component.fileList.addListSelectionListener { event ->
             if (!event.valueIsAdjusting) {

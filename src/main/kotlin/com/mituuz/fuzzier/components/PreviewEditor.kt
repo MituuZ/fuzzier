@@ -28,6 +28,7 @@ import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.EditorFactory
+import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.fileEditor.FileDocumentManager
@@ -56,7 +57,12 @@ class PreviewEditor(project: Project?) : EditorTextField(
     }
 
     override fun createEditor(): EditorEx {
-        val editor = super.createEditor()
+        val editor = super.createEditor() // TODO: Exception in thread com.intellij.openapi.diagnostic.RuntimeExceptionWithAttachments: Access is allowed from Event Dispatch Thread (EDT) only; see https://jb.gg/ij-platform-threading for details editor.setVerticalScrollbarVisible(true)
+        /*
+            at com.mituuz.fuzzier.components.PreviewEditor.updateFile(PreviewEditor.kt:78)
+            at com.mituuz.fuzzier.Fuzzier.createListeners$lambda$12(Fuzzier.kt:234)
+            at com.mituuz.fuzzier.FuzzierFS.updateListContents$lambda$1(FuzzierFS.kt:39)
+         */
         editor.setVerticalScrollbarVisible(true)
         editor.setHorizontalScrollbarVisible(true)
         editor.isOneLineMode = false
@@ -79,7 +85,7 @@ class PreviewEditor(project: Project?) : EditorTextField(
         this.fileType = PlainTextFileType.INSTANCE
     }
 
-    fun updateFile(virtualFile: VirtualFile?) {
+    fun updateFile(virtualFile: VirtualFile?, offset: Int? = null) {
         ApplicationManager.getApplication().executeOnPooledThread {
             val sourceDocument = ApplicationManager.getApplication().runReadAction<Document?> {
                 virtualFile?.let { FileDocumentManager.getInstance().getDocument(virtualFile) }
@@ -101,9 +107,9 @@ class PreviewEditor(project: Project?) : EditorTextField(
                             this.document = sourceDocument
                         }
                         ApplicationManager.getApplication().invokeLater {
-                            editor?.scrollingModel?.run {
-                                scrollHorizontally(0)
-                                scrollVertically(0)
+                            scrollTo0()
+                            if (offset != null) {
+                                moveCaretToOffset(offset)
                             }
                         }
                     }
@@ -112,6 +118,22 @@ class PreviewEditor(project: Project?) : EditorTextField(
                 }
                 this.fileType = fileType
             }
+        }
+    }
+
+    fun scrollTo0() {
+        editor?.scrollingModel?.run {
+            scrollHorizontally(0)
+            scrollVertically(0)
+        }
+    }
+
+    fun moveCaretToOffset(offset: Int) {
+        val caret = editor?.caretModel?.primaryCaret
+        if (caret != null) {
+            caret.moveToOffset(offset)
+            val logicalPosition = caret.logicalPosition
+            editor?.scrollingModel?.scrollTo(logicalPosition, ScrollType.CENTER)
         }
     }
 }
