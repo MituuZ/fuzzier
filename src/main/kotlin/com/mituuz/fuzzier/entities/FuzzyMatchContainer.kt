@@ -41,7 +41,7 @@ class FuzzyMatchContainer(
     filePath: String,
     filename: String,
     moduleBasePath: String
-) : Serializable, FuzzyContainer(filePath, moduleBasePath, filename) {
+) : FuzzyContainer(filePath, moduleBasePath, filename) {
     override fun getDisplayString(filenameType: FilenameType, highlight: Boolean): String {
         return when (filenameType) {
             FilenameType.FILENAME_ONLY -> filename
@@ -104,6 +104,11 @@ class FuzzyMatchContainer(
         return "FuzzyMatchContainer: $filename, score: ${getScore()}, dir score: ${getScoreWithDirLength()}"
     }
 
+    /**
+     * Serializable version of FuzzyMatchContainer
+     *
+     * This is required for SerializedMatchContainerConverter to work correctly
+     */
     class SerializedMatchContainer : Serializable {
         companion object {
             fun fromFuzzyMatchContainer(container: FuzzyMatchContainer): SerializedMatchContainer {
@@ -148,8 +153,8 @@ class FuzzyMatchContainer(
      * Uses a base 64 encoded string
      *
      * ```
-     * @OptionTag(converter = FuzzyMatchContainer.FuzzyMatchContainerConverter::class)
-     * var recentlySearchedFiles: DefaultListModel<FuzzyContainer>? = DefaultListModel()
+     * @OptionTag(converter = FuzzyMatchContainer.SerializedMatchContainerConverter::class)
+     * var recentlySearchedFiles: DefaultListModel<SerializedMatchContainer>? = DefaultListModel()
      * ```
      *
      * @see FuzzierSettingsService
