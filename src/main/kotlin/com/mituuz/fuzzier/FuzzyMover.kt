@@ -47,6 +47,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.refactoring.move.moveFilesOrDirectories.MoveFilesOrDirectoriesUtil
 import com.mituuz.fuzzier.components.SimpleFinderComponent
+import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.StringEvaluator
 import com.mituuz.fuzzier.util.FuzzierUtil
@@ -211,7 +212,7 @@ class FuzzyMover : FuzzyAction() {
                 // Create a reference to the current task to check if it has been cancelled
                 val task = currentTask
                 component.fileList.setPaintBusy(true)
-                var listModel = DefaultListModel<FuzzyMatchContainer>()
+                var listModel = DefaultListModel<FuzzyContainer>()
 
                 val stringEvaluator = getStringEvaluator()
 
@@ -249,7 +250,7 @@ class FuzzyMover : FuzzyAction() {
     }
     
     private fun process(project: Project, stringEvaluator: StringEvaluator, searchString: String,
-                        listModel: DefaultListModel<FuzzyMatchContainer>, task: Future<*>?) {
+                        listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?) {
         val moduleManager = ModuleManager.getInstance(project)
         val ss = FuzzierUtil.cleanSearchString(searchString, fuzzierSettingsService.state.ignoredCharacters)
         if (fuzzierSettingsService.state.isProject) {
@@ -260,7 +261,7 @@ class FuzzyMover : FuzzyAction() {
     }
 
     private fun processProject(project: Project, stringEvaluator: StringEvaluator,
-                               searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>, task: Future<*>?) {
+                               searchString: String, listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?) {
         val contentIterator = if (!component.isDirSelector) {
             stringEvaluator.getContentIterator(project.name, searchString, listModel, task)
         } else {
@@ -270,7 +271,7 @@ class FuzzyMover : FuzzyAction() {
     }
 
     private fun processModules(moduleManager: ModuleManager, stringEvaluator: StringEvaluator,
-                               searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>, task: Future<*>?) {
+                               searchString: String, listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?) {
         for (module in moduleManager.modules) {
             val moduleFileIndex = module.rootManager.fileIndex
 

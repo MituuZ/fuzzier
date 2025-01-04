@@ -26,6 +26,7 @@ package com.mituuz.fuzzier.util
 import com.intellij.openapi.components.service
 import com.intellij.testFramework.TestApplicationManager
 import com.mituuz.fuzzier.TestUtil
+import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FuzzyScore
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
@@ -38,8 +39,8 @@ class FuzzierUtilTest {
     @Suppress("unused")
     private val testApplicationManager = TestApplicationManager.getInstance()
     private val fuzzierUtil = FuzzierUtil()
-    private val listModel = DefaultListModel<FuzzyMatchContainer>()
-    private lateinit var result: DefaultListModel<FuzzyMatchContainer>
+    private val listModel = DefaultListModel<FuzzyContainer>()
+    private lateinit var result: DefaultListModel<FuzzyContainer>
     private val testUtil = TestUtil()
 
     @BeforeEach

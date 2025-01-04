@@ -33,6 +33,7 @@ import com.intellij.testFramework.LightVirtualFile
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import com.mituuz.fuzzier.components.SimpleFinderComponent
+import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
@@ -169,10 +170,10 @@ class FuzzyMoverTest {
         myFixture.tearDown()
     }
 
-    private fun getListModel(virtualFile: VirtualFile?): ListModel<FuzzyMatchContainer?> {
-        val listModel = DefaultListModel<FuzzyMatchContainer?>()
+    private fun getListModel(virtualFile: VirtualFile?): ListModel<FuzzyContainer?> {
+        val listModel = DefaultListModel<FuzzyContainer?>()
         if (virtualFile != null) {
-            val container = FuzzyMatchContainer(FuzzyMatchContainer.FuzzyScore(), virtualFile.path, virtualFile.name)
+        val container = FuzzyMatchContainer(FuzzyMatchContainer.FuzzyScore(), virtualFile.path, virtualFile.name, "")
             listModel.addElement(container)
         }
         return listModel

@@ -25,8 +25,8 @@ package com.mituuz.fuzzier.settings
 
 import com.intellij.openapi.components.service
 import com.intellij.testFramework.TestApplicationManager
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType.FILENAME_WITH_PATH_STYLED
+import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType.FILENAME_WITH_PATH_STYLED
+import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType.FILENAME_ONLY
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.NONE
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.RECENT_PROJECT_FILES
 import org.junit.jupiter.api.Assertions.*
@@ -122,7 +122,7 @@ class FuzzierSettingsConfigurableTest {
     @Test
     fun filenameType() {
         pre()
-        state.filenameType = FuzzyMatchContainer.FilenameType.FILENAME_ONLY
+        state.filenameType = FILENAME_ONLY
         assertTrue(settingsConfigurable.isModified())
     }
 

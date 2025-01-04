@@ -114,20 +114,13 @@ class InitialViewHandlerTest {
     }
 
     @Test
-    fun `Recently searched files - Null returns an empty list`() {
-        `when`(fuzzierSettingsService.state.recentlySearchedFiles).thenReturn(null)
-        val result = InitialViewHandler.getRecentlySearchedFiles(fuzzierSettingsService)
-        assertEquals(0, result.size())
-    }
-
-    @Test
     fun `Recently searched files - Order of multiple files`() {
         val fuzzyMatchContainer1 = mock(FuzzyMatchContainer::class.java)
         val fuzzyMatchContainer2 = mock(FuzzyMatchContainer::class.java)
         val listModel = DefaultListModel<FuzzyMatchContainer>()
         listModel.addElement(fuzzyMatchContainer1)
         listModel.addElement(fuzzyMatchContainer2)
-        `when`(fuzzierSettingsService.state.recentlySearchedFiles).thenReturn(listModel)
+        `when`(fuzzierSettingsService.state.getRecentlySearchedFilesAsFuzzyMatchContainer()).thenReturn(listModel)
 
         val result = InitialViewHandler.getRecentlySearchedFiles(fuzzierSettingsService)
 
@@ -142,7 +135,7 @@ class InitialViewHandlerTest {
         listModel.addElement(fuzzyMatchContainer)
         listModel.addElement(null)
         listModel.addElement(null)
-        `when`(fuzzierSettingsService.state.recentlySearchedFiles).thenReturn(listModel)
+        `when`(fuzzierSettingsService.state.getRecentlySearchedFilesAsFuzzyMatchContainer()).thenReturn(listModel)
 
         val result = InitialViewHandler.getRecentlySearchedFiles(fuzzierSettingsService)
 
@@ -153,12 +146,12 @@ class InitialViewHandlerTest {
     fun `Add file to recently used files - Null list should default to empty`() {
         val fuzzierSettingsServiceInstance: FuzzierSettingsService = service<FuzzierSettingsService>()
         val score = FuzzyMatchContainer.FuzzyScore()
-        val container = FuzzyMatchContainer(score, "", "")
+        val container = FuzzyMatchContainer(score, "", "", "")
 
         fuzzierSettingsServiceInstance.state.recentlySearchedFiles = null
         InitialViewHandler.addFileToRecentlySearchedFiles(container, fuzzierSettingsServiceInstance)
-        assertNotNull(fuzzierSettingsServiceInstance.state.recentlySearchedFiles)
-        assertEquals(1, fuzzierSettingsServiceInstance.state.recentlySearchedFiles!!.size)
+        assertNotNull(fuzzierSettingsServiceInstance.state.getRecentlySearchedFilesAsFuzzyMatchContainer())
+        assertEquals(1, fuzzierSettingsServiceInstance.state.getRecentlySearchedFilesAsFuzzyMatchContainer().size)
     }
 
     @Test
@@ -166,18 +159,18 @@ class InitialViewHandlerTest {
         val fuzzierSettingsServiceInstance: FuzzierSettingsService = service<FuzzierSettingsService>()
         val fileListLimit = 2
         val score = FuzzyMatchContainer.FuzzyScore()
-        val container = FuzzyMatchContainer(score, "", "")
+        val container = FuzzyMatchContainer(score, "", "", "")
 
         val largeList: DefaultListModel<FuzzyMatchContainer> = DefaultListModel()
         for (i in 0..25) {
-            largeList.addElement(FuzzyMatchContainer(score, "" + i, "" + i))
+            largeList.addElement(FuzzyMatchContainer(score, "" + i, "" + i, ""))
         }
 
         fuzzierSettingsServiceInstance.state.fileListLimit = fileListLimit
 
-        fuzzierSettingsServiceInstance.state.recentlySearchedFiles = largeList
+        fuzzierSettingsServiceInstance.state.recentlySearchedFiles = FuzzyMatchContainer.SerializedMatchContainer.fromListModel(largeList)
         InitialViewHandler.addFileToRecentlySearchedFiles(container, fuzzierSettingsServiceInstance)
-        assertEquals(fileListLimit, fuzzierSettingsServiceInstance.state.recentlySearchedFiles!!.size)
+        assertEquals(fileListLimit, fuzzierSettingsServiceInstance.state.getRecentlySearchedFilesAsFuzzyMatchContainer().size)
     }
 
     @Test
@@ -185,17 +178,17 @@ class InitialViewHandlerTest {
         val fuzzierSettingsServiceInstance: FuzzierSettingsService = service<FuzzierSettingsService>()
         val fileListLimit = 20
         val score = FuzzyMatchContainer.FuzzyScore()
-        val container = FuzzyMatchContainer(score, "", "")
+        val container = FuzzyMatchContainer(score, "", "", "")
 
         val largeList: DefaultListModel<FuzzyMatchContainer> = DefaultListModel()
         repeat (26) {
-            largeList.addElement(FuzzyMatchContainer(score, "", ""))
+            largeList.addElement(FuzzyMatchContainer(score, "", "", ""))
         }
 
         fuzzierSettingsServiceInstance.state.fileListLimit = fileListLimit
 
-        fuzzierSettingsServiceInstance.state.recentlySearchedFiles = largeList
+        fuzzierSettingsServiceInstance.state.recentlySearchedFiles = FuzzyMatchContainer.SerializedMatchContainer.fromListModel(largeList)
         InitialViewHandler.addFileToRecentlySearchedFiles(container, fuzzierSettingsServiceInstance)
-        assertEquals(1, fuzzierSettingsServiceInstance.state.recentlySearchedFiles!!.size)
+        assertEquals(1, fuzzierSettingsServiceInstance.state.getRecentlySearchedFilesAsFuzzyMatchContainer().size)
     }
 }

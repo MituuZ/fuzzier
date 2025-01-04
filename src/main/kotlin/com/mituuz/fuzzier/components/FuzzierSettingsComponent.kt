@@ -34,7 +34,7 @@ import com.intellij.util.ui.FormBuilder
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.components.JBTextField
 import com.mituuz.fuzzier.components.FuzzierSettingsComponent.SettingsComponent
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType
+import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode
 import java.awt.Component

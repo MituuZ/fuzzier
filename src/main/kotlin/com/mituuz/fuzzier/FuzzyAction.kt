@@ -39,9 +39,10 @@ import com.intellij.openapi.keymap.KeymapManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
 import com.mituuz.fuzzier.components.FuzzyComponent
+import com.mituuz.fuzzier.entities.FuzzyContainer
+import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
+import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType.FILE_PATH_ONLY
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType.FILE_PATH_ONLY
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.util.FuzzierUtil
 import java.awt.Component
@@ -177,13 +178,13 @@ abstract class FuzzyAction : AnAction() {
             ): Component {
                 val renderer =
                     super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) as JLabel
-                val container = value as FuzzyMatchContainer
+                val container = value as FuzzyContainer
                 val filenameType: FilenameType = if (component.isDirSelector) {
                     FILE_PATH_ONLY // Directories are always shown as full paths
                 } else {
                     fuzzierSettingsService.state.filenameType
                 }
-                renderer.text = container.toString(filenameType, fuzzierSettingsService.state.highlightFilename)
+                renderer.text = container.getDisplayString(filenameType, fuzzierSettingsService.state.highlightFilename)
                 fuzzierSettingsService.state.fileListSpacing.let {
                     renderer.border = BorderFactory.createEmptyBorder(it, 0, it, 0)
                 }

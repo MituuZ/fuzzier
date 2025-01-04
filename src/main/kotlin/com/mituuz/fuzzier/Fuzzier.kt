@@ -46,6 +46,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
+import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.StringEvaluator
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.NONE
@@ -149,7 +150,7 @@ open class Fuzzier : FuzzyAction() {
 
                 RECENTLY_SEARCHED_FILES -> InitialViewHandler.getRecentlySearchedFiles(fuzzierSettingsService)
                 else -> {
-                    DefaultListModel<FuzzyMatchContainer>()
+                    DefaultListModel<FuzzyContainer>()
                 }
             }
 
@@ -176,7 +177,7 @@ open class Fuzzier : FuzzyAction() {
                 // Create a reference to the current task to check if it has been cancelled
                 val task = currentTask
                 component.fileList.setPaintBusy(true)
-                var listModel = DefaultListModel<FuzzyMatchContainer>()
+                var listModel = DefaultListModel<FuzzyContainer>()
 
                 val stringEvaluator = getStringEvaluator()
 
@@ -227,7 +228,7 @@ open class Fuzzier : FuzzyAction() {
 
     private fun process(
         project: Project, stringEvaluator: StringEvaluator, searchString: String,
-        listModel: DefaultListModel<FuzzyMatchContainer>, task: Future<*>?
+        listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?
     ) {
         val moduleManager = ModuleManager.getInstance(project)
         if (fuzzierSettingsService.state.isProject) {
@@ -239,7 +240,7 @@ open class Fuzzier : FuzzyAction() {
 
     private fun processProject(
         project: Project, stringEvaluator: StringEvaluator,
-        searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>, task: Future<*>?
+        searchString: String, listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?
     ) {
         val filesToIterate = ConcurrentHashMap.newKeySet<FuzzierUtil.IterationFile>()
         FuzzierUtil.fileIndexToIterationFile(filesToIterate, ProjectFileIndex.getInstance(project), project.name, task)
@@ -248,7 +249,7 @@ open class Fuzzier : FuzzyAction() {
 
     private fun processModules(
         moduleManager: ModuleManager, stringEvaluator: StringEvaluator,
-        searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>, task: Future<*>?
+        searchString: String, listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?
     ) {
         val filesToIterate = ConcurrentHashMap.newKeySet<FuzzierUtil.IterationFile>()
         for (module in moduleManager.modules) {
@@ -262,7 +263,7 @@ open class Fuzzier : FuzzyAction() {
      */
     private fun processFiles(
         filesToIterate: ConcurrentHashMap.KeySetView<FuzzierUtil.IterationFile, Boolean>,
-        stringEvaluator: StringEvaluator, listModel: DefaultListModel<FuzzyMatchContainer>,
+        stringEvaluator: StringEvaluator, listModel: DefaultListModel<FuzzyContainer>,
         searchString: String, task: Future<*>?
     ) {
         val ss = FuzzierUtil.cleanSearchString(searchString, fuzzierSettingsService.state.ignoredCharacters)
@@ -278,7 +279,7 @@ open class Fuzzier : FuzzyAction() {
         }
     }
 
-    private fun openFile(project: Project, fuzzyMatchContainer: FuzzyMatchContainer?, virtualFile: VirtualFile) {
+    private fun openFile(project: Project, fuzzyContainer: FuzzyContainer?, virtualFile: VirtualFile) {
         val fileEditorManager = FileEditorManager.getInstance(project)
         val currentEditor = fileEditorManager.selectedTextEditor
         val previousFile = currentEditor?.virtualFile
@@ -295,8 +296,8 @@ open class Fuzzier : FuzzyAction() {
                 }
             }
         }
-        if (fuzzyMatchContainer != null) {
-            InitialViewHandler.addFileToRecentlySearchedFiles(fuzzyMatchContainer, fuzzierSettingsService)
+        if (fuzzyContainer != null) {
+            InitialViewHandler.addFileToRecentlySearchedFiles(fuzzyContainer, fuzzierSettingsService)
         }
         popup?.cancel()
     }

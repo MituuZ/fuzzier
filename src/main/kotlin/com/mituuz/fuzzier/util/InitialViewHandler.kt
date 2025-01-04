@@ -24,7 +24,9 @@ SOFTWARE.
 package com.mituuz.fuzzier.util
 
 import com.intellij.openapi.fileEditor.impl.EditorHistoryManager
+import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
+import com.mituuz.fuzzier.entities.OrderedContainer
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import javax.swing.DefaultListModel
 
@@ -33,9 +35,9 @@ class InitialViewHandler {
         fun getRecentProjectFiles(
             fuzzierSettingsService: FuzzierSettingsService, fuzzierUtil: FuzzierUtil,
             editorHistoryManager: EditorHistoryManager
-        ): DefaultListModel<FuzzyMatchContainer> {
+        ): DefaultListModel<FuzzyContainer> {
             val editorHistory = editorHistoryManager.fileList
-            val listModel = DefaultListModel<FuzzyMatchContainer>()
+            val listModel = DefaultListModel<FuzzyContainer>()
             val limit = fuzzierSettingsService.state.fileListLimit
 
             // Start from the end of editor history (most recent file)
@@ -48,23 +50,18 @@ class InitialViewHandler {
                     i--
                     continue
                 }
-                val fuzzyMatchContainer = FuzzyMatchContainer.createOrderedContainer(
-                    i, filePathAndModule.first, filePathAndModule.second, file.name
+                val orderedContainer = OrderedContainer(
+                    filePathAndModule.first, filePathAndModule.second, file.name
                 )
-                listModel.addElement(fuzzyMatchContainer)
+                listModel.addElement(orderedContainer)
                 i--
             }
 
             return listModel
         }
 
-        fun getRecentlySearchedFiles(fuzzierSettingsService: FuzzierSettingsService): DefaultListModel<FuzzyMatchContainer> {
-            var listModel = fuzzierSettingsService.state.recentlySearchedFiles
-
-            if (listModel == null) {
-                listModel = DefaultListModel<FuzzyMatchContainer>()
-                fuzzierSettingsService.state.recentlySearchedFiles = listModel
-            }
+        fun getRecentlySearchedFiles(fuzzierSettingsService: FuzzierSettingsService): DefaultListModel<FuzzyContainer> {
+            var listModel = fuzzierSettingsService.state.getRecentlySearchedFilesAsFuzzyMatchContainer()
 
             var i = 0
             while (i < listModel.size) {
@@ -76,7 +73,7 @@ class InitialViewHandler {
             }
 
             // Reverse the list to show the most recent searches first
-            var result = DefaultListModel<FuzzyMatchContainer>()
+            var result = DefaultListModel<FuzzyContainer>()
 
             var j = 0
             while (j < listModel.size) {
@@ -88,17 +85,12 @@ class InitialViewHandler {
             return result
         }
 
-        fun addFileToRecentlySearchedFiles(fuzzyMatchContainer: FuzzyMatchContainer, fuzzierSettingsService: FuzzierSettingsService) {
-            var listModel: DefaultListModel<FuzzyMatchContainer>? = fuzzierSettingsService.state.recentlySearchedFiles
-
-            if (listModel == null) {
-                listModel = DefaultListModel<FuzzyMatchContainer>()
-                fuzzierSettingsService.state.recentlySearchedFiles = listModel
-            }
+        fun addFileToRecentlySearchedFiles(fuzzyContainer: FuzzyContainer, fuzzierSettingsService: FuzzierSettingsService) {
+            var listModel: DefaultListModel<FuzzyMatchContainer> = fuzzierSettingsService.state.getRecentlySearchedFilesAsFuzzyMatchContainer()
 
             var i = 0
             while (i < listModel.size) {
-                if (listModel[i].filePath == fuzzyMatchContainer.filePath) {
+                if (listModel[i].filePath == fuzzyContainer.filePath) {
                     listModel.remove(i)
                 } else {
                     i++
@@ -109,7 +101,10 @@ class InitialViewHandler {
                 listModel.remove(listModel.size - 1)
             }
 
-            listModel.addElement(fuzzyMatchContainer)
+            if (fuzzyContainer is FuzzyMatchContainer) {
+                listModel.addElement(fuzzyContainer)
+                fuzzierSettingsService.state.recentlySearchedFiles = FuzzyMatchContainer.SerializedMatchContainer.fromListModel(listModel)
+            }
         }
     }
 }
