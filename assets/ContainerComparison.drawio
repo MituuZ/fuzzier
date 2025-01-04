@@ -1,6 +1,6 @@
-<mxfile host="drawio-plugin" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" modified="2025-01-02T17:44:32.476Z" version="22.1.22" etag="YuxBYm3laT8uBoR8ifKm" type="embed">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0" version="26.0.2">
   <diagram name="Page-1" id="BjPpnATlAqmnPM9V4Ykc">
-    <mxGraphModel dx="949" dy="694" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="800" pageHeight="800" math="0" shadow="0">
+    <mxGraphModel dx="1185" dy="658" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="800" pageHeight="800" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -46,7 +46,7 @@
         <mxCell id="WUuY3x_TO1SyaEHNx0RS-16" value="Scoring&lt;br&gt;&lt;span style=&quot;font-weight: normal;&quot;&gt;Find the best file&lt;br&gt;&lt;/span&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontStyle=1" parent="1" vertex="1">
           <mxGeometry x="100.75" y="420" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="WUuY3x_TO1SyaEHNx0RS-18" value="&lt;b&gt;Preview&lt;/b&gt;&lt;br&gt;Load file" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="WUuY3x_TO1SyaEHNx0RS-18" value="&lt;b&gt;Preview&lt;/b&gt;&lt;br&gt;1. Load file&lt;br&gt;2. Scroll to class" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="171.5" y="340" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="WUuY3x_TO1SyaEHNx0RS-19" value="&lt;b&gt;Preview&lt;/b&gt;&lt;br&gt;1. Load file&lt;br&gt;2. Scroll to row" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
@@ -66,6 +66,21 @@
         </mxCell>
         <mxCell id="WUuY3x_TO1SyaEHNx0RS-24" value="Module" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="WUuY3x_TO1SyaEHNx0RS-21" vertex="1">
           <mxGeometry y="90" width="140" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="nkHttpiEGHfKr55FSMCi-1" value="&lt;b&gt;toString&lt;/b&gt;&lt;br&gt;Display" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="260" y="600" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="nkHttpiEGHfKr55FSMCi-2" value="&lt;b&gt;getFileUri&lt;/b&gt;&lt;br&gt;Action&lt;br&gt;Preview" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="420" y="600" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="nkHttpiEGHfKr55FSMCi-3" value="&lt;b&gt;getScore&lt;/b&gt;&lt;br&gt;Scoring" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="100.25" y="600" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="nkHttpiEGHfKr55FSMCi-5" value="Methods" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=24;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="300" y="540" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="nkHttpiEGHfKr55FSMCi-15" value="&lt;div&gt;&lt;b&gt;getRow&lt;/b&gt;&lt;/div&gt;Action&lt;br&gt;Preview" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="578.75" y="600" width="120" height="60" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
