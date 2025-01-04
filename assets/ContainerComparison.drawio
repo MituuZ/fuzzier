@@ -67,7 +67,7 @@
         <mxCell id="WUuY3x_TO1SyaEHNx0RS-24" value="Module" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="WUuY3x_TO1SyaEHNx0RS-21" vertex="1">
           <mxGeometry y="90" width="140" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="nkHttpiEGHfKr55FSMCi-1" value="&lt;b&gt;toString&lt;/b&gt;&lt;br&gt;Display" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="nkHttpiEGHfKr55FSMCi-1" value="&lt;b&gt;getDisplayString&lt;/b&gt;&lt;br&gt;Display" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="260" y="600" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="nkHttpiEGHfKr55FSMCi-2" value="&lt;b&gt;getFileUri&lt;/b&gt;&lt;br&gt;Action&lt;br&gt;Preview" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
@@ -81,6 +81,12 @@
         </mxCell>
         <mxCell id="nkHttpiEGHfKr55FSMCi-15" value="&lt;div&gt;&lt;b&gt;getRow&lt;/b&gt;&lt;/div&gt;Action&lt;br&gt;Preview" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="578.75" y="600" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="nkHttpiEGHfKr55FSMCi-16" value="Using base path instead of module would simplify the handling" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="330" y="300" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="nkHttpiEGHfKr55FSMCi-17" value="Separate ordered containers" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="20" y="110" width="120" height="60" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
