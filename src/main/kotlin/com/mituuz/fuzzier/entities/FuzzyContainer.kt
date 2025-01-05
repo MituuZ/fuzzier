@@ -27,13 +27,20 @@ abstract class FuzzyContainer(val filePath: String, val basePath: String, val fi
     /**
      * Get display string for the popup
      */
-    abstract fun getDisplayString(filenameType: FilenameType, highlight: Boolean): String
+    abstract fun getDisplayString(): String
 
     /**
      * Get the complete URI for the file
      */
     fun getFileUri() : String {
         return "$basePath$filePath"
+    }
+
+    /**
+     * Directories always return full path
+     */
+    fun getDirDisplayString(): String {
+        return filePath
     }
 
     /**
@@ -44,10 +51,6 @@ abstract class FuzzyContainer(val filePath: String, val basePath: String, val fi
         FILENAME_ONLY("Filename only"),
         FILENAME_WITH_PATH("Filename with (path)"),
         FILENAME_WITH_PATH_STYLED("Filename with (path) styled")
-    }
-
-    protected fun getFilenameWithPathStyled(): String {
-        return "<html><strong>$filename</strong>  <i>($filePath)</i></html>"
     }
 
     override fun toString(): String {

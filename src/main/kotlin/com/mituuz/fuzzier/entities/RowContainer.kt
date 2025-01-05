@@ -29,17 +29,8 @@ class RowContainer(
     filename: String,
     val rowNumber: Integer
 ) : FuzzyContainer(filePath, basePath, filename) {
-
-    override fun getDisplayString(
-        filenameType: FilenameType,
-        highlight: Boolean
-    ): String {
-        return when (filenameType) {
-            FilenameType.FILENAME_ONLY -> filename
-            FilenameType.FILE_PATH_ONLY -> filePath
-            FilenameType.FILENAME_WITH_PATH -> "$filename   ($filePath)"
-            FilenameType.FILENAME_WITH_PATH_STYLED -> getFilenameWithPathStyled()
-        }
+    override fun getDisplayString(): String {
+        return "$filename:$rowNumber"
     }
 
     override fun toString(): String {
