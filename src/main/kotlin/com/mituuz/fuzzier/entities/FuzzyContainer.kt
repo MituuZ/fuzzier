@@ -9,7 +9,7 @@ abstract class FuzzyContainer(val filePath: String, val basePath: String, val fi
     /**
      * Get the complete URI for the file
      */
-    open fun getFileUri() : String {
+    fun getFileUri() : String {
         return "$basePath$filePath"
     }
 
@@ -23,7 +23,7 @@ abstract class FuzzyContainer(val filePath: String, val basePath: String, val fi
         FILENAME_WITH_PATH_STYLED("Filename with (path) styled")
     }
 
-    fun getFilenameWithPathStyled(): String {
+    protected fun getFilenameWithPathStyled(): String {
         return "<html><strong>$filename</strong>  <i>($filePath)</i></html>"
     }
 
