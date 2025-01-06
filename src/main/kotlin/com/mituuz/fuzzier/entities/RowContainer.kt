@@ -29,7 +29,7 @@ class RowContainer(
     filePath: String,
     basePath: String,
     filename: String,
-    val rowNumber: Integer
+    val rowNumber: Int
 ) : FuzzyContainer(filePath, basePath, filename) {
     override fun getDisplayString(state: FuzzierSettingsService.State): String {
         return "$filename:$rowNumber"
