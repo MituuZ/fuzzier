@@ -23,11 +23,13 @@ SOFTWARE.
 */
 package com.mituuz.fuzzier.entities
 
+import com.mituuz.fuzzier.settings.FuzzierSettingsService
+
 abstract class FuzzyContainer(val filePath: String, val basePath: String, val filename: String) {
     /**
      * Get display string for the popup
      */
-    abstract fun getDisplayString(): String
+    abstract fun getDisplayString(state: FuzzierSettingsService.State): String
 
     /**
      * Get the complete URI for the file

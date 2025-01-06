@@ -41,7 +41,6 @@ import com.intellij.openapi.ui.popup.JBPopup
 import com.mituuz.fuzzier.components.FuzzyComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
-import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType.FILE_PATH_ONLY
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.util.FuzzierUtil
 import java.awt.Component
@@ -166,7 +165,7 @@ abstract class FuzzyAction : AnAction() {
         }
     }
 
-    fun getCellRenderer(): ListCellRenderer<Any?> {
+    fun getCellRenderer(state: FuzzierSettingsService.State): ListCellRenderer<Any?> {
         return object : DefaultListCellRenderer() {
             override fun getListCellRendererComponent(
                 list: JList<*>?,
@@ -180,13 +179,13 @@ abstract class FuzzyAction : AnAction() {
                 val container = value as FuzzyContainer
                 renderer.text = when (component.isDirSelector) {
                     true -> container.getDirDisplayString()
-                    false -> container.getDisplayString()
+                    false -> container.getDisplayString(state)
                 }
 
-                fuzzierSettingsService.state.fileListSpacing.let {
+                state.fileListSpacing.let {
                     renderer.border = BorderFactory.createEmptyBorder(it, 0, it, 0)
                 }
-                fuzzierSettingsService.state.fileListFontSize.let {
+                state.fileListFontSize.let {
                     renderer.font = renderer.font.deriveFont(it.toFloat())
                 }
                 return renderer

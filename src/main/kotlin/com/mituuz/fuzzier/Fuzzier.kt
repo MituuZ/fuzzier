@@ -47,7 +47,6 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.StringEvaluator
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.NONE
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.RECENTLY_SEARCHED_FILES
@@ -156,7 +155,7 @@ open class Fuzzier : FuzzyAction() {
 
             ApplicationManager.getApplication().invokeLater {
                 component.fileList.model = listModel
-                component.fileList.cellRenderer = getCellRenderer()
+                component.fileList.cellRenderer = getCellRenderer(fuzzierSettingsService.state)
                 component.fileList.setPaintBusy(false)
                 if (!component.fileList.isEmpty) {
                     component.fileList.setSelectedValue(listModel[0], true)
@@ -193,7 +192,7 @@ open class Fuzzier : FuzzyAction() {
 
                 ApplicationManager.getApplication().invokeLater {
                     component.fileList.model = listModel
-                    component.fileList.cellRenderer = getCellRenderer()
+                    component.fileList.cellRenderer = getCellRenderer(fuzzierSettingsService.state)
                     component.fileList.setPaintBusy(false)
                     if (!component.fileList.isEmpty) {
                         component.fileList.setSelectedValue(listModel[0], true)

@@ -23,7 +23,6 @@ SOFTWARE.
 */
 package com.mituuz.fuzzier.entities
 
-import com.intellij.openapi.components.service
 import com.intellij.util.xmlb.Converter
 import com.intellij.util.xmlb.XmlSerializationException
 import com.mituuz.fuzzier.settings.FuzzierConfiguration.END_STYLE_TAG
@@ -43,15 +42,12 @@ class FuzzyMatchContainer(
     filename: String,
     moduleBasePath: String
 ) : FuzzyContainer(filePath, moduleBasePath, filename) {
-    override fun getDisplayString(): String {
-        val fss = service<FuzzierSettingsService>().state
-        val ft = fss.filenameType
-        val hl = fss.highlightFilename
-        return when (ft) {
+    override fun getDisplayString(state: FuzzierSettingsService.State): String {
+        return when (state.filenameType) {
             FilenameType.FILENAME_ONLY -> filename
             FilenameType.FILE_PATH_ONLY -> filePath
             FilenameType.FILENAME_WITH_PATH -> "$filename   ($filePath)"
-            FilenameType.FILENAME_WITH_PATH_STYLED -> getFilenameWithPathStyled(hl)
+            FilenameType.FILENAME_WITH_PATH_STYLED -> getFilenameWithPathStyled(state.highlightFilename)
         }
     }
 
