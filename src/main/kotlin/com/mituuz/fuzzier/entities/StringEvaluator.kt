@@ -81,7 +81,7 @@ class StringEvaluator(
                     return@ContentIterator true
                 }
                 if (filePath.isNotBlank()) {
-                    val fuzzyMatchContainer = createFuzzyContainer(filePath, moduleName, scoreCalculator)
+                    val fuzzyMatchContainer = createFuzzyContainer(filePath, moduleBasePath, scoreCalculator)
                     if (fuzzyMatchContainer != null) {
                         listModel.addElement(fuzzyMatchContainer)
                     }
@@ -104,7 +104,7 @@ class StringEvaluator(
                 return
             }
             if (filePath.isNotBlank()) {
-                val fuzzyMatchContainer = createFuzzyContainer(filePath, moduleName, scoreCalculator)
+                val fuzzyMatchContainer = createFuzzyContainer(filePath, moduleBasePath, scoreCalculator)
                 if (fuzzyMatchContainer != null) {
                     listModel.addElement(fuzzyMatchContainer)
                 }
@@ -157,10 +157,7 @@ class StringEvaluator(
                                      scoreCalculator: ScoreCalculator): FuzzyMatchContainer? {
         val filename = filePath.substring(filePath.lastIndexOf("/") + 1)
         return when (val score = scoreCalculator.calculateScore(filePath)) {
-            null -> {
-                null
-            }
-
+            null -> null
             else -> FuzzyMatchContainer(score, filePath, filename, moduleBasePath)
         }
     }
