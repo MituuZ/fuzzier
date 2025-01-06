@@ -45,7 +45,6 @@ import com.intellij.openapi.wm.WindowManager
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
-import com.intellij.refactoring.move.moveFilesOrDirectories.MoveFilesOrDirectoriesUtil
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.StringEvaluator
@@ -175,7 +174,7 @@ class FuzzyMover : FuzzyAction() {
                     val originalFilePath = movableFile.virtualFile.path
                     if (targetDir != null) {
                         WriteCommandAction.runWriteCommandAction(project) {
-                            MoveFilesOrDirectoriesUtil.doMoveFile(movableFile, targetDir)
+                            movableFile.virtualFile.move(movableFile.manager, targetDir.virtualFile)
                         }
                         val notification = Notification(
                             "Fuzzier Notification Group",
