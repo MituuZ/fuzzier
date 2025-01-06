@@ -59,11 +59,11 @@ import javax.swing.*
 import kotlin.coroutines.cancellation.CancellationException
 
 class FuzzyMover : FuzzyAction() {
-    private val moverDimensionKey: String = "FuzzyMoverPopup"
     lateinit var movableFile: PsiFile
     lateinit var currentFile: VirtualFile
 
     override fun runAction(project: Project, actionEvent: AnActionEvent) {
+        dimensionKey = "FuzzyMoverPopup"
         setCustomHandlers()
         ApplicationManager.getApplication().invokeLater {
             component = SimpleFinderComponent()
@@ -73,7 +73,7 @@ class FuzzyMover : FuzzyAction() {
             val mainWindow = WindowManager.getInstance().getIdeFrame(actionEvent.project)?.component
             mainWindow?.let {
                 val screenBounds = it.graphicsConfiguration.bounds
-                val dimensionKey = createDimensionKey(moverDimensionKey, screenBounds)
+                val dimensionKey = createDimensionKey(dimensionKey, screenBounds)
                 popup = createPopup(dimensionKey)
 
                 val currentEditor = FileEditorManager.getInstance(project).selectedTextEditor

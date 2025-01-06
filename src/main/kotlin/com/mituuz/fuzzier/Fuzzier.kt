@@ -69,12 +69,12 @@ import kotlin.coroutines.cancellation.CancellationException
 open class Fuzzier : FuzzyAction() {
     private var defaultDoc: Document? = null
     open var title: String = "Fuzzy Search"
-    private val fuzzyDimensionKey: String = "FuzzySearchPopup"
 
     // Used by FuzzierVCS to check if files are tracked by the VCS
     protected var changeListManager: ChangeListManager? = null
 
     override fun runAction(project: Project, actionEvent: AnActionEvent) {
+        dimensionKey = "FuzzySearchPopup"
         setCustomHandlers()
         ApplicationManager.getApplication().invokeLater {
             defaultDoc = EditorFactory.getInstance().createDocument("")
@@ -85,7 +85,7 @@ open class Fuzzier : FuzzyAction() {
             val mainWindow = WindowManager.getInstance().getIdeFrame(actionEvent.project)?.component
             mainWindow?.let {
                 val screenBounds = it.graphicsConfiguration.bounds
-                val dimensionKey = createDimensionKey(fuzzyDimensionKey, screenBounds)
+                val dimensionKey = createDimensionKey(dimensionKey, screenBounds)
                 popup = createPopup(dimensionKey)
 
                 if (fuzzierSettingsService.state.resetWindow) {
