@@ -37,7 +37,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.rootManager
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.ui.popup.JBPopup
-import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.util.DimensionService
@@ -67,15 +66,16 @@ import javax.swing.*
 import kotlin.coroutines.cancellation.CancellationException
 
 open class Fuzzier : FuzzyAction() {
+    override var popupTitle = "Fuzzy Search"
+    override var dimensionKey = "FuzzySearchPopup"
     private var defaultDoc: Document? = null
-    open var title: String = "Fuzzy Search"
 
     // Used by FuzzierVCS to check if files are tracked by the VCS
     protected var changeListManager: ChangeListManager? = null
 
     override fun runAction(project: Project, actionEvent: AnActionEvent) {
-        dimensionKey = "FuzzySearchPopup"
         setCustomHandlers()
+
         ApplicationManager.getApplication().invokeLater {
             defaultDoc = EditorFactory.getInstance().createDocument("")
             component = FuzzyFinderComponent(project)
@@ -86,7 +86,7 @@ open class Fuzzier : FuzzyAction() {
             mainWindow?.let {
                 val screenBounds = it.graphicsConfiguration.bounds
                 val dimensionKey = createDimensionKey(dimensionKey, screenBounds)
-                popup = createPopup(dimensionKey)
+                popup = createPopup()
 
                 if (fuzzierSettingsService.state.resetWindow) {
                     DimensionService.getInstance().setSize(dimensionKey, null, null)
@@ -108,18 +108,8 @@ open class Fuzzier : FuzzyAction() {
         }
     }
 
-    private fun createPopup(dimensionKey: String): JBPopup {
-        val popup: JBPopup = JBPopupFactory
-            .getInstance()
-            .createComponentPopupBuilder(component, component.searchField)
-            .setFocusable(true)
-            .setRequestFocus(true)
-            .setResizable(true)
-            .setDimensionServiceKey(null, dimensionKey, true)
-            .setTitle(title)
-            .setMovable(true)
-            .setShowBorder(true)
-            .createPopup()
+    private fun createPopup(): JBPopup {
+        val popup = getInitialPopup()
 
         popup.addListener(object : JBPopupListener {
             override fun onClosed(event: LightweightWindowEvent) {

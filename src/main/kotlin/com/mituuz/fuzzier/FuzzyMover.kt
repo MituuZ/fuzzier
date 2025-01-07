@@ -35,7 +35,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.rootManager
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.ui.popup.JBPopup
-import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.util.DimensionService
@@ -59,12 +58,14 @@ import javax.swing.*
 import kotlin.coroutines.cancellation.CancellationException
 
 class FuzzyMover : FuzzyAction() {
+    override var popupTitle = "Fuzzy File Mover"
+    override var dimensionKey = "FuzzyMoverPopup"
     lateinit var movableFile: PsiFile
     lateinit var currentFile: VirtualFile
 
     override fun runAction(project: Project, actionEvent: AnActionEvent) {
-        dimensionKey = "FuzzyMoverPopup"
         setCustomHandlers()
+
         ApplicationManager.getApplication().invokeLater {
             component = SimpleFinderComponent()
             createListeners(project)
@@ -74,7 +75,7 @@ class FuzzyMover : FuzzyAction() {
             mainWindow?.let {
                 val screenBounds = it.graphicsConfiguration.bounds
                 val dimensionKey = createDimensionKey(dimensionKey, screenBounds)
-                popup = createPopup(dimensionKey)
+                popup = createPopup()
 
                 val currentEditor = FileEditorManager.getInstance(project).selectedTextEditor
                 if (currentEditor != null) {
@@ -95,18 +96,8 @@ class FuzzyMover : FuzzyAction() {
         }
     }
 
-    private fun createPopup(dimensionKey: String): JBPopup {
-        val popup = JBPopupFactory
-            .getInstance()
-            .createComponentPopupBuilder(component, component.searchField)
-            .setFocusable(true)
-            .setRequestFocus(true)
-            .setResizable(true)
-            .setDimensionServiceKey(null, dimensionKey, true)
-            .setTitle("Fuzzy File Mover")
-            .setMovable(true)
-            .setShowBorder(true)
-            .createPopup()
+    private fun createPopup(): JBPopup {
+        val popup = getInitialPopup()
 
         popup.addListener(object : JBPopupListener {
             override fun onClosed(event: LightweightWindowEvent) {

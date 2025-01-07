@@ -38,6 +38,7 @@ import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.keymap.KeymapManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
+import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.mituuz.fuzzier.components.FuzzyComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
@@ -53,7 +54,8 @@ import kotlin.concurrent.schedule
 
 abstract class FuzzyAction : AnAction() {
     lateinit var component: FuzzyComponent
-    lateinit var dimensionKey: String
+    open lateinit var dimensionKey: String
+    open lateinit var popupTitle: String
     protected var popup: JBPopup? = null
     private lateinit var originalDownHandler: EditorActionHandler
     private lateinit var originalUpHandler: EditorActionHandler
@@ -72,6 +74,20 @@ abstract class FuzzyAction : AnAction() {
     }
 
     abstract fun runAction(project: Project, actionEvent: AnActionEvent)
+
+    fun getInitialPopup(): JBPopup {
+        return JBPopupFactory
+            .getInstance()
+            .createComponentPopupBuilder(component, component.searchField)
+            .setFocusable(true)
+            .setRequestFocus(true)
+            .setResizable(true)
+            .setDimensionServiceKey(null, dimensionKey, true)
+            .setTitle(popupTitle)
+            .setMovable(true)
+            .setShowBorder(true)
+            .createPopup()
+    }
 
     fun createSharedListeners(project: Project) {
         val inputMap = component.searchField.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
