@@ -91,7 +91,7 @@ class FuzzyMover : FuzzyAction() {
 
                 val centerX = screenBounds.x + screenBounds.width / 2
                 val centerY = screenBounds.y + screenBounds.height / 2
-                popup!!.showInScreenCoordinates(it, Point(centerX, centerY))
+                popup.showInScreenCoordinates(it, Point(centerX, centerY))
             }
         }
     }
@@ -175,7 +175,7 @@ class FuzzyMover : FuzzyAction() {
                         )
                         Notifications.Bus.notify(notification, project)
                         ApplicationManager.getApplication().invokeLater {
-                            popup?.cancel()
+                            popup.cancel()
                         }
                         completableFuture.complete(null)
                     } else {

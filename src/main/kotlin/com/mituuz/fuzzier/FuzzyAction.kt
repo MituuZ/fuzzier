@@ -53,10 +53,10 @@ import javax.swing.*
 import kotlin.concurrent.schedule
 
 abstract class FuzzyAction : AnAction() {
-    lateinit var component: FuzzyComponent
     open lateinit var dimensionKey: String
     open lateinit var popupTitle: String
-    protected var popup: JBPopup? = null
+    lateinit var component: FuzzyComponent
+    lateinit var popup: JBPopup
     private lateinit var originalDownHandler: EditorActionHandler
     private lateinit var originalUpHandler: EditorActionHandler
     private var debounceTimer: TimerTask? = null

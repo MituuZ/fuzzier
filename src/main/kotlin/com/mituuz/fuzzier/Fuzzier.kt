@@ -96,7 +96,7 @@ open class Fuzzier : FuzzyAction() {
 
                 val centerX = screenBounds.x + screenBounds.width / 2
                 val centerY = screenBounds.y + screenBounds.height / 2
-                popup!!.showInScreenCoordinates(it, Point(centerX, centerY))
+                popup.showInScreenCoordinates(it, Point(centerX, centerY))
 
                 (component as FuzzyFinderComponent).splitPane.dividerLocation =
                     fuzzierSettingsService.state.splitPosition
@@ -288,7 +288,7 @@ open class Fuzzier : FuzzyAction() {
         if (fuzzyContainer != null) {
             InitialViewHandler.addFileToRecentlySearchedFiles(fuzzyContainer, fuzzierSettingsService)
         }
-        popup?.cancel()
+        popup.cancel()
     }
 
     private fun createListeners(project: Project) {
