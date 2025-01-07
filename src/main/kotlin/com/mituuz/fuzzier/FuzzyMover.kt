@@ -71,32 +71,17 @@ class FuzzyMover : FuzzyAction() {
             createListeners(project)
             createSharedListeners(project)
 
-            val mainWindow = WindowManager.getInstance().getIdeFrame(actionEvent.project)?.component
-            mainWindow?.let {
-                val screenBounds = it.graphicsConfiguration.bounds
-                val dimensionKey = createDimensionKey(dimensionKey, screenBounds)
-                popup = createPopup()
-
-                val currentEditor = FileEditorManager.getInstance(project).selectedTextEditor
-                if (currentEditor != null) {
-                    currentFile = currentEditor.virtualFile
-                    component.fileList.setEmptyText("Press enter to use current file: ${currentFile.path}")
-                }
-
-                if (fuzzierSettingsService.state.resetWindow) {
-                    DimensionService.getInstance().setSize(dimensionKey, null, null)
-                    DimensionService.getInstance().setLocation(dimensionKey, null, null)
-                    fuzzierSettingsService.state.resetWindow = false
-                }
-
-                val centerX = screenBounds.x + screenBounds.width / 2
-                val centerY = screenBounds.y + screenBounds.height / 2
-                popup.showInScreenCoordinates(it, Point(centerX, centerY))
+            val currentEditor = FileEditorManager.getInstance(project).selectedTextEditor
+            if (currentEditor != null) {
+                currentFile = currentEditor.virtualFile
+                component.fileList.setEmptyText("Press enter to use current file: ${currentFile.path}")
             }
+
+            showPopup(project)
         }
     }
 
-    private fun createPopup(): JBPopup {
+    override fun createPopup(): JBPopup {
         val popup = getInitialPopup()
 
         popup.addListener(object : JBPopupListener {

@@ -39,12 +39,16 @@ import com.intellij.openapi.keymap.KeymapManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
+import com.intellij.openapi.util.DimensionService
+import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.components.FuzzyComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.util.FuzzierUtil
+import com.mituuz.fuzzier.util.FuzzierUtil.Companion.createDimensionKey
 import java.awt.Component
+import java.awt.Point
 import java.awt.event.ActionEvent
 import java.util.*
 import java.util.Timer
@@ -75,6 +79,8 @@ abstract class FuzzyAction : AnAction() {
 
     abstract fun runAction(project: Project, actionEvent: AnActionEvent)
 
+    abstract fun createPopup(): JBPopup
+
     fun getInitialPopup(): JBPopup {
         return JBPopupFactory
             .getInstance()
@@ -87,6 +93,25 @@ abstract class FuzzyAction : AnAction() {
             .setMovable(true)
             .setShowBorder(true)
             .createPopup()
+    }
+
+    fun showPopup(project: Project) {
+        val mainWindow = WindowManager.getInstance().getIdeFrame(project)?.component
+        mainWindow?.let {
+            val screenBounds = it.graphicsConfiguration.bounds
+            val dimensionKey = createDimensionKey(dimensionKey, screenBounds)
+            popup = createPopup()
+
+            if (fuzzierSettingsService.state.resetWindow) {
+                DimensionService.getInstance().setSize(dimensionKey, null, null)
+                DimensionService.getInstance().setLocation(dimensionKey, null, null)
+                fuzzierSettingsService.state.resetWindow = false
+            }
+
+            val centerX = screenBounds.x + screenBounds.width / 2
+            val centerY = screenBounds.y + screenBounds.height / 2
+            popup.showInScreenCoordinates(it, Point(centerX, centerY))
+        }
     }
 
     fun createSharedListeners(project: Project) {

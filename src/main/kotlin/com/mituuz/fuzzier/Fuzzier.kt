@@ -82,25 +82,10 @@ open class Fuzzier : FuzzyAction() {
             createListeners(project)
             createSharedListeners(project)
 
-            val mainWindow = WindowManager.getInstance().getIdeFrame(actionEvent.project)?.component
-            mainWindow?.let {
-                val screenBounds = it.graphicsConfiguration.bounds
-                val dimensionKey = createDimensionKey(dimensionKey, screenBounds)
-                popup = createPopup()
+            showPopup(project)
 
-                if (fuzzierSettingsService.state.resetWindow) {
-                    DimensionService.getInstance().setSize(dimensionKey, null, null)
-                    DimensionService.getInstance().setLocation(dimensionKey, null, null)
-                    fuzzierSettingsService.state.resetWindow = false
-                }
-
-                val centerX = screenBounds.x + screenBounds.width / 2
-                val centerY = screenBounds.y + screenBounds.height / 2
-                popup.showInScreenCoordinates(it, Point(centerX, centerY))
-
-                (component as FuzzyFinderComponent).splitPane.dividerLocation =
-                    fuzzierSettingsService.state.splitPosition
-            }
+            (component as FuzzyFinderComponent).splitPane.dividerLocation =
+                fuzzierSettingsService.state.splitPosition
 
             if (fuzzierSettingsService.state.recentFilesMode != NONE) {
                 createInitialView(project)
@@ -108,7 +93,7 @@ open class Fuzzier : FuzzyAction() {
         }
     }
 
-    private fun createPopup(): JBPopup {
+    override fun createPopup(): JBPopup {
         val popup = getInitialPopup()
 
         popup.addListener(object : JBPopupListener {
