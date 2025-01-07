@@ -28,6 +28,7 @@ import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import com.mituuz.fuzzier.components.SimpleFinderComponent
@@ -172,6 +173,10 @@ class FuzzyActionTest {
             }
 
             override fun runAction(project: Project, actionEvent: AnActionEvent) {
+            }
+
+            override fun createPopup(): JBPopup {
+                TODO("Not yet implemented")
             }
 
             override fun updateListContents(project: Project, searchString: String) {
