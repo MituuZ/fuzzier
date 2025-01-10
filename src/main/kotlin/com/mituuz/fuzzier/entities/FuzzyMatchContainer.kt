@@ -30,6 +30,7 @@ import com.mituuz.fuzzier.settings.FuzzierConfiguration.startStyleTag
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.io.InvalidClassException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.io.Serializable
@@ -168,9 +169,7 @@ class FuzzyMatchContainer(
 
                 @Suppress("UNCHECKED_CAST")
                 return ObjectInputStream(byteArrayInputStream).use { it.readObject() as DefaultListModel<SerializedMatchContainer> }
-            } catch (_: XmlSerializationException) {
-                return DefaultListModel<SerializedMatchContainer>();
-            } catch (_: IllegalArgumentException) {
+            } catch (_: Exception) {
                 return DefaultListModel<SerializedMatchContainer>();
             }
         }
