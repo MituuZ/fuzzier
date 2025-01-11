@@ -1,4 +1,7 @@
 # Changelog
+## Version 1.4.1
+- Refactoring match containers
+
 ## Version 1.4.0
 - Add option to ignore characters from search
 - Update dependencies
