@@ -149,9 +149,16 @@ class TestBenchComponent : JPanel() {
             process(project, stringEvaluator, searchString, listModel)
 
             val sortedList = listModel.elements().toList().sortedByDescending { (it as FuzzyMatchContainer).getScore() }
-            val data = sortedList.map {
-                arrayOf((it as FuzzyMatchContainer).filename, it.filePath, it.score.streakScore, it.score.multiMatchScore,
-                    it.score.partialPathScore, it.score.filenameScore, it.score.getTotalScore())
+            val data: Array<Array<Any>> = sortedList.map {
+                arrayOf(
+                    (it as FuzzyMatchContainer).filename as Any,
+                    it.filePath as Any,
+                    it.score.streakScore as Any,
+                    it.score.multiMatchScore as Any,
+                    it.score.partialPathScore as Any,
+                    it.score.filenameScore as Any,
+                    it.score.getTotalScore() as Any
+                )
             }.toTypedArray()
 
             val tableModel = DefaultTableModel(data, columnNames)
@@ -159,7 +166,7 @@ class TestBenchComponent : JPanel() {
             table.setPaintBusy(false)
         }
     }
-    
+
     private fun process(project: Project, stringEvaluator: StringEvaluator, searchString: String, 
                         listModel: DefaultListModel<FuzzyContainer>) {
         val moduleManager = ModuleManager.getInstance(project)
