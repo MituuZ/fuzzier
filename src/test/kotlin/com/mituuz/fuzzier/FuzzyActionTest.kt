@@ -25,14 +25,17 @@ package com.mituuz.fuzzier
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.IdeActions
+import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType.*
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FuzzyScore
+import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType.*
+import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.awt.event.InputEvent
@@ -88,8 +91,8 @@ class FuzzyActionTest {
         val action = getAction()
         action.setFiletype(FILENAME_ONLY)
         action.component = SimpleFinderComponent()
-        val renderer = action.getCellRenderer()
-        val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd")
+        val renderer = action.getCellRenderer(service<FuzzierSettingsService>().state)
+        val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd", "")
         val dummyList = JList<FuzzyMatchContainer>()
         val component = renderer.getListCellRendererComponent(dummyList, container, 0, false, false) as JLabel
         assertNotNull(component)
@@ -101,8 +104,8 @@ class FuzzyActionTest {
         val action = getAction()
         action.setFiletype(FILENAME_WITH_PATH)
         action.component = SimpleFinderComponent()
-        val renderer = action.getCellRenderer()
-        val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd")
+        val renderer = action.getCellRenderer(service<FuzzierSettingsService>().state)
+        val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd", "")
         val dummyList = JList<FuzzyMatchContainer>()
         val component = renderer.getListCellRendererComponent(dummyList, container, 0, false, false) as JLabel
         assertNotNull(component)
@@ -115,8 +118,8 @@ class FuzzyActionTest {
         action.setFiletype(FILENAME_WITH_PATH_STYLED)
         action.setHighlight(false)
         action.component = SimpleFinderComponent()
-        val renderer = action.getCellRenderer()
-        val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd")
+        val renderer = action.getCellRenderer(service<FuzzierSettingsService>().state)
+        val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd", "")
         val dummyList = JList<FuzzyMatchContainer>()
         val component = renderer.getListCellRendererComponent(dummyList, container, 0, false, false) as JLabel
         assertNotNull(component)
@@ -129,8 +132,8 @@ class FuzzyActionTest {
         action.setFiletype(FILENAME_WITH_PATH_STYLED)
         action.setHighlight(true)
         action.component = SimpleFinderComponent()
-        val renderer = action.getCellRenderer()
-        val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd")
+        val renderer = action.getCellRenderer(service<FuzzierSettingsService>().state)
+        val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd", "")
         val dummyList = JList<FuzzyMatchContainer>()
         val component = renderer.getListCellRendererComponent(dummyList, container, 0, false, false) as JLabel
         assertNotNull(component)
@@ -142,8 +145,8 @@ class FuzzyActionTest {
         val action = getAction()
         action.setFiletype(FILE_PATH_ONLY)
         action.component = SimpleFinderComponent()
-        val renderer = action.getCellRenderer()
-        val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd")
+        val renderer = action.getCellRenderer(service<FuzzierSettingsService>().state)
+        val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd", "")
         val dummyList = JList<FuzzyMatchContainer>()
         val component = renderer.getListCellRendererComponent(dummyList, container, 0, false, false) as JLabel
         assertNotNull(component)
@@ -156,8 +159,8 @@ class FuzzyActionTest {
         action.setFiletype(FILENAME_ONLY)
         action.component = SimpleFinderComponent()
         action.component.isDirSelector = true
-        val renderer = action.getCellRenderer()
-        val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd")
+        val renderer = action.getCellRenderer(service<FuzzierSettingsService>().state)
+        val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd", "")
         val dummyList = JList<FuzzyMatchContainer>()
         val component = renderer.getListCellRendererComponent(dummyList, container, 0, false, false) as JLabel
         assertNotNull(component)
@@ -170,6 +173,10 @@ class FuzzyActionTest {
             }
 
             override fun runAction(project: Project, actionEvent: AnActionEvent) {
+            }
+
+            override fun createPopup(): JBPopup {
+                TODO("Not yet implemented")
             }
 
             override fun updateListContents(project: Project, searchString: String) {

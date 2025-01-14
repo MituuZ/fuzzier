@@ -28,8 +28,8 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.util.xmlb.annotations.OptionTag
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType.FILE_PATH_ONLY
+import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
+import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType.FILE_PATH_ONLY
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.RECENT_PROJECT_FILES
 import javax.swing.DefaultListModel
 
@@ -42,8 +42,8 @@ class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.S
         var modules: Map<String, String> = HashMap()
         var isProject = false
         var recentFilesMode: RecentFilesMode = RECENT_PROJECT_FILES
-        @OptionTag(converter = FuzzyMatchContainer.FuzzyMatchContainerConverter::class)
-        var recentlySearchedFiles: DefaultListModel<FuzzyMatchContainer>? = DefaultListModel()
+        @OptionTag(converter = FuzzyMatchContainer.SerializedMatchContainerConverter::class)
+        var recentlySearchedFiles: DefaultListModel<FuzzyMatchContainer.SerializedMatchContainer>? = DefaultListModel()
 
         var splitPosition: Int = 300
         var exclusionSet: Set<String> = setOf("/.idea/*", "/.git/*", "/target/*", "/build/*", "/.gradle/*", "/.run/*")
@@ -66,6 +66,11 @@ class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.S
         var matchWeightSingleChar = 5
         var matchWeightStreakModifier = 10
         var matchWeightFilename = 10
+
+        fun getRecentlySearchedFilesAsFuzzyMatchContainer(): DefaultListModel<FuzzyMatchContainer> {
+            val list = recentlySearchedFiles ?: DefaultListModel()
+            return FuzzyMatchContainer.SerializedMatchContainer.toListModel(list)
+        }
     }
 
     private var state = State()

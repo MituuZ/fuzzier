@@ -21,16 +21,21 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-package com.mituuz.fuzzier.components
+package com.mituuz.fuzzier.entities
 
-import com.intellij.ui.EditorTextField
-import com.intellij.ui.components.JBList
-import com.mituuz.fuzzier.entities.FuzzyContainer
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer
-import javax.swing.JPanel
+import com.mituuz.fuzzier.settings.FuzzierSettingsService
 
-open class FuzzyComponent : JPanel() {
-    var fileList = JBList<FuzzyContainer?>()
-    var searchField = EditorTextField()
-    var isDirSelector = false
+class RowContainer(
+    filePath: String,
+    basePath: String,
+    filename: String,
+    val rowNumber: Int
+) : FuzzyContainer(filePath, basePath, filename) {
+    override fun getDisplayString(state: FuzzierSettingsService.State): String {
+        return "$filename:$rowNumber"
+    }
+
+    override fun toString(): String {
+        return "RowContainer(filePath='$filePath', basePath='$basePath', filename='$filename', rowNumber=$rowNumber)"
+    }
 }

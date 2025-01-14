@@ -34,6 +34,7 @@ import javax.swing.DefaultListModel
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.roots.FileIndex
 import com.intellij.openapi.vfs.VirtualFile
+import com.mituuz.fuzzier.entities.FuzzyContainer
 import java.awt.Rectangle
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Future
@@ -93,26 +94,28 @@ class FuzzierUtil {
      * @return a sorted and sized list model
      */
     fun sortAndLimit(
-        listModel: DefaultListModel<FuzzyMatchContainer>,
+        listModel: DefaultListModel<FuzzyContainer>,
         isDirSort: Boolean = false
-    ): DefaultListModel<FuzzyMatchContainer> {
+    ): DefaultListModel<FuzzyContainer> {
         val useShortDirPath = isDirSort && prioritizeShorterDirPaths
         var comparator = getComparator(useShortDirPath, false)
         val priorityQueue = PriorityQueue(listLimit + 1, comparator)
 
         var minimumScore: Int? = null
         listModel.elements().toList().forEach {
-            if (minimumScore == null || it.getScore() > minimumScore!!) {
-                priorityQueue.add(it)
-                if (priorityQueue.size > listLimit) {
-                    priorityQueue.remove()
-                    minimumScore = priorityQueue.peek().getScore()
+            if (it is FuzzyMatchContainer) {
+                if (minimumScore == null || it.getScore() > minimumScore) {
+                    priorityQueue.add(it)
+                    if (priorityQueue.size > listLimit) {
+                        priorityQueue.remove()
+                        minimumScore = priorityQueue.peek().getScore()
+                    }
                 }
             }
         }
 
         comparator = getComparator(useShortDirPath, true)
-        val result = DefaultListModel<FuzzyMatchContainer>()
+        val result = DefaultListModel<FuzzyContainer>()
         result.addAll(priorityQueue.toList().sortedWith(comparator))
 
         return result

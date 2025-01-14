@@ -38,13 +38,17 @@ import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.keymap.KeymapManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
+import com.intellij.openapi.ui.popup.JBPopupFactory
+import com.intellij.openapi.util.DimensionService
+import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.components.FuzzyComponent
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType.FILE_PATH_ONLY
+import com.mituuz.fuzzier.entities.FuzzyContainer
+import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.util.FuzzierUtil
+import com.mituuz.fuzzier.util.FuzzierUtil.Companion.createDimensionKey
 import java.awt.Component
+import java.awt.Point
 import java.awt.event.ActionEvent
 import java.util.*
 import java.util.Timer
@@ -53,8 +57,10 @@ import javax.swing.*
 import kotlin.concurrent.schedule
 
 abstract class FuzzyAction : AnAction() {
+    open lateinit var dimensionKey: String
+    open lateinit var popupTitle: String
     lateinit var component: FuzzyComponent
-    protected var popup: JBPopup? = null
+    lateinit var popup: JBPopup
     private lateinit var originalDownHandler: EditorActionHandler
     private lateinit var originalUpHandler: EditorActionHandler
     private var debounceTimer: TimerTask? = null
@@ -72,6 +78,41 @@ abstract class FuzzyAction : AnAction() {
     }
 
     abstract fun runAction(project: Project, actionEvent: AnActionEvent)
+
+    abstract fun createPopup(): JBPopup
+
+    fun getInitialPopup(): JBPopup {
+        return JBPopupFactory
+            .getInstance()
+            .createComponentPopupBuilder(component, component.searchField)
+            .setFocusable(true)
+            .setRequestFocus(true)
+            .setResizable(true)
+            .setDimensionServiceKey(null, dimensionKey, true)
+            .setTitle(popupTitle)
+            .setMovable(true)
+            .setShowBorder(true)
+            .createPopup()
+    }
+
+    fun showPopup(project: Project) {
+        val mainWindow = WindowManager.getInstance().getIdeFrame(project)?.component
+        mainWindow?.let {
+            val screenBounds = it.graphicsConfiguration.bounds
+            val dimensionKey = createDimensionKey(dimensionKey, screenBounds)
+            popup = createPopup()
+
+            if (fuzzierSettingsService.state.resetWindow) {
+                DimensionService.getInstance().setSize(dimensionKey, null, null)
+                DimensionService.getInstance().setLocation(dimensionKey, null, null)
+                fuzzierSettingsService.state.resetWindow = false
+            }
+
+            val centerX = screenBounds.x + screenBounds.width / 2
+            val centerY = screenBounds.y + screenBounds.height / 2
+            popup.showInScreenCoordinates(it, Point(centerX, centerY))
+        }
+    }
 
     fun createSharedListeners(project: Project) {
         val inputMap = component.searchField.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
@@ -166,7 +207,7 @@ abstract class FuzzyAction : AnAction() {
         }
     }
 
-    fun getCellRenderer(): ListCellRenderer<Any?> {
+    fun getCellRenderer(state: FuzzierSettingsService.State): ListCellRenderer<Any?> {
         return object : DefaultListCellRenderer() {
             override fun getListCellRendererComponent(
                 list: JList<*>?,
@@ -177,17 +218,16 @@ abstract class FuzzyAction : AnAction() {
             ): Component {
                 val renderer =
                     super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) as JLabel
-                val container = value as FuzzyMatchContainer
-                val filenameType: FilenameType = if (component.isDirSelector) {
-                    FILE_PATH_ONLY // Directories are always shown as full paths
-                } else {
-                    fuzzierSettingsService.state.filenameType
+                val container = value as FuzzyContainer
+                renderer.text = when (component.isDirSelector) {
+                    true -> container.getDirDisplayString()
+                    false -> container.getDisplayString(state)
                 }
-                renderer.text = container.toString(filenameType, fuzzierSettingsService.state.highlightFilename)
-                fuzzierSettingsService.state.fileListSpacing.let {
+
+                state.fileListSpacing.let {
                     renderer.border = BorderFactory.createEmptyBorder(it, 0, it, 0)
                 }
-                fuzzierSettingsService.state.fileListFontSize.let {
+                state.fileListFontSize.let {
                     renderer.font = renderer.font.deriveFont(it.toFloat())
                 }
                 return renderer

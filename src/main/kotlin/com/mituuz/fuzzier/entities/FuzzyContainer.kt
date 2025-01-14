@@ -21,16 +21,41 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-package com.mituuz.fuzzier.components
+package com.mituuz.fuzzier.entities
 
-import com.intellij.ui.EditorTextField
-import com.intellij.ui.components.JBList
-import com.mituuz.fuzzier.entities.FuzzyContainer
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer
-import javax.swing.JPanel
+import com.mituuz.fuzzier.settings.FuzzierSettingsService
 
-open class FuzzyComponent : JPanel() {
-    var fileList = JBList<FuzzyContainer?>()
-    var searchField = EditorTextField()
-    var isDirSelector = false
+abstract class FuzzyContainer(val filePath: String, val basePath: String, val filename: String) {
+    /**
+     * Get display string for the popup
+     */
+    abstract fun getDisplayString(state: FuzzierSettingsService.State): String
+
+    /**
+     * Get the complete URI for the file
+     */
+    fun getFileUri() : String {
+        return "$basePath$filePath"
+    }
+
+    /**
+     * Directories always return full path
+     */
+    fun getDirDisplayString(): String {
+        return filePath
+    }
+
+    /**
+     * Display string options
+     */
+    enum class FilenameType(val text: String) {
+        FILE_PATH_ONLY("File path only"),
+        FILENAME_ONLY("Filename only"),
+        FILENAME_WITH_PATH("Filename with (path)"),
+        FILENAME_WITH_PATH_STYLED("Filename with (path) styled")
+    }
+
+    override fun toString(): String {
+        return "FuzzyContainer(filePath='$filePath', basePath='$basePath', filename='$filename')"
+    }
 }

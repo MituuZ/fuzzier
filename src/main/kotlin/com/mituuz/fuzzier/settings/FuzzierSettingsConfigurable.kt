@@ -26,7 +26,7 @@ package com.mituuz.fuzzier.settings
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
 import com.mituuz.fuzzier.components.FuzzierSettingsComponent
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FilenameType
+import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode
 import javax.swing.JComponent
 

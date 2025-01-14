@@ -38,6 +38,7 @@ import com.intellij.ui.components.JBTextArea
 import com.intellij.ui.table.JBTable
 import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
+import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.StringEvaluator
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
@@ -143,14 +144,21 @@ class TestBenchComponent : JPanel() {
 
         currentTask = ApplicationManager.getApplication().executeOnPooledThread {
             table.setPaintBusy(true)
-            val listModel = DefaultListModel<FuzzyMatchContainer>()
+            val listModel = DefaultListModel<FuzzyContainer>()
 
             process(project, stringEvaluator, searchString, listModel)
 
-            val sortedList = listModel.elements().toList().sortedByDescending { it.getScore() }
-            val data = sortedList.map {
-                arrayOf(it.filename, it.filePath, it.score.streakScore, it.score.multiMatchScore,
-                    it.score.partialPathScore, it.score.filenameScore, it.score.getTotalScore())
+            val sortedList = listModel.elements().toList().sortedByDescending { (it as FuzzyMatchContainer).getScore() }
+            val data: Array<Array<Any>> = sortedList.map {
+                arrayOf(
+                    (it as FuzzyMatchContainer).filename as Any,
+                    it.filePath as Any,
+                    it.score.streakScore as Any,
+                    it.score.multiMatchScore as Any,
+                    it.score.partialPathScore as Any,
+                    it.score.filenameScore as Any,
+                    it.score.getTotalScore() as Any
+                )
             }.toTypedArray()
 
             val tableModel = DefaultTableModel(data, columnNames)
@@ -158,9 +166,9 @@ class TestBenchComponent : JPanel() {
             table.setPaintBusy(false)
         }
     }
-    
+
     private fun process(project: Project, stringEvaluator: StringEvaluator, searchString: String, 
-                        listModel: DefaultListModel<FuzzyMatchContainer>) {
+                        listModel: DefaultListModel<FuzzyContainer>) {
         val moduleManager = ModuleManager.getInstance(project)
         if (service<FuzzierSettingsService>().state.isProject) {
             processProject(project, stringEvaluator, searchString, listModel)
@@ -170,7 +178,7 @@ class TestBenchComponent : JPanel() {
     }
 
     private fun processProject(project: Project, stringEvaluator: StringEvaluator,
-                               searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
+                               searchString: String, listModel: DefaultListModel<FuzzyContainer>) {
         val ss = FuzzierUtil.cleanSearchString(searchString, liveSettingsComponent.ignoredCharacters.getJBTextField().text)
         val contentIterator = stringEvaluator.getContentIterator(project.name, ss, listModel, null)
 
@@ -184,7 +192,7 @@ class TestBenchComponent : JPanel() {
     }
 
     private fun processModules(moduleManager: ModuleManager, stringEvaluator: StringEvaluator,
-                               searchString: String, listModel: DefaultListModel<FuzzyMatchContainer>) {
+                               searchString: String, listModel: DefaultListModel<FuzzyContainer>) {
         for (module in moduleManager.modules) {
             val moduleFileIndex = module.rootManager.fileIndex
             val ss = FuzzierUtil.cleanSearchString(searchString, liveSettingsComponent.ignoredCharacters.getJBTextField().text)

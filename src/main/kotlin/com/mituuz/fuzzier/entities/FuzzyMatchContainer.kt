@@ -23,7 +23,6 @@ SOFTWARE.
 */
 package com.mituuz.fuzzier.entities
 
-import com.intellij.openapi.components.service
 import com.intellij.util.xmlb.Converter
 import com.intellij.util.xmlb.XmlSerializationException
 import com.mituuz.fuzzier.settings.FuzzierConfiguration.END_STYLE_TAG
@@ -31,6 +30,7 @@ import com.mituuz.fuzzier.settings.FuzzierConfiguration.startStyleTag
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.io.InvalidClassException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.io.Serializable
@@ -39,35 +39,21 @@ import javax.swing.DefaultListModel
 
 class FuzzyMatchContainer(
     val score: FuzzyScore,
-    var filePath: String,
-    var filename: String,
-    private var module: String = ""
-) : Serializable {
-    @Transient
-    private var initialPath: String? = null
-
-    companion object {
-        fun createOrderedContainer(
-            order: Int,
-            filePath: String,
-            initialPath: String,
-            filename: String
-        ): FuzzyMatchContainer {
-            val fuzzyScore = FuzzyScore()
-            fuzzyScore.filenameScore = order
-            val fuzzyMatchContainer = FuzzyMatchContainer(fuzzyScore, filePath, filename)
-            fuzzyMatchContainer.initialPath = initialPath
-            return fuzzyMatchContainer
-        }
-    }
-
-    fun toString(filenameType: FilenameType, highlight: Boolean): String {
-        return when (filenameType) {
+    filePath: String,
+    filename: String,
+    moduleBasePath: String
+) : FuzzyContainer(filePath, moduleBasePath, filename) {
+    override fun getDisplayString(state: FuzzierSettingsService.State): String {
+        return when (state.filenameType) {
             FilenameType.FILENAME_ONLY -> filename
             FilenameType.FILE_PATH_ONLY -> filePath
             FilenameType.FILENAME_WITH_PATH -> "$filename   ($filePath)"
-            FilenameType.FILENAME_WITH_PATH_STYLED -> getFilenameWithPathStyled(highlight)
+            FilenameType.FILENAME_WITH_PATH_STYLED -> getFilenameWithPathStyled(state.highlightFilename)
         }
+    }
+
+    fun getFilenameWithPathStyled(highlight: Boolean): String {
+        return "<html><strong>${getStyledFilename(highlight)}</strong>  <i>($filePath)</i></html>"
     }
 
     private fun getStyledFilename(highlight: Boolean): String {
@@ -92,21 +78,6 @@ class FuzzyMatchContainer(
         return stringBuilder.toString()
     }
 
-    private fun getFilenameWithPathStyled(highlight: Boolean): String {
-        return "<html><strong>${getStyledFilename(highlight)}</strong>  <i>($filePath)</i></html>"
-    }
-
-    fun getFileUri(): String {
-        val basePath = service<FuzzierSettingsService>().state.modules[module]
-        if (basePath != null) {
-            return "$basePath$filePath"
-        }
-        if (initialPath != null && initialPath != "") {
-            return "$initialPath$filePath"
-        }
-        return filePath
-    }
-
     fun getScore(): Int {
         return score.getTotalScore()
     }
@@ -116,13 +87,6 @@ class FuzzyMatchContainer(
      */
     fun getScoreWithDirLength(): Int {
         return score.getTotalScore() + filePath.length * -5
-    }
-
-    enum class FilenameType(val text: String) {
-        FILE_PATH_ONLY("File path only"),
-        FILENAME_ONLY("Filename only"),
-        FILENAME_WITH_PATH("Filename with (path)"),
-        FILENAME_WITH_PATH_STYLED("Filename with (path) styled")
     }
 
     class FuzzyScore : Serializable {
@@ -142,32 +106,75 @@ class FuzzyMatchContainer(
     }
 
     /**
+     * Serializable version of FuzzyMatchContainer
+     *
+     * This is required for SerializedMatchContainerConverter to work correctly
+     */
+    class SerializedMatchContainer : Serializable {
+        companion object {
+            fun fromFuzzyMatchContainer(container: FuzzyMatchContainer): SerializedMatchContainer {
+                val serialized = SerializedMatchContainer()
+                serialized.score = container.score
+                serialized.filePath = container.filePath
+                serialized.filename = container.filename
+                serialized.moduleBasePath = container.basePath
+                return serialized
+            }
+
+            fun fromListModel(listModel: DefaultListModel<FuzzyMatchContainer>): DefaultListModel<SerializedMatchContainer> {
+                val serializedList = DefaultListModel<SerializedMatchContainer>()
+                for (i in 0 until listModel.size) {
+                    serializedList.addElement(fromFuzzyMatchContainer(listModel[i]))
+                }
+                return serializedList
+            }
+
+            fun toListModel(serializedList: DefaultListModel<SerializedMatchContainer>): DefaultListModel<FuzzyMatchContainer> {
+                val listModel = DefaultListModel<FuzzyMatchContainer>()
+                for (i in 0 until serializedList.size) {
+                    listModel.addElement(serializedList[i].toFuzzyMatchContainer())
+                }
+                return listModel
+            }
+        }
+
+        fun toFuzzyMatchContainer(): FuzzyMatchContainer {
+            return FuzzyMatchContainer(score!!, filePath!!, filename!!, moduleBasePath!!)
+        }
+
+        var score: FuzzyScore? = null
+        var filePath: String? = null
+        var filename: String? = null
+        var moduleBasePath: String? = null
+    }
+
+    /**
      * This is necessary to persists recently used files between IDE restarts
      *
      * Uses a base 64 encoded string
      *
      * ```
-     * @OptionTag(converter = FuzzyMatchContainer.FuzzyMatchContainerConverter::class)
-     * var recentlySearchedFiles: DefaultListModel<FuzzyMatchContainer>? = DefaultListModel()
+     * @OptionTag(converter = FuzzyMatchContainer.SerializedMatchContainerConverter::class)
+     * var recentlySearchedFiles: DefaultListModel<SerializedMatchContainer>? = DefaultListModel()
      * ```
      *
      * @see FuzzierSettingsService
      */
-    class FuzzyMatchContainerConverter : Converter<DefaultListModel<FuzzyMatchContainer>>() {
-        override fun fromString(value: String) : DefaultListModel<FuzzyMatchContainer> {
+    class SerializedMatchContainerConverter : Converter<DefaultListModel<SerializedMatchContainer>>() {
+        override fun fromString(value: String) : DefaultListModel<SerializedMatchContainer> {
             // Fallback to an empty list if deserialization fails
             try {
                 val data = Base64.getDecoder().decode(value)
                 val byteArrayInputStream = ByteArrayInputStream(data)
-                return ObjectInputStream(byteArrayInputStream).use { it.readObject() as DefaultListModel<FuzzyMatchContainer> }
-            } catch (_: XmlSerializationException) {
-                return DefaultListModel<FuzzyMatchContainer>();
-            } catch (_: IllegalArgumentException) {
-                return DefaultListModel<FuzzyMatchContainer>();
+
+                @Suppress("UNCHECKED_CAST")
+                return ObjectInputStream(byteArrayInputStream).use { it.readObject() as DefaultListModel<SerializedMatchContainer> }
+            } catch (_: Exception) {
+                return DefaultListModel<SerializedMatchContainer>();
             }
         }
 
-        override fun toString(value: DefaultListModel<FuzzyMatchContainer>) : String {
+        override fun toString(value: DefaultListModel<SerializedMatchContainer>) : String {
             val byteArrayOutputStream = ByteArrayOutputStream()
             ObjectOutputStream(byteArrayOutputStream).use { it.writeObject(value) }
             return Base64.getEncoder().encodeToString(byteArrayOutputStream.toByteArray())
