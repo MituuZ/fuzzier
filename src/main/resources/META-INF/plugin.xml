@@ -21,11 +21,19 @@
       parentId="tools"
       instance="com.mituuz.fuzzier.settings.FuzzierSettingsConfigurable"
       id="com.mituuz.fuzzier.settings.FuzzierSettingsConfigurable"
-      displayName="Fuzzier Settings"/>
+      displayName="Fuzzier Project Settings"/>
     <notificationGroup id="Fuzzier Notification Group"
                        displayType="BALLOON"
                        toolWindowId="Event Log"
                        isLogByDefault="true"/>
+
+    <applicationService serviceImplementation="com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService"/>
+    <applicationConfigurable
+      parentId="tools"
+      instance="com.mituuz.fuzzier.settings.FuzzierGlobalSettingsConfigurable"
+      id="com.mituuz.fuzzier.settings.FuzzierGlobalSettingsConfigurable"
+      displayName="Fuzzier Global Settings"
+    />
   </extensions>
 
   <actions>

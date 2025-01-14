@@ -33,6 +33,7 @@ import javax.swing.JComponent
 class FuzzierSettingsConfigurable : Configurable {
     private lateinit var component: FuzzierSettingsComponent
     private var state = service<FuzzierSettingsService>().state
+
     override fun getDisplayName(): String {
         return "Fuzzy File Finder Settings"
     }
