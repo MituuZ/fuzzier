@@ -1,7 +1,7 @@
 package com.mituuz.fuzzier.entities
 
 import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
-import com.mituuz.fuzzier.settings.FuzzierSettingsService
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
@@ -9,7 +9,7 @@ class OrderedContainerTest {
     @Test
     fun testGetDisplayString() {
         val orderedContainer = OrderedContainer("filePath", "basePath", "filename")
-        val state = FuzzierSettingsService.State()
+        val state = FuzzierGlobalSettingsService.State()
 
         state.filenameType = FilenameType.FILENAME_ONLY
         assertEquals("filename", orderedContainer.getDisplayString(state))

@@ -37,10 +37,8 @@ import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
-import com.intellij.openapi.util.DimensionService
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
-import com.intellij.openapi.wm.WindowManager
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
@@ -48,9 +46,7 @@ import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.StringEvaluator
 import com.mituuz.fuzzier.util.FuzzierUtil
-import com.mituuz.fuzzier.util.FuzzierUtil.Companion.createDimensionKey
 import org.apache.commons.lang3.StringUtils
-import java.awt.Point
 import java.awt.event.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Future
@@ -202,7 +198,7 @@ class FuzzyMover : FuzzyAction() {
 
                 ApplicationManager.getApplication().invokeLater {
                     component.fileList.model = listModel
-                    component.fileList.cellRenderer = getCellRenderer(fuzzierSettingsService.state)
+                    component.fileList.cellRenderer = getCellRenderer()
                     component.fileList.setPaintBusy(false)
                     if (!component.fileList.isEmpty) {
                         component.fileList.setSelectedValue(listModel[0], true)
@@ -218,16 +214,16 @@ class FuzzyMover : FuzzyAction() {
 
     private fun getStringEvaluator(): StringEvaluator {
         return StringEvaluator(
-            fuzzierSettingsService.state.exclusionSet,
-            fuzzierSettingsService.state.modules
+            projectState.exclusionSet,
+            projectState.modules
         )
     }
     
     private fun process(project: Project, stringEvaluator: StringEvaluator, searchString: String,
                         listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?) {
         val moduleManager = ModuleManager.getInstance(project)
-        val ss = FuzzierUtil.cleanSearchString(searchString, fuzzierSettingsService.state.ignoredCharacters)
-        if (fuzzierSettingsService.state.isProject) {
+        val ss = FuzzierUtil.cleanSearchString(searchString, projectState.ignoredCharacters)
+        if (projectState.isProject) {
             processProject(project, stringEvaluator, ss, listModel, task)
         } else {
             processModules(moduleManager, stringEvaluator, ss, listModel, task)

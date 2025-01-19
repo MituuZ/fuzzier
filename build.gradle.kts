@@ -64,8 +64,7 @@ intellijPlatform {
     
     changeNotes = """
     <h2>Version $currentVersion</h2>
-    - Add option to ignore characters from search
-    - Update dependencies
+    - Properly separate project and application settings
     """.trimIndent()
     
     ideaVersion {
