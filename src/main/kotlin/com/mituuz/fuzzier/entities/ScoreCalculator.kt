@@ -25,6 +25,7 @@ package com.mituuz.fuzzier.entities
 
 import com.intellij.openapi.components.service
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FuzzyScore
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import org.apache.commons.lang3.StringUtils
 
@@ -40,14 +41,15 @@ class ScoreCalculator(searchString: String) {
     private var filenameIndex: Int = 0
 
     // Set up match settings
-    private val settings = service<FuzzierSettingsService>().state
-    private var tolerance = settings.tolerance
-    private var multiMatch = settings.multiMatch
-    private var matchWeightSingleChar = settings.matchWeightSingleChar
-    private var matchWeightStreakModifier = settings.matchWeightStreakModifier
-    private var matchWeightPartialPath = settings.matchWeightPartialPath
-    private var matchWeightFilename = settings.matchWeightFilename
-    private var ignoredCharacters: Set<Char> = settings.ignoredCharacters.toSet()
+    private val globalState = service<FuzzierGlobalSettingsService>().state
+    private val projectState = service<FuzzierSettingsService>().state
+    private var tolerance = globalState.tolerance
+    private var multiMatch = globalState.multiMatch
+    private var matchWeightSingleChar = globalState.matchWeightSingleChar
+    private var matchWeightStreakModifier = globalState.matchWeightStreakModifier
+    private var matchWeightPartialPath = globalState.matchWeightPartialPath
+    private var matchWeightFilename = globalState.matchWeightFilename
+    private var ignoredCharacters: Set<Char> = projectState.ignoredCharacters.toSet()
 
     var currentFilePath = ""
     private var longestStreak: Int = 0

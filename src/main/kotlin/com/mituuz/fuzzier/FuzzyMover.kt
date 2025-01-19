@@ -202,7 +202,7 @@ class FuzzyMover : FuzzyAction() {
 
                 ApplicationManager.getApplication().invokeLater {
                     component.fileList.model = listModel
-                    component.fileList.cellRenderer = getCellRenderer(fuzzierSettingsService.state)
+                    component.fileList.cellRenderer = getCellRenderer()
                     component.fileList.setPaintBusy(false)
                     if (!component.fileList.isEmpty) {
                         component.fileList.setSelectedValue(listModel[0], true)
@@ -218,16 +218,16 @@ class FuzzyMover : FuzzyAction() {
 
     private fun getStringEvaluator(): StringEvaluator {
         return StringEvaluator(
-            fuzzierSettingsService.state.exclusionSet,
-            fuzzierSettingsService.state.modules
+            projectState.exclusionSet,
+            projectState.modules
         )
     }
     
     private fun process(project: Project, stringEvaluator: StringEvaluator, searchString: String,
                         listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?) {
         val moduleManager = ModuleManager.getInstance(project)
-        val ss = FuzzierUtil.cleanSearchString(searchString, fuzzierSettingsService.state.ignoredCharacters)
-        if (fuzzierSettingsService.state.isProject) {
+        val ss = FuzzierUtil.cleanSearchString(searchString, projectState.ignoredCharacters)
+        if (projectState.isProject) {
             processProject(project, stringEvaluator, ss, listModel, task)
         } else {
             processModules(moduleManager, stringEvaluator, ss, listModel, task)

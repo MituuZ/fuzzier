@@ -35,14 +35,16 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.roots.FileIndex
 import com.intellij.openapi.vfs.VirtualFile
 import com.mituuz.fuzzier.entities.FuzzyContainer
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import java.awt.Rectangle
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Future
 
 class FuzzierUtil {
-    private var settingsState = service<FuzzierSettingsService>().state
-    private var listLimit: Int = settingsState.fileListLimit
-    private var prioritizeShorterDirPaths = settingsState.prioritizeShorterDirPaths
+    private var globalState = service<FuzzierGlobalSettingsService>().state
+    private var projectState = service<FuzzierSettingsService>().state
+    private var listLimit: Int = globalState.fileListLimit
+    private var prioritizeShorterDirPaths = globalState.prioritizeShorterDirPaths
     
     data class IterationFile(val file: VirtualFile, val module: String)
     
@@ -142,7 +144,7 @@ class FuzzierUtil {
      * @return a pair of the file path (with the module path removed) and the module path
      */
     fun extractModulePath(filePath: String): Pair<String, String> {
-        val modules = settingsState.modules
+        val modules = projectState.modules
         for (modulePath in modules.values) {
             if (filePath.contains(modulePath)) {
                 val file = filePath.removePrefix(modulePath)
