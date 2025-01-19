@@ -115,7 +115,8 @@ open class Fuzzier : FuzzyAction() {
                 RECENT_PROJECT_FILES -> InitialViewHandler.getRecentProjectFiles(
                     globalState,
                     fuzzierUtil,
-                    editorHistoryManager
+                    editorHistoryManager,
+                    project
                 )
 
                 RECENTLY_SEARCHED_FILES -> InitialViewHandler.getRecentlySearchedFiles(projectState)

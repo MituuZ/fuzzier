@@ -25,12 +25,13 @@ package com.mituuz.fuzzier.settings
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
+import com.intellij.openapi.project.Project
 import com.mituuz.fuzzier.components.FuzzierSettingsComponent
 import javax.swing.JComponent
 
-class FuzzierSettingsConfigurable : Configurable {
+class FuzzierSettingsConfigurable(project: Project) : Configurable {
     private lateinit var component: FuzzierSettingsComponent
-    private var state = service<FuzzierSettingsService>().state
+    private var state = project.service<FuzzierSettingsService>().state
 
     override fun getDisplayName(): String {
         return "Fuzzy File Finder Settings"

@@ -63,7 +63,7 @@ class TestBenchComponent : JPanel() {
 
     fun fill(settingsComponent: FuzzierGlobalSettingsComponent) {
         val project = ProjectManager.getInstance().openProjects[0]
-        projectState = service<FuzzierSettingsService>().state
+        projectState = project.service<FuzzierSettingsService>().state
 
         val fuzzierUtil = FuzzierUtil()
         fuzzierUtil.parseModules(project)
@@ -134,7 +134,7 @@ class TestBenchComponent : JPanel() {
 
         val stringEvaluator = StringEvaluator(
             projectState.exclusionSet,
-            service<FuzzierSettingsService>().state.modules
+            project.service<FuzzierSettingsService>().state.modules
         )
 
         currentTask?.takeIf { !it.isDone }?.cancel(true)
@@ -167,7 +167,7 @@ class TestBenchComponent : JPanel() {
     private fun process(project: Project, stringEvaluator: StringEvaluator, searchString: String, 
                         listModel: DefaultListModel<FuzzyContainer>) {
         val moduleManager = ModuleManager.getInstance(project)
-        if (service<FuzzierSettingsService>().state.isProject) {
+        if (project.service<FuzzierSettingsService>().state.isProject) {
             processProject(project, stringEvaluator, searchString, listModel)
         } else {
             processModules(moduleManager, stringEvaluator, searchString, listModel)

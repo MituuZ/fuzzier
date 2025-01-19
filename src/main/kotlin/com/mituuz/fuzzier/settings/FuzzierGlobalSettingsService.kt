@@ -3,13 +3,16 @@ package com.mituuz.fuzzier.settings
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.components.PersistentStateComponent
+import com.intellij.openapi.components.Service
 import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
 import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType.FILE_PATH_ONLY
 
 @State(
     name = "com.mituuz.fuzzier.FuzzierGlobalSettings",
-    storages = [Storage("FuzzierGlobalSettings.xml")]
+    storages = [Storage("FuzzierGlobalSettings.xml")],
+    reloadable = true
 )
+@Service(Service.Level.APP)
 class FuzzierGlobalSettingsService : PersistentStateComponent<FuzzierGlobalSettingsService.State> {
     class State {
         var splitPosition: Int = 300

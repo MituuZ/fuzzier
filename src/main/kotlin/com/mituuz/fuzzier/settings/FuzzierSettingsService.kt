@@ -24,6 +24,7 @@ SOFTWARE.
 package com.mituuz.fuzzier.settings
 
 import com.intellij.openapi.components.PersistentStateComponent
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.util.xmlb.annotations.OptionTag
@@ -32,8 +33,10 @@ import javax.swing.DefaultListModel
 
 @State(
     name = "com.mituuz.fuzzier.FuzzierSettings",
-    storages = [Storage("FuzzierSettings.xml")]
+    storages = [Storage("FuzzierSettings.xml")],
+    reloadable = true
 )
+@Service(Service.Level.PROJECT)
 class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.State> {
     class State {
         var modules: Map<String, String> = HashMap()

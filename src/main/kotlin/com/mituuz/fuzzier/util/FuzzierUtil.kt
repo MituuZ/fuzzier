@@ -42,7 +42,6 @@ import java.util.concurrent.Future
 
 class FuzzierUtil {
     private var globalState = service<FuzzierGlobalSettingsService>().state
-    private var projectState = service<FuzzierSettingsService>().state
     private var listLimit: Int = globalState.fileListLimit
     private var prioritizeShorterDirPaths = globalState.prioritizeShorterDirPaths
     
@@ -143,8 +142,8 @@ class FuzzierUtil {
      * For each module in the project, check if the file path contains the module path.
      * @return a pair of the file path (with the module path removed) and the module path
      */
-    fun extractModulePath(filePath: String): Pair<String, String> {
-        val modules = projectState.modules
+    fun extractModulePath(filePath: String, project: Project): Pair<String, String> {
+        val modules = project.service<FuzzierSettingsService>().state.modules
         for (modulePath in modules.values) {
             if (filePath.contains(modulePath)) {
                 val file = filePath.removePrefix(modulePath)
@@ -191,11 +190,11 @@ class FuzzierUtil {
 
         if (moduleList.isEmpty() && project.basePath != null) {
             moduleList.add(ModuleContainer(project.name, project.basePath!!))
-            service<FuzzierSettingsService>().state.isProject = true
+            project.service<FuzzierSettingsService>().state.isProject = true
         }
 
         val moduleMap = listToMap(moduleList)
-        service<FuzzierSettingsService>().state.modules = moduleMap
+        project.service<FuzzierSettingsService>().state.modules = moduleMap
     }
 
     private fun shortenModulePaths(modules: List<ModuleContainer>) {

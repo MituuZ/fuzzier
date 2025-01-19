@@ -65,7 +65,7 @@ abstract class FuzzyAction : AnAction() {
     private lateinit var originalDownHandler: EditorActionHandler
     private lateinit var originalUpHandler: EditorActionHandler
     private var debounceTimer: TimerTask? = null
-    protected val projectState = service<FuzzierSettingsService>().state
+    protected lateinit var projectState: FuzzierSettingsService.State
     protected val globalState = service<FuzzierGlobalSettingsService>().state
     @Volatile
     var currentTask: Future<*>? = null
@@ -74,6 +74,7 @@ abstract class FuzzyAction : AnAction() {
     override fun actionPerformed(actionEvent: AnActionEvent) {
         val project = actionEvent.project
         if (project != null) {
+            projectState = project.service<FuzzierSettingsService>().state
             fuzzierUtil.parseModules(project)
             runAction(project, actionEvent)
         }
