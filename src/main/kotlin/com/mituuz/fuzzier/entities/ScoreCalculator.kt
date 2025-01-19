@@ -130,7 +130,7 @@ class ScoreCalculator(searchString: String) {
 
     private fun processChar(searchStringPartChar: Char): Boolean {
         if (filePathIndex >= currentFilePath.length) {
-            return false;
+            return false
         }
         val filePathPartChar = currentFilePath[filePathIndex]
         if (searchStringPartChar == filePathPartChar) {
@@ -224,9 +224,5 @@ class ScoreCalculator(searchString: String) {
 
     fun setTolerance(value: Int) {
         tolerance = value
-    }
-
-    fun setIgnoredCharacters(characterString: String) {
-        ignoredCharacters = characterString.toSet()
     }
 }

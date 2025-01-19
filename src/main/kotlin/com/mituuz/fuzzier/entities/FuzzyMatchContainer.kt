@@ -169,7 +169,7 @@ class FuzzyMatchContainer(
                 @Suppress("UNCHECKED_CAST")
                 return ObjectInputStream(byteArrayInputStream).use { it.readObject() as DefaultListModel<SerializedMatchContainer> }
             } catch (_: Exception) {
-                return DefaultListModel<SerializedMatchContainer>();
+                return DefaultListModel<SerializedMatchContainer>()
             }
         }
 

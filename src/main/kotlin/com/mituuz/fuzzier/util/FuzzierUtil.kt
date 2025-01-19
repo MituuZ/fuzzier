@@ -79,7 +79,7 @@ class FuzzierUtil {
                 ret = ret.filterNot { it == i.lowercaseChar() }
             }
 
-            return ret;
+            return ret
         }
     }
 
@@ -136,7 +136,7 @@ class FuzzierUtil {
     }
 
     fun setPrioritizeShorterDirPaths(prioritizeShortedFilePaths: Boolean) {
-        this.prioritizeShorterDirPaths = prioritizeShortedFilePaths;
+        this.prioritizeShorterDirPaths = prioritizeShortedFilePaths
     }
 
     /**
@@ -176,9 +176,9 @@ class FuzzierUtil {
                         || prevModule.basePath.startsWith(currentModule.basePath))
             ) {
                 if (currentModule.basePath.length > prevModule.basePath.length) {
-                    currentModule.basePath = prevModule.basePath;
+                    currentModule.basePath = prevModule.basePath
                 } else {
-                    prevModule.basePath = currentModule.basePath;
+                    prevModule.basePath = currentModule.basePath
                 }
             }
 
