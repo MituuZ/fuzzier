@@ -64,6 +64,7 @@ intellijPlatform {
     
     changeNotes = """
     <h2>Version $currentVersion</h2>
+    - Refactor match containers, add row support<br>
     - Properly separate project and application settings<br>
     - Fix duplicate files in search results
     """.trimIndent()

@@ -1,6 +1,6 @@
 # Changelog
 ## Version 1.4.1
-- Refactoring match containers
+- Refactor match containers, add row support
 - Properly separate project and application settings
 - Fix duplicate files in search results
 
