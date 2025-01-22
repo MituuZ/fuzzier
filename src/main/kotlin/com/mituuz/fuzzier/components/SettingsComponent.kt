@@ -89,3 +89,8 @@ internal fun FormBuilder.addComponent(settingsComponent: SettingsComponent): For
     val builder = addComponent(settingsComponent.label)
     return builder.addComponent(settingsComponent.component)
 }
+
+internal fun FormBuilder.addComponentFillVertically(settingsComponent: SettingsComponent, inset: Int): FormBuilder {
+    val builder = addComponent(settingsComponent.label)
+    return builder.addComponentFillVertically(settingsComponent.component, inset)
+}
