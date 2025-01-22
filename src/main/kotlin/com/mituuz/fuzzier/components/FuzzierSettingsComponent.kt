@@ -56,7 +56,7 @@ class FuzzierSettingsComponent {
         setupComponents()
         jPanel = FormBuilder.createFormBuilder()
             .addComponent(JBLabel("<html><strong>General settings</strong></html>"))
-            .addComponent(exclusionSet)
+            .addComponentFillVertically(exclusionSet.component, 1)
             .addComponent(ignoredCharacters)
 
             .addSeparator()
