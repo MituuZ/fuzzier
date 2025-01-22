@@ -105,6 +105,25 @@ class FuzzyMatchContainer(
         return "FuzzyMatchContainer(basePath='$basePath', filePath='$filePath', score=${getScore()}, dirScore=${getScoreWithDirLength()})"
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as FuzzyMatchContainer
+
+        return score == other.score && filePath == other.filePath
+                && filename == other.filename && basePath == other.basePath
+    }
+
+    override fun hashCode(): Int {
+        var result = score.hashCode()
+        result = 31 * result + filePath.hashCode()
+        result = 31 * result + filename.hashCode()
+        result = 31 * result + basePath.hashCode()
+        return result
+    }
+
+
     /**
      * Serializable version of FuzzyMatchContainer
      *
