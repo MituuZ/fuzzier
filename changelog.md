@@ -2,6 +2,7 @@
 ## Version 1.4.1
 - Refactoring match containers
 - Properly separate project and application settings
+- Fix duplicate files in search results
 
 ## Version 1.4.0
 - Add option to ignore characters from search

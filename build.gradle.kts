@@ -64,7 +64,8 @@ intellijPlatform {
     
     changeNotes = """
     <h2>Version $currentVersion</h2>
-    - Properly separate project and application settings
+    - Properly separate project and application settings<br>
+    - Fix duplicate files in search results
     """.trimIndent()
     
     ideaVersion {
