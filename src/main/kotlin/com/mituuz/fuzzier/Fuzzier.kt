@@ -238,12 +238,15 @@ open class Fuzzier : FuzzyAction() {
         searchString: String, task: Future<*>?
     ) {
         val ss = FuzzierUtil.cleanSearchString(searchString, projectState.ignoredCharacters)
+        val processedFiles = ConcurrentHashMap.newKeySet<String>()
         runBlocking {
             withContext(Dispatchers.IO) {
                 filesToIterate.forEach { iterationFile ->
                     if (task?.isCancelled == true) return@forEach
-                    launch {
-                        stringEvaluator.evaluateFile(iterationFile, listModel, ss)
+                    if (processedFiles.add(iterationFile.file.path)) {
+                        launch {
+                            stringEvaluator.evaluateFile(iterationFile, listModel, ss)
+                        }
                     }
                 }
             }

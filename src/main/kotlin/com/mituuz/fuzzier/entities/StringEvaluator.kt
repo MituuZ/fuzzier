@@ -47,7 +47,6 @@ class StringEvaluator(
         task: Future<*>?
     ): ContentIterator {
         scoreCalculator = ScoreCalculator(searchString)
-        val fuzzyMatchSet = HashSet<FuzzyMatchContainer>()
         return ContentIterator { file: VirtualFile ->
             if (task?.isCancelled == true) {
                 return@ContentIterator false
@@ -62,13 +61,11 @@ class StringEvaluator(
                 if (filePath.isNotBlank()) {
                     val fuzzyMatchContainer = createFuzzyContainer(filePath, moduleBasePath, scoreCalculator)
                     if (fuzzyMatchContainer != null) {
-                        fuzzyMatchSet.add(fuzzyMatchContainer)
+                        listModel.addElement(fuzzyMatchContainer)
                     }
                 }
             }
             true
-        }.also {
-            listModel.addAll(fuzzyMatchSet)
         }
     }
 
