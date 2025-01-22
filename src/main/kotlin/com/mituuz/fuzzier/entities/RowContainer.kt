@@ -32,6 +32,9 @@ class RowContainer(
     val rowNumber: Int
 ) : FuzzyContainer(filePath, basePath, filename) {
     override fun getDisplayString(state: FuzzierGlobalSettingsService.State): String {
+        if (state.filenameType == FilenameType.DEBUG) {
+            return toString()
+        }
         return "$filename:$rowNumber"
     }
 

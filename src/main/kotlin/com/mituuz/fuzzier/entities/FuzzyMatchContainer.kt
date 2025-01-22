@@ -48,6 +48,7 @@ class FuzzyMatchContainer(
             FilenameType.FILE_PATH_ONLY -> filePath
             FilenameType.FILENAME_WITH_PATH -> "$filename   ($filePath)"
             FilenameType.FILENAME_WITH_PATH_STYLED -> getFilenameWithPathStyled(state.highlightFilename)
+            FilenameType.DEBUG -> toString()
         }
     }
 
@@ -101,7 +102,7 @@ class FuzzyMatchContainer(
     }
 
     override fun toString(): String {
-        return "FuzzyMatchContainer: $filename, score: ${getScore()}, dir score: ${getScoreWithDirLength()}"
+        return "FuzzyMatchContainer(basePath='$basePath', filePath='$filePath', score=${getScore()}, dirScore=${getScoreWithDirLength()})"
     }
 
     /**

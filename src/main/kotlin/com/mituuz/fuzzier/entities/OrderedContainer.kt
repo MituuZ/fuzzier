@@ -34,6 +34,7 @@ class OrderedContainer(filePath: String, basePath: String, filename: String) :
             FilenameType.FILE_PATH_ONLY -> filePath
             FilenameType.FILENAME_WITH_PATH -> "$filename   ($filePath)"
             FilenameType.FILENAME_WITH_PATH_STYLED -> getFilenameWithPathStyled()
+            FilenameType.DEBUG -> toString()
         }
     }
 

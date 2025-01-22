@@ -52,7 +52,8 @@ abstract class FuzzyContainer(val filePath: String, val basePath: String, val fi
         FILE_PATH_ONLY("File path only"),
         FILENAME_ONLY("Filename only"),
         FILENAME_WITH_PATH("Filename with (path)"),
-        FILENAME_WITH_PATH_STYLED("Filename with (path) styled")
+        FILENAME_WITH_PATH_STYLED("Filename with (path) styled"),
+        DEBUG("Debug information")
     }
 
     override fun toString(): String {
