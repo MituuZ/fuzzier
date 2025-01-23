@@ -35,14 +35,15 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.roots.FileIndex
 import com.intellij.openapi.vfs.VirtualFile
 import com.mituuz.fuzzier.entities.FuzzyContainer
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import java.awt.Rectangle
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Future
 
 class FuzzierUtil {
-    private var settingsState = service<FuzzierSettingsService>().state
-    private var listLimit: Int = settingsState.fileListLimit
-    private var prioritizeShorterDirPaths = settingsState.prioritizeShorterDirPaths
+    private var globalState = service<FuzzierGlobalSettingsService>().state
+    private var listLimit: Int = globalState.fileListLimit
+    private var prioritizeShorterDirPaths = globalState.prioritizeShorterDirPaths
     
     data class IterationFile(val file: VirtualFile, val module: String)
     
@@ -77,7 +78,7 @@ class FuzzierUtil {
                 ret = ret.filterNot { it == i.lowercaseChar() }
             }
 
-            return ret;
+            return ret
         }
     }
 
@@ -134,15 +135,15 @@ class FuzzierUtil {
     }
 
     fun setPrioritizeShorterDirPaths(prioritizeShortedFilePaths: Boolean) {
-        this.prioritizeShorterDirPaths = prioritizeShortedFilePaths;
+        this.prioritizeShorterDirPaths = prioritizeShortedFilePaths
     }
 
     /**
      * For each module in the project, check if the file path contains the module path.
      * @return a pair of the file path (with the module path removed) and the module path
      */
-    fun extractModulePath(filePath: String): Pair<String, String> {
-        val modules = settingsState.modules
+    fun extractModulePath(filePath: String, project: Project): Pair<String, String> {
+        val modules = project.service<FuzzierSettingsService>().state.modules
         for (modulePath in modules.values) {
             if (filePath.contains(modulePath)) {
                 val file = filePath.removePrefix(modulePath)
@@ -174,9 +175,9 @@ class FuzzierUtil {
                         || prevModule.basePath.startsWith(currentModule.basePath))
             ) {
                 if (currentModule.basePath.length > prevModule.basePath.length) {
-                    currentModule.basePath = prevModule.basePath;
+                    currentModule.basePath = prevModule.basePath
                 } else {
-                    prevModule.basePath = currentModule.basePath;
+                    prevModule.basePath = currentModule.basePath
                 }
             }
 
@@ -189,11 +190,11 @@ class FuzzierUtil {
 
         if (moduleList.isEmpty() && project.basePath != null) {
             moduleList.add(ModuleContainer(project.name, project.basePath!!))
-            service<FuzzierSettingsService>().state.isProject = true
+            project.service<FuzzierSettingsService>().state.isProject = true
         }
 
         val moduleMap = listToMap(moduleList)
-        service<FuzzierSettingsService>().state.modules = moduleMap
+        project.service<FuzzierSettingsService>().state.modules = moduleMap
     }
 
     private fun shortenModulePaths(modules: List<ModuleContainer>) {

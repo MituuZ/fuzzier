@@ -34,7 +34,6 @@ import com.intellij.openapi.project.rootManager
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
-import com.intellij.ui.components.JBTextArea
 import com.intellij.ui.table.JBTable
 import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
@@ -59,10 +58,12 @@ class TestBenchComponent : JPanel() {
     private var debounceTimer: TimerTask? = null
     @Volatile
     var currentTask: Future<*>? = null
-    private lateinit var liveSettingsComponent: FuzzierSettingsComponent
+    private lateinit var liveSettingsComponent: FuzzierGlobalSettingsComponent
+    private lateinit var projectState: FuzzierSettingsService.State
 
-    fun fill(settingsComponent: FuzzierSettingsComponent) {
+    fun fill(settingsComponent: FuzzierGlobalSettingsComponent) {
         val project = ProjectManager.getInstance().openProjects[0]
+        projectState = project.service<FuzzierSettingsService>().state
 
         val fuzzierUtil = FuzzierUtil()
         fuzzierUtil.parseModules(project)
@@ -131,13 +132,9 @@ class TestBenchComponent : JPanel() {
             return
         }
 
-        val newSet = (liveSettingsComponent.exclusionSet.component as JBTextArea).text
-            .split("\n")
-            .filter { it.isNotBlank() }
-            .toSet()
         val stringEvaluator = StringEvaluator(
-            newSet,
-            service<FuzzierSettingsService>().state.modules
+            projectState.exclusionSet,
+            project.service<FuzzierSettingsService>().state.modules
         )
 
         currentTask?.takeIf { !it.isDone }?.cancel(true)
@@ -170,7 +167,7 @@ class TestBenchComponent : JPanel() {
     private fun process(project: Project, stringEvaluator: StringEvaluator, searchString: String, 
                         listModel: DefaultListModel<FuzzyContainer>) {
         val moduleManager = ModuleManager.getInstance(project)
-        if (service<FuzzierSettingsService>().state.isProject) {
+        if (project.service<FuzzierSettingsService>().state.isProject) {
             processProject(project, stringEvaluator, searchString, listModel)
         } else {
             processModules(moduleManager, stringEvaluator, searchString, listModel)
@@ -179,7 +176,7 @@ class TestBenchComponent : JPanel() {
 
     private fun processProject(project: Project, stringEvaluator: StringEvaluator,
                                searchString: String, listModel: DefaultListModel<FuzzyContainer>) {
-        val ss = FuzzierUtil.cleanSearchString(searchString, liveSettingsComponent.ignoredCharacters.getJBTextField().text)
+        val ss = FuzzierUtil.cleanSearchString(searchString, projectState.ignoredCharacters)
         val contentIterator = stringEvaluator.getContentIterator(project.name, ss, listModel, null)
 
         val scoreCalculator = stringEvaluator.scoreCalculator
@@ -195,7 +192,7 @@ class TestBenchComponent : JPanel() {
                                searchString: String, listModel: DefaultListModel<FuzzyContainer>) {
         for (module in moduleManager.modules) {
             val moduleFileIndex = module.rootManager.fileIndex
-            val ss = FuzzierUtil.cleanSearchString(searchString, liveSettingsComponent.ignoredCharacters.getJBTextField().text)
+            val ss = FuzzierUtil.cleanSearchString(searchString, projectState.ignoredCharacters)
             val contentIterator = stringEvaluator.getContentIterator(module.name, ss, listModel, null)
 
             val scoreCalculator = stringEvaluator.scoreCalculator

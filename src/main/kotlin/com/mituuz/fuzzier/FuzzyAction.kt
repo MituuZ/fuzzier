@@ -44,6 +44,7 @@ import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.components.FuzzyComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.util.FuzzierUtil
 import com.mituuz.fuzzier.util.FuzzierUtil.Companion.createDimensionKey
@@ -64,7 +65,8 @@ abstract class FuzzyAction : AnAction() {
     private lateinit var originalDownHandler: EditorActionHandler
     private lateinit var originalUpHandler: EditorActionHandler
     private var debounceTimer: TimerTask? = null
-    protected val fuzzierSettingsService = service<FuzzierSettingsService>()
+    protected lateinit var projectState: FuzzierSettingsService.State
+    protected val globalState = service<FuzzierGlobalSettingsService>().state
     @Volatile
     var currentTask: Future<*>? = null
     val fuzzierUtil = FuzzierUtil()
@@ -72,6 +74,7 @@ abstract class FuzzyAction : AnAction() {
     override fun actionPerformed(actionEvent: AnActionEvent) {
         val project = actionEvent.project
         if (project != null) {
+            projectState = project.service<FuzzierSettingsService>().state
             fuzzierUtil.parseModules(project)
             runAction(project, actionEvent)
         }
@@ -102,10 +105,10 @@ abstract class FuzzyAction : AnAction() {
             val dimensionKey = createDimensionKey(dimensionKey, screenBounds)
             popup = createPopup()
 
-            if (fuzzierSettingsService.state.resetWindow) {
+            if (globalState.resetWindow) {
                 DimensionService.getInstance().setSize(dimensionKey, null, null)
                 DimensionService.getInstance().setLocation(dimensionKey, null, null)
-                fuzzierSettingsService.state.resetWindow = false
+                globalState.resetWindow = false
             }
 
             val centerX = screenBounds.x + screenBounds.width / 2
@@ -153,7 +156,7 @@ abstract class FuzzyAction : AnAction() {
         document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
                 debounceTimer?.cancel()
-                val debouncePeriod = fuzzierSettingsService.state.debouncePeriod
+                val debouncePeriod = globalState.debouncePeriod
                 debounceTimer = Timer().schedule(debouncePeriod.toLong()) {
                     updateListContents(project, component.searchField.text)
                 }
@@ -207,7 +210,7 @@ abstract class FuzzyAction : AnAction() {
         }
     }
 
-    fun getCellRenderer(state: FuzzierSettingsService.State): ListCellRenderer<Any?> {
+    fun getCellRenderer(): ListCellRenderer<Any?> {
         return object : DefaultListCellRenderer() {
             override fun getListCellRendererComponent(
                 list: JList<*>?,
@@ -221,13 +224,13 @@ abstract class FuzzyAction : AnAction() {
                 val container = value as FuzzyContainer
                 renderer.text = when (component.isDirSelector) {
                     true -> container.getDirDisplayString()
-                    false -> container.getDisplayString(state)
+                    false -> container.getDisplayString(globalState)
                 }
 
-                state.fileListSpacing.let {
+                globalState.fileListSpacing.let {
                     renderer.border = BorderFactory.createEmptyBorder(it, 0, it, 0)
                 }
-                state.fileListFontSize.let {
+                globalState.fileListFontSize.let {
                     renderer.font = renderer.font.deriveFont(it.toFloat())
                 }
                 return renderer
@@ -237,10 +240,10 @@ abstract class FuzzyAction : AnAction() {
 
     // Used for testing
     fun setFiletype(filenameType: FilenameType) {
-        fuzzierSettingsService.state.filenameType = filenameType
+        globalState.filenameType = filenameType
     }
 
     fun setHighlight(highlight: Boolean) {
-        fuzzierSettingsService.state.highlightFilename = highlight
+        globalState.highlightFilename = highlight
     }
 }

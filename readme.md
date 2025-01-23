@@ -14,7 +14,7 @@
 A simple plugin to allow "fuzzy" file search with the UI inspired by [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim)
 
 If you are interested in plugin development you can check out my write-up about creating Fuzzier in 
-[here.](https://mituuz.com/content/fuzzier_development.html).
+[here](https://mituuz.com/content/fuzzier_development.html).
 
 Supports spaces in the search string, splitting the string and searching for both parts separately. 
 e.g. parts do not need to be in the correct order, as long as both succeed on their own.

@@ -42,8 +42,10 @@ class StringEvaluator(
 ) {
     lateinit var scoreCalculator: ScoreCalculator
 
-    fun getContentIterator(moduleName: String, searchString: String, listModel: DefaultListModel<FuzzyContainer>,
-                           task: Future<*>?): ContentIterator {
+    fun getContentIterator(
+        moduleName: String, searchString: String, listModel: DefaultListModel<FuzzyContainer>,
+        task: Future<*>?
+    ): ContentIterator {
         scoreCalculator = ScoreCalculator(searchString)
         return ContentIterator { file: VirtualFile ->
             if (task?.isCancelled == true) {
@@ -67,8 +69,10 @@ class StringEvaluator(
         }
     }
 
-    fun getDirIterator(moduleName: String, searchString: String, listModel: DefaultListModel<FuzzyContainer>,
-                       task: Future<*>?): ContentIterator {
+    fun getDirIterator(
+        moduleName: String, searchString: String, listModel: DefaultListModel<FuzzyContainer>,
+        task: Future<*>?
+    ): ContentIterator {
         scoreCalculator = ScoreCalculator(searchString)
         return ContentIterator { file: VirtualFile ->
             if (task?.isCancelled == true) {
@@ -91,8 +95,10 @@ class StringEvaluator(
         }
     }
 
-    fun evaluateFile(iterationFile: FuzzierUtil.IterationFile, listModel: DefaultListModel<FuzzyContainer>,
-                     searchString: String) {
+    fun evaluateFile(
+        iterationFile: FuzzierUtil.IterationFile, listModel: DefaultListModel<FuzzyContainer>,
+        searchString: String
+    ) {
         val scoreCalculator = ScoreCalculator(searchString)
         val file = iterationFile.file
         val moduleName = iterationFile.module
@@ -153,8 +159,10 @@ class StringEvaluator(
      * @param filePath to evaluate
      * @return null if no match can be found
      */
-    private fun createFuzzyContainer(filePath: String, moduleBasePath: String,
-                                     scoreCalculator: ScoreCalculator): FuzzyMatchContainer? {
+    private fun createFuzzyContainer(
+        filePath: String, moduleBasePath: String,
+        scoreCalculator: ScoreCalculator
+    ): FuzzyMatchContainer? {
         val filename = filePath.substring(filePath.lastIndexOf("/") + 1)
         return when (val score = scoreCalculator.calculateScore(filePath)) {
             null -> null

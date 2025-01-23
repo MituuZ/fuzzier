@@ -39,26 +39,22 @@ import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
-import com.intellij.openapi.util.DimensionService
 import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
-import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.StringEvaluator
-import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.NONE
-import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.RECENTLY_SEARCHED_FILES
-import com.mituuz.fuzzier.settings.FuzzierSettingsService.RecentFilesMode.RECENT_PROJECT_FILES
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode.NONE
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode.RECENTLY_SEARCHED_FILES
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode.RECENT_PROJECT_FILES
 import com.mituuz.fuzzier.util.FuzzierUtil
-import com.mituuz.fuzzier.util.FuzzierUtil.Companion.createDimensionKey
 import com.mituuz.fuzzier.util.InitialViewHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.apache.commons.lang3.StringUtils
-import java.awt.Point
 import java.awt.event.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Future
@@ -85,9 +81,9 @@ open class Fuzzier : FuzzyAction() {
             showPopup(project)
 
             (component as FuzzyFinderComponent).splitPane.dividerLocation =
-                fuzzierSettingsService.state.splitPosition
+                globalState.splitPosition
 
-            if (fuzzierSettingsService.state.recentFilesMode != NONE) {
+            if (globalState.recentFilesMode != NONE) {
                 createInitialView(project)
             }
         }
@@ -98,7 +94,7 @@ open class Fuzzier : FuzzyAction() {
 
         popup.addListener(object : JBPopupListener {
             override fun onClosed(event: LightweightWindowEvent) {
-                fuzzierSettingsService.state.splitPosition =
+                globalState.splitPosition =
                     (component as FuzzyFinderComponent).splitPane.dividerLocation
                 resetOriginalHandlers()
                 super.onClosed(event)
@@ -115,14 +111,15 @@ open class Fuzzier : FuzzyAction() {
         ApplicationManager.getApplication().executeOnPooledThread {
             val editorHistoryManager = EditorHistoryManager.getInstance(project)
 
-            val listModel = when (fuzzierSettingsService.state.recentFilesMode) {
+            val listModel = when (globalState.recentFilesMode) {
                 RECENT_PROJECT_FILES -> InitialViewHandler.getRecentProjectFiles(
-                    fuzzierSettingsService,
+                    globalState,
                     fuzzierUtil,
-                    editorHistoryManager
+                    editorHistoryManager,
+                    project
                 )
 
-                RECENTLY_SEARCHED_FILES -> InitialViewHandler.getRecentlySearchedFiles(fuzzierSettingsService)
+                RECENTLY_SEARCHED_FILES -> InitialViewHandler.getRecentlySearchedFiles(projectState)
                 else -> {
                     DefaultListModel<FuzzyContainer>()
                 }
@@ -130,7 +127,7 @@ open class Fuzzier : FuzzyAction() {
 
             ApplicationManager.getApplication().invokeLater {
                 component.fileList.model = listModel
-                component.fileList.cellRenderer = getCellRenderer(fuzzierSettingsService.state)
+                component.fileList.cellRenderer = getCellRenderer()
                 component.fileList.setPaintBusy(false)
                 if (!component.fileList.isEmpty) {
                     component.fileList.setSelectedValue(listModel[0], true)
@@ -167,7 +164,7 @@ open class Fuzzier : FuzzyAction() {
 
                 ApplicationManager.getApplication().invokeLater {
                     component.fileList.model = listModel
-                    component.fileList.cellRenderer = getCellRenderer(fuzzierSettingsService.state)
+                    component.fileList.cellRenderer = getCellRenderer()
                     component.fileList.setPaintBusy(false)
                     if (!component.fileList.isEmpty) {
                         component.fileList.setSelectedValue(listModel[0], true)
@@ -182,7 +179,7 @@ open class Fuzzier : FuzzyAction() {
     }
 
     private fun handleEmptySearchString(project: Project) {
-        if (fuzzierSettingsService.state.recentFilesMode != NONE) {
+        if (globalState.recentFilesMode != NONE) {
             createInitialView(project)
         } else {
             ApplicationManager.getApplication().invokeLater {
@@ -194,8 +191,8 @@ open class Fuzzier : FuzzyAction() {
 
     private fun getStringEvaluator(): StringEvaluator {
         return StringEvaluator(
-            fuzzierSettingsService.state.exclusionSet,
-            fuzzierSettingsService.state.modules,
+            projectState.exclusionSet,
+            projectState.modules,
             changeListManager
         )
     }
@@ -205,7 +202,7 @@ open class Fuzzier : FuzzyAction() {
         listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?
     ) {
         val moduleManager = ModuleManager.getInstance(project)
-        if (fuzzierSettingsService.state.isProject) {
+        if (projectState.isProject) {
             processProject(project, stringEvaluator, searchString, listModel, task)
         } else {
             processModules(moduleManager, stringEvaluator, searchString, listModel, task)
@@ -240,13 +237,16 @@ open class Fuzzier : FuzzyAction() {
         stringEvaluator: StringEvaluator, listModel: DefaultListModel<FuzzyContainer>,
         searchString: String, task: Future<*>?
     ) {
-        val ss = FuzzierUtil.cleanSearchString(searchString, fuzzierSettingsService.state.ignoredCharacters)
+        val ss = FuzzierUtil.cleanSearchString(searchString, projectState.ignoredCharacters)
+        val processedFiles = ConcurrentHashMap.newKeySet<String>()
         runBlocking {
             withContext(Dispatchers.IO) {
                 filesToIterate.forEach { iterationFile ->
                     if (task?.isCancelled == true) return@forEach
-                    launch {
-                        stringEvaluator.evaluateFile(iterationFile, listModel, ss)
+                    if (processedFiles.add(iterationFile.file.path)) {
+                        launch {
+                            stringEvaluator.evaluateFile(iterationFile, listModel, ss)
+                        }
                     }
                 }
             }
@@ -262,7 +262,7 @@ open class Fuzzier : FuzzyAction() {
             fileEditorManager.openFile(virtualFile, true)
         } else {
             fileEditorManager.openFile(virtualFile, true)
-            if (currentEditor != null && !fuzzierSettingsService.state.newTab) {
+            if (currentEditor != null && !globalState.newTab) {
                 fileEditorManager.selectedEditor?.let {
                     if (previousFile != null) {
                         fileEditorManager.closeFile(previousFile)
@@ -271,7 +271,7 @@ open class Fuzzier : FuzzyAction() {
             }
         }
         if (fuzzyContainer != null) {
-            InitialViewHandler.addFileToRecentlySearchedFiles(fuzzyContainer, fuzzierSettingsService)
+            InitialViewHandler.addFileToRecentlySearchedFiles(fuzzyContainer, projectState, globalState)
         }
         popup.cancel()
     }

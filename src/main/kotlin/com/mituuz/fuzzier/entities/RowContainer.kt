@@ -23,7 +23,7 @@ SOFTWARE.
 */
 package com.mituuz.fuzzier.entities
 
-import com.mituuz.fuzzier.settings.FuzzierSettingsService
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 
 class RowContainer(
     filePath: String,
@@ -31,7 +31,10 @@ class RowContainer(
     filename: String,
     val rowNumber: Int
 ) : FuzzyContainer(filePath, basePath, filename) {
-    override fun getDisplayString(state: FuzzierSettingsService.State): String {
+    override fun getDisplayString(state: FuzzierGlobalSettingsService.State): String {
+        if (state.filenameType == FilenameType.DEBUG) {
+            return toString()
+        }
         return "$filename:$rowNumber"
     }
 

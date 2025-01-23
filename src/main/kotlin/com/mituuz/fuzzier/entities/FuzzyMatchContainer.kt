@@ -24,13 +24,12 @@ SOFTWARE.
 package com.mituuz.fuzzier.entities
 
 import com.intellij.util.xmlb.Converter
-import com.intellij.util.xmlb.XmlSerializationException
 import com.mituuz.fuzzier.settings.FuzzierConfiguration.END_STYLE_TAG
 import com.mituuz.fuzzier.settings.FuzzierConfiguration.startStyleTag
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
-import java.io.InvalidClassException
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.io.Serializable
@@ -43,12 +42,13 @@ class FuzzyMatchContainer(
     filename: String,
     moduleBasePath: String
 ) : FuzzyContainer(filePath, moduleBasePath, filename) {
-    override fun getDisplayString(state: FuzzierSettingsService.State): String {
+    override fun getDisplayString(state: FuzzierGlobalSettingsService.State): String {
         return when (state.filenameType) {
             FilenameType.FILENAME_ONLY -> filename
             FilenameType.FILE_PATH_ONLY -> filePath
             FilenameType.FILENAME_WITH_PATH -> "$filename   ($filePath)"
             FilenameType.FILENAME_WITH_PATH_STYLED -> getFilenameWithPathStyled(state.highlightFilename)
+            FilenameType.DEBUG -> toString()
         }
     }
 
@@ -102,7 +102,7 @@ class FuzzyMatchContainer(
     }
 
     override fun toString(): String {
-        return "FuzzyMatchContainer: $filename, score: ${getScore()}, dir score: ${getScoreWithDirLength()}"
+        return "FuzzyMatchContainer(basePath='$basePath', filePath='$filePath', score=${getScore()}, dirScore=${getScoreWithDirLength()})"
     }
 
     /**
@@ -170,7 +170,7 @@ class FuzzyMatchContainer(
                 @Suppress("UNCHECKED_CAST")
                 return ObjectInputStream(byteArrayInputStream).use { it.readObject() as DefaultListModel<SerializedMatchContainer> }
             } catch (_: Exception) {
-                return DefaultListModel<SerializedMatchContainer>();
+                return DefaultListModel<SerializedMatchContainer>()
             }
         }
 

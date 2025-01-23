@@ -38,7 +38,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.EditorTextField
-import com.mituuz.fuzzier.settings.FuzzierSettingsService
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import kotlin.math.min
 
 class PreviewEditor(project: Project?) : EditorTextField(
@@ -47,7 +47,8 @@ class PreviewEditor(project: Project?) : EditorTextField(
 ) {
     private val toBeContinued: String = "\n\n\n--- End of Fuzzier Preview ---\n--- Open file to see full content ---\n\n\n"
     private val fileCutOff: Int = 70000
-    private val settingsState = service<FuzzierSettingsService>().state
+    private val globalState = service<FuzzierGlobalSettingsService>().state
+
 
     companion object {
         fun getDefaultFileType(): FileType {
@@ -66,7 +67,7 @@ class PreviewEditor(project: Project?) : EditorTextField(
         val globalScheme = EditorColorsManager.getInstance().globalScheme
         this.font = globalScheme.getFont(null)
 
-        val previewFontSize = settingsState.previewFontSize
+        val previewFontSize = globalState.previewFontSize
         if (previewFontSize != 0) {
             this.font = this.font.deriveFont(previewFontSize.toFloat())
         }

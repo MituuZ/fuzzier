@@ -23,17 +23,18 @@ SOFTWARE.
 */
 package com.mituuz.fuzzier.entities
 
-import com.mituuz.fuzzier.settings.FuzzierSettingsService
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 
 class OrderedContainer(filePath: String, basePath: String, filename: String) :
     FuzzyContainer(filePath, basePath, filename) {
 
-    override fun getDisplayString(state: FuzzierSettingsService.State): String {
+    override fun getDisplayString(state: FuzzierGlobalSettingsService.State): String {
         return when (state.filenameType) {
             FilenameType.FILENAME_ONLY -> filename
             FilenameType.FILE_PATH_ONLY -> filePath
             FilenameType.FILENAME_WITH_PATH -> "$filename   ($filePath)"
             FilenameType.FILENAME_WITH_PATH_STYLED -> getFilenameWithPathStyled()
+            FilenameType.DEBUG -> toString()
         }
     }
 
