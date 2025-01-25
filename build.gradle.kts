@@ -6,6 +6,10 @@ plugins {
   id("org.jetbrains.kotlin.jvm") version "2.1.0"
   id("org.jetbrains.intellij.platform") version "2.2.1"
   id("org.jetbrains.kotlinx.kover") version "0.9.0"
+  id("me.champeau.jmh") version "0.7.2"
+}
+
+dependencies {
 }
 
 // Use same version and group for the jar and the plugin
@@ -33,10 +37,12 @@ dependencies {
 
     testFramework(TestFrameworkType.Platform)
   }
-  
+  implementation("org.openjdk.jmh:jmh-core:1.37")
+  annotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:1.37")
+  jmh("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
+
   testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.4")
   testImplementation("org.mockito:mockito-core:5.14.2")
-
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.4")
 
   // Required to fix issue where JUnit5 Test Framework refers to JUnit4
@@ -84,4 +90,14 @@ intellijPlatform {
     privateKey.set(System.getenv("PRIVATE_KEY"))
     password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
   }
+}
+
+jmh {
+  fork = 1
+  warmupIterations = 1
+  iterations = 1
+  timeOnIteration = "1s"
+  resultFormat = "JSON"
+  jvmArgs = listOf("-Xms2G", "-Xmx2G")
+  jmhTimeout = "30s"
 }
