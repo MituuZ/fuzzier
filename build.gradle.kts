@@ -94,9 +94,9 @@ intellijPlatform {
 
 jmh {
   fork = 1
-  warmupIterations = 1
-  iterations = 1
-  timeOnIteration = "1s"
+  warmupIterations = 2
+  iterations = 2
+  timeOnIteration = "2s"
   resultFormat = "JSON"
   jvmArgs = listOf("-Xms2G", "-Xmx2G")
   jmhTimeout = "30s"
