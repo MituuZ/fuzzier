@@ -1,6 +1,5 @@
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.targets.js.internal.filterClassName
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
