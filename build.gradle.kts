@@ -55,8 +55,14 @@ tasks.test {
   finalizedBy(tasks.koverHtmlReport) // report is always generated after tests run
 }
 
-tasks.koverHtmlReport {
-  filterClassName("com.mituuz.fuzzier.performance.PerformanceTests")
+kover {
+  reports {
+    filters {
+      excludes {
+        classes("com.mituuz.fuzzier.performance.*")
+      }
+    }
+  }
 }
 
 
