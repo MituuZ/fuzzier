@@ -34,8 +34,6 @@ dependencies {
 
     testFramework(TestFrameworkType.Platform)
   }
-  implementation("org.openjdk.jmh:jmh-core:1.37")
-  annotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:1.37")
   testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.4")
   testImplementation("org.mockito:mockito-core:5.14.2")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.4")
@@ -45,6 +43,8 @@ dependencies {
   testRuntimeOnly("junit:junit:4.13.2")
 
   // JMH dependencies
+  implementation("org.openjdk.jmh:jmh-core:1.37")
+  annotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:1.37")
   jmh("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
   jmh(files("libs/*")) // libs folder contains idea:ideaIC:2024.3 jars
 }
