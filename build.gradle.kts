@@ -10,7 +10,7 @@ plugins {
 }
 
 // Use same version and group for the jar and the plugin
-val currentVersion = "1.4.1"
+val currentVersion = "1.4.2"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -69,9 +69,8 @@ intellijPlatform {
     
     changeNotes = """
     <h2>Version $currentVersion</h2>
-    - Refactor match containers, add row support<br>
-    - Properly separate project and application settings<br>
-    - Fix duplicate files in search results
+    - Make highlighting speed faster when highlighting sequential matches<br>
+    - Init JMH benchmarking to be used in the future<br>
     """.trimIndent()
     
     ideaVersion {
