@@ -1,5 +1,6 @@
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.targets.js.internal.filterClassName
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -53,6 +54,11 @@ tasks.test {
   useJUnitPlatform()
   finalizedBy(tasks.koverHtmlReport) // report is always generated after tests run
 }
+
+tasks.koverHtmlReport {
+  filterClassName("com.mituuz.fuzzier.performance.PerformanceTests")
+}
+
 
 tasks.withType<KotlinCompile> {
   compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
