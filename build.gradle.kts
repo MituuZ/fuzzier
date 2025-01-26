@@ -9,9 +9,6 @@ plugins {
   id("me.champeau.jmh") version "0.7.2"
 }
 
-dependencies {
-}
-
 // Use same version and group for the jar and the plugin
 val currentVersion = "1.4.1"
 val myGroup = "com.mituuz"
@@ -39,8 +36,6 @@ dependencies {
   }
   implementation("org.openjdk.jmh:jmh-core:1.37")
   annotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:1.37")
-  jmh("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
-
   testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.4")
   testImplementation("org.mockito:mockito-core:5.14.2")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.4")
@@ -48,6 +43,10 @@ dependencies {
   // Required to fix issue where JUnit5 Test Framework refers to JUnit4
   // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-faq.html#junit5-test-framework-refers-to-junit4
   testRuntimeOnly("junit:junit:4.13.2")
+
+  // JMH dependencies
+  jmh("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
+  jmh(files("libs/*")) // libs folder contains idea:ideaIC:2024.3 jars
 }
 
 tasks.test {
@@ -100,4 +99,5 @@ jmh {
   resultFormat = "JSON"
   jvmArgs = listOf("-Xms2G", "-Xmx2G")
   jmhTimeout = "30s"
+  benchmarkMode = listOf("Throughput")
 }
