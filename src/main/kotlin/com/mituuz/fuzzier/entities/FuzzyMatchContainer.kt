@@ -67,14 +67,33 @@ class FuzzyMatchContainer(
         val stringBuilder: StringBuilder = StringBuilder(source)
         var offset = 0
         val hlIndexes = score.highlightCharacters.sorted()
-        for (i in hlIndexes) {
-            if (i < source.length) {
-                stringBuilder.insert(i + offset, startStyleTag)
+        var prevIndex = -10
+        var tagIsOpen = false
+
+        var i = 0
+        while (i < hlIndexes.size) {
+            val highlightIndex = hlIndexes[i]
+
+            if (!tagIsOpen) {
+                stringBuilder.insert(highlightIndex + offset, startStyleTag)
                 offset += startStyleTag.length
-                stringBuilder.insert(i + offset + 1, END_STYLE_TAG)
-                offset += END_STYLE_TAG.length
+                tagIsOpen = true
             }
+
+            if (highlightIndex < source.length) {
+                if (i + 1 < hlIndexes.size  && hlIndexes[i + 1] == highlightIndex + 1) {
+                    i++
+                    continue
+                }
+
+                stringBuilder.insert(highlightIndex + offset + 1, END_STYLE_TAG)
+                offset += END_STYLE_TAG.length
+                tagIsOpen = false
+            }
+            prevIndex = highlightIndex
+            i++
         }
+
         return stringBuilder.toString()
     }
 

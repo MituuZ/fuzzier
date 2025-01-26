@@ -50,6 +50,16 @@ class FuzzyMatchContainerTest {
     }
 
     @Test
+    fun `Test highlight indexing sequential indexes`() {
+        val score = FuzzyScore()
+        score.highlightCharacters.add(0)
+        score.highlightCharacters.add(1)
+        val container = FuzzyMatchContainer(score, "", "Hello", "")
+        val res = container.highlight(container.filename)
+        assertEquals("${startStyleTag}He${END_STYLE_TAG}llo", res)
+    }
+
+    @Test
     fun `Test highlight indexing complex case`() {
         val score = FuzzyScore()
         score.highlightCharacters.add(0)  // f
@@ -64,15 +74,11 @@ class FuzzyMatchContainerTest {
         val res = container.highlight(container.filename)
         val sb = StringBuilder()
 
-        sb.append(startStyleTag, "F", END_STYLE_TAG)
-        sb.append(startStyleTag, "u", END_STYLE_TAG)
-        sb.append(startStyleTag, "z", END_STYLE_TAG)
-        sb.append(startStyleTag, "z", END_STYLE_TAG)
+        sb.append(startStyleTag, "Fuzz", END_STYLE_TAG)
         sb.append("yMatchConta")
         sb.append(startStyleTag, "i", END_STYLE_TAG)
         sb.append("n")
-        sb.append(startStyleTag, "e", END_STYLE_TAG)
-        sb.append(startStyleTag, "r", END_STYLE_TAG)
+        sb.append(startStyleTag, "er", END_STYLE_TAG)
         sb.append("Test.kt")
         var i = 0
         while (i < res.length) {

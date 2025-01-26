@@ -23,6 +23,17 @@ open class PerformanceTests {
     @Benchmark
     fun threeMatchesInFilename() {
         val score = FuzzyScore()
+        score.highlightCharacters.add(0)   // f
+        score.highlightCharacters.add(15)  // i
+        score.highlightCharacters.add(18)  // r
+
+        val container = FuzzyMatchContainer(score, "", "FuzzyMatchContainerTest.kt", "")
+        container.highlight(container.filename)
+    }
+
+    @Benchmark
+    fun threeMatchesInFilenameInARow() {
+        val score = FuzzyScore()
         score.highlightCharacters.add(0)  // f
         score.highlightCharacters.add(1)  // u
         score.highlightCharacters.add(2)  // z
@@ -35,14 +46,6 @@ open class PerformanceTests {
     fun oneMatchInFilename() {
         val score = FuzzyScore()
         score.highlightCharacters.add(0) // F
-
-        val container = FuzzyMatchContainer(score, "", "FuzzyMatchContainerTest.kt", "")
-        container.highlight(container.filename)
-    }
-
-    @Benchmark
-    fun noMatchesInFilename() {
-        val score = FuzzyScore()
 
         val container = FuzzyMatchContainer(score, "", "FuzzyMatchContainerTest.kt", "")
         container.highlight(container.filename)
