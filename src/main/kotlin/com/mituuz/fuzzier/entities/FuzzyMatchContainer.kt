@@ -97,6 +97,21 @@ class FuzzyMatchContainer(
         return stringBuilder.toString()
     }
 
+    fun highlightLegacy(source: String): String {
+        val stringBuilder: StringBuilder = StringBuilder(source)
+        var offset = 0
+        val hlIndexes = score.highlightCharacters.sorted()
+        for (i in hlIndexes) {
+            if (i < source.length) {
+                stringBuilder.insert(i + offset, startStyleTag)
+                offset += startStyleTag.length
+                stringBuilder.insert(i + offset + 1, END_STYLE_TAG)
+                offset += END_STYLE_TAG.length
+            }
+        }
+        return stringBuilder.toString()
+    }
+
     fun getScore(): Int {
         return score.getTotalScore()
     }
