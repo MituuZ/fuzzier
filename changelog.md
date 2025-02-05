@@ -1,4 +1,8 @@
 # Changelog
+## Version 1.4.2
+- Make highlighting speed faster when highlighting sequential matches
+- Init JMH benchmarking to be used in the future
+
 ## Version 1.4.1
 - Refactor match containers, add row support
 - Properly separate project and application settings
