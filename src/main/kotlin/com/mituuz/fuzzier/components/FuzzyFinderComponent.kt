@@ -63,7 +63,6 @@ class FuzzyFinderComponent(project: Project) : FuzzyComponent() {
         previewPane.isViewer = true
 
         splitPane.preferredSize = Dimension(700, 400)
-        splitPane.orientation = JSplitPane.VERTICAL_SPLIT
 
         fuzzyPanel.layout = GridLayoutManager(1, 1, JBUI.emptyInsets(), -1, -1)
         val panel1 = JPanel()
@@ -79,22 +78,10 @@ class FuzzyFinderComponent(project: Project) : FuzzyComponent() {
 
         fuzzyPanel.add(
             splitPane,
-            GridConstraints(
-                0,
-                0,
-                1,
-                1,
-                GridConstraints.ANCHOR_CENTER,
-                GridConstraints.FILL_BOTH,
-                GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_CAN_GROW,
-                GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_CAN_GROW,
-                null,
-                Dimension(-1, -1),
-                null,
-                0,
-                false
-            )
+            getGridConstraints(0)
         )
+
+        splitPane.orientation = JSplitPane.VERTICAL_SPLIT
 
         var searchFieldGridRow: Int
         var fileListGridRow: Int
@@ -111,39 +98,11 @@ class FuzzyFinderComponent(project: Project) : FuzzyComponent() {
         }
         panel1.add(
             searchField,
-            GridConstraints(
-                searchFieldGridRow,
-                0,
-                1,
-                1,
-                GridConstraints.ANCHOR_WEST,
-                GridConstraints.FILL_HORIZONTAL,
-                GridConstraints.SIZEPOLICY_WANT_GROW,
-                GridConstraints.SIZEPOLICY_FIXED,
-                null,
-                Dimension(-1, -1),
-                null,
-                0,
-                false
-            )
+            getGridConstraints(searchFieldGridRow, true)
         )
         panel1.add(
             scrollPane1,
-            GridConstraints(
-                fileListGridRow,
-                0,
-                1,
-                1,
-                GridConstraints.ANCHOR_CENTER,
-                GridConstraints.FILL_BOTH,
-                GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_WANT_GROW,
-                GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_WANT_GROW,
-                null,
-                Dimension(-1, -1),
-                null,
-                0,
-                false
-            )
+            getGridConstraints(fileListGridRow)
         )
     }
 
@@ -159,69 +118,28 @@ class FuzzyFinderComponent(project: Project) : FuzzyComponent() {
         val panel1 = JPanel()
         panel1.layout = GridLayoutManager(2, 1, JBUI.emptyInsets(), -1, -1)
         searchField.text = ""
-        panel1.add(
-            searchField,
-            GridConstraints(
-                1,
-                0,
-                1,
-                1,
-                GridConstraints.ANCHOR_WEST,
-                GridConstraints.FILL_HORIZONTAL,
-                GridConstraints.SIZEPOLICY_WANT_GROW,
-                GridConstraints.SIZEPOLICY_FIXED,
-                null,
-                Dimension(-1, -1),
-                null,
-                0,
-                false
-            )
-        )
+
         val scrollPane1 = JBScrollPane()
+        fileList = JBList<FuzzyContainer?>()
+        fileList.selectionMode = 0
+        scrollPane1.setViewportView(fileList)
 
         splitPane.dividerSize = 10
 
         fuzzyPanel.add(
             splitPane,
-            GridConstraints(
-                0,
-                0,
-                1,
-                1,
-                GridConstraints.ANCHOR_CENTER,
-                GridConstraints.FILL_BOTH,
-                GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_CAN_GROW,
-                GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_CAN_GROW,
-                null,
-                Dimension(-1, -1),
-                null,
-                0,
-                false
-            )
+            getGridConstraints(0)
+        )
+
+        panel1.add(
+            searchField,
+            getGridConstraints(1, true)
         )
 
         panel1.add(
             scrollPane1,
-            GridConstraints(
-                0,
-                0,
-                1,
-                1,
-                GridConstraints.ANCHOR_CENTER,
-                GridConstraints.FILL_BOTH,
-                GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_WANT_GROW,
-                GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_WANT_GROW,
-                null,
-                Dimension(-1, -1),
-                null,
-                0,
-                false
-            )
+            getGridConstraints(0)
         )
-        fileList = JBList<FuzzyContainer?>()
-        fileList.selectionMode = 0
-        scrollPane1.setViewportView(fileList)
-
 
         if (searchPosition == LEFT) {
             splitPane.leftComponent = panel1
@@ -230,5 +148,26 @@ class FuzzyFinderComponent(project: Project) : FuzzyComponent() {
             splitPane.rightComponent = panel1
             splitPane.leftComponent = previewPane
         }
+    }
+
+    private fun getGridConstraints(row: Int, sizePolicyFixed: Boolean = false) : GridConstraints {
+        val sizePolicy = if (sizePolicyFixed) GridConstraints.SIZEPOLICY_FIXED
+        else GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_WANT_GROW
+
+        return GridConstraints(
+            row,
+            0,
+            1,
+            1,
+            GridConstraints.ANCHOR_CENTER,
+            GridConstraints.FILL_BOTH,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK or GridConstraints.SIZEPOLICY_WANT_GROW,
+            sizePolicy,
+            null,
+            Dimension(-1, -1),
+            null,
+            0,
+            false
+        )
     }
 }
