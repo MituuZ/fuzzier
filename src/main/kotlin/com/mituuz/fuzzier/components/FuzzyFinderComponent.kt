@@ -48,15 +48,6 @@ class FuzzyFinderComponent(project: Project) : FuzzyComponent() {
     var splitPane: JSplitPane = JSplitPane()
 
     init {
-        val searchPosition = service<FuzzierGlobalSettingsService>().state.searchPosition
-
-        when (searchPosition) {
-            BOTTOM, TOP -> vertical(searchPosition)
-            RIGHT, LEFT -> horizontal(searchPosition)
-        }
-    }
-
-    fun vertical(searchPosition: FuzzierGlobalSettingsService.SearchPosition) {
         layout = BorderLayout()
         add(fuzzyPanel)
         previewPane.fileType = PlainTextFileType.INSTANCE
@@ -65,17 +56,26 @@ class FuzzyFinderComponent(project: Project) : FuzzyComponent() {
         splitPane.preferredSize = Dimension(700, 400)
 
         fuzzyPanel.layout = GridLayoutManager(1, 1, JBUI.emptyInsets(), -1, -1)
-        val panel1 = JPanel()
-        panel1.layout = GridLayoutManager(3, 1, JBUI.emptyInsets(), -1, -1)
+        val searchPanel = JPanel()
+        searchPanel.layout = GridLayoutManager(3, 1, JBUI.emptyInsets(), -1, -1)
         searchField.text = ""
-
-        val scrollPane1 = JBScrollPane()
+        val fileListScrollPane = JBScrollPane()
         fileList = JBList<FuzzyContainer?>()
         fileList.selectionMode = 0
-        scrollPane1.setViewportView(fileList)
+        fileListScrollPane.setViewportView(fileList)
 
         splitPane.dividerSize = 10
 
+        val searchPosition = service<FuzzierGlobalSettingsService>().state.searchPosition
+
+        when (searchPosition) {
+            BOTTOM, TOP -> vertical(searchPosition, searchPanel, fileListScrollPane)
+            RIGHT, LEFT -> horizontal(searchPosition, searchPanel, fileListScrollPane)
+        }
+    }
+
+    fun vertical(searchPosition: FuzzierGlobalSettingsService.SearchPosition, searchPanel: JPanel,
+                 fileListScrollPane: JBScrollPane) {
         fuzzyPanel.add(
             splitPane,
             getGridConstraints(0)
@@ -88,64 +88,46 @@ class FuzzyFinderComponent(project: Project) : FuzzyComponent() {
         if (searchPosition == TOP) {
             searchFieldGridRow = 0
             fileListGridRow = 1
-            splitPane.topComponent = panel1
+            splitPane.topComponent = searchPanel
             splitPane.bottomComponent = previewPane
         } else {
             searchFieldGridRow = 1
             fileListGridRow = 0
             splitPane.topComponent = previewPane
-            splitPane.bottomComponent = panel1
+            splitPane.bottomComponent = searchPanel
         }
-        panel1.add(
+        searchPanel.add(
             searchField,
             getGridConstraints(searchFieldGridRow, true)
         )
-        panel1.add(
-            scrollPane1,
+        searchPanel.add(
+            fileListScrollPane,
             getGridConstraints(fileListGridRow)
         )
     }
 
-    fun horizontal(searchPosition: FuzzierGlobalSettingsService.SearchPosition) {
-        layout = BorderLayout()
-        add(fuzzyPanel)
-        previewPane.fileType = PlainTextFileType.INSTANCE
-        previewPane.isViewer = true
-
-        splitPane.preferredSize = Dimension(700, 400)
-
-        fuzzyPanel.layout = GridLayoutManager(1, 1, JBUI.emptyInsets(), -1, -1)
-        val panel1 = JPanel()
-        panel1.layout = GridLayoutManager(2, 1, JBUI.emptyInsets(), -1, -1)
-        searchField.text = ""
-
-        val scrollPane1 = JBScrollPane()
-        fileList = JBList<FuzzyContainer?>()
-        fileList.selectionMode = 0
-        scrollPane1.setViewportView(fileList)
-
-        splitPane.dividerSize = 10
-
+    fun horizontal(searchPosition: FuzzierGlobalSettingsService.SearchPosition, searchPanel: JPanel,
+                   fileListScrollPane: JBScrollPane) {
         fuzzyPanel.add(
             splitPane,
             getGridConstraints(0)
         )
 
-        panel1.add(
+        searchPanel.add(
             searchField,
             getGridConstraints(1, true)
         )
 
-        panel1.add(
-            scrollPane1,
+        searchPanel.add(
+            fileListScrollPane,
             getGridConstraints(0)
         )
 
         if (searchPosition == LEFT) {
-            splitPane.leftComponent = panel1
+            splitPane.leftComponent = searchPanel
             splitPane.rightComponent = previewPane
         } else {
-            splitPane.rightComponent = panel1
+            splitPane.rightComponent = searchPanel
             splitPane.leftComponent = previewPane
         }
     }
