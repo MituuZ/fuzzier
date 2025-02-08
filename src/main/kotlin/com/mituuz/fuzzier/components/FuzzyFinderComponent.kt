@@ -44,7 +44,7 @@ import javax.swing.JSplitPane
 
 class FuzzyFinderComponent(project: Project) : FuzzyComponent() {
     var previewPane: PreviewEditor = PreviewEditor(project)
-    private var fuzzyPanel: JPanel = JPanel()
+    var fuzzyPanel: JPanel = JPanel()
     var splitPane: JSplitPane = JSplitPane()
 
     init {
