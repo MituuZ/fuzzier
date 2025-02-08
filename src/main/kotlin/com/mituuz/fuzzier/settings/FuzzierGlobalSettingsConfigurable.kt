@@ -92,7 +92,9 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
 
         val selectedSearchPosition: FuzzierGlobalSettingsService.SearchPosition = FuzzierGlobalSettingsService.SearchPosition.entries.toTypedArray()[component.searchPosition.getSearchPositionComboBox().selectedIndex]
         if (state.searchPosition != selectedSearchPosition) {
-            // Reset window size and split position
+            // Reset window size and split position to defaults
+            state.resetWindow = true
+            state.splitPosition = FuzzierGlobalSettingsService.DEFAULT_SPLIT_POSITION
             state.searchPosition = selectedSearchPosition
         }
         state.prioritizeShorterDirPaths = component.prioritizeShortDirs.getCheckBox().isSelected
