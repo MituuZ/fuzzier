@@ -32,6 +32,7 @@ import com.intellij.ui.components.JBTextArea
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.FormBuilder
 import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode
 import javax.swing.JButton
 import javax.swing.JComponent
@@ -89,6 +90,11 @@ class SettingsComponent {
     fun getRecentFilesTypeComboBox(): ComboBox<RecentFilesMode> {
         @Suppress("UNCHECKED_CAST")
         return component as ComboBox<RecentFilesMode>
+    }
+
+    fun getSearchPositionComboBox(): ComboBox<FuzzierGlobalSettingsService.SearchPosition> {
+        @Suppress("UNCHECKED_CAST")
+        return component as ComboBox<FuzzierGlobalSettingsService.SearchPosition>
     }
 
     fun getButton(): JButton {

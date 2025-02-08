@@ -43,6 +43,7 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
         component = FuzzierGlobalSettingsComponent()
         component.newTabSelect.getCheckBox().isSelected = state.newTab
         component.recentFileModeSelector.getRecentFilesTypeComboBox().selectedIndex = state.recentFilesMode.ordinal
+        component.searchPosition.getSearchPositionComboBox().selectedIndex = state.searchPosition.ordinal
         component.prioritizeShortDirs.getCheckBox().isSelected = state.prioritizeShorterDirPaths
         component.debounceTimerValue.getIntSpinner().value = state.debouncePeriod
         component.fileListLimit.getIntSpinner().value = state.fileListLimit
@@ -66,6 +67,7 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
     override fun isModified(): Boolean {
         return state.newTab != component.newTabSelect.getCheckBox().isSelected
                 || state.recentFilesMode != component.recentFileModeSelector.getRecentFilesTypeComboBox().selectedItem
+                || state.searchPosition != component.recentFileModeSelector.getSearchPositionComboBox().selectedItem
                 || state.prioritizeShorterDirPaths != component.prioritizeShortDirs.getCheckBox().isSelected
                 || state.debouncePeriod != component.debounceTimerValue.getIntSpinner().value
                 || state.fileListLimit != component.fileListLimit.getIntSpinner().value
@@ -87,6 +89,12 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
     override fun apply() {
         state.newTab = component.newTabSelect.getCheckBox().isSelected
         state.recentFilesMode = RecentFilesMode.entries.toTypedArray()[component.recentFileModeSelector.getRecentFilesTypeComboBox().selectedIndex]
+
+        val selectedSearchPosition: FuzzierGlobalSettingsService.SearchPosition = FuzzierGlobalSettingsService.SearchPosition.entries.toTypedArray()[component.searchPosition.getSearchPositionComboBox().selectedIndex]
+        if (state.searchPosition != selectedSearchPosition) {
+            // Reset window size and split position
+            state.searchPosition = selectedSearchPosition
+        }
         state.prioritizeShorterDirPaths = component.prioritizeShortDirs.getCheckBox().isSelected
         state.debouncePeriod = component.debounceTimerValue.getIntSpinner().value as Int
         state.fileListLimit = component.fileListLimit.getIntSpinner().value as Int

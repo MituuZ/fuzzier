@@ -1,3 +1,26 @@
+/*
+MIT License
+
+Copyright (c) 2024 Mitja Leino
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 package com.mituuz.fuzzier.components
 
 import com.intellij.openapi.components.service
@@ -9,6 +32,7 @@ import com.intellij.util.ui.FormBuilder
 import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.SearchPosition
 import java.awt.Component
 import javax.swing.DefaultListCellRenderer
 import javax.swing.JButton
@@ -25,6 +49,8 @@ class FuzzierGlobalSettingsComponent {
         Show recent files when opening a search window.
     """.trimIndent(),
         false)
+
+    val searchPosition = SettingsComponent(ComboBox<SearchPosition>(), "Search bar location")
 
     val prioritizeShortDirs = SettingsComponent(JBCheckBox(), "Prioritize shorter dir paths", """
         When having a directory selector active, prioritize shorter file paths over pure score calculation.
@@ -162,6 +188,7 @@ class FuzzierGlobalSettingsComponent {
             .addComponent(JBLabel("<html><strong>General settings</strong></html>"))
             .addComponent(newTabSelect)
             .addComponent(recentFileModeSelector)
+            .addComponent(searchPosition)
             .addComponent(prioritizeShortDirs)
             .addComponent(debounceTimerValue)
             .addComponent(fileListLimit)
@@ -215,6 +242,24 @@ class FuzzierGlobalSettingsComponent {
         }
         for (recentFilesMode in RecentFilesMode.entries) {
             recentFileModeSelector.getRecentFilesTypeComboBox().addItem(recentFilesMode)
+        }
+
+        searchPosition.getSearchPositionComboBox().renderer = object : DefaultListCellRenderer() {
+            override fun getListCellRendererComponent(
+                list: JList<*>?,
+                value: Any?,
+                index: Int,
+                isSelected: Boolean,
+                cellHasFocus: Boolean
+            ): Component? {
+                val renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) as JLabel
+                val position = value as SearchPosition
+                renderer.text = position.text
+                return renderer
+            }
+        }
+        for (sp in SearchPosition.entries) {
+            searchPosition.getSearchPositionComboBox().addItem(sp)
         }
 
         filenameTypeSelector.getFilenameTypeComboBox().renderer = object : DefaultListCellRenderer() {
