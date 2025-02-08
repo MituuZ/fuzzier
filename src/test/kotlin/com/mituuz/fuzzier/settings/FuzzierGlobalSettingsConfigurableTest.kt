@@ -29,6 +29,7 @@ import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType.FILENAME_ONLY
 import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType.FILENAME_WITH_PATH_STYLED
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode.NONE
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode.RECENT_PROJECT_FILES
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.SearchPosition.TOP
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -73,6 +74,13 @@ class FuzzierGlobalSettingsConfigurableTest {
     fun recentFilesMode() {
         pre()
         state.recentFilesMode = NONE
+        assertTrue(settingsConfigurable.isModified)
+    }
+
+    @Test
+    fun searchPosition() {
+        pre()
+        state.searchPosition = TOP
         assertTrue(settingsConfigurable.isModified)
     }
 

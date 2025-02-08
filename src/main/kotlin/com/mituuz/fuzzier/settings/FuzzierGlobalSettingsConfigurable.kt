@@ -67,7 +67,7 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
     override fun isModified(): Boolean {
         return state.newTab != component.newTabSelect.getCheckBox().isSelected
                 || state.recentFilesMode != component.recentFileModeSelector.getRecentFilesTypeComboBox().selectedItem
-                || state.searchPosition != component.recentFileModeSelector.getSearchPositionComboBox().selectedItem
+                || state.searchPosition != component.searchPosition.getSearchPositionComboBox().selectedItem
                 || state.prioritizeShorterDirPaths != component.prioritizeShortDirs.getCheckBox().isSelected
                 || state.debouncePeriod != component.debounceTimerValue.getIntSpinner().value
                 || state.fileListLimit != component.fileListLimit.getIntSpinner().value
