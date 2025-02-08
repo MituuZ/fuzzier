@@ -44,10 +44,8 @@ import javax.swing.JSplitPane
 
 class FuzzyFinderComponent(project: Project) : FuzzyComponent() {
     var previewPane: PreviewEditor = PreviewEditor(project)
-        private set
     private var fuzzyPanel: JPanel = JPanel()
     var splitPane: JSplitPane = JSplitPane()
-        private set
 
     init {
         val searchPosition = service<FuzzierGlobalSettingsService>().state.searchPosition
