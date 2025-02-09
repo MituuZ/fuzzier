@@ -35,6 +35,7 @@ import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode
 import javax.swing.JButton
+import javax.swing.JPanel
 import javax.swing.JComponent
 
 class SettingsComponent {
@@ -95,6 +96,10 @@ class SettingsComponent {
     fun getSearchPositionComboBox(): ComboBox<FuzzierGlobalSettingsService.SearchPosition> {
         @Suppress("UNCHECKED_CAST")
         return component as ComboBox<FuzzierGlobalSettingsService.SearchPosition>
+    }
+
+    fun getIntSpinner(index: Int): JBIntSpinner {
+        return (component as JPanel).getComponent(index) as JBIntSpinner
     }
 
     fun getButton(): JButton {

@@ -34,6 +34,7 @@ import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.SearchPosition
 import java.awt.Component
+import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.DefaultListCellRenderer
 import javax.swing.JButton
@@ -102,20 +103,26 @@ class FuzzierGlobalSettingsComponent {
         """.trimIndent(),
         false)
 
-    val defaultHeight = SettingsComponent(JBIntSpinner(400, 100, 4000), "Default popup height",
+    val dimensionComponent = JPanel().apply {
+        layout = BoxLayout(this, BoxLayout.X_AXIS)
+        add(JBLabel("Width: "))
+        add(JBIntSpinner(700, 100, 4000))
+        add(Box.createHorizontalStrut(10))
+        add(JBLabel("Height: "))
+        add(JBIntSpinner(400, 100, 4000))
+    }
+    val defaultDimension = SettingsComponent(dimensionComponent, "Default dimensions",
         """
-            When resetting the popupsize
-        """.trimIndent())
-
-    val defaultWidth = SettingsComponent(JBIntSpinner(700, 100, 4000), "Default popup width",
-        """
-            
-        """.trimIndent())
+            Default dimensions for the finder popup. Affects reset window behaviour.<br><br>
+            Min: 100, Max: 4000
+        """.trimIndent(),
+        false)
 
     val searchPosition = SettingsComponent(ComboBox<SearchPosition>(), "Search bar location",
         """
             Controls where the search bar is located on the popup.
-        """.trimIndent())
+        """.trimIndent(),
+        false)
 
 
     val fileListLimit = SettingsComponent(JBIntSpinner(50, 1, 5000), "File list limit",
@@ -207,9 +214,6 @@ class FuzzierGlobalSettingsComponent {
             .addComponent(JBLabel("<html><strong>General settings</strong></html>"))
             .addComponent(newTabSelect)
             .addComponent(recentFileModeSelector)
-            .addComponent(searchPosition)
-            .addComponent(defaultHeight)
-            .addComponent(defaultWidth)
             .addComponent(prioritizeShortDirs)
             .addComponent(debounceTimerValue)
             .addComponent(fileListLimit)
@@ -217,6 +221,8 @@ class FuzzierGlobalSettingsComponent {
             .addSeparator()
             .addComponent(JBLabel("<html><strong>Popup styling</strong></html>"))
             .addComponent(filenameTypeSelector)
+            .addComponent(searchPosition)
+            .addComponent(defaultDimension)
             .addComponent(highlightFilename)
             .addComponent(fileListFontSize)
             .addComponent(previewFontSize)

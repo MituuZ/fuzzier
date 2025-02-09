@@ -43,8 +43,8 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
         component = FuzzierGlobalSettingsComponent()
         component.newTabSelect.getCheckBox().isSelected = state.newTab
         component.recentFileModeSelector.getRecentFilesTypeComboBox().selectedIndex = state.recentFilesMode.ordinal
-        component.defaultHeight.getIntSpinner().value = state.defaultPopupHeight
-        component.defaultWidth.getIntSpinner().value = state.defaultPopupWidth
+        component.defaultDimension.getIntSpinner(4).value = state.defaultPopupHeight
+        component.defaultDimension.getIntSpinner(1).value = state.defaultPopupWidth
         component.searchPosition.getSearchPositionComboBox().selectedIndex = state.searchPosition.ordinal
         component.prioritizeShortDirs.getCheckBox().isSelected = state.prioritizeShorterDirPaths
         component.debounceTimerValue.getIntSpinner().value = state.debouncePeriod
@@ -69,8 +69,8 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
     override fun isModified(): Boolean {
         return state.newTab != component.newTabSelect.getCheckBox().isSelected
                 || state.recentFilesMode != component.recentFileModeSelector.getRecentFilesTypeComboBox().selectedItem
-                || state.defaultPopupHeight != component.defaultHeight.getIntSpinner().value
-                || state.defaultPopupWidth != component.defaultWidth.getIntSpinner().value
+                || state.defaultPopupHeight != component.defaultDimension.getIntSpinner(4).value
+                || state.defaultPopupWidth != component.defaultDimension.getIntSpinner(1).value
                 || state.searchPosition != component.searchPosition.getSearchPositionComboBox().selectedItem
                 || state.prioritizeShorterDirPaths != component.prioritizeShortDirs.getCheckBox().isSelected
                 || state.debouncePeriod != component.debounceTimerValue.getIntSpinner().value
@@ -94,8 +94,8 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
         state.newTab = component.newTabSelect.getCheckBox().isSelected
         state.recentFilesMode = RecentFilesMode.entries.toTypedArray()[component.recentFileModeSelector.getRecentFilesTypeComboBox().selectedIndex]
 
-        val newPopupHeight = component.defaultHeight.getIntSpinner().value as Int
-        val newPopupWidth = component.defaultWidth.getIntSpinner().value as Int
+        val newPopupHeight = component.defaultDimension.getIntSpinner(4).value as Int
+        val newPopupWidth = component.defaultDimension.getIntSpinner(1).value as Int
         val newSearchPosition: FuzzierGlobalSettingsService.SearchPosition = FuzzierGlobalSettingsService.SearchPosition.entries.toTypedArray()[component.searchPosition.getSearchPositionComboBox().selectedIndex]
         if (state.searchPosition != newSearchPosition ||
             state.defaultPopupHeight != newPopupHeight ||
