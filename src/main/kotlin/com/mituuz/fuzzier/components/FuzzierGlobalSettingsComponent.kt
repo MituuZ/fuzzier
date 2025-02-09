@@ -211,7 +211,7 @@ class FuzzierGlobalSettingsComponent {
     init {
         setupComponents()
         jPanel = FormBuilder.createFormBuilder()
-            .addComponent(JBLabel("<html><strong>General settings</strong></html>"))
+            .addComponent(JBLabel("<html><h2>General settings</h2></html>"))
             .addComponent(newTabSelect)
             .addComponent(recentFileModeSelector)
             .addComponent(prioritizeShortDirs)
@@ -219,17 +219,17 @@ class FuzzierGlobalSettingsComponent {
             .addComponent(fileListLimit)
 
             .addSeparator()
-            .addComponent(JBLabel("<html><strong>Popup styling</strong></html>"))
+            .addComponent(JBLabel("<html><h2>Popup styling</h2></html>"))
             .addComponent(filenameTypeSelector)
+            .addComponent(highlightFilename)
             .addComponent(searchPosition)
             .addComponent(defaultDimension)
-            .addComponent(highlightFilename)
-            .addComponent(fileListFontSize)
             .addComponent(previewFontSize)
+            .addComponent(fileListFontSize)
             .addComponent(fileListSpacing)
 
             .addSeparator()
-            .addComponent(JBLabel("<html><strong>Match settings</strong></html>"))
+            .addComponent(JBLabel("<html><h2>Match settings</h2></html>"))
             .addComponent(tolerance)
             .addComponent(multiMatchActive)
             .addComponent(matchWeightSingleChar)
@@ -238,11 +238,13 @@ class FuzzierGlobalSettingsComponent {
             .addComponent(matchWeightFilename)
 
             .addSeparator()
+            .addComponent(JBLabel("<html><h2>Test bench</h2></html>"))
             .addComponent(startTestBench)
             .addComponent(testBench)
             .addComponentFillVertically(JPanel(), 0)
 
             .addSeparator()
+            .addComponent(JBLabel("<html><h2>Reset window</h2></html>"))
             .addComponent(resetWindowDimension)
             .panel
     }
