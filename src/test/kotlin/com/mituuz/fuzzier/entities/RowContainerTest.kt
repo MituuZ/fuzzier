@@ -8,8 +8,8 @@ class RowContainerTest {
     @Test
     fun displayString() {
         val state = FuzzierGlobalSettingsService.State()
-        val container = RowContainer("", "", "filename", 0)
+        val container = RowContainer("", "", "filename", 0, "trimmed row content")
 
-        assertEquals("filename:0", container.getDisplayString(state))
+        assertEquals("filename 0:trimmed row content", container.getDisplayString(state))
     }
 }

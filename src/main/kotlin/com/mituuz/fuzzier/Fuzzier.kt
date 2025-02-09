@@ -64,7 +64,6 @@ import kotlin.coroutines.cancellation.CancellationException
 open class Fuzzier : FuzzyAction() {
     override var popupTitle = "Fuzzy Search"
     override var dimensionKey = "FuzzySearchPopup"
-    private var defaultDoc: Document? = null
 
     // Used by FuzzierVCS to check if files are tracked by the VCS
     protected var changeListManager: ChangeListManager? = null

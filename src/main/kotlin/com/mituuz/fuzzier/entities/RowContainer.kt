@@ -29,13 +29,15 @@ class RowContainer(
     filePath: String,
     basePath: String,
     filename: String,
-    val rowNumber: Int
+    val rowNumber: Int,
+    val columnNumber: Int,
+    val trimmedRow: String
 ) : FuzzyContainer(filePath, basePath, filename) {
     override fun getDisplayString(state: FuzzierGlobalSettingsService.State): String {
         if (state.filenameType == FilenameType.DEBUG) {
             return toString()
         }
-        return "$filename:$rowNumber"
+        return "$filename $rowNumber:$trimmedRow"
     }
 
     override fun toString(): String {
