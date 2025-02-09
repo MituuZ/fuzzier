@@ -84,7 +84,7 @@ class PreviewEditor(project: Project?) : EditorTextField(
         this.fileType = PlainTextFileType.INSTANCE
     }
 
-    fun updateFile(virtualFile: VirtualFile?, rowNumber: Int? = null, columnNumber: Int? = null) {
+    fun updateFile(virtualFile: VirtualFile?, rowNumber: Int? = null) {
         ApplicationManager.getApplication().executeOnPooledThread {
             val sourceDocument = ApplicationManager.getApplication().runReadAction<Document?> {
                 virtualFile?.let { FileDocumentManager.getInstance().getDocument(virtualFile) }
