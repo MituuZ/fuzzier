@@ -37,7 +37,7 @@ class RowContainer(
         if (state.filenameType == FilenameType.DEBUG) {
             return toString()
         }
-        return "$filename $rowNumber:$trimmedRow"
+        return "$filename $rowNumber:$columnNumber:$trimmedRow"
     }
 
     override fun toString(): String {
