@@ -77,8 +77,8 @@ class FuzzyMover : FuzzyAction() {
         }
     }
 
-    override fun createPopup(): JBPopup {
-        val popup = getInitialPopup()
+    override fun createPopup(screenDimensionKey: String): JBPopup {
+        val popup = getInitialPopup(screenDimensionKey)
 
         popup.addListener(object : JBPopupListener {
             override fun onClosed(event: LightweightWindowEvent) {

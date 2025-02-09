@@ -44,6 +44,8 @@ class FuzzierGlobalSettingsService : PersistentStateComponent<FuzzierGlobalSetti
     class State {
         var searchPosition: SearchPosition = SearchPosition.LEFT
         var splitPosition: Int = DEFAULT_SPLIT_POSITION
+        var defaultPopupWidth: Int = 700
+        var defaultPopupHeight: Int = 400
 
         var recentFilesMode: RecentFilesMode = RecentFilesMode.RECENT_PROJECT_FILES
         var filenameType: FilenameType = FILE_PATH_ONLY

@@ -30,6 +30,7 @@ import java.awt.Dimension
 
 class SimpleFinderComponent() : FuzzyComponent() {
     init {
+        this.preferredSize = Dimension(700, 400)
         layout = GridLayoutManager(2, 1)
         val scrollPane = JBScrollPane()
         scrollPane.setViewportView(fileList)

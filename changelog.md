@@ -1,4 +1,11 @@
 # Changelog
+## Version 1.5.0
+- Allow configuring the default finder popup size
+- Fix a bug where the correct dimension key wasn't used
+- Enable changing the search field location on the popup
+  - Top, bottom, left and right
+- Improve mover popup's default size
+
 ## Version 1.4.2
 - Make highlighting speed faster when highlighting sequential matches
 - Init JMH benchmarking to be used in the future

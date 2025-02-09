@@ -50,7 +50,14 @@ class FuzzierGlobalSettingsComponent {
     """.trimIndent(),
         false)
 
-    val searchPosition = SettingsComponent(ComboBox<SearchPosition>(), "Search bar location")
+    val defaultHeight = SettingsComponent(JBIntSpinner(400, 100, 2000), "Default popup height")
+
+    val defaultWidth = SettingsComponent(JBIntSpinner(700, 100, 2000), "Default popup width")
+
+    val searchPosition = SettingsComponent(ComboBox<SearchPosition>(), "Search bar location",
+        """
+            Controls where the search bar is located on the popup.
+        """.trimIndent())
 
     val prioritizeShortDirs = SettingsComponent(JBCheckBox(), "Prioritize shorter dir paths", """
         When having a directory selector active, prioritize shorter file paths over pure score calculation.
@@ -189,6 +196,8 @@ class FuzzierGlobalSettingsComponent {
             .addComponent(newTabSelect)
             .addComponent(recentFileModeSelector)
             .addComponent(searchPosition)
+            .addComponent(defaultHeight)
+            .addComponent(defaultWidth)
             .addComponent(prioritizeShortDirs)
             .addComponent(debounceTimerValue)
             .addComponent(fileListLimit)

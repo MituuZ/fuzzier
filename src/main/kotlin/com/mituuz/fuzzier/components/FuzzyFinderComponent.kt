@@ -48,12 +48,14 @@ class FuzzyFinderComponent(project: Project) : FuzzyComponent() {
     var splitPane: JSplitPane = JSplitPane()
 
     init {
+        val settingsState = service<FuzzierGlobalSettingsService>().state
+
         layout = BorderLayout()
         add(fuzzyPanel)
         previewPane.fileType = PlainTextFileType.INSTANCE
         previewPane.isViewer = true
 
-        splitPane.preferredSize = Dimension(700, 400)
+        splitPane.preferredSize = Dimension(settingsState.defaultPopupWidth, settingsState.defaultPopupHeight)
 
         fuzzyPanel.layout = GridLayoutManager(1, 1, JBUI.emptyInsets(), -1, -1)
         val searchPanel = JPanel()
@@ -66,7 +68,7 @@ class FuzzyFinderComponent(project: Project) : FuzzyComponent() {
 
         splitPane.dividerSize = 10
 
-        val searchPosition = service<FuzzierGlobalSettingsService>().state.searchPosition
+        val searchPosition = settingsState.searchPosition
 
         when (searchPosition) {
             BOTTOM, TOP -> vertical(searchPosition, searchPanel, fileListScrollPane)
