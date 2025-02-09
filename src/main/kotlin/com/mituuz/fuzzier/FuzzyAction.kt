@@ -111,10 +111,7 @@ abstract class FuzzyAction : AnAction() {
             }
 
             popup = createPopup(screenDimensionKey)
-
-            val centerX = screenBounds.x + screenBounds.width / 2
-            val centerY = screenBounds.y + screenBounds.height / 2
-            popup.showInScreenCoordinates(it, Point(centerX, centerY))
+            popup.showInCenterOf(it)
         }
     }
 
