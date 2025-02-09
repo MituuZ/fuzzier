@@ -236,6 +236,8 @@ class FuzzierGlobalSettingsComponent {
         }
         resetWindowDimension.addActionListener {
             service<FuzzierGlobalSettingsService>().state.resetWindow = true
+            // Disable the button to indicate that the press was registered
+            resetWindowDimension.isEnabled = false
         }
 
         recentFileModeSelector.getRecentFilesTypeComboBox().renderer = object : DefaultListCellRenderer() {
