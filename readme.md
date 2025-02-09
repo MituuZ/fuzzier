@@ -64,10 +64,11 @@ map <Leader>mf <action>(com.mituuz.fuzzier.FuzzyMover)
 The plugin can be installed from the [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/23451-fuzzier)
 
 ## Contact
-I can be reached from <mituuuuz@hotmail.com>
+I can be reached at <mitja@mituuz.com>.
 
 ## Contributing
 I have a tendency to make some larger refactors from time to time, 
 so I would appreciate it if you would open an issue before starting to work on a feature or a bug fix.
 
-I'll help as I can and can give guidance on how to implement the feature or fix the bug, but cannot guarantee that I will accept the PR.
+I'll help as I can and can give guidance on how to implement the feature or fix the bug, 
+but cannot guarantee that I will accept the PR.
