@@ -34,6 +34,7 @@ import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.SearchPosition
 import java.awt.Component
+import javax.swing.BoxLayout
 import javax.swing.DefaultListCellRenderer
 import javax.swing.JButton
 import javax.swing.JLabel
@@ -50,15 +51,6 @@ class FuzzierGlobalSettingsComponent {
     """.trimIndent(),
         false)
 
-    val defaultHeight = SettingsComponent(JBIntSpinner(400, 100, 2000), "Default popup height")
-
-    val defaultWidth = SettingsComponent(JBIntSpinner(700, 100, 2000), "Default popup width")
-
-    val searchPosition = SettingsComponent(ComboBox<SearchPosition>(), "Search bar location",
-        """
-            Controls where the search bar is located on the popup.
-        """.trimIndent())
-
     val prioritizeShortDirs = SettingsComponent(JBCheckBox(), "Prioritize shorter dir paths", """
         When having a directory selector active, prioritize shorter file paths over pure score calculation.
     """.trimIndent(),
@@ -70,6 +62,10 @@ class FuzzierGlobalSettingsComponent {
         """.trimIndent(),
         false)
 
+
+    /////////////////////////////////////////////////////////////////
+    // Popup styling and configuration
+    /////////////////////////////////////////////////////////////////
     val filenameTypeSelector = SettingsComponent(ComboBox<FilenameType>(), "Filename type",
         """
             Controls how the filename is shown on the file search and selector popups.<br><br>
@@ -105,6 +101,22 @@ class FuzzierGlobalSettingsComponent {
             Only works with styled file list, which supports html styling.
         """.trimIndent(),
         false)
+
+    val defaultHeight = SettingsComponent(JBIntSpinner(400, 100, 4000), "Default popup height",
+        """
+            When resetting the popupsize
+        """.trimIndent())
+
+    val defaultWidth = SettingsComponent(JBIntSpinner(700, 100, 4000), "Default popup width",
+        """
+            
+        """.trimIndent())
+
+    val searchPosition = SettingsComponent(ComboBox<SearchPosition>(), "Search bar location",
+        """
+            Controls where the search bar is located on the popup.
+        """.trimIndent())
+
 
     val fileListLimit = SettingsComponent(JBIntSpinner(50, 1, 5000), "File list limit",
         """
