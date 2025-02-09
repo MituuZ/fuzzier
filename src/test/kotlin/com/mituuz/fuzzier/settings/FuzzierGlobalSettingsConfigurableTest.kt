@@ -78,13 +78,6 @@ class FuzzierGlobalSettingsConfigurableTest {
     }
 
     @Test
-    fun searchPosition() {
-        pre()
-        state.searchPosition = TOP
-        assertTrue(settingsConfigurable.isModified)
-    }
-
-    @Test
     fun prioritizeShorterDirPaths() {
         pre()
         state.prioritizeShorterDirPaths = true
@@ -182,8 +175,36 @@ class FuzzierGlobalSettingsConfigurableTest {
         assertTrue(settingsConfigurable.isModified)
     }
 
+    @Test
+    fun dimensionKeyWidth() {
+        pre()
+        state.defaultPopupWidth = 400
+        assertTrue(settingsConfigurable.isModified)
+        settingsConfigurable.apply()
+        assertTrue(state.resetWindow)
+    }
+
+    @Test
+    fun searchPosition() {
+        pre()
+        state.searchPosition = TOP
+        assertTrue(settingsConfigurable.isModified)
+        settingsConfigurable.apply()
+        assertTrue(state.resetWindow)
+    }
+
+    @Test
+    fun dimensionKeyHeight() {
+        pre()
+        state.defaultPopupHeight = 700
+        assertTrue(settingsConfigurable.isModified)
+        settingsConfigurable.apply()
+        assertTrue(state.resetWindow)
+    }
+
     private fun pre() {
         settingsConfigurable.createComponent()
         assertFalse(settingsConfigurable.isModified)
+        assertFalse(state.resetWindow)
     }
 }
