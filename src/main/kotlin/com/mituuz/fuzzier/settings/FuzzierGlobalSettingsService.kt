@@ -37,8 +37,15 @@ import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType.FILE_PATH_ONLY
 )
 @Service(Service.Level.APP)
 class FuzzierGlobalSettingsService : PersistentStateComponent<FuzzierGlobalSettingsService.State> {
+    companion object {
+        @JvmStatic
+        val DEFAULT_SPLIT_POSITION: Int = 300
+    }
     class State {
-        var splitPosition: Int = 300
+        var searchPosition: SearchPosition = SearchPosition.LEFT
+        var splitPosition: Int = DEFAULT_SPLIT_POSITION
+        var defaultPopupWidth: Int = 700
+        var defaultPopupHeight: Int = 400
 
         var recentFilesMode: RecentFilesMode = RecentFilesMode.RECENT_PROJECT_FILES
         var filenameType: FilenameType = FILE_PATH_ONLY
@@ -75,5 +82,12 @@ class FuzzierGlobalSettingsService : PersistentStateComponent<FuzzierGlobalSetti
         NONE("None"),
         RECENT_PROJECT_FILES("Recent project files"),
         RECENTLY_SEARCHED_FILES("Recently searched files")
+    }
+
+    enum class SearchPosition(val text: String) {
+        TOP("Top"),
+        BOTTOM("Bottom"),
+        LEFT("Left"),
+        RIGHT("Right")
     }
 }

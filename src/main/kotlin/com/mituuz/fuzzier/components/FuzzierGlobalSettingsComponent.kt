@@ -1,3 +1,26 @@
+/*
+MIT License
+
+Copyright (c) 2024 Mitja Leino
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
 package com.mituuz.fuzzier.components
 
 import com.intellij.openapi.components.service
@@ -9,7 +32,10 @@ import com.intellij.util.ui.FormBuilder
 import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.SearchPosition
 import java.awt.Component
+import javax.swing.Box
+import javax.swing.BoxLayout
 import javax.swing.DefaultListCellRenderer
 import javax.swing.JButton
 import javax.swing.JLabel
@@ -37,6 +63,10 @@ class FuzzierGlobalSettingsComponent {
         """.trimIndent(),
         false)
 
+
+    /////////////////////////////////////////////////////////////////
+    // Popup styling and configuration
+    /////////////////////////////////////////////////////////////////
     val filenameTypeSelector = SettingsComponent(ComboBox<FilenameType>(), "Filename type",
         """
             Controls how the filename is shown on the file search and selector popups.<br><br>
@@ -72,6 +102,28 @@ class FuzzierGlobalSettingsComponent {
             Only works with styled file list, which supports html styling.
         """.trimIndent(),
         false)
+
+    val dimensionComponent = JPanel().apply {
+        layout = BoxLayout(this, BoxLayout.X_AXIS)
+        add(JBLabel("Width: "))
+        add(JBIntSpinner(700, 100, 4000))
+        add(Box.createHorizontalStrut(10))
+        add(JBLabel("Height: "))
+        add(JBIntSpinner(400, 100, 4000))
+    }
+    val defaultDimension = SettingsComponent(dimensionComponent, "Default dimensions",
+        """
+            Default dimensions for the finder popup. Affects reset window behaviour.<br><br>
+            Min: 100, Max: 4000
+        """.trimIndent(),
+        false)
+
+    val searchPosition = SettingsComponent(ComboBox<SearchPosition>(), "Search bar location",
+        """
+            Controls where the search bar is located on the popup.
+        """.trimIndent(),
+        false)
+
 
     val fileListLimit = SettingsComponent(JBIntSpinner(50, 1, 5000), "File list limit",
         """
@@ -159,7 +211,7 @@ class FuzzierGlobalSettingsComponent {
     init {
         setupComponents()
         jPanel = FormBuilder.createFormBuilder()
-            .addComponent(JBLabel("<html><strong>General settings</strong></html>"))
+            .addComponent(JBLabel("<html><h2>General settings</h2></html>"))
             .addComponent(newTabSelect)
             .addComponent(recentFileModeSelector)
             .addComponent(prioritizeShortDirs)
@@ -167,15 +219,17 @@ class FuzzierGlobalSettingsComponent {
             .addComponent(fileListLimit)
 
             .addSeparator()
-            .addComponent(JBLabel("<html><strong>Popup styling</strong></html>"))
+            .addComponent(JBLabel("<html><h2>Popup styling</h2></html>"))
             .addComponent(filenameTypeSelector)
             .addComponent(highlightFilename)
-            .addComponent(fileListFontSize)
+            .addComponent(searchPosition)
+            .addComponent(defaultDimension)
             .addComponent(previewFontSize)
+            .addComponent(fileListFontSize)
             .addComponent(fileListSpacing)
 
             .addSeparator()
-            .addComponent(JBLabel("<html><strong>Match settings</strong></html>"))
+            .addComponent(JBLabel("<html><h2>Match settings</h2></html>"))
             .addComponent(tolerance)
             .addComponent(multiMatchActive)
             .addComponent(matchWeightSingleChar)
@@ -184,11 +238,13 @@ class FuzzierGlobalSettingsComponent {
             .addComponent(matchWeightFilename)
 
             .addSeparator()
+            .addComponent(JBLabel("<html><h2>Test bench</h2></html>"))
             .addComponent(startTestBench)
             .addComponent(testBench)
             .addComponentFillVertically(JPanel(), 0)
 
             .addSeparator()
+            .addComponent(JBLabel("<html><h2>Reset window</h2></html>"))
             .addComponent(resetWindowDimension)
             .panel
     }
@@ -200,6 +256,8 @@ class FuzzierGlobalSettingsComponent {
         }
         resetWindowDimension.addActionListener {
             service<FuzzierGlobalSettingsService>().state.resetWindow = true
+            // Disable the button to indicate that the press was registered
+            resetWindowDimension.isEnabled = false
         }
 
         recentFileModeSelector.getRecentFilesTypeComboBox().renderer = object : DefaultListCellRenderer() {
@@ -215,6 +273,24 @@ class FuzzierGlobalSettingsComponent {
         }
         for (recentFilesMode in RecentFilesMode.entries) {
             recentFileModeSelector.getRecentFilesTypeComboBox().addItem(recentFilesMode)
+        }
+
+        searchPosition.getSearchPositionComboBox().renderer = object : DefaultListCellRenderer() {
+            override fun getListCellRendererComponent(
+                list: JList<*>?,
+                value: Any?,
+                index: Int,
+                isSelected: Boolean,
+                cellHasFocus: Boolean
+            ): Component? {
+                val renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) as JLabel
+                val position = value as SearchPosition
+                renderer.text = position.text
+                return renderer
+            }
+        }
+        for (sp in SearchPosition.entries) {
+            searchPosition.getSearchPositionComboBox().addItem(sp)
         }
 
         filenameTypeSelector.getFilenameTypeComboBox().renderer = object : DefaultListCellRenderer() {

@@ -43,6 +43,9 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
         component = FuzzierGlobalSettingsComponent()
         component.newTabSelect.getCheckBox().isSelected = state.newTab
         component.recentFileModeSelector.getRecentFilesTypeComboBox().selectedIndex = state.recentFilesMode.ordinal
+        component.defaultDimension.getIntSpinner(4).value = state.defaultPopupHeight
+        component.defaultDimension.getIntSpinner(1).value = state.defaultPopupWidth
+        component.searchPosition.getSearchPositionComboBox().selectedIndex = state.searchPosition.ordinal
         component.prioritizeShortDirs.getCheckBox().isSelected = state.prioritizeShorterDirPaths
         component.debounceTimerValue.getIntSpinner().value = state.debouncePeriod
         component.fileListLimit.getIntSpinner().value = state.fileListLimit
@@ -66,6 +69,9 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
     override fun isModified(): Boolean {
         return state.newTab != component.newTabSelect.getCheckBox().isSelected
                 || state.recentFilesMode != component.recentFileModeSelector.getRecentFilesTypeComboBox().selectedItem
+                || state.defaultPopupHeight != component.defaultDimension.getIntSpinner(4).value
+                || state.defaultPopupWidth != component.defaultDimension.getIntSpinner(1).value
+                || state.searchPosition != component.searchPosition.getSearchPositionComboBox().selectedItem
                 || state.prioritizeShorterDirPaths != component.prioritizeShortDirs.getCheckBox().isSelected
                 || state.debouncePeriod != component.debounceTimerValue.getIntSpinner().value
                 || state.fileListLimit != component.fileListLimit.getIntSpinner().value
@@ -87,6 +93,21 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
     override fun apply() {
         state.newTab = component.newTabSelect.getCheckBox().isSelected
         state.recentFilesMode = RecentFilesMode.entries.toTypedArray()[component.recentFileModeSelector.getRecentFilesTypeComboBox().selectedIndex]
+
+        val newPopupHeight = component.defaultDimension.getIntSpinner(4).value as Int
+        val newPopupWidth = component.defaultDimension.getIntSpinner(1).value as Int
+        val newSearchPosition: FuzzierGlobalSettingsService.SearchPosition = FuzzierGlobalSettingsService.SearchPosition.entries.toTypedArray()[component.searchPosition.getSearchPositionComboBox().selectedIndex]
+        if (state.searchPosition != newSearchPosition ||
+            state.defaultPopupHeight != newPopupHeight ||
+            state.defaultPopupWidth != newPopupWidth) {
+
+            // Reset window size and split position to defaults
+            state.resetWindow = true
+            state.splitPosition = FuzzierGlobalSettingsService.DEFAULT_SPLIT_POSITION
+        }
+        state.defaultPopupHeight = newPopupHeight
+        state.defaultPopupWidth = newPopupWidth
+        state.searchPosition = newSearchPosition
         state.prioritizeShorterDirPaths = component.prioritizeShortDirs.getCheckBox().isSelected
         state.debouncePeriod = component.debounceTimerValue.getIntSpinner().value as Int
         state.fileListLimit = component.fileListLimit.getIntSpinner().value as Int

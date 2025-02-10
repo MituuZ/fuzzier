@@ -173,7 +173,7 @@ class FuzzyActionTest {
             override fun runAction(project: Project, actionEvent: AnActionEvent) {
             }
 
-            override fun createPopup(): JBPopup {
+            override fun createPopup(screenDimensionKey1: String): JBPopup {
                 TODO("Not yet implemented")
             }
 

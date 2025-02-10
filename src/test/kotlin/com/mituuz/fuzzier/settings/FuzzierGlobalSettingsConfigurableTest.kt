@@ -29,6 +29,7 @@ import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType.FILENAME_ONLY
 import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType.FILENAME_WITH_PATH_STYLED
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode.NONE
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode.RECENT_PROJECT_FILES
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.SearchPosition.TOP
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -174,8 +175,36 @@ class FuzzierGlobalSettingsConfigurableTest {
         assertTrue(settingsConfigurable.isModified)
     }
 
+    @Test
+    fun dimensionKeyWidth() {
+        pre()
+        state.defaultPopupWidth = 400
+        assertTrue(settingsConfigurable.isModified)
+        settingsConfigurable.apply()
+        assertTrue(state.resetWindow)
+    }
+
+    @Test
+    fun searchPosition() {
+        pre()
+        state.searchPosition = TOP
+        assertTrue(settingsConfigurable.isModified)
+        settingsConfigurable.apply()
+        assertTrue(state.resetWindow)
+    }
+
+    @Test
+    fun dimensionKeyHeight() {
+        pre()
+        state.defaultPopupHeight = 700
+        assertTrue(settingsConfigurable.isModified)
+        settingsConfigurable.apply()
+        assertTrue(state.resetWindow)
+    }
+
     private fun pre() {
         settingsConfigurable.createComponent()
         assertFalse(settingsConfigurable.isModified)
+        assertFalse(state.resetWindow)
     }
 }

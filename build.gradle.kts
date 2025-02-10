@@ -10,7 +10,7 @@ plugins {
 }
 
 // Use same version and group for the jar and the plugin
-val currentVersion = "1.4.2"
+val currentVersion = "1.5.0"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -80,8 +80,16 @@ intellijPlatform {
     
     changeNotes = """
     <h2>Version $currentVersion</h2>
-    - Make highlighting speed faster when highlighting sequential matches<br>
-    - Init JMH benchmarking to be used in the future<br>
+    <ul>
+      <li>Allow configuring the default finder popup size</li>
+      <li>Fix a bug where the correct dimension key wasn't used</li>
+      <li>Enable changing the search field location on the popup
+        <ul>
+          <li>Top, bottom, left and right</li>
+        </ul>
+      </li>
+      <li>Improve mover popup's default size</li>
+    </ul>    
     """.trimIndent()
     
     ideaVersion {

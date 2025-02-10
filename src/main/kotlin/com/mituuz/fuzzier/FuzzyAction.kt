@@ -82,16 +82,16 @@ abstract class FuzzyAction : AnAction() {
 
     abstract fun runAction(project: Project, actionEvent: AnActionEvent)
 
-    abstract fun createPopup(): JBPopup
+    abstract fun createPopup(screenDimensionKey: String): JBPopup
 
-    fun getInitialPopup(): JBPopup {
+    fun getInitialPopup(screenDimensionKey: String): JBPopup {
         return JBPopupFactory
             .getInstance()
             .createComponentPopupBuilder(component, component.searchField)
             .setFocusable(true)
             .setRequestFocus(true)
             .setResizable(true)
-            .setDimensionServiceKey(null, dimensionKey, true)
+            .setDimensionServiceKey(null, screenDimensionKey, true)
             .setTitle(popupTitle)
             .setMovable(true)
             .setShowBorder(true)
@@ -102,18 +102,16 @@ abstract class FuzzyAction : AnAction() {
         val mainWindow = WindowManager.getInstance().getIdeFrame(project)?.component
         mainWindow?.let {
             val screenBounds = it.graphicsConfiguration.bounds
-            val dimensionKey = createDimensionKey(dimensionKey, screenBounds)
-            popup = createPopup()
+            val screenDimensionKey = createDimensionKey(dimensionKey, screenBounds)
 
             if (globalState.resetWindow) {
-                DimensionService.getInstance().setSize(dimensionKey, null, null)
-                DimensionService.getInstance().setLocation(dimensionKey, null, null)
+                DimensionService.getInstance().setSize(screenDimensionKey, component.preferredSize, null)
+                DimensionService.getInstance().setLocation(screenDimensionKey, null, null)
                 globalState.resetWindow = false
             }
 
-            val centerX = screenBounds.x + screenBounds.width / 2
-            val centerY = screenBounds.y + screenBounds.height / 2
-            popup.showInScreenCoordinates(it, Point(centerX, centerY))
+            popup = createPopup(screenDimensionKey)
+            popup.showInCenterOf(it)
         }
     }
 
