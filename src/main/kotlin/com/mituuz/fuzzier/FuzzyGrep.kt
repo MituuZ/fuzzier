@@ -25,6 +25,7 @@ import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.AbstractAction
 import javax.swing.DefaultListModel
 import javax.swing.JComponent
@@ -117,7 +118,13 @@ class FuzzyGrep() : FuzzyAction() {
 
     private fun findInFiles(searchString: String, listModel: DefaultListModel<FuzzyContainer>,
                             files: Set<VirtualFile>, projectBasePath: String) {
+        val limitReached = AtomicBoolean(false)
+
         files.parallelStream().forEach {
+            if (limitReached.get()) {
+                return@forEach
+            }
+
             ApplicationManager.getApplication().runReadAction {
                 it.findDocument()?.text?.let { text ->
                     var found = false
@@ -146,6 +153,11 @@ class FuzzyGrep() : FuzzyAction() {
                                     row.trim()
                                 )
                             )
+
+                            if (listModel.size >= globalState.fileListLimit) {
+                                limitReached.set(true)
+                                return@runReadAction
+                            }
                         }
 
                         i++
