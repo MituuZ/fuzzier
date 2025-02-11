@@ -78,6 +78,7 @@ class FuzzyGrep() : FuzzyAction() {
 
     override fun updateListContents(project: Project, searchString: String) {
         if (StringUtils.isBlank(searchString)) {
+            component.fileList.model = DefaultListModel()
             return
         }
 
