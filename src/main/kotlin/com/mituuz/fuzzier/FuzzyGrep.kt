@@ -81,9 +81,9 @@ class FuzzyGrep() : FuzzyAction() {
             return
         }
 
+        currentTask?.takeIf { !it.isDone }?.cancel(true)
         currentTask = ApplicationManager.getApplication().executeOnPooledThread {
             try {
-                currentTask?.takeIf { !it.isDone }?.cancel(true)
                 val task = currentTask
                 component.fileList.setPaintBusy(true)
                 val listModel = DefaultListModel<FuzzyContainer>()
