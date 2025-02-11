@@ -1,4 +1,7 @@
 # Changelog
+## Version 1.6.0
+- Introduce the first, experimental version of Fuzzy Grep
+
 ## Version 1.5.0
 - Allow configuring the default finder popup size
 - Fix a bug where the correct dimension key wasn't used
