@@ -87,6 +87,8 @@ class FuzzyGrep() : FuzzyAction() {
                 val task = currentTask
                 component.fileList.setPaintBusy(true)
                 val listModel = DefaultListModel<FuzzyContainer>()
+                component.fileList.model = listModel
+                component.fileList.cellRenderer = getCellRenderer()
 
                 if (task?.isCancelled == true) return@executeOnPooledThread
 
@@ -99,12 +101,7 @@ class FuzzyGrep() : FuzzyAction() {
                 if (task?.isCancelled == true) return@executeOnPooledThread
 
                 ApplicationManager.getApplication().invokeLater {
-                    component.fileList.model = listModel
-                    component.fileList.cellRenderer = getCellRenderer()
                     component.fileList.setPaintBusy(false)
-                    if (!component.fileList.isEmpty) {
-                        component.fileList.setSelectedValue(listModel[0], true)
-                    }
                 }
             } catch (_: InterruptedException) {
                 return@executeOnPooledThread
@@ -141,7 +138,9 @@ class FuzzyGrep() : FuzzyAction() {
                     launch() {
                         ApplicationManager.getApplication().runReadAction {
                             virtualFile.findDocument()?.text?.let { text ->
-                                val filePath = virtualFile.path.removePrefix(projectBasePath)
+                                var found = false
+                                var filePath = ""
+
                                 var rows = text.split("\n")
                                 var rowCount = rows.size
                                 var i = 0
@@ -149,6 +148,10 @@ class FuzzyGrep() : FuzzyAction() {
                                 while (i < rowCount) {
                                     val row = rows[i]
                                     if (row.contains(searchString, ignoreCase = true)) {
+                                        if (!found) {
+                                            // Setup file info
+                                            filePath = virtualFile.path.removePrefix(projectBasePath)
+                                        }
                                         val columnNumber = row.indexOf(searchString, ignoreCase = true)
                                         listModel.addElement(
                                             RowContainer(
@@ -160,6 +163,14 @@ class FuzzyGrep() : FuzzyAction() {
                                                 row.trim()
                                             )
                                         )
+
+                                        if (!found) {
+                                            // Update the preview pane with the first result
+                                            if (!component.fileList.isEmpty) {
+                                                component.fileList.setSelectedValue(listModel[0], true)
+                                            }
+                                            found = true
+                                        }
 
                                         if (listModel.size >= globalState.fileListLimit) {
                                             limitReached.set(true)
