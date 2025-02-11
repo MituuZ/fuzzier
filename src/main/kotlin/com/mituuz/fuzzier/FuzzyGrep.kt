@@ -146,6 +146,7 @@ class FuzzyGrep() : FuzzyAction() {
                                 var i = 0
 
                                 while (i < rowCount) {
+                                    if (task?.isCancelled == true || limitReached.get()) return@runReadAction
                                     val row = rows[i]
                                     if (row.contains(searchString, ignoreCase = true)) {
                                         if (!found) {
