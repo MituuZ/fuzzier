@@ -85,6 +85,9 @@ class FuzzyGrep() : FuzzyAction() {
         currentTask = ApplicationManager.getApplication().executeOnPooledThread {
             try {
                 val task = currentTask
+
+                if (task?.isCancelled == true) return@executeOnPooledThread
+
                 component.fileList.setPaintBusy(true)
                 val listModel = DefaultListModel<FuzzyContainer>()
                 component.fileList.model = listModel
@@ -159,7 +162,11 @@ class FuzzyGrep() : FuzzyAction() {
                                             // Setup file info
                                             filePath = virtualFile.path.removePrefix(projectBasePath)
                                         }
+
                                         val columnNumber = row.indexOf(searchString, ignoreCase = true)
+
+                                        if (task?.isCancelled == true || limitReached.get()) return@runReadAction
+
                                         listModel.addElement(
                                             RowContainer(
                                                 filePath,
