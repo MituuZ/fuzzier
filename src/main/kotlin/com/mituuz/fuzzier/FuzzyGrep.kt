@@ -21,7 +21,6 @@ import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.RowContainer
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -158,13 +157,12 @@ class FuzzyGrep() : FuzzyAction() {
                                 while (i < rowCount) {
                                     if (task?.isCancelled == true || limitReached.get()) return@runReadAction
                                     val row = rows[i]
-                                    if (row.contains(searchString, ignoreCase = true)) {
+                                    val columnNumber = row.indexOf(searchString, ignoreCase = true)
+                                    if (columnNumber != -1) {
                                         if (!found) {
                                             // Setup file info
                                             filePath = virtualFile.path.removePrefix(projectBasePath)
                                         }
-
-                                        val columnNumber = row.indexOf(searchString, ignoreCase = true)
 
                                         if (task?.isCancelled == true || limitReached.get()) return@runReadAction
 
