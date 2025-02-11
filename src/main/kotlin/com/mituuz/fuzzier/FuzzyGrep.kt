@@ -101,7 +101,13 @@ class FuzzyGrep() : FuzzyAction() {
                 if (task?.isCancelled == true) return@executeOnPooledThread
 
                 ApplicationManager.getApplication().invokeLater {
+                    val selectedIndex = component.fileList.selectedIndex
                     component.fileList.setPaintBusy(false)
+
+                    // Retain the current selection
+                    if (selectedIndex >= 0 && selectedIndex < listModel.size) {
+                        component.fileList.selectedIndex = selectedIndex
+                    }
                 }
             } catch (_: InterruptedException) {
                 return@executeOnPooledThread
