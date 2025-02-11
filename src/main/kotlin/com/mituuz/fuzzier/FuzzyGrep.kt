@@ -20,11 +20,17 @@ import com.intellij.openapi.vfs.findDocument
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.RowContainer
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
+import java.util.concurrent.Future
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.AbstractAction
 import javax.swing.DefaultListModel
@@ -86,7 +92,7 @@ class FuzzyGrep() : FuzzyAction() {
 
             if (task?.isCancelled == true) return@executeOnPooledThread
 
-            findInFiles(searchString, listModel, files, project.basePath.toString())
+            findInFiles(searchString, listModel, files, project.basePath.toString(), task)
 
             if (task?.isCancelled == true) return@executeOnPooledThread
 
@@ -117,50 +123,54 @@ class FuzzyGrep() : FuzzyAction() {
     }
 
     private fun findInFiles(searchString: String, listModel: DefaultListModel<FuzzyContainer>,
-                            files: Set<VirtualFile>, projectBasePath: String) {
+                                    files: Set<VirtualFile>, projectBasePath: String, task: Future<*>?) {
         val limitReached = AtomicBoolean(false)
 
-        files.parallelStream().forEach {
-            if (limitReached.get()) {
-                return@forEach
-            }
+        runBlocking {
+            withContext(Dispatchers.IO) {
+                files.forEach { virtualFile ->
+                    if (task?.isCancelled == true || limitReached.get()) return@forEach
 
-            ApplicationManager.getApplication().runReadAction {
-                it.findDocument()?.text?.let { text ->
-                    var found = false
-                    var filePath = ""
+                    launch() {
+                        ApplicationManager.getApplication().runReadAction {
+                            virtualFile.findDocument()?.text?.let { text ->
+                                var found = false
+                                var filePath = ""
 
-                    var rows = text.split("\n")
-                    var rowCount = rows.size
-                    var i = 0
+                                var rows = text.split("\n")
+                                var rowCount = rows.size
+                                var i = 0
 
-                    while (i < rowCount) {
-                        val row = rows[i]
-                        if (row.contains(searchString, ignoreCase = true)) {
-                            if (found == false) {
-                                // Setup file info
-                                filePath = it.path.removePrefix(projectBasePath)
-                                found = true
-                            }
-                            val columnNumber = row.indexOf(searchString, ignoreCase = true)
-                            listModel.addElement(
-                                RowContainer(
-                                    filePath,
-                                    projectBasePath,
-                                    it.name,
-                                    i,
-                                    columnNumber,
-                                    row.trim()
-                                )
-                            )
+                                while (i < rowCount) {
+                                    val row = rows[i]
+                                    if (row.contains(searchString, ignoreCase = true)) {
+                                        if (found == false) {
+                                            // Setup file info
+                                            filePath = virtualFile.path.removePrefix(projectBasePath)
+                                            found = true
+                                        }
+                                        val columnNumber = row.indexOf(searchString, ignoreCase = true)
+                                        listModel.addElement(
+                                            RowContainer(
+                                                filePath,
+                                                projectBasePath,
+                                                virtualFile.name,
+                                                i,
+                                                columnNumber,
+                                                row.trim()
+                                            )
+                                        )
 
-                            if (listModel.size >= globalState.fileListLimit) {
-                                limitReached.set(true)
-                                return@runReadAction
+                                        if (listModel.size >= globalState.fileListLimit) {
+                                            limitReached.set(true)
+                                            return@runReadAction
+                                        }
+                                    }
+
+                                    i++
+                                }
                             }
                         }
-
-                        i++
                     }
                 }
             }
