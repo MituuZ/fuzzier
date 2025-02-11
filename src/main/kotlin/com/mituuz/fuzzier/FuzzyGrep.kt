@@ -182,7 +182,7 @@ class FuzzyGrep() : FuzzyAction() {
                                         if (!found) {
                                             // Update the preview pane with the first result
                                             if (!component.fileList.isEmpty) {
-                                                component.fileList.setSelectedValue(listModel[0], true)
+                                                component.fileList.selectedIndex = 0
                                             }
                                             found = true
                                         }
