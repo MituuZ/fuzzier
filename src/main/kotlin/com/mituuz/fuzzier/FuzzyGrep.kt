@@ -81,7 +81,11 @@ class FuzzyGrep() : FuzzyAction() {
 
             if (task?.isCancelled == true) return@executeOnPooledThread
 
-            findInFiles(searchString, listModel, project)
+            var files = getFiles(project)
+
+            if (task?.isCancelled == true) return@executeOnPooledThread
+
+            findInFiles(searchString, listModel, files, project.basePath.toString())
 
             if (task?.isCancelled == true) return@executeOnPooledThread
 
@@ -96,14 +100,24 @@ class FuzzyGrep() : FuzzyAction() {
         }
     }
 
-    private fun findInFiles(searchString: String, listModel: DefaultListModel<FuzzyContainer>, project: Project) {
+    private fun getFiles(project: Project): Set<VirtualFile> {
+        val res = HashSet<VirtualFile>()
         val fileIndex = ProjectFileIndex.getInstance(project)
-        val projectBasePath = project.basePath.toString()
-
         fileIndex.iterateContent {
             if (currentTask?.isCancelled == true) {
                 return@iterateContent false
             }
+
+            res.add(it)
+            true
+        }
+
+        return res
+    }
+
+    private fun findInFiles(searchString: String, listModel: DefaultListModel<FuzzyContainer>,
+                            files: Set<VirtualFile>, projectBasePath: String) {
+        files.parallelStream().forEach {
             ApplicationManager.getApplication().runReadAction {
                 it.findDocument()?.text?.let { text ->
                     var found = false
@@ -122,16 +136,23 @@ class FuzzyGrep() : FuzzyAction() {
                                 found = true
                             }
                             val columnNumber = row.indexOf(searchString, ignoreCase = true)
-                            listModel.addElement(RowContainer(filePath, projectBasePath, it.name, i, columnNumber, row.trim()))
+                            listModel.addElement(
+                                RowContainer(
+                                    filePath,
+                                    projectBasePath,
+                                    it.name,
+                                    i,
+                                    columnNumber,
+                                    row.trim()
+                                )
+                            )
                         }
 
                         i++
                     }
                 }
             }
-            true
         }
-
     }
 
     private fun createListeners(project: Project) {
