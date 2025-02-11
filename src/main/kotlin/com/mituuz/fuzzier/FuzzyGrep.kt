@@ -104,12 +104,14 @@ class FuzzyGrep() : FuzzyAction() {
                 if (task?.isCancelled == true) return@executeOnPooledThread
 
                 ApplicationManager.getApplication().invokeLater {
-                    val selectedIndex = component.fileList.selectedIndex
-                    component.fileList.setPaintBusy(false)
+                    synchronized(listModel) {
+                        val selectedIndex = component.fileList.selectedIndex
+                        component.fileList.setPaintBusy(false)
 
-                    // Retain the current selection
-                    if (selectedIndex >= 0 && selectedIndex < listModel.size) {
-                        component.fileList.selectedIndex = selectedIndex
+                        // Retain the current selection
+                        if (selectedIndex >= 0 && selectedIndex < listModel.size) {
+                            component.fileList.selectedIndex = selectedIndex
+                        }
                     }
                 }
             } catch (_: InterruptedException) {
@@ -177,12 +179,14 @@ class FuzzyGrep() : FuzzyAction() {
                                             )
                                         )
 
-                                        if (!found) {
-                                            // Update the preview pane with the first result
-                                            if (!component.fileList.isEmpty) {
-                                                component.fileList.selectedIndex = 0
+                                        synchronized(listModel) {
+                                            if (!found) {
+                                                // Update the preview pane with the first result
+                                                if (!component.fileList.isEmpty) {
+                                                    component.fileList.selectedIndex = 0
+                                                }
+                                                found = true
                                             }
-                                            found = true
                                         }
 
                                         if (listModel.size >= globalState.fileListLimit) {
