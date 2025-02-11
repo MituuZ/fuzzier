@@ -36,6 +36,7 @@ import javax.swing.AbstractAction
 import javax.swing.DefaultListModel
 import javax.swing.JComponent
 import javax.swing.KeyStroke
+import kotlin.coroutines.cancellation.CancellationException
 
 class FuzzyGrep() : FuzzyAction() {
     override var popupTitle: String = "Fuzzy Grep"
@@ -80,29 +81,35 @@ class FuzzyGrep() : FuzzyAction() {
             return
         }
 
-        currentTask?.takeIf { !it.isDone }?.cancel(true)
         currentTask = ApplicationManager.getApplication().executeOnPooledThread {
-            val task = currentTask
-            component.fileList.setPaintBusy(true)
-            val listModel = DefaultListModel<FuzzyContainer>()
+            try {
+                currentTask?.takeIf { !it.isDone }?.cancel(true)
+                val task = currentTask
+                component.fileList.setPaintBusy(true)
+                val listModel = DefaultListModel<FuzzyContainer>()
 
-            if (task?.isCancelled == true) return@executeOnPooledThread
+                if (task?.isCancelled == true) return@executeOnPooledThread
 
-            var files = getFiles(project)
+                var files = getFiles(project)
 
-            if (task?.isCancelled == true) return@executeOnPooledThread
+                if (task?.isCancelled == true) return@executeOnPooledThread
 
-            findInFiles(searchString, listModel, files, project.basePath.toString(), task)
+                findInFiles(searchString, listModel, files, project.basePath.toString(), task)
 
-            if (task?.isCancelled == true) return@executeOnPooledThread
+                if (task?.isCancelled == true) return@executeOnPooledThread
 
-            ApplicationManager.getApplication().invokeLater {
-                component.fileList.model = listModel
-                component.fileList.cellRenderer = getCellRenderer()
-                component.fileList.setPaintBusy(false)
-                if (!component.fileList.isEmpty) {
-                    component.fileList.setSelectedValue(listModel[0], true)
+                ApplicationManager.getApplication().invokeLater {
+                    component.fileList.model = listModel
+                    component.fileList.cellRenderer = getCellRenderer()
+                    component.fileList.setPaintBusy(false)
+                    if (!component.fileList.isEmpty) {
+                        component.fileList.setSelectedValue(listModel[0], true)
+                    }
                 }
+            } catch (_: InterruptedException) {
+                return@executeOnPooledThread
+            } catch (_: CancellationException) {
+                return@executeOnPooledThread
             }
         }
     }
