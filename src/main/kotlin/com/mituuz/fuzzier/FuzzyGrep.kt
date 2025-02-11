@@ -168,18 +168,18 @@ class FuzzyGrep() : FuzzyAction() {
 
                                         if (task?.isCancelled == true || limitReached.get()) return@runReadAction
 
-                                        listModel.addElement(
-                                            RowContainer(
-                                                filePath,
-                                                projectBasePath,
-                                                virtualFile.name,
-                                                i,
-                                                columnNumber,
-                                                row.trim()
-                                            )
-                                        )
-
                                         synchronized(listModel) {
+                                            listModel.addElement(
+                                                RowContainer(
+                                                    filePath,
+                                                    projectBasePath,
+                                                    virtualFile.name,
+                                                    i,
+                                                    columnNumber,
+                                                    row.trim()
+                                                )
+                                            )
+
                                             if (!found) {
                                                 // Update the preview pane with the first result
                                                 if (!component.fileList.isEmpty) {
