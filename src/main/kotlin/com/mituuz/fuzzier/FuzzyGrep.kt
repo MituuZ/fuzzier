@@ -141,9 +141,7 @@ class FuzzyGrep() : FuzzyAction() {
                     launch() {
                         ApplicationManager.getApplication().runReadAction {
                             virtualFile.findDocument()?.text?.let { text ->
-                                var found = false
-                                var filePath = ""
-
+                                val filePath = virtualFile.path.removePrefix(projectBasePath)
                                 var rows = text.split("\n")
                                 var rowCount = rows.size
                                 var i = 0
@@ -151,11 +149,6 @@ class FuzzyGrep() : FuzzyAction() {
                                 while (i < rowCount) {
                                     val row = rows[i]
                                     if (row.contains(searchString, ignoreCase = true)) {
-                                        if (found == false) {
-                                            // Setup file info
-                                            filePath = virtualFile.path.removePrefix(projectBasePath)
-                                            found = true
-                                        }
                                         val columnNumber = row.indexOf(searchString, ignoreCase = true)
                                         listModel.addElement(
                                             RowContainer(
