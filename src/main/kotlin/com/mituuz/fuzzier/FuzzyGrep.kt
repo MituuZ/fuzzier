@@ -166,14 +166,14 @@ class FuzzyGrep() : FuzzyAction() {
     private fun findInFiles(searchString: String, listModel: DefaultListModel<FuzzyContainer>,
                                     files: Set<VirtualFile>, projectBasePath: String, task: Future<*>?) {
         val limitReached = AtomicBoolean(false)
+        val firstItem = AtomicBoolean(false)
 
         files.parallelStream().forEach { virtualFile ->
             if (task?.isCancelled == true || limitReached.get()) return@forEach
 
             ApplicationManager.getApplication().runReadAction {
                 virtualFile.findDocument()?.text?.let { text ->
-                    var found = false
-                    var filePath = ""
+                    val filePath = virtualFile.path.removePrefix(projectBasePath)
 
                     var rows = text.split("\n")
                     var rowCount = rows.size
@@ -181,14 +181,11 @@ class FuzzyGrep() : FuzzyAction() {
 
                     while (i < rowCount) {
                         if (task?.isCancelled == true || limitReached.get()) return@runReadAction
+
                         val row = rows[i]
                         val columnNumber = row.indexOf(searchString, ignoreCase = true)
-                        if (columnNumber != -1) {
-                            if (!found) {
-                                // Setup file info on the first run
-                                filePath = virtualFile.path.removePrefix(projectBasePath)
-                            }
 
+                        if (columnNumber != -1) {
                             if (task?.isCancelled == true || limitReached.get()) return@runReadAction
 
                             synchronized(listModel) {
@@ -203,12 +200,13 @@ class FuzzyGrep() : FuzzyAction() {
                                     )
                                 )
 
-                                if (!found) {
-                                    // Update the preview pane with the first result
+                                // Update the preview pane with the first result
+                                // Only jump once to the first result
+                                if (!firstItem.get()) {
                                     if (!component.fileList.isEmpty) {
                                         component.fileList.selectedIndex = 0
                                     }
-                                    found = true
+                                    firstItem.set(true);
                                 }
                             }
 
