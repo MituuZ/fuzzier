@@ -79,14 +79,14 @@ class FuzzyGrep() : FuzzyAction() {
     }
 
     override fun updateListContents(project: Project, searchString: String) {
+        if (StringUtils.isBlank(searchString)) {
+            component.fileList.model = DefaultListModel()
+            return
+        }
+
         // println("Fuzzier: Update list contents called from thread: " + Thread.currentThread().name)
         currentTask?.takeIf { !it.isDone }?.cancel(true)
         if (lock.tryLock(500, TimeUnit.MILLISECONDS)) {
-            if (StringUtils.isBlank(searchString)) {
-                component.fileList.model = DefaultListModel()
-                lock.unlock()
-                return
-            }
 
             // println("Fuzzier: Thread " + Thread.currentThread().name + " aquired the lock")
             try {
@@ -167,68 +167,125 @@ class FuzzyGrep() : FuzzyAction() {
                                     files: Set<VirtualFile>, projectBasePath: String, task: Future<*>?) {
         val limitReached = AtomicBoolean(false)
 
-        runBlocking {
-            withContext(Dispatchers.IO) {
-                files.forEach { virtualFile ->
-                    if (task?.isCancelled == true || limitReached.get()) return@forEach
+        files.parallelStream().forEach { virtualFile ->
+            if (task?.isCancelled == true || limitReached.get()) return@forEach
 
-                    launch() {
-                        ApplicationManager.getApplication().runReadAction {
-                            virtualFile.findDocument()?.text?.let { text ->
-                                var found = false
-                                var filePath = ""
+            ApplicationManager.getApplication().runReadAction {
+                virtualFile.findDocument()?.text?.let { text ->
+                    var found = false
+                    var filePath = ""
 
-                                var rows = text.split("\n")
-                                var rowCount = rows.size
-                                var i = 0
+                    var rows = text.split("\n")
+                    var rowCount = rows.size
+                    var i = 0
 
-                                while (i < rowCount) {
-                                    if (task?.isCancelled == true || limitReached.get()) return@runReadAction
-                                    val row = rows[i]
-                                    val columnNumber = row.indexOf(searchString, ignoreCase = true)
-                                    if (columnNumber != -1) {
-                                        if (!found) {
-                                            // Setup file info
-                                            filePath = virtualFile.path.removePrefix(projectBasePath)
-                                        }
+                    while (i < rowCount) {
+                        if (task?.isCancelled == true || limitReached.get()) return@runReadAction
+                        val row = rows[i]
+                        val columnNumber = row.indexOf(searchString, ignoreCase = true)
+                        if (columnNumber != -1) {
+                            if (!found) {
+                                // Setup file info
+                                filePath = virtualFile.path.removePrefix(projectBasePath)
+                            }
 
-                                        if (task?.isCancelled == true || limitReached.get()) return@runReadAction
+                            if (task?.isCancelled == true || limitReached.get()) return@runReadAction
 
-                                        synchronized(listModel) {
-                                            listModel.addElement(
-                                                RowContainer(
-                                                    filePath,
-                                                    projectBasePath,
-                                                    virtualFile.name,
-                                                    i,
-                                                    columnNumber,
-                                                    row.trim()
-                                                )
-                                            )
+                            synchronized(listModel) {
+                                listModel.addElement(
+                                    RowContainer(
+                                        filePath,
+                                        projectBasePath,
+                                        virtualFile.name,
+                                        i,
+                                        columnNumber,
+                                        row.trim()
+                                    )
+                                )
 
-                                            if (!found) {
-                                                // Update the preview pane with the first result
-                                                if (!component.fileList.isEmpty) {
-                                                    component.fileList.selectedIndex = 0
-                                                }
-                                                found = true
-                                            }
-                                        }
-
-                                        if (listModel.size >= globalState.fileListLimit) {
-                                            limitReached.set(true)
-                                            return@runReadAction
-                                        }
+                                if (!found) {
+                                    // Update the preview pane with the first result
+                                    if (!component.fileList.isEmpty) {
+                                        component.fileList.selectedIndex = 0
                                     }
-
-                                    i++
+                                    found = true
                                 }
                             }
+
+                            if (listModel.size >= globalState.fileListLimit) {
+                                limitReached.set(true)
+                                return@runReadAction
+                            }
                         }
+
+                        i++
                     }
                 }
             }
         }
+
+//        runBlocking {
+//            withContext(Dispatchers.IO) {
+//                files.forEach { virtualFile ->
+//                    if (task?.isCancelled == true || limitReached.get()) return@forEach
+//
+//                    launch() {
+//                        ApplicationManager.getApplication().runReadAction {
+//                            virtualFile.findDocument()?.text?.let { text ->
+//                                var found = false
+//                                var filePath = ""
+//
+//                                var rows = text.split("\n")
+//                                var rowCount = rows.size
+//                                var i = 0
+//
+//                                while (i < rowCount) {
+//                                    if (task?.isCancelled == true || limitReached.get()) return@runReadAction
+//                                    val row = rows[i]
+//                                    val columnNumber = row.indexOf(searchString, ignoreCase = true)
+//                                    if (columnNumber != -1) {
+//                                        if (!found) {
+//                                            // Setup file info
+//                                            filePath = virtualFile.path.removePrefix(projectBasePath)
+//                                        }
+//
+//                                        if (task?.isCancelled == true || limitReached.get()) return@runReadAction
+//
+//                                        synchronized(listModel) {
+//                                            listModel.addElement(
+//                                                RowContainer(
+//                                                    filePath,
+//                                                    projectBasePath,
+//                                                    virtualFile.name,
+//                                                    i,
+//                                                    columnNumber,
+//                                                    row.trim()
+//                                                )
+//                                            )
+//
+//                                            if (!found) {
+//                                                // Update the preview pane with the first result
+//                                                if (!component.fileList.isEmpty) {
+//                                                    component.fileList.selectedIndex = 0
+//                                                }
+//                                                found = true
+//                                            }
+//                                        }
+//
+//                                        if (listModel.size >= globalState.fileListLimit) {
+//                                            limitReached.set(true)
+//                                            return@runReadAction
+//                                        }
+//                                    }
+//
+//                                    i++
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
     }
 
     private fun createListeners(project: Project) {
