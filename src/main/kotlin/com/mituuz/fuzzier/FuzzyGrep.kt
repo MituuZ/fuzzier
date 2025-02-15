@@ -185,7 +185,7 @@ class FuzzyGrep() : FuzzyAction() {
                         val columnNumber = row.indexOf(searchString, ignoreCase = true)
                         if (columnNumber != -1) {
                             if (!found) {
-                                // Setup file info
+                                // Setup file info on the first run
                                 filePath = virtualFile.path.removePrefix(projectBasePath)
                             }
 
