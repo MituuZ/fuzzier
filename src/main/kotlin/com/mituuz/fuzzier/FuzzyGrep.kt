@@ -359,6 +359,7 @@ class FuzzyGrep() : FuzzyAction() {
                 }
             }
         }
+        currentTask?.cancel(true)
         popup.cancel()
         ApplicationManager.getApplication().invokeLater {
             val rc = fuzzyContainer as RowContainer
