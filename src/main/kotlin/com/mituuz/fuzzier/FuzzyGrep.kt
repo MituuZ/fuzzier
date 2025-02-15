@@ -30,7 +30,9 @@ import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.util.concurrent.Future
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.locks.ReentrantLock
 import javax.swing.AbstractAction
 import javax.swing.DefaultListModel
 import javax.swing.JComponent
@@ -40,6 +42,7 @@ import kotlin.coroutines.cancellation.CancellationException
 class FuzzyGrep() : FuzzyAction() {
     override var popupTitle: String = "Fuzzy Grep"
     override var dimensionKey = "FuzzyGrepPopup"
+    var lock = ReentrantLock()
 
     override fun runAction(
         project: Project,
@@ -76,49 +79,72 @@ class FuzzyGrep() : FuzzyAction() {
     }
 
     override fun updateListContents(project: Project, searchString: String) {
-        if (StringUtils.isBlank(searchString)) {
-            component.fileList.model = DefaultListModel()
-            return
-        }
-
+        // println("Fuzzier: Update list contents called from thread: " + Thread.currentThread().name)
         currentTask?.takeIf { !it.isDone }?.cancel(true)
-        currentTask = ApplicationManager.getApplication().executeOnPooledThread {
+        if (lock.tryLock(500, TimeUnit.MILLISECONDS)) {
+            if (StringUtils.isBlank(searchString)) {
+                component.fileList.model = DefaultListModel()
+                lock.unlock()
+                return
+            }
+
+            // println("Fuzzier: Thread " + Thread.currentThread().name + " aquired the lock")
             try {
-                val task = currentTask
+                currentTask = ApplicationManager.getApplication().executeOnPooledThread {
+                    try {
+                        // println("Fuzzier: Starting a new processing task: " + Thread.currentThread().name)
+                        val task = currentTask
 
-                if (task?.isCancelled == true) return@executeOnPooledThread
+                        if (task?.isCancelled == true) return@executeOnPooledThread
 
-                component.fileList.setPaintBusy(true)
-                val listModel = DefaultListModel<FuzzyContainer>()
-                component.fileList.model = listModel
-                component.fileList.cellRenderer = getCellRenderer()
+                        component.fileList.setPaintBusy(true)
+                        val listModel = DefaultListModel<FuzzyContainer>()
+                        component.fileList.model = listModel
+                        component.fileList.cellRenderer = getCellRenderer()
 
-                if (task?.isCancelled == true) return@executeOnPooledThread
+                        if (task?.isCancelled == true) return@executeOnPooledThread
 
-                var files = getFiles(project)
+                        var files = getFiles(project)
 
-                if (task?.isCancelled == true) return@executeOnPooledThread
+                        if (task?.isCancelled == true) return@executeOnPooledThread
 
-                findInFiles(searchString, listModel, files, project.basePath.toString(), task)
+                        findInFiles(searchString, listModel, files, project.basePath.toString(), task)
 
-                if (task?.isCancelled == true) return@executeOnPooledThread
+                        if (task?.isCancelled == true) return@executeOnPooledThread
 
-                ApplicationManager.getApplication().invokeLater {
-                    synchronized(listModel) {
-                        val selectedIndex = component.fileList.selectedIndex
-                        component.fileList.setPaintBusy(false)
+                        ApplicationManager.getApplication().invokeLater {
+                            synchronized(listModel) {
+                                val selectedIndex = component.fileList.selectedIndex
+                                component.fileList.setPaintBusy(false)
 
-                        // Retain the current selection
-                        if (selectedIndex >= 0 && selectedIndex < listModel.size) {
-                            component.fileList.selectedIndex = selectedIndex
+                                // Retain the current selection
+                                if (selectedIndex >= 0 && selectedIndex < listModel.size) {
+                                    component.fileList.selectedIndex = selectedIndex
+                                }
+                            }
                         }
+                        // println("Fuzzier: Finished processing: " + Thread.currentThread().name)
+                    } catch (_: InterruptedException) {
+                        // println("Fuzzier: Stopping process task: " + Thread.currentThread().name)
+                        return@executeOnPooledThread
+                    } catch (_: CancellationException) {
+                        // println("Fuzzier: Stopping process task: " + Thread.currentThread().name)
+                        return@executeOnPooledThread
                     }
                 }
-            } catch (_: InterruptedException) {
-                return@executeOnPooledThread
-            } catch (_: CancellationException) {
-                return@executeOnPooledThread
+                try {
+                    currentTask?.get()
+                } catch (_: InterruptedException) {
+                    // println("Fuzzier: Stopping process task: " + Thread.currentThread().name)
+                } catch (_: CancellationException) {
+                    // println("Fuzzier: Stopping process task: " + Thread.currentThread().name)
+                }
+            } finally {
+                // println("Fuzzier: Thread " + Thread.currentThread().name + " released the lock")
+                lock.unlock()
             }
+        } else {
+            // println("Fuzzier: Thread " + Thread.currentThread().name + " could not aquire the lock")
         }
     }
 
