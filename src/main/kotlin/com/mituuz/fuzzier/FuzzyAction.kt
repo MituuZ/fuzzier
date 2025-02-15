@@ -50,7 +50,6 @@ import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.util.FuzzierUtil
 import com.mituuz.fuzzier.util.FuzzierUtil.Companion.createDimensionKey
 import java.awt.Component
-import java.awt.Point
 import java.awt.event.ActionEvent
 import java.util.*
 import java.util.Timer

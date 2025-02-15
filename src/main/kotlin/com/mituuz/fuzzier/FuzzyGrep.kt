@@ -72,6 +72,7 @@ class FuzzyGrep() : FuzzyAction() {
                     (component as FuzzyFinderComponent).splitPane.dividerLocation
                 resetOriginalHandlers()
                 super.onClosed(event)
+                currentTask?.cancel(true)
             }
         })
 
@@ -359,7 +360,6 @@ class FuzzyGrep() : FuzzyAction() {
                 }
             }
         }
-        currentTask?.cancel(true)
         popup.cancel()
         ApplicationManager.getApplication().invokeLater {
             val rc = fuzzyContainer as RowContainer
