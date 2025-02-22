@@ -83,8 +83,8 @@ intellijPlatform {
     <ul>
       <li>Introduce first version of Fuzzy Grep</li>
       <ul>
-        <li>Call [ripgrep](https://github.com/BurntSushi/ripgrep) in the background</li>
-      </ul>    
+        <li>Call <a href="https://github.com/BurntSushi/ripgrep">ripgrep</a> in the background</li>
+      </ul>
     </ul>    
     """.trimIndent()
     
