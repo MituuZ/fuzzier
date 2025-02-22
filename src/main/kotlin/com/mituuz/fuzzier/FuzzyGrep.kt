@@ -29,6 +29,9 @@ import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
+import java.io.File
+import java.io.IOException
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -164,127 +167,34 @@ class FuzzyGrep() : FuzzyAction() {
         return res
     }
 
-    private fun findInFiles(searchString: String, listModel: DefaultListModel<FuzzyContainer>,
-                                    files: Set<VirtualFile>, projectBasePath: String, task: Future<*>?) {
-        val limitReached = AtomicBoolean(false)
-        val firstItem = AtomicBoolean(false)
+    fun String.runCommand(workingDir: File): String? {
+    try {
+        val parts = this.split("\\s".toRegex())
+        val proc = ProcessBuilder(*parts.toTypedArray())
+                .directory(workingDir)
+                .redirectOutput(ProcessBuilder.Redirect.PIPE)
+                .redirectError(ProcessBuilder.Redirect.PIPE)
+                .start()
 
-        files.parallelStream().forEach { virtualFile ->
-            if (task?.isCancelled == true || limitReached.get()) return@forEach
+        proc.waitFor(15, TimeUnit.SECONDS)
+        return proc.inputStream.bufferedReader().readText()
+    } catch(e: IOException) {
+        println("Fuzzier: Error running command: $this")
+        e.printStackTrace()
+        return null
+    }
+}
 
-            ApplicationManager.getApplication().runReadAction {
-                virtualFile.findDocument()?.text?.let { text ->
-                    val filePath = virtualFile.path.removePrefix(projectBasePath)
+    private fun findInFiles(
+        searchString: String, listModel: DefaultListModel<FuzzyContainer>,
+        files: Set<VirtualFile>, projectBasePath: String, task: Future<*>?
+    ) {
+        println("Fuzzier: Starting process: $searchString in $projectBasePath")
 
-                    var rows = text.split("\n")
-                    var rowCount = rows.size
-                    var i = 0
-
-                    while (i < rowCount) {
-                        if (task?.isCancelled == true || limitReached.get()) return@runReadAction
-
-                        val row = rows[i]
-                        val columnNumber = row.indexOf(searchString, ignoreCase = true)
-
-                        if (columnNumber != -1) {
-                            if (task?.isCancelled == true || limitReached.get()) return@runReadAction
-
-                            synchronized(listModel) {
-                                listModel.addElement(
-                                    RowContainer(
-                                        filePath,
-                                        projectBasePath,
-                                        virtualFile.name,
-                                        i,
-                                        columnNumber,
-                                        row.trim()
-                                    )
-                                )
-
-                                // Update the preview pane with the first result
-                                // Only jump once to the first result
-                                if (!firstItem.get()) {
-                                    if (!component.fileList.isEmpty) {
-                                        component.fileList.selectedIndex = 0
-                                    }
-                                    firstItem.set(true);
-                                }
-                            }
-
-                            if (listModel.size >= globalState.fileListLimit) {
-                                limitReached.set(true)
-                                return@runReadAction
-                            }
-                        }
-
-                        i++
-                    }
-                }
-            }
+        val res = "echo $searchString".runCommand(File(projectBasePath))
+        if (res != null) {
+            println("Fuzzier: Finished process: $searchString in $projectBasePath")
         }
-
-//        runBlocking {
-//            withContext(Dispatchers.IO) {
-//                files.forEach { virtualFile ->
-//                    if (task?.isCancelled == true || limitReached.get()) return@forEach
-//
-//                    launch() {
-//                        ApplicationManager.getApplication().runReadAction {
-//                            virtualFile.findDocument()?.text?.let { text ->
-//                                var found = false
-//                                var filePath = ""
-//
-//                                var rows = text.split("\n")
-//                                var rowCount = rows.size
-//                                var i = 0
-//
-//                                while (i < rowCount) {
-//                                    if (task?.isCancelled == true || limitReached.get()) return@runReadAction
-//                                    val row = rows[i]
-//                                    val columnNumber = row.indexOf(searchString, ignoreCase = true)
-//                                    if (columnNumber != -1) {
-//                                        if (!found) {
-//                                            // Setup file info
-//                                            filePath = virtualFile.path.removePrefix(projectBasePath)
-//                                        }
-//
-//                                        if (task?.isCancelled == true || limitReached.get()) return@runReadAction
-//
-//                                        synchronized(listModel) {
-//                                            listModel.addElement(
-//                                                RowContainer(
-//                                                    filePath,
-//                                                    projectBasePath,
-//                                                    virtualFile.name,
-//                                                    i,
-//                                                    columnNumber,
-//                                                    row.trim()
-//                                                )
-//                                            )
-//
-//                                            if (!found) {
-//                                                // Update the preview pane with the first result
-//                                                if (!component.fileList.isEmpty) {
-//                                                    component.fileList.selectedIndex = 0
-//                                                }
-//                                                found = true
-//                                            }
-//                                        }
-//
-//                                        if (listModel.size >= globalState.fileListLimit) {
-//                                            limitReached.set(true)
-//                                            return@runReadAction
-//                                        }
-//                                    }
-//
-//                                    i++
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
     }
 
     private fun createListeners(project: Project) {
@@ -304,7 +214,10 @@ class FuzzyGrep() : FuzzyAction() {
                     override fun run(indicator: ProgressIndicator) {
                         val file = VirtualFileManager.getInstance().findFileByUrl(fileUrl)
                         file?.let {
-                            (component as FuzzyFinderComponent).previewPane.updateFile(file, (selectedValue as RowContainer).rowNumber)
+                            (component as FuzzyFinderComponent).previewPane.updateFile(
+                                file,
+                                (selectedValue as RowContainer).rowNumber
+                            )
                         }
                     }
                 })
