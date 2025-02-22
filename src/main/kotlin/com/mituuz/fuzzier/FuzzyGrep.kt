@@ -167,23 +167,22 @@ class FuzzyGrep() : FuzzyAction() {
         return res
     }
 
-    fun String.runCommand(workingDir: File): String? {
-    try {
-        val parts = this.split("\\s".toRegex())
-        val proc = ProcessBuilder(*parts.toTypedArray())
+    fun List<String>.runCommand(workingDir: File): String? {
+        try {
+            val proc = ProcessBuilder(this)
                 .directory(workingDir)
                 .redirectOutput(ProcessBuilder.Redirect.PIPE)
                 .redirectError(ProcessBuilder.Redirect.PIPE)
                 .start()
 
-        proc.waitFor(15, TimeUnit.SECONDS)
-        return proc.inputStream.bufferedReader().readText()
-    } catch(e: IOException) {
-        println("Fuzzier: Error running command: $this")
-        e.printStackTrace()
-        return null
+            proc.waitFor(15, TimeUnit.SECONDS)
+            return proc.inputStream.bufferedReader().readText() + proc.errorStream.bufferedReader().readText()
+        } catch(e: IOException) {
+            println("Fuzzier: Error running command: ${this.joinToString(" ")}")
+            e.printStackTrace()
+            return null
+        }
     }
-}
 
     private fun findInFiles(
         searchString: String, listModel: DefaultListModel<FuzzyContainer>,
@@ -191,9 +190,12 @@ class FuzzyGrep() : FuzzyAction() {
     ) {
         println("Fuzzier: Starting process: $searchString in $projectBasePath")
 
-        val res = "echo $searchString".runCommand(File(projectBasePath))
+        // val res = listOf("grep", "-r", searchString, ".").runCommand(File(projectBasePath))
+        val res = listOf("rg", searchString, ".").runCommand(File(projectBasePath))
+
         if (res != null) {
             println("Fuzzier: Finished process: $searchString in $projectBasePath")
+            println(res)
         }
     }
 
