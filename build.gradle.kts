@@ -10,7 +10,7 @@ plugins {
 }
 
 // Use same version and group for the jar and the plugin
-val currentVersion = "1.6.0-preview.2"
+val currentVersion = "1.6.0-preview.3"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -82,6 +82,9 @@ intellijPlatform {
     <h2>Version $currentVersion</h2>
     <ul>
       <li>Introduce first version of Fuzzy Grep</li>
+      <ul>
+        <li>Call [ripgrep](https://github.com/BurntSushi/ripgrep) in the background</li>
+      </ul>    
     </ul>    
     """.trimIndent()
     
