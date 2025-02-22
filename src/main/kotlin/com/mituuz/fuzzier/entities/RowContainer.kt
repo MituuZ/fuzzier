@@ -33,6 +33,37 @@ class RowContainer(
     val columnNumber: Int,
     val trimmedRow: String
 ) : FuzzyContainer(filePath, basePath, filename) {
+    companion object {
+        /**
+         * Create a row container from a string
+         * <br><br>
+         * <h2>RipGrep</h2>
+         * ```
+         * ./src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt:205:33:            moduleFileIndex.iterateContent(contentIterator)
+         * ```
+         * <h2>Grep</h2>
+         * ```
+         * ./src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt:205:            moduleFileIndex.iterateContent(contentIterator)
+         * ```
+         */
+        fun rowContainerFromString(row: String, basePath: String, isRg: Boolean = true): RowContainer {
+            val parts = row.split(":")
+            val filePath = parts[0].removePrefix(".")
+            val filename = filePath.substringAfterLast("/")
+            val rowNumber = parts[1].toInt()
+            var columnNumber: Int
+            var trimmedRow: String
+            if (isRg) {
+                columnNumber = parts[2].toInt()
+                trimmedRow = parts[3]
+            } else {
+                columnNumber = 0
+                trimmedRow = parts[2]
+            }
+            return RowContainer(filePath, basePath, filename, rowNumber, columnNumber, trimmedRow)
+        }
+    }
+
     override fun getDisplayString(state: FuzzierGlobalSettingsService.State): String {
         if (state.filenameType == FilenameType.DEBUG) {
             return toString()

@@ -113,7 +113,7 @@ class PreviewEditor(project: Project?) : EditorTextField(
                                     val textAttributes = TextAttributes()
                                     textAttributes.backgroundColor = JBColor.LIGHT_GRAY
                                     if (rowNumber in 0 until document.lineCount) {
-                                        markupModel?.addLineHighlighter(rowNumber, rowNumber + 1, textAttributes)
+                                        markupModel?.addLineHighlighter(rowNumber - 1, rowNumber, textAttributes)
                                     }
                                 } else {
                                     scroll(0, 0)

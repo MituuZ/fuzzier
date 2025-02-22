@@ -10,20 +10,14 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
-import com.intellij.openapi.vfs.findDocument
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.RowContainer
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
@@ -31,10 +25,7 @@ import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.io.File
 import java.io.IOException
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.locks.ReentrantLock
 import javax.swing.AbstractAction
 import javax.swing.DefaultListModel
@@ -88,114 +79,112 @@ class FuzzyGrep() : FuzzyAction() {
             return
         }
 
-        // println("Fuzzier: Update list contents called from thread: " + Thread.currentThread().name)
         currentTask?.takeIf { !it.isDone }?.cancel(true)
         if (lock.tryLock(500, TimeUnit.MILLISECONDS)) {
 
-            // println("Fuzzier: Thread " + Thread.currentThread().name + " aquired the lock")
             try {
                 currentTask = ApplicationManager.getApplication().executeOnPooledThread {
                     try {
-                        // println("Fuzzier: Starting a new processing task: " + Thread.currentThread().name)
                         val task = currentTask
 
                         if (task?.isCancelled == true) return@executeOnPooledThread
 
                         component.fileList.setPaintBusy(true)
                         val listModel = DefaultListModel<FuzzyContainer>()
-                        component.fileList.model = listModel
+                        synchronized(component.fileList.model) {
+                            component.fileList.model = listModel
+                        }
                         component.fileList.cellRenderer = getCellRenderer()
 
                         if (task?.isCancelled == true) return@executeOnPooledThread
 
-                        var files = getFiles(project)
-
-                        if (task?.isCancelled == true) return@executeOnPooledThread
-
-                        findInFiles(searchString, listModel, files, project.basePath.toString(), task)
+                        findInFiles(searchString, listModel, project.basePath.toString())
 
                         if (task?.isCancelled == true) return@executeOnPooledThread
 
                         ApplicationManager.getApplication().invokeLater {
-                            synchronized(listModel) {
-                                val selectedIndex = component.fileList.selectedIndex
-                                component.fileList.setPaintBusy(false)
-
-                                // Retain the current selection
-                                if (selectedIndex >= 0 && selectedIndex < listModel.size) {
-                                    component.fileList.selectedIndex = selectedIndex
+                            synchronized(component.fileList.model) {
+                                if (!listModel.isEmpty) {
+                                    component.fileList.selectedIndex = 0
                                 }
+                                component.fileList.setPaintBusy(false)
                             }
                         }
-                        // println("Fuzzier: Finished processing: " + Thread.currentThread().name)
                     } catch (_: InterruptedException) {
-                        // println("Fuzzier: Stopping process task: " + Thread.currentThread().name)
                         return@executeOnPooledThread
                     } catch (_: CancellationException) {
-                        // println("Fuzzier: Stopping process task: " + Thread.currentThread().name)
                         return@executeOnPooledThread
                     }
                 }
                 try {
                     currentTask?.get()
                 } catch (_: InterruptedException) {
-                    // println("Fuzzier: Stopping process task: " + Thread.currentThread().name)
                 } catch (_: CancellationException) {
-                    // println("Fuzzier: Stopping process task: " + Thread.currentThread().name)
                 }
             } finally {
-                // println("Fuzzier: Thread " + Thread.currentThread().name + " released the lock")
                 lock.unlock()
             }
-        } else {
-            // println("Fuzzier: Thread " + Thread.currentThread().name + " could not aquire the lock")
         }
-    }
-
-    private fun getFiles(project: Project): Set<VirtualFile> {
-        val res = HashSet<VirtualFile>()
-        val fileIndex = ProjectFileIndex.getInstance(project)
-        fileIndex.iterateContent {
-            if (currentTask?.isCancelled == true) {
-                return@iterateContent false
-            }
-
-            res.add(it)
-            true
-        }
-
-        return res
     }
 
     fun List<String>.runCommand(workingDir: File): String? {
-        try {
+        return try {
             val proc = ProcessBuilder(this)
                 .directory(workingDir)
-                .redirectOutput(ProcessBuilder.Redirect.PIPE)
-                .redirectError(ProcessBuilder.Redirect.PIPE)
+                .redirectErrorStream(true)
                 .start()
 
-            proc.waitFor(15, TimeUnit.SECONDS)
-            return proc.inputStream.bufferedReader().readText() + proc.errorStream.bufferedReader().readText()
-        } catch(e: IOException) {
-            println("Fuzzier: Error running command: ${this.joinToString(" ")}")
-            e.printStackTrace()
-            return null
+            val output = StringBuilder()
+            proc.inputStream.bufferedReader().useLines { lines ->
+                lines.forEach { output.appendLine(it) }
+            }
+
+            proc.waitFor(2, TimeUnit.SECONDS)
+            output.toString()
+        } catch (_: IOException) {
+            null
+        } catch (_: InterruptedException) {
+            null
         }
     }
 
     private fun findInFiles(
         searchString: String, listModel: DefaultListModel<FuzzyContainer>,
-        files: Set<VirtualFile>, projectBasePath: String, task: Future<*>?
+        projectBasePath: String
     ) {
-        println("Fuzzier: Starting process: $searchString in $projectBasePath")
-
-        // val res = listOf("grep", "-r", searchString, ".").runCommand(File(projectBasePath))
-        val res = listOf("rg", searchString, ".").runCommand(File(projectBasePath))
+//        val res = listOf("grep", "--color=none", "-r", "-n", searchString, ".").runCommand(File(projectBasePath))
+        val res = listOf(
+            "rg",
+            "--no-heading",
+            "--colors",
+            "path:none",
+            "--colors",
+            "line:none",
+            "--colors",
+            "column:none",
+            "--colors",
+            "column:none",
+            "-n",
+            "--with-filename",
+            "--column",
+            "-m",
+            globalState.fileListLimit.toString(),
+            searchString,
+            "."
+        ).runCommand(File(projectBasePath))
 
         if (res != null) {
-            println("Fuzzier: Finished process: $searchString in $projectBasePath")
-            println(res)
+            res.lines()
+                .take(globalState.fileListLimit)
+                .forEach { line ->
+                    if (line.matches(Regex("""^.+:\d+:\d+:\s*.+$""")) || line.matches(Regex("""^.+:\d+:\s*.+$"""))) {
+                        val rowContainer = RowContainer.rowContainerFromString(line, projectBasePath)
+                        listModel.addElement(rowContainer)
+                    }
+                }
+        } else {
+            println("Fuzzier: No results found for: $searchString in $projectBasePath")
+            return
         }
     }
 
