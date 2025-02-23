@@ -1,5 +1,8 @@
 package com.mituuz.fuzzier
 
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationType
+import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.EditorFactory
@@ -44,6 +47,19 @@ class FuzzyGrep() : FuzzyAction() {
     ) {
         setCustomHandlers()
 
+        val projectBasePath = project.basePath.toString()
+        val rgCommand = checkRgInstallation(projectBasePath)
+        if (rgCommand != null) {
+            val notification = Notification(
+                "Fuzzier Notification Group",
+                "No rg command found",
+                "No ripgrep found with command: $rgCommand",
+                NotificationType.WARNING
+            )
+            Notifications.Bus.notify(notification, project)
+            return
+        }
+
         ApplicationManager.getApplication().invokeLater {
             defaultDoc = EditorFactory.getInstance().createDocument("")
             component = FuzzyFinderComponent(project)
@@ -71,6 +87,24 @@ class FuzzyGrep() : FuzzyAction() {
         })
 
         return popup
+    }
+
+    /**
+     * OS specific to see if `rg` is installed
+     * @return the used command if no installation detected, otherwise null
+     */
+    private fun checkRgInstallation(projectBasePath: String): String? {
+        val command = if (System.getProperty("os.name").lowercase().contains("win")) {
+            listOf("where", "rg")
+        } else {
+            listOf("which", "rg")
+        }
+
+        if (runCommand(command, projectBasePath).isNullOrBlank()) {
+            return command.joinToString(" ")
+        }
+
+        return null
     }
 
     override fun updateListContents(project: Project, searchString: String) {
@@ -127,10 +161,10 @@ class FuzzyGrep() : FuzzyAction() {
         }
     }
 
-    fun List<String>.runCommand(workingDir: File): String? {
+    fun runCommand(commands: List<String>, projectBasePath: String): String? {
         return try {
-            val proc = ProcessBuilder(this)
-                .directory(workingDir)
+            val proc = ProcessBuilder(commands)
+                .directory(File(projectBasePath))
                 .redirectErrorStream(true)
                 .start()
 
@@ -152,8 +186,7 @@ class FuzzyGrep() : FuzzyAction() {
         searchString: String, listModel: DefaultListModel<FuzzyContainer>,
         projectBasePath: String
     ) {
-//        val res = listOf("grep", "--color=none", "-r", "-n", searchString, ".").runCommand(File(projectBasePath))
-        val res = listOf(
+        val res = runCommand(listOf(
             "rg",
             "--no-heading",
             "--colors",
@@ -171,7 +204,7 @@ class FuzzyGrep() : FuzzyAction() {
             globalState.fileListLimit.toString(),
             searchString,
             "."
-        ).runCommand(File(projectBasePath))
+        ), projectBasePath)
 
         if (res != null) {
             res.lines()
@@ -183,7 +216,6 @@ class FuzzyGrep() : FuzzyAction() {
                     }
                 }
         } else {
-            println("Fuzzier: No results found for: $searchString in $projectBasePath")
             return
         }
     }
