@@ -39,12 +39,18 @@
 
   <actions>
     <action
+            id="com.mituuz.fuzzier.FuzzyGrep"
+            class="com.mituuz.fuzzier.FuzzyGrep"
+            text="Fuzzy Grep"
+            description="Search text">
+      <override-text place="MainMenu" text="Fuzzy Grep"/>
+    </action>
+    <action
             id="com.mituuz.fuzzier.Fuzzier"
             class="com.mituuz.fuzzier.Fuzzier"
             text="Fuzzy File Search"
             description="Search files using a basic fuzzy search">
       <override-text place="MainMenu" text="Fuzzy File Search"/>
-      <add-to-group group-id="ToolsMenu" anchor="first"/>
     </action>
     <action id="com.mituuz.fuzzier.FuzzierVCS"
             class="com.mituuz.fuzzier.FuzzierVCS"

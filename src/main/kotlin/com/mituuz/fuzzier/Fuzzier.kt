@@ -25,7 +25,6 @@ package com.mituuz.fuzzier
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.impl.EditorHistoryManager
@@ -64,7 +63,6 @@ import kotlin.coroutines.cancellation.CancellationException
 open class Fuzzier : FuzzyAction() {
     override var popupTitle = "Fuzzy Search"
     override var dimensionKey = "FuzzySearchPopup"
-    private var defaultDoc: Document? = null
 
     // Used by FuzzierVCS to check if files are tracked by the VCS
     protected var changeListManager: ChangeListManager? = null

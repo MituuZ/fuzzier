@@ -28,8 +28,11 @@ import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.EditorFactory
+import com.intellij.openapi.editor.LogicalPosition
+import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.ex.EditorEx
+import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.fileTypes.FileTypeManager
@@ -38,6 +41,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.EditorTextField
+import com.intellij.ui.JBColor
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import kotlin.math.min
 
@@ -80,7 +84,7 @@ class PreviewEditor(project: Project?) : EditorTextField(
         this.fileType = PlainTextFileType.INSTANCE
     }
 
-    fun updateFile(virtualFile: VirtualFile?) {
+    fun updateFile(virtualFile: VirtualFile?, rowNumber: Int? = null) {
         ApplicationManager.getApplication().executeOnPooledThread {
             val sourceDocument = ApplicationManager.getApplication().runReadAction<Document?> {
                 virtualFile?.let { FileDocumentManager.getInstance().getDocument(virtualFile) }
@@ -103,8 +107,17 @@ class PreviewEditor(project: Project?) : EditorTextField(
                         }
                         ApplicationManager.getApplication().invokeLater {
                             editor?.scrollingModel?.run {
-                                scrollHorizontally(0)
-                                scrollVertically(0)
+                                if (rowNumber != null) {
+                                    scrollTo(LogicalPosition(rowNumber, 0), ScrollType.CENTER)
+                                    val markupModel = editor?.markupModel
+                                    val textAttributes = TextAttributes()
+                                    textAttributes.backgroundColor = JBColor.LIGHT_GRAY
+                                    if (rowNumber in 0 until document.lineCount) {
+                                        markupModel?.addLineHighlighter(rowNumber - 1, rowNumber, textAttributes)
+                                    }
+                                } else {
+                                    scroll(0, 0)
+                                }
                             }
                         }
                     }
