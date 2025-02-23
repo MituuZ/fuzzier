@@ -140,10 +140,6 @@ class FuzzyGrep() : FuzzyAction() {
 
                         component.fileList.setPaintBusy(true)
                         val listModel = DefaultListModel<FuzzyContainer>()
-                        synchronized(component.fileList.model) {
-                            component.fileList.model = listModel
-                        }
-                        component.fileList.cellRenderer = getCellRenderer()
 
                         if (task?.isCancelled == true) return@executeOnPooledThread
 
@@ -153,6 +149,8 @@ class FuzzyGrep() : FuzzyAction() {
 
                         ApplicationManager.getApplication().invokeLater {
                             synchronized(component.fileList.model) {
+                                component.fileList.model = listModel
+                                component.fileList.cellRenderer = getCellRenderer()
                                 if (!listModel.isEmpty) {
                                     component.fileList.selectedIndex = 0
                                 }
