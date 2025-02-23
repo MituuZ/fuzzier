@@ -48,16 +48,31 @@ class FuzzyGrep() : FuzzyAction() {
         setCustomHandlers()
 
         val projectBasePath = project.basePath.toString()
-        val rgCommand = checkRgInstallation(projectBasePath)
+        val rgCommand = checkInstallation("rg", projectBasePath)
         if (rgCommand != null) {
             val notification = Notification(
                 "Fuzzier Notification Group",
-                "No rg command found",
-                "No ripgrep found with command: $rgCommand",
+                "No `rg` command found",
+                """
+                    No ripgrep found with command: $rgCommand<br>
+                    Fallback to `grep`<br>
+                    This notification can be disabled
+                """.trimIndent(),
                 NotificationType.WARNING
             )
             Notifications.Bus.notify(notification, project)
-            return
+
+            val grepCommand = checkInstallation("grep", projectBasePath)
+            if (grepCommand != null) {
+                val notification = Notification(
+                    "Fuzzier Notification Group",
+                    "No `grep` command found",
+                    "No grep found with command: $grepCommand",
+                    NotificationType.ERROR
+                )
+                Notifications.Bus.notify(notification, project)
+                return
+            }
         }
 
         ApplicationManager.getApplication().invokeLater {
@@ -93,11 +108,11 @@ class FuzzyGrep() : FuzzyAction() {
      * OS specific to see if `rg` is installed
      * @return the used command if no installation detected, otherwise null
      */
-    private fun checkRgInstallation(projectBasePath: String): String? {
+    private fun checkInstallation(command: String, projectBasePath: String): String? {
         val command = if (System.getProperty("os.name").lowercase().contains("win")) {
-            listOf("where", "rg")
+            listOf("where", command)
         } else {
-            listOf("which", "rg")
+            listOf("which", command)
         }
 
         if (runCommand(command, projectBasePath).isNullOrBlank()) {
