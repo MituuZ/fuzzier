@@ -49,7 +49,7 @@ class FuzzyGrep() : FuzzyAction() {
         setCustomHandlers()
 
         val projectBasePath = project.basePath.toString()
-        val rgCommand = checkInstallation("rgasd", projectBasePath)
+        val rgCommand = checkInstallation("rg", projectBasePath)
         if (rgCommand != null) {
             val notification = Notification(
                 "Fuzzier Notification Group",

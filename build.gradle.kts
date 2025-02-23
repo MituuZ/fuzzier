@@ -81,10 +81,12 @@ intellijPlatform {
     changeNotes = """
     <h2>Version $currentVersion</h2>
     <ul>
-      <li>Introduce first version of Fuzzy Grep</li>
-      <ul>
-        <li>Call <a href="https://github.com/BurntSushi/ripgrep">ripgrep</a> in the background</li>
-      </ul>
+      <li>Introduce first version of Fuzzy Grep
+        <ul>
+          <li>Call <a href="https://github.com/BurntSushi/ripgrep">ripgrep</a> in the background</li>
+          <li>Attempt to fall back to grep if rg is not found</li>
+        </ul>
+      </li>
     </ul>    
     """.trimIndent()
     
