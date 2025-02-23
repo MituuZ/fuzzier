@@ -186,7 +186,7 @@ class FuzzyGrep() : FuzzyAction() {
                 lines.forEach { output.appendLine(it) }
             }
 
-            proc.waitFor(2, TimeUnit.SECONDS)
+            proc.waitFor(4, TimeUnit.SECONDS)
             output.toString()
         } catch (_: IOException) {
             null
