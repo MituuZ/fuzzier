@@ -16,7 +16,7 @@ class RowContainerTest {
     @Test
     fun fromRGString() {
         val input = "./src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt:205:33:            moduleFileIndex.iterateContent(contentIterator)"
-        val rc = RowContainer.rowContainerFromString(input, "/base/")
+        val rc = RowContainer.rowContainerFromString(input, "/base/", true)
 
         assertEquals("/src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt", rc.filePath)
         assertEquals("/base/", rc.basePath)
