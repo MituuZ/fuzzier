@@ -40,6 +40,7 @@ class FuzzyGrep() : FuzzyAction() {
     override var popupTitle: String = "Fuzzy Grep"
     override var dimensionKey = "FuzzyGrepPopup"
     var lock = ReentrantLock()
+    var useRg = true
 
     override fun runAction(
         project: Project,
@@ -48,7 +49,7 @@ class FuzzyGrep() : FuzzyAction() {
         setCustomHandlers()
 
         val projectBasePath = project.basePath.toString()
-        val rgCommand = checkInstallation("rg", projectBasePath)
+        val rgCommand = checkInstallation("rgasd", projectBasePath)
         if (rgCommand != null) {
             val notification = Notification(
                 "Fuzzier Notification Group",
@@ -72,7 +73,11 @@ class FuzzyGrep() : FuzzyAction() {
                 )
                 Notifications.Bus.notify(notification, project)
                 return
+            } else {
+                useRg = false
             }
+        } else {
+            useRg = true
         }
 
         ApplicationManager.getApplication().invokeLater {
@@ -199,32 +204,39 @@ class FuzzyGrep() : FuzzyAction() {
         searchString: String, listModel: DefaultListModel<FuzzyContainer>,
         projectBasePath: String
     ) {
-        val res = runCommand(listOf(
-            "rg",
-            "--no-heading",
-            "--colors",
-            "path:none",
-            "--colors",
-            "line:none",
-            "--colors",
-            "column:none",
-            "--colors",
-            "column:none",
-            "-n",
-            "--with-filename",
-            "--column",
-            "-m",
-            globalState.fileListLimit.toString(),
-            searchString,
-            "."
-        ), projectBasePath)
+
+        val res = if (useRg) {
+            runCommand(
+                listOf(
+                    "rg",
+                    "--no-heading",
+                    "--colors",
+                    "path:none",
+                    "--colors",
+                    "line:none",
+                    "--colors",
+                    "column:none",
+                    "--colors",
+                    "column:none",
+                    "-n",
+                    "--with-filename",
+                    "--column",
+                    "-m",
+                    globalState.fileListLimit.toString(),
+                    searchString,
+                    "."
+                ), projectBasePath
+            )
+        } else {
+            runCommand(listOf("grep", "--color=none", "-r", "-n", searchString, "."), projectBasePath)
+        }
 
         if (res != null) {
             res.lines()
                 .take(globalState.fileListLimit)
                 .forEach { line ->
                     if (line.matches(Regex("""^.+:\d+:\d+:\s*.+$""")) || line.matches(Regex("""^.+:\d+:\s*.+$"""))) {
-                        val rowContainer = RowContainer.rowContainerFromString(line, projectBasePath)
+                        val rowContainer = RowContainer.rowContainerFromString(line, projectBasePath, useRg)
                         listModel.addElement(rowContainer)
                     }
                 }
