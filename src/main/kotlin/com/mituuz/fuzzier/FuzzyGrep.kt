@@ -244,7 +244,7 @@ class FuzzyGrep() : FuzzyAction() {
             )
         } else {
             if (isWindows) {
-                runCommand(listOf("findstr", "/n", searchString, "*"), projectBasePath)
+                runCommand(listOf("findstr", "/p", "/s", "/n", searchString, "*"), projectBasePath)
             } else {
                 runCommand(listOf("grep", "--color=none", "-r", "-n", searchString, "."), projectBasePath)
             }
