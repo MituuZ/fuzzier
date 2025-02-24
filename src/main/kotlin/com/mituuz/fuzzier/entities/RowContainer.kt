@@ -37,19 +37,23 @@ class RowContainer(
         /**
          * Create a row container from a string
          * <br><br>
-         * <h2>RipGrep</h2>
+         * <h2>ripgrep</h2>
          * ```
          * ./src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt:205:33:            moduleFileIndex.iterateContent(contentIterator)
          * ```
-         * <h2>Grep</h2>
+         * <h2>grep</h2>
          * ```
          * ./src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt:205:            moduleFileIndex.iterateContent(contentIterator)
          * ```
+         * <h2>findstr</h2>
+         * ```
+         * src\main\kotlin\com\mituuz\fuzzier\components\TestBenchComponent.kt:205:            moduleFileIndex.iterateContent(contentIterator)
+         * ```
          */
-        fun rowContainerFromString(row: String, basePath: String, isRg: Boolean): RowContainer {
+        fun rowContainerFromString(row: String, basePath: String, isRg: Boolean, isWindows: Boolean): RowContainer {
             val parts = row.split(":")
-            val filePath = parts[0].removePrefix(".")
-            val filename = filePath.substringAfterLast("/")
+            var filePath = parts[0].removePrefix(".")
+            val filename = filePath.substringAfterLast(if (isWindows) "\\" else "/")
             val rowNumber = parts[1].toInt()
             var columnNumber: Int
             var trimmedRow: String
@@ -57,6 +61,9 @@ class RowContainer(
                 columnNumber = parts[2].toInt()
                 trimmedRow = parts[3]
             } else {
+                if (isWindows) {
+                    filePath = "/$filePath"
+                }
                 columnNumber = 0
                 trimmedRow = parts[2]
             }

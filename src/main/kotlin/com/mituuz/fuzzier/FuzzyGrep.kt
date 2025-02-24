@@ -41,6 +41,7 @@ class FuzzyGrep() : FuzzyAction() {
     override var dimensionKey = "FuzzyGrepPopup"
     var lock = ReentrantLock()
     var useRg = true
+    val isWindows = System.getProperty("os.name").lowercase().contains("win")
 
     override fun runAction(
         project: Project,
@@ -63,19 +64,32 @@ class FuzzyGrep() : FuzzyAction() {
             )
             Notifications.Bus.notify(notification, project)
 
-            val grepCommand = checkInstallation("grep", projectBasePath)
-            if (grepCommand != null) {
-                val notification = Notification(
-                    "Fuzzier Notification Group",
-                    "No `grep` command found",
-                    "No grep found with command: $grepCommand",
-                    NotificationType.ERROR
-                )
-                Notifications.Bus.notify(notification, project)
-                return
+            if (isWindows) {
+                val findstrCommand = checkInstallation("findstr", projectBasePath)
+                if (findstrCommand != null) {
+                    val notification = Notification(
+                        "Fuzzier Notification Group",
+                        "No `findstr` command found",
+                        "No findstr found with command: $findstrCommand",
+                        NotificationType.ERROR
+                    )
+                    Notifications.Bus.notify(notification, project)
+                    return
+                }
             } else {
-                useRg = false
+                val grepCommand = checkInstallation("grep", projectBasePath)
+                if (grepCommand != null) {
+                    val notification = Notification(
+                        "Fuzzier Notification Group",
+                        "No `grep` command found",
+                        "No grep found with command: $grepCommand",
+                        NotificationType.ERROR
+                    )
+                    Notifications.Bus.notify(notification, project)
+                    return
+                }
             }
+            useRg = false
         } else {
             useRg = true
         }
@@ -114,7 +128,7 @@ class FuzzyGrep() : FuzzyAction() {
      * @return the used command if no installation detected, otherwise null
      */
     private fun checkInstallation(command: String, projectBasePath: String): String? {
-        val command = if (System.getProperty("os.name").lowercase().contains("win")) {
+        val command = if (isWindows) {
             listOf("where", command)
         } else {
             listOf("which", command)
@@ -229,7 +243,11 @@ class FuzzyGrep() : FuzzyAction() {
                 ), projectBasePath
             )
         } else {
-            runCommand(listOf("grep", "--color=none", "-r", "-n", searchString, "."), projectBasePath)
+            if (isWindows) {
+                runCommand(listOf("findstr", "/n", searchString, "*"), projectBasePath)
+            } else {
+                runCommand(listOf("grep", "--color=none", "-r", "-n", searchString, "."), projectBasePath)
+            }
         }
 
         if (res != null) {
@@ -237,7 +255,7 @@ class FuzzyGrep() : FuzzyAction() {
                 .take(globalState.fileListLimit)
                 .forEach { line ->
                     if (line.matches(Regex("""^.+:\d+:\d+:\s*.+$""")) || line.matches(Regex("""^.+:\d+:\s*.+$"""))) {
-                        val rowContainer = RowContainer.rowContainerFromString(line, projectBasePath, useRg)
+                        val rowContainer = RowContainer.rowContainerFromString(line, projectBasePath, useRg, isWindows)
                         listModel.addElement(rowContainer)
                     }
                 }
