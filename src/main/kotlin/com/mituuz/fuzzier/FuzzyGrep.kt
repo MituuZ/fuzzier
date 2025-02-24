@@ -120,7 +120,8 @@ class FuzzyGrep() : FuzzyAction() {
             listOf("which", command)
         }
 
-        if (runCommand(command, projectBasePath).isNullOrBlank()) {
+        val result = runCommand(command, projectBasePath)
+        if (result.isNullOrBlank() || result.contains("Could not find files")) {
             return command.joinToString(" ")
         }
 
