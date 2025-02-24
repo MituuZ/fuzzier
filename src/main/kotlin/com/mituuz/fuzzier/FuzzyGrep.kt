@@ -57,7 +57,7 @@ class FuzzyGrep() : FuzzyAction() {
                 "No `rg` command found",
                 """
                     No ripgrep found with command: $rgCommand<br>
-                    Fallback to `grep`<br>
+                    Fallback to `grep` or `findstr`<br>
                     This notification can be disabled
                 """.trimIndent(),
                 NotificationType.WARNING
