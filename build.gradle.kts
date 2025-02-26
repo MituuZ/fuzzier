@@ -10,7 +10,7 @@ plugins {
 }
 
 // Use same version and group for the jar and the plugin
-val currentVersion = "1.5.0"
+val currentVersion = "1.6.0"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -81,14 +81,13 @@ intellijPlatform {
     changeNotes = """
     <h2>Version $currentVersion</h2>
     <ul>
-      <li>Allow configuring the default finder popup size</li>
-      <li>Fix a bug where the correct dimension key wasn't used</li>
-      <li>Enable changing the search field location on the popup
+      <li>Introduce first version of Fuzzy Grep
         <ul>
-          <li>Top, bottom, left and right</li>
+          <li>Call <a href="https://github.com/BurntSushi/ripgrep">ripgrep</a> in the background</li>
+          <li>Attempt to fall back to <code>grep</code> or <code>findstr</code> if <code>rg</code> is not found</li>
+          <li>The following action has been added: <code>map &lt;Leader&gt;ff &lt;action&gt;(com.mituuz.fuzzier.FuzzyGrep)</code></li>
         </ul>
       </li>
-      <li>Improve mover popup's default size</li>
     </ul>    
     """.trimIndent()
     

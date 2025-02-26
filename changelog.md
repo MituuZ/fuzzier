@@ -1,4 +1,9 @@
 # Changelog
+## Version 1.6.0
+- Introduce the first, experimental version of Fuzzy Grep
+  - Call [ripgrep](https://github.com/BurntSushi/ripgrep) in the background
+  - Attempt to fall back to `grep` or `findstr` if rg is not found
+
 ## Version 1.5.0
 - Allow configuring the default finder popup size
 - Fix a bug where the correct dimension key wasn't used

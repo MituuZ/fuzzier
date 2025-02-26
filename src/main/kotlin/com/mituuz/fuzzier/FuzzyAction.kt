@@ -30,6 +30,7 @@ import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.actionSystem.KeyboardShortcut
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Caret
+import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorActionHandler
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
@@ -49,7 +50,6 @@ import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.util.FuzzierUtil
 import com.mituuz.fuzzier.util.FuzzierUtil.Companion.createDimensionKey
 import java.awt.Component
-import java.awt.Point
 import java.awt.event.ActionEvent
 import java.util.*
 import java.util.Timer
@@ -67,6 +67,7 @@ abstract class FuzzyAction : AnAction() {
     private var debounceTimer: TimerTask? = null
     protected lateinit var projectState: FuzzierSettingsService.State
     protected val globalState = service<FuzzierGlobalSettingsService>().state
+    protected var defaultDoc: Document? = null
     @Volatile
     var currentTask: Future<*>? = null
     val fuzzierUtil = FuzzierUtil()
