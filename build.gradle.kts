@@ -85,7 +85,7 @@ intellijPlatform {
         <ul>
           <li>Call <a href="https://github.com/BurntSushi/ripgrep">ripgrep</a> in the background</li>
           <li>Attempt to fall back to <code>grep</code> or <code>findstr</code> if <code>rg</code> is not found</li>
-          <li>The following action has been added: <code>map <Leader>ff <action>(com.mituuz.fuzzier.FuzzyGrep)</code></li>
+          <li>The following action has been added: <code>map &lt;Leader&gt;ff &lt;action&gt;(com.mituuz.fuzzier.FuzzyGrep)</code></li>
         </ul>
       </li>
     </ul>    
