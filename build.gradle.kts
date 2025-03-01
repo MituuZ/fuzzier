@@ -3,10 +3,10 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("org.jetbrains.kotlin.jvm") version "2.1.0"
-  id("org.jetbrains.intellij.platform") version "2.2.1"
-  id("org.jetbrains.kotlinx.kover") version "0.9.0"
-  id("me.champeau.jmh") version "0.7.2"
+  id("org.jetbrains.kotlin.jvm") version "2.1.10"
+  id("org.jetbrains.intellij.platform") version "2.3.0"
+  id("org.jetbrains.kotlinx.kover") version "0.9.1"
+  id("me.champeau.jmh") version "0.7.3"
 }
 
 // Use same version and group for the jar and the plugin
@@ -45,7 +45,7 @@ dependencies {
   // JMH dependencies
   implementation("org.openjdk.jmh:jmh-core:1.37")
   annotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:1.37")
-  jmh("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
+  jmh("org.jetbrains.kotlin:kotlin-stdlib:2.1.10")
   jmh(files("libs/*")) // libs folder contains idea:ideaIC:2024.3 jars
 }
 
