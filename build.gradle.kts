@@ -36,9 +36,9 @@ dependencies {
   }
 
     // Test dependencies
-  testImplementation("org.mockito:mockito-core:5.14.2")
-  testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.4")
-  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.4")
+  testImplementation(libs.mockito)
+  testImplementation(libs.junit5Api)
+  testImplementation(libs.junit5Engine)
 
   // Required to fix issue where JUnit5 Test Framework refers to JUnit4
   // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-faq.html#junit5-test-framework-refers-to-junit4

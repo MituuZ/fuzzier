@@ -1,0 +1,8 @@
+[versions]
+junit5 = "5.11.4"
+mockito = "5.14.2"
+
+[libraries]
+junit5Api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit5" }
+junit5Engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit5" }
+mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
