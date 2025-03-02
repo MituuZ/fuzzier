@@ -34,15 +34,17 @@ dependencies {
 
     testFramework(TestFrameworkType.Platform)
   }
-  testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.4")
+
+    // Test dependencies
   testImplementation("org.mockito:mockito-core:5.14.2")
+  testImplementation("org.junit.jupiter:junit-jupiter-api:5.11.4")
   testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.11.4")
 
   // Required to fix issue where JUnit5 Test Framework refers to JUnit4
   // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-faq.html#junit5-test-framework-refers-to-junit4
   testRuntimeOnly("junit:junit:4.13.2")
 
-  // JMH dependencies
+    // JMH dependencies
   implementation("org.openjdk.jmh:jmh-core:1.37")
   annotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:1.37")
   jmh("org.jetbrains.kotlin:kotlin-stdlib:2.1.10")
