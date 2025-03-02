@@ -3,10 +3,10 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-  id("org.jetbrains.kotlin.jvm") version "2.1.10"
-  id("org.jetbrains.intellij.platform") version "2.3.0"
-  id("org.jetbrains.kotlinx.kover") version "0.9.1"
-  id("me.champeau.jmh") version "0.7.3"
+  alias(libs.plugins.kotlinJvm)
+  alias(libs.plugins.intellijPlatform)
+  alias(libs.plugins.kover)
+  alias(libs.plugins.jmh)
 }
 
 // Use same version and group for the jar and the plugin
