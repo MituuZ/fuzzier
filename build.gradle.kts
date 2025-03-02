@@ -47,7 +47,7 @@ dependencies {
     // JMH dependencies
   implementation(libs.jmhCore)
   annotationProcessor(libs.jmhAnnprocessor)
-  jmh("org.jetbrains.kotlin:kotlin-stdlib:2.1.10")
+  jmh(libs.kotlinStdlib)
   jmh(fileTree("./libs") { include("*.jar") }) // libs folder contains idea:ideaIC:2024.3 jars
 }
 
