@@ -46,7 +46,11 @@ dependencies {
   implementation("org.openjdk.jmh:jmh-core:1.37")
   annotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:1.37")
   jmh("org.jetbrains.kotlin:kotlin-stdlib:2.1.10")
-  jmh(files("libs/*")) // libs folder contains idea:ideaIC:2024.3 jars
+  jmh(fileTree("./libs") { include("*.jar") }) // libs folder contains idea:ideaIC:2024.3 jars
+}
+
+tasks.named<Jar>("jmhJar") {
+  isZip64 = true
 }
 
 tasks.test {
