@@ -1,4 +1,7 @@
 # Changelog
+## Version 1.6.1
+- Update gradle and plugins
+
 ## Version 1.6.0
 - Introduce the first, experimental version of Fuzzy Grep
   - Call [ripgrep](https://github.com/BurntSushi/ripgrep) in the background
