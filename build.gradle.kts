@@ -2,18 +2,53 @@ import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+// Use same version and group for the jar and the plugin
+val currentVersion = "1.6.0"
+val myGroup = "com.mituuz"
+version = currentVersion
+group = myGroup
+
+intellijPlatform {
+  pluginConfiguration {
+    version = currentVersion
+    group = myGroup
+
+    changeNotes = """
+    <h2>Version $currentVersion</h2>
+    <ul>
+      <li>Introduce first version of Fuzzy Grep
+        <ul>
+          <li>Call <a href="https://github.com/BurntSushi/ripgrep">ripgrep</a> in the background</li>
+          <li>Attempt to fall back to <code>grep</code> or <code>findstr</code> if <code>rg</code> is not found</li>
+          <li>The following action has been added: <code>map &lt;Leader&gt;ff &lt;action&gt;(com.mituuz.fuzzier.FuzzyGrep)</code></li>
+        </ul>
+      </li>
+    </ul>    
+    """.trimIndent()
+
+    ideaVersion {
+      sinceBuild = "243"
+      untilBuild = provider { null }
+    }
+  }
+
+  publishing {
+    token.set(System.getenv("PUBLISH_TOKEN"))
+  }
+
+  signing {
+    certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
+    privateKey.set(System.getenv("PRIVATE_KEY"))
+    password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
+  }
+}
+
 plugins {
   alias(libs.plugins.kotlinJvm)
   alias(libs.plugins.intellijPlatform)
   alias(libs.plugins.kover)
   alias(libs.plugins.jmh)
 }
-
-// Use same version and group for the jar and the plugin
-val currentVersion = "1.6.0"
-val myGroup = "com.mituuz"
-version = currentVersion
-group = myGroup
 
 repositories {
   mavenCentral()
@@ -27,7 +62,7 @@ dependencies {
   intellijPlatform {
     // Downgraded from 2024.3.1.1
     // https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1838
-    intellijIdeaCommunity("2024.3")
+    intellijIdeaCommunity(libs.versions.communityVersion.get())
     
     pluginVerifier()
     zipSigner()
@@ -77,41 +112,6 @@ tasks.withType<KotlinCompile> {
 
 java {
   sourceCompatibility = JavaVersion.VERSION_21
-}
-
-intellijPlatform {
-  pluginConfiguration {
-    version = currentVersion
-    group = myGroup
-    
-    changeNotes = """
-    <h2>Version $currentVersion</h2>
-    <ul>
-      <li>Introduce first version of Fuzzy Grep
-        <ul>
-          <li>Call <a href="https://github.com/BurntSushi/ripgrep">ripgrep</a> in the background</li>
-          <li>Attempt to fall back to <code>grep</code> or <code>findstr</code> if <code>rg</code> is not found</li>
-          <li>The following action has been added: <code>map &lt;Leader&gt;ff &lt;action&gt;(com.mituuz.fuzzier.FuzzyGrep)</code></li>
-        </ul>
-      </li>
-    </ul>    
-    """.trimIndent()
-    
-    ideaVersion {
-      sinceBuild = "243"
-      untilBuild = provider { null }
-    }
-  }
-  
-  publishing {
-    token.set(System.getenv("PUBLISH_TOKEN"))
-  }
-  
-  signing {
-    certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
-    privateKey.set(System.getenv("PRIVATE_KEY"))
-    password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
-  }
 }
 
 jmh {
