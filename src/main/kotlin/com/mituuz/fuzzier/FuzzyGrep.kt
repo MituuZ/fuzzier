@@ -1,5 +1,7 @@
 package com.mituuz.fuzzier
 
+import com.intellij.execution.configurations.GeneralCommandLine
+import com.intellij.execution.process.OSProcessHandler
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
@@ -26,7 +28,6 @@ import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import java.io.File
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
@@ -195,19 +196,14 @@ class FuzzyGrep() : FuzzyAction() {
     }
 
     fun runCommand(commands: List<String>, projectBasePath: String): String? {
+        val commandLine = GeneralCommandLine(commands)
+            .withWorkDirectory(projectBasePath)
+            .withRedirectErrorStream(true)
+        val processHandler = OSProcessHandler(commandLine)
+
         return try {
-            val proc = ProcessBuilder(commands)
-                .directory(File(projectBasePath))
-                .redirectErrorStream(true)
-                .start()
-
-            val output = StringBuilder()
-            proc.inputStream.bufferedReader().useLines { lines ->
-                lines.forEach { output.appendLine(it) }
-            }
-
-            proc.waitFor(4, TimeUnit.SECONDS)
-            output.toString()
+            processHandler.startNotify()
+            processHandler.process.inputStream.bufferedReader().readText()
         } catch (_: IOException) {
             null
         } catch (_: InterruptedException) {
