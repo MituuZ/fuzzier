@@ -11,7 +11,6 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -37,6 +36,7 @@ jobs:
         id: kover
         uses: mi-kas/kover-report@v1
         with:
+          token: ${{ secrets.ACCESS_TOKEN }}
           path: ${{ github.workspace }}/build/reports/kover/report.xml
           title: Code Coverage
           update-comment: true
