@@ -17,6 +17,12 @@ intellijPlatform {
     <h2>Version $currentVersion</h2>
     <ul>
       <li>Update gradle and plugins</li>
+      <li>Improve FuzzyGrep PATH handling by using GeneralCommandline
+        <ul>
+          <li>Thanks to <a href="https://github.com/gymynnym">gymynnym</a> for finding the issue and the solution</li>
+        </ul>
+      </li>
+      <li>Indicate which command FuzzyGrep is running</li>
     </ul>
     <h2>Version 1.6.0</h2>
     <ul>
