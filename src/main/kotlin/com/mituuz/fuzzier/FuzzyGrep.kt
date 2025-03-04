@@ -1,5 +1,9 @@
 package com.mituuz.fuzzier
 
+import com.intellij.execution.configurations.GeneralCommandLine
+import com.intellij.execution.process.OSProcessHandler
+import com.intellij.execution.process.ProcessAdapter
+import com.intellij.execution.process.ProcessEvent
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
@@ -16,6 +20,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
@@ -194,19 +199,20 @@ class FuzzyGrep() : FuzzyAction() {
         }
     }
 
-    fun runCommand(commands: List<String>, projectBasePath: String): String? {
+    private fun runCommand(commands: List<String>, projectBasePath: String): String? {
         return try {
-            val proc = ProcessBuilder(commands)
-                .directory(File(projectBasePath))
-                .redirectErrorStream(true)
-                .start()
-
+            val commandLine = GeneralCommandLine(commands)
+                .withWorkDirectory(projectBasePath)
+                .withRedirectErrorStream(true)
             val output = StringBuilder()
-            proc.inputStream.bufferedReader().useLines { lines ->
-                lines.forEach { output.appendLine(it) }
-            }
-
-            proc.waitFor(4, TimeUnit.SECONDS)
+            val processHandler = OSProcessHandler(commandLine)
+            processHandler.addProcessListener(object : ProcessAdapter() {
+                override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
+                    output.appendLine(event.text.replace("\n", ""))
+                }
+            })
+            processHandler.startNotify()
+            processHandler.process.waitFor(2, TimeUnit.SECONDS)
             output.toString()
         } catch (_: IOException) {
             null
