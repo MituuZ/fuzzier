@@ -26,9 +26,6 @@ Current implementation uses the first content root.
 ![The UI consist of three parts. A file list on the top left, search field on the bottom left and the preview pane on the right](assets/FuzzierUI.png "An image of the plugin UI")
 
 ## Usage
-You can open Fuzzier with a shortcut or from the Tools menu. There is an action to fuzzy search over all files or over
-only VCS tracked files.
-
 Double-clicking a list item opens the file
 
 When focused on the search field, you can use:
@@ -39,9 +36,12 @@ When focused on the search field, you can use:
 
 List movement can be remapped from settings -> keymaps, but do not support chorded shortcuts.
 
-### File operations
-Fuzzier can be used to move files using the same search to locate the file and target directory that is used for 
-searching files. File Mover defaults to current file when search string is empty.
+## Features
+- Fuzzy file finder
+  - Search all except excluded files
+  - Search only from VCS tracked files
+- Text search by leveraging [ripgrep](https://github.com/BurntSushi/ripgrep), grep or findstr
+- File mover
 
 ## Documentation
 For a more thorough documentation of the plugin, please refer to the [Fuzzier Wiki](https://github.com/MituuZ/fuzzier/wiki).
@@ -55,6 +55,7 @@ Example of a .ideavimrc-row to add a vim keybinding for the plugin
 map <Leader>pf <action>(com.mituuz.fuzzier.Fuzzier)
 map <Leader>gf <action>(com.mituuz.fuzzier.FuzzierVCS)
 map <Leader>mf <action>(com.mituuz.fuzzier.FuzzyMover)
+map <Leader>ff <action>(com.mituuz.fuzzier.FuzzyGrep)
 ```
 
 ### Adding an editor shortcut
