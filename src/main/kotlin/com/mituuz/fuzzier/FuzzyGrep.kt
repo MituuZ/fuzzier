@@ -41,6 +41,10 @@ import javax.swing.KeyStroke
 import kotlin.coroutines.cancellation.CancellationException
 
 class FuzzyGrep() : FuzzyAction() {
+    companion object {
+        const val FUZZIER_NOTIFICATION_GROUP: String = "Fuzzier Notification Group"
+        const val COLORS: String = "--colors"
+    }
     override var popupTitle: String = "Fuzzy Grep"
     override var dimensionKey = "FuzzyGrepPopup"
     private var lock = ReentrantLock()
@@ -56,8 +60,8 @@ class FuzzyGrep() : FuzzyAction() {
         val projectBasePath = project.basePath.toString()
         val rgCommand = checkInstallation("rg", projectBasePath)
         if (rgCommand != null) {
-            val notification = Notification(
-                "Fuzzier Notification Group",
+            val rgNotification = Notification(
+                FUZZIER_NOTIFICATION_GROUP,
                 "No `rg` command found",
                 """
                     No ripgrep found with command: $rgCommand<br>
@@ -66,31 +70,31 @@ class FuzzyGrep() : FuzzyAction() {
                 """.trimIndent(),
                 NotificationType.WARNING
             )
-            Notifications.Bus.notify(notification, project)
+            Notifications.Bus.notify(rgNotification, project)
 
             if (isWindows) {
                 val findstrCommand = checkInstallation("findstr", projectBasePath)
                 if (findstrCommand != null) {
-                    val notification = Notification(
-                        "Fuzzier Notification Group",
+                    val findstrNotification = Notification(
+                        FUZZIER_NOTIFICATION_GROUP,
                         "No `findstr` command found",
                         "No findstr found with command: $findstrCommand",
                         NotificationType.ERROR
                     )
-                    Notifications.Bus.notify(notification, project)
+                    Notifications.Bus.notify(findstrNotification, project)
                     return
                 }
                 popupTitle = "Fuzzy Grep (findstr)"
             } else {
                 val grepCommand = checkInstallation("grep", projectBasePath)
                 if (grepCommand != null) {
-                    val notification = Notification(
-                        "Fuzzier Notification Group",
+                    val grepNotification = Notification(
+                        FUZZIER_NOTIFICATION_GROUP,
                         "No `grep` command found",
                         "No grep found with command: $grepCommand",
                         NotificationType.ERROR
                     )
-                    Notifications.Bus.notify(notification, project)
+                    Notifications.Bus.notify(grepNotification, project)
                     return
                 }
                 popupTitle = "Fuzzy Grep (grep)"
@@ -131,14 +135,14 @@ class FuzzyGrep() : FuzzyAction() {
     }
 
     /**
-     * OS specific to see if `rg` is installed
+     * OS specific to see if a specific executable is found
      * @return the used command if no installation detected, otherwise null
      */
-    private fun checkInstallation(command: String, projectBasePath: String): String? {
+    private fun checkInstallation(executable: String, projectBasePath: String): String? {
         val command = if (isWindows) {
-            listOf("where", command)
+            listOf("where", executable)
         } else {
-            listOf("which", command)
+            listOf("which", executable)
         }
 
         val result = runCommand(command, projectBasePath)
@@ -233,13 +237,13 @@ class FuzzyGrep() : FuzzyAction() {
                 listOf(
                     "rg",
                     "--no-heading",
-                    "--colors",
+                    COLORS,
                     "path:none",
-                    "--colors",
+                    COLORS,
                     "line:none",
-                    "--colors",
+                    COLORS,
                     "column:none",
-                    "--colors",
+                    COLORS,
                     "column:none",
                     "-n",
                     "--with-filename",
