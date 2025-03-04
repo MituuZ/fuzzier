@@ -31,7 +31,6 @@ import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import java.io.File
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
@@ -44,9 +43,9 @@ import kotlin.coroutines.cancellation.CancellationException
 class FuzzyGrep() : FuzzyAction() {
     override var popupTitle: String = "Fuzzy Grep"
     override var dimensionKey = "FuzzyGrepPopup"
-    var lock = ReentrantLock()
-    var useRg = true
-    val isWindows = System.getProperty("os.name").lowercase().contains("win")
+    private var lock = ReentrantLock()
+    private var useRg = true
+    private val isWindows = System.getProperty("os.name").lowercase().contains("win")
 
     override fun runAction(
         project: Project,
@@ -81,6 +80,7 @@ class FuzzyGrep() : FuzzyAction() {
                     Notifications.Bus.notify(notification, project)
                     return
                 }
+                popupTitle = "Fuzzy Grep (findstr)"
             } else {
                 val grepCommand = checkInstallation("grep", projectBasePath)
                 if (grepCommand != null) {
@@ -93,9 +93,11 @@ class FuzzyGrep() : FuzzyAction() {
                     Notifications.Bus.notify(notification, project)
                     return
                 }
+                popupTitle = "Fuzzy Grep (grep)"
             }
             useRg = false
         } else {
+            popupTitle = "Fuzzy Grep (ripgrep)"
             useRg = true
         }
 
