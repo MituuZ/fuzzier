@@ -1,6 +1,9 @@
 # Changelog
 ## Version 1.6.1
 - Update gradle and plugins
+- Improve FuzzyGrep PATH handling by using GeneralCommandline
+  - Thanks to [gymynnym](https://github.com/gymynnym) for finding the issue and the solution
+- Indicate which command FuzzyGrep is running
 
 ## Version 1.6.0
 - Introduce the first, experimental version of Fuzzy Grep

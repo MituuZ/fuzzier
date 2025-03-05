@@ -1,5 +1,9 @@
 package com.mituuz.fuzzier
 
+import com.intellij.execution.configurations.GeneralCommandLine
+import com.intellij.execution.process.OSProcessHandler
+import com.intellij.execution.process.ProcessAdapter
+import com.intellij.execution.process.ProcessEvent
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
@@ -16,6 +20,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
@@ -26,7 +31,6 @@ import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import java.io.File
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
@@ -37,11 +41,15 @@ import javax.swing.KeyStroke
 import kotlin.coroutines.cancellation.CancellationException
 
 class FuzzyGrep() : FuzzyAction() {
+    companion object {
+        const val FUZZIER_NOTIFICATION_GROUP: String = "Fuzzier Notification Group"
+        const val COLORS: String = "--colors"
+    }
     override var popupTitle: String = "Fuzzy Grep"
     override var dimensionKey = "FuzzyGrepPopup"
-    var lock = ReentrantLock()
-    var useRg = true
-    val isWindows = System.getProperty("os.name").lowercase().contains("win")
+    private var lock = ReentrantLock()
+    private var useRg = true
+    private val isWindows = System.getProperty("os.name").lowercase().contains("win")
 
     override fun runAction(
         project: Project,
@@ -52,8 +60,8 @@ class FuzzyGrep() : FuzzyAction() {
         val projectBasePath = project.basePath.toString()
         val rgCommand = checkInstallation("rg", projectBasePath)
         if (rgCommand != null) {
-            val notification = Notification(
-                "Fuzzier Notification Group",
+            val rgNotification = Notification(
+                FUZZIER_NOTIFICATION_GROUP,
                 "No `rg` command found",
                 """
                     No ripgrep found with command: $rgCommand<br>
@@ -62,35 +70,38 @@ class FuzzyGrep() : FuzzyAction() {
                 """.trimIndent(),
                 NotificationType.WARNING
             )
-            Notifications.Bus.notify(notification, project)
+            Notifications.Bus.notify(rgNotification, project)
 
             if (isWindows) {
                 val findstrCommand = checkInstallation("findstr", projectBasePath)
                 if (findstrCommand != null) {
-                    val notification = Notification(
-                        "Fuzzier Notification Group",
+                    val findstrNotification = Notification(
+                        FUZZIER_NOTIFICATION_GROUP,
                         "No `findstr` command found",
                         "No findstr found with command: $findstrCommand",
                         NotificationType.ERROR
                     )
-                    Notifications.Bus.notify(notification, project)
+                    Notifications.Bus.notify(findstrNotification, project)
                     return
                 }
+                popupTitle = "Fuzzy Grep (findstr)"
             } else {
                 val grepCommand = checkInstallation("grep", projectBasePath)
                 if (grepCommand != null) {
-                    val notification = Notification(
-                        "Fuzzier Notification Group",
+                    val grepNotification = Notification(
+                        FUZZIER_NOTIFICATION_GROUP,
                         "No `grep` command found",
                         "No grep found with command: $grepCommand",
                         NotificationType.ERROR
                     )
-                    Notifications.Bus.notify(notification, project)
+                    Notifications.Bus.notify(grepNotification, project)
                     return
                 }
+                popupTitle = "Fuzzy Grep (grep)"
             }
             useRg = false
         } else {
+            popupTitle = "Fuzzy Grep (ripgrep)"
             useRg = true
         }
 
@@ -124,14 +135,14 @@ class FuzzyGrep() : FuzzyAction() {
     }
 
     /**
-     * OS specific to see if `rg` is installed
+     * OS specific to see if a specific executable is found
      * @return the used command if no installation detected, otherwise null
      */
-    private fun checkInstallation(command: String, projectBasePath: String): String? {
+    private fun checkInstallation(executable: String, projectBasePath: String): String? {
         val command = if (isWindows) {
-            listOf("where", command)
+            listOf("where", executable)
         } else {
-            listOf("which", command)
+            listOf("which", executable)
         }
 
         val result = runCommand(command, projectBasePath)
@@ -194,19 +205,20 @@ class FuzzyGrep() : FuzzyAction() {
         }
     }
 
-    fun runCommand(commands: List<String>, projectBasePath: String): String? {
+    private fun runCommand(commands: List<String>, projectBasePath: String): String? {
         return try {
-            val proc = ProcessBuilder(commands)
-                .directory(File(projectBasePath))
-                .redirectErrorStream(true)
-                .start()
-
+            val commandLine = GeneralCommandLine(commands)
+                .withWorkDirectory(projectBasePath)
+                .withRedirectErrorStream(true)
             val output = StringBuilder()
-            proc.inputStream.bufferedReader().useLines { lines ->
-                lines.forEach { output.appendLine(it) }
-            }
-
-            proc.waitFor(4, TimeUnit.SECONDS)
+            val processHandler = OSProcessHandler(commandLine)
+            processHandler.addProcessListener(object : ProcessAdapter() {
+                override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
+                    output.appendLine(event.text.replace("\n", ""))
+                }
+            })
+            processHandler.startNotify()
+            processHandler.process.waitFor(2, TimeUnit.SECONDS)
             output.toString()
         } catch (_: IOException) {
             null
@@ -225,13 +237,13 @@ class FuzzyGrep() : FuzzyAction() {
                 listOf(
                     "rg",
                     "--no-heading",
-                    "--colors",
+                    COLORS,
                     "path:none",
-                    "--colors",
+                    COLORS,
                     "line:none",
-                    "--colors",
+                    COLORS,
                     "column:none",
-                    "--colors",
+                    COLORS,
                     "column:none",
                     "-n",
                     "--with-filename",
