@@ -46,6 +46,13 @@
       <override-text place="MainMenu" text="Fuzzy Grep"/>
     </action>
     <action
+            id="com.mituuz.fuzzier.FuzzyGrepCaseInsensitive"
+            class="com.mituuz.fuzzier.FuzzyGrepCaseInsensitive"
+            text="Fuzzy Grep (Case Insensitive)"
+            description="Search text with case insensitivity">
+      <override-text place="MainMenu" text="Fuzzy Grep (Case Insensitive)"/>
+    </action>
+    <action
             id="com.mituuz.fuzzier.Fuzzier"
             class="com.mituuz.fuzzier.Fuzzier"
             text="Fuzzy File Search"
