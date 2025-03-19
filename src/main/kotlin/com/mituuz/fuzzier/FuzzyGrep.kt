@@ -205,7 +205,7 @@ open class FuzzyGrep() : FuzzyAction() {
         }
     }
 
-    private fun runCommand(commands: List<String>, projectBasePath: String): String? {
+    protected open fun runCommand(commands: List<String>, projectBasePath: String): String? {
         return try {
             val commandLine = GeneralCommandLine(commands)
                 .withWorkDirectory(projectBasePath)
