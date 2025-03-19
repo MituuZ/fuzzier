@@ -5,6 +5,7 @@ libs/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+.aider*
 
 ### IntelliJ IDEA ###
 .intellijPlatform
