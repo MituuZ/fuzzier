@@ -56,6 +56,7 @@ map <Leader>pf <action>(com.mituuz.fuzzier.Fuzzier)
 map <Leader>gf <action>(com.mituuz.fuzzier.FuzzierVCS)
 map <Leader>mf <action>(com.mituuz.fuzzier.FuzzyMover)
 map <Leader>ff <action>(com.mituuz.fuzzier.FuzzyGrep)
+map <Leader>ff <action>(com.mituuz.fuzzier.FuzzyGrepCaseInsensitive)
 ```
 
 ### Adding an editor shortcut
