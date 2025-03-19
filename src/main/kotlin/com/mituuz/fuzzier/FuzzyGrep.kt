@@ -49,7 +49,7 @@ open class FuzzyGrep() : FuzzyAction() {
     override var dimensionKey = "FuzzyGrepPopup"
     private var lock = ReentrantLock()
     private var useRg = true
-    private val isWindows = System.getProperty("os.name").lowercase().contains("win")
+    val isWindows = System.getProperty("os.name").lowercase().contains("win")
 
     override fun runAction(
         project: Project,
