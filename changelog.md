@@ -1,4 +1,7 @@
 # Changelog
+## Version 1.7.0
+- Add Fuzzy Grep (Case Insensitive) action
+
 ## Version 1.6.1
 - Update gradle and plugins
 - Improve FuzzyGrep PATH handling by using GeneralCommandline

@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 // Use same version and group for the jar and the plugin
-val currentVersion = "1.6.1"
+val currentVersion = "1.7.0"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -23,6 +23,7 @@ intellijPlatform {
         </ul>
       </li>
       <li>Indicate which command FuzzyGrep is running</li>
+      <li>Add Fuzzy Grep (Case Insensitive) action</li>
     </ul>
     <h2>Version 1.6.0</h2>
     <ul>
