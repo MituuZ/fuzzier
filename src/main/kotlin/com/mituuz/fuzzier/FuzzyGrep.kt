@@ -40,7 +40,7 @@ import javax.swing.JComponent
 import javax.swing.KeyStroke
 import kotlin.coroutines.cancellation.CancellationException
 
-class FuzzyGrep() : FuzzyAction() {
+open class FuzzyGrep() : FuzzyAction() {
     companion object {
         const val FUZZIER_NOTIFICATION_GROUP: String = "Fuzzier Notification Group"
         const val COLORS: String = "--colors"
