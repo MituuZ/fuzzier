@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 // Use same version and group for the jar and the plugin
-val currentVersion = "1.6.1"
+val currentVersion = "1.7.0"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -16,23 +16,7 @@ intellijPlatform {
     changeNotes = """
     <h2>Version $currentVersion</h2>
     <ul>
-      <li>Update gradle and plugins</li>
-      <li>Improve FuzzyGrep PATH handling by using GeneralCommandline
-        <ul>
-          <li>Thanks to <a href="https://github.com/gymynnym">gymynnym</a> for finding the issue and the solution</li>
-        </ul>
-      </li>
-      <li>Indicate which command FuzzyGrep is running</li>
-    </ul>
-    <h2>Version 1.6.0</h2>
-    <ul>
-      <li>Introduce first version of Fuzzy Grep
-        <ul>
-          <li>Call <a href="https://github.com/BurntSushi/ripgrep">ripgrep</a> in the background</li>
-          <li>Attempt to fall back to <code>grep</code> or <code>findstr</code> if <code>rg</code> is not found</li>
-          <li>The following action has been added: <code>map &lt;Leader&gt;ff &lt;action&gt;(com.mituuz.fuzzier.FuzzyGrep)</code></li>
-        </ul>
-      </li>
+      <li>Add new action FuzzyGrepCaseInsensitive with smart case and non-regex search</li>
     </ul>
     """.trimIndent()
 

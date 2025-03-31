@@ -40,7 +40,7 @@ import javax.swing.JComponent
 import javax.swing.KeyStroke
 import kotlin.coroutines.cancellation.CancellationException
 
-class FuzzyGrep() : FuzzyAction() {
+open class FuzzyGrep() : FuzzyAction() {
     companion object {
         const val FUZZIER_NOTIFICATION_GROUP: String = "Fuzzier Notification Group"
         const val COLORS: String = "--colors"
@@ -49,7 +49,7 @@ class FuzzyGrep() : FuzzyAction() {
     override var dimensionKey = "FuzzyGrepPopup"
     private var lock = ReentrantLock()
     private var useRg = true
-    private val isWindows = System.getProperty("os.name").lowercase().contains("win")
+    val isWindows = System.getProperty("os.name").lowercase().contains("win")
 
     override fun runAction(
         project: Project,
@@ -205,7 +205,7 @@ class FuzzyGrep() : FuzzyAction() {
         }
     }
 
-    private fun runCommand(commands: List<String>, projectBasePath: String): String? {
+    protected open fun runCommand(commands: List<String>, projectBasePath: String): String? {
         return try {
             val commandLine = GeneralCommandLine(commands)
                 .withWorkDirectory(projectBasePath)
