@@ -12,6 +12,7 @@ class FuzzyGrepCaseInsensitive : FuzzyGrep() {
         } else {
             // Customize grep and ripgrep for case insensitivity
             modifiedCommands.add(1, "--smart-case")
+            modifiedCommands.add(2, "-F")
         }
         return super.runCommand(modifiedCommands, projectBasePath)
     }

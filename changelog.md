@@ -1,6 +1,6 @@
 # Changelog
 ## Version 1.7.0
-- Add Fuzzy Grep (Case Insensitive) action
+- Add new action FuzzyGrepCaseInsensitive with smart case and non-regex search
 
 ## Version 1.6.1
 - Update gradle and plugins

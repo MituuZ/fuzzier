@@ -16,7 +16,7 @@ intellijPlatform {
     changeNotes = """
     <h2>Version $currentVersion</h2>
     <ul>
-      <li>Add Fuzzy Grep (Case Insensitive) action</li>
+      <li>Add new action FuzzyGrepCaseInsensitive with smart case and non-regex search</li>
     </ul>
     """.trimIndent()
 
