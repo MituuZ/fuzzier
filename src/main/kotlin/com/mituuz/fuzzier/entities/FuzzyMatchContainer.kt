@@ -67,7 +67,6 @@ class FuzzyMatchContainer(
         val stringBuilder: StringBuilder = StringBuilder(source)
         var offset = 0
         val hlIndexes = score.highlightCharacters.sorted()
-        var prevIndex = -10
         var tagIsOpen = false
 
         var i = 0
@@ -90,7 +89,6 @@ class FuzzyMatchContainer(
                 offset += END_STYLE_TAG.length
                 tagIsOpen = false
             }
-            prevIndex = highlightIndex
             i++
         }
 
