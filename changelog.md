@@ -1,4 +1,7 @@
 # Changelog
+## Version 1.7.1
+- Add module info to project settings, unify debug format
+
 ## Version 1.7.0
 - Add new action FuzzyGrepCaseInsensitive with smart case and non-regex search
 
