@@ -52,12 +52,20 @@ class FuzzierSettingsComponent {
         """.trimIndent(),
         false)
 
+    val modules = SettingsComponent(JBTextField().apply { isEditable = false }, "Modules",
+        """
+            For debugging purposes only. This is a list of all modules in the project.<br>
+            If all modules have the same root path, only show the count of modules.
+        """.trimIndent(),
+        false)
+
     init {
         setupComponents()
         jPanel = FormBuilder.createFormBuilder()
             .addComponent(JBLabel("<html><strong>General settings</strong></html>"))
             .addComponentFillVertically(exclusionSet, 1)
             .addComponent(ignoredCharacters)
+            .addComponent(modules)
 
             .addSeparator()
             .panel

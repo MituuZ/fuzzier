@@ -43,7 +43,29 @@ class FuzzierSettingsConfigurable(project: Project) : Configurable {
         val combinedString = state.exclusionSet.joinToString("\n")
         component.exclusionSet.getJBTextArea().text = combinedString
         component.ignoredCharacters.getJBTextField().text = state.ignoredCharacters
+        component.modules.getJBTextField().text = displayModules(state.modules)
         return component.jPanel
+    }
+
+    /**
+     * Display the modules in a readable format.
+     */
+    private fun displayModules(modules: Map<String, String>): String {
+        val count = modules.size
+        var singleRoot = true
+
+        for (module in modules) {
+            if (module.value != modules.values.first()) {
+                singleRoot = false
+                break
+            }
+        }
+
+        if (singleRoot) {
+            return "$count modules in '${modules.values.first()}'"
+        }
+
+        return modules.toString()
     }
 
     override fun isModified(): Boolean {
