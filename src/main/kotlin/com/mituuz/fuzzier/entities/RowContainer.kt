@@ -55,8 +55,8 @@ class RowContainer(
             var filePath = parts[0].removePrefix(".")
             val filename = filePath.substringAfterLast(if (isWindows) "\\" else "/")
             val rowNumber = parts[1].toInt()
-            var columnNumber: Int
-            var trimmedRow: String
+            val columnNumber: Int
+            val trimmedRow: String
             if (isRg) {
                 columnNumber = parts[2].toInt()
                 trimmedRow = parts[3]
