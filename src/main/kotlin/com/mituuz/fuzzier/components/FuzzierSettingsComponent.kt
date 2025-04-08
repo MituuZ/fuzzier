@@ -32,7 +32,6 @@ import com.intellij.util.ui.FormBuilder
 import com.intellij.ui.components.JBTextField
 import javax.swing.*
 import javax.swing.border.LineBorder
-import kotlin.math.exp
 
 class FuzzierSettingsComponent {
     var jPanel: JPanel
