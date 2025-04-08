@@ -52,7 +52,7 @@ class FuzzyMatchContainer(
         }
     }
 
-    fun getFilenameWithPathStyled(highlight: Boolean): String {
+    private fun getFilenameWithPathStyled(highlight: Boolean): String {
         return "<html><strong>${getStyledFilename(highlight)}</strong>  <i>($filePath)</i></html>"
     }
 
