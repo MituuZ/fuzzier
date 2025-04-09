@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2024 Mitja Leino
+Copyright (c) 2025 Mitja Leino
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -52,7 +52,7 @@ class FuzzyMatchContainer(
         }
     }
 
-    fun getFilenameWithPathStyled(highlight: Boolean): String {
+    private fun getFilenameWithPathStyled(highlight: Boolean): String {
         return "<html><strong>${getStyledFilename(highlight)}</strong>  <i>($filePath)</i></html>"
     }
 
@@ -67,7 +67,6 @@ class FuzzyMatchContainer(
         val stringBuilder: StringBuilder = StringBuilder(source)
         var offset = 0
         val hlIndexes = score.highlightCharacters.sorted()
-        var prevIndex = -10
         var tagIsOpen = false
 
         var i = 0
@@ -90,7 +89,6 @@ class FuzzyMatchContainer(
                 offset += END_STYLE_TAG.length
                 tagIsOpen = false
             }
-            prevIndex = highlightIndex
             i++
         }
 

@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2024 Mitja Leino
+Copyright (c) 2025 Mitja Leino
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -55,8 +55,8 @@ class RowContainer(
             var filePath = parts[0].removePrefix(".")
             val filename = filePath.substringAfterLast(if (isWindows) "\\" else "/")
             val rowNumber = parts[1].toInt()
-            var columnNumber: Int
-            var trimmedRow: String
+            val columnNumber: Int
+            val trimmedRow: String
             if (isRg) {
                 columnNumber = parts[2].toInt()
                 trimmedRow = parts[3]
@@ -79,6 +79,6 @@ class RowContainer(
     }
 
     override fun toString(): String {
-        return "RowContainer(filePath='$filePath', basePath='$basePath', filename='$filename', rowNumber=$rowNumber)"
+        return "RowContainer(basePath='$basePath', filePath='$filePath', filename='$filename', rowNumber=$rowNumber)"
     }
 }

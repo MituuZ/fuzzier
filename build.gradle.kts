@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 // Use same version and group for the jar and the plugin
-val currentVersion = "1.7.0"
+val currentVersion = "1.7.1"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -15,6 +15,10 @@ intellijPlatform {
 
     changeNotes = """
     <h2>Version $currentVersion</h2>
+    <ul>
+      <li>Add module info to project settings, unify debug format</li>
+    </ul>
+    <h2>Version 1.7.0</h2>
     <ul>
       <li>Add new action FuzzyGrepCaseInsensitive with smart case and non-regex search</li>
     </ul>

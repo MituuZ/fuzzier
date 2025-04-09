@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2024 Mitja Leino
+Copyright (c) 2025 Mitja Leino
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -43,6 +43,6 @@ class OrderedContainer(filePath: String, basePath: String, filename: String) :
     }
 
     override fun toString(): String {
-        return "OrderedContainer(filePath='$filePath', basePath='$basePath', filename='$filename')"
+        return "OrderedContainer(basePath='$basePath', filePath='$filePath')"
     }
 }
