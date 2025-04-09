@@ -54,17 +54,13 @@ class FuzzierSettingsConfigurable(project: Project) : Configurable {
      */
     private fun displayModules(modules: Map<String, String>): String {
         val count = modules.size
-        var singleRoot = false
 
-        for (module in modules) {
-            if (module.value != modules.values.first()) {
-                singleRoot = false
-                break
-            }
-        }
+        // Check if all values in the modules map are the same
+        val uniqueRoots = modules.values.distinct()
+        val singleRoot = uniqueRoots.size == 1
 
         if (singleRoot) {
-            return "$count modules in '${modules.values.first()}'"
+            return "$count modules in '${uniqueRoots.first()}'"
         }
 
         return modules.map { "${it.key} in '${it.value}'" }
