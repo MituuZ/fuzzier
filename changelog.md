@@ -1,4 +1,9 @@
 # Changelog
+## Version 1.8.0
+- Improve FuzzyGrep process handling for consistent behavior
+  - Huge thanks to [jspmarc](https://github.com/jspmarc) for this
+- Update IntelliJ platform plugin to 2.5.0
+
 ## Version 1.7.1
 - Add module info to project settings, unify debug format
 
