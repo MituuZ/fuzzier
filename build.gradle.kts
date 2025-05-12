@@ -28,8 +28,8 @@ import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-// Use same version and group for the jar and the plugin
-val currentVersion = "1.7.1"
+// Use the same version and group for the jar and the plugin
+val currentVersion = "1.8.0"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -42,11 +42,11 @@ intellijPlatform {
     changeNotes = """
     <h2>Version $currentVersion</h2>
     <ul>
-      <li>Add module info to project settings, unify debug format</li>
-    </ul>
-    <h2>Version 1.7.0</h2>
-    <ul>
-      <li>Add new action FuzzyGrepCaseInsensitive with smart case and non-regex search</li>
+      <li>Improve FuzzyGrep process handling for consistent behavior</li>
+      <ul>
+          <li>Huge thanks to <a href="https://github.com/jspmarc">jspmarc</a> for this</li>
+      </ul>
+      <li>Update IntelliJ platform plugin to 2.5.0</li>
     </ul>
     """.trimIndent()
 
