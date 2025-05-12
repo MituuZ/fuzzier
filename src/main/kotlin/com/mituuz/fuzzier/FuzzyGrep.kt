@@ -218,7 +218,7 @@ open class FuzzyGrep() : FuzzyAction() {
                 }
             })
             processHandler.startNotify()
-            processHandler.process.waitFor(2, TimeUnit.SECONDS)
+            processHandler.waitFor(2000)
             output.toString()
         } catch (_: IOException) {
             null
