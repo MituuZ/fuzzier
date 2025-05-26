@@ -29,7 +29,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 // Use the same version and group for the jar and the plugin
-val currentVersion = "1.8.0"
+val currentVersion = "1.8.1"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -42,11 +42,8 @@ intellijPlatform {
     changeNotes = """
     <h2>Version $currentVersion</h2>
     <ul>
-      <li>Improve FuzzyGrep process handling for consistent behavior</li>
-      <ul>
-          <li>Huge thanks to <a href="https://github.com/jspmarc">jspmarc</a> for this</li>
-      </ul>
-      <li>Update IntelliJ platform plugin to 2.5.0</li>
+      <li>Remove result limit, fix line and column positions for FuzzyGrep</li>
+      <li>Update IntelliJ platform plugin to 2.6.0</li>
     </ul>
     """.trimIndent()
 

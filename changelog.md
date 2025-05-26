@@ -1,4 +1,8 @@
 # Changelog
+## Version 1.8.1
+- Remove result limit, fix line and column positions for FuzzyGrep
+- Update IntelliJ platform plugin to 2.6.0
+
 ## Version 1.8.0
 - Improve FuzzyGrep process handling for consistent behavior
   - Huge thanks to [jspmarc](https://github.com/jspmarc) for this
