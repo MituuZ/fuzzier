@@ -29,7 +29,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 // Use the same version and group for the jar and the plugin
-val currentVersion = "1.8.1"
+val currentVersion = "1.8.2"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -41,6 +41,10 @@ intellijPlatform {
 
     changeNotes = """
     <h2>Version $currentVersion</h2>
+    <ul>
+      <li>Fix row parsing for FuzzyGrep</li>
+    </ul>
+    <h2>Version 1.8.1</h2>
     <ul>
       <li>Remove result limit, fix line and column positions for FuzzyGrep</li>
       <li>Update IntelliJ platform plugin to 2.6.0</li>
