@@ -42,7 +42,7 @@ class RowContainerTest {
     @Test
     fun fromRGString() {
         val input = "./src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt:205:33:            moduleFileIndex.iterateContent(contentIterator)"
-        val rc = RowContainer.rowContainerFromString(input, "/base/", true, false)
+        val rc = RowContainer.rowContainerFromString(input, "/base/", true, isWindows = false)
 
         assertEquals("/src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt", rc.filePath)
         assertEquals("/base/", rc.basePath)
@@ -53,9 +53,35 @@ class RowContainerTest {
     }
 
     @Test
+    fun fromRGString_complexString() {
+        val input = "./src/main/kotlin/com/example/Test.kt:42:15:val x = \"Hello:World\"; // Contains: colon:in:string and comment"
+        val rc = RowContainer.rowContainerFromString(input, "/base/", true, isWindows = false)
+
+        assertEquals("/src/main/kotlin/com/example/Test.kt", rc.filePath)
+        assertEquals("/base/", rc.basePath)
+        assertEquals("Test.kt", rc.filename)
+        assertEquals(41, rc.rowNumber)
+        assertEquals(14, rc.columnNumber)
+        assertEquals("val x = \"Hello:World\"; // Contains: colon:in:string and comment", rc.trimmedRow)
+    }
+
+    @Test
+    fun fromGrepString_complexString() {
+        val input = "./src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt:205:val message = Map.of(\"key:1\", \"value:2\"); // Multiple: colons: here"
+        val rc = RowContainer.rowContainerFromString(input, "/base/", false, isWindows = false)
+
+        assertEquals("/src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt", rc.filePath)
+        assertEquals("/base/", rc.basePath)
+        assertEquals("TestBenchComponent.kt", rc.filename)
+        assertEquals(204, rc.rowNumber)
+        assertEquals(0, rc.columnNumber)
+        assertEquals("val message = Map.of(\"key:1\", \"value:2\"); // Multiple: colons: here", rc.trimmedRow)
+    }
+
+    @Test
     fun fromGrepString() {
         val input = "./src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt:205:            moduleFileIndex.iterateContent(contentIterator)"
-        val rc = RowContainer.rowContainerFromString(input, "/base/", false, false)
+        val rc = RowContainer.rowContainerFromString(input, "/base/", false, isWindows = false)
 
         assertEquals("/src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt", rc.filePath)
         assertEquals("/base/", rc.basePath)
@@ -68,7 +94,7 @@ class RowContainerTest {
     @Test
     fun fromFindstrString() {
         val input = "src\\main\\kotlin\\com\\mituuz\\fuzzier\\components\\TestBenchComponent.kt:205:            moduleFileIndex.iterateContent(contentIterator)"
-        val rc = RowContainer.rowContainerFromString(input, "/base/", false, true)
+        val rc = RowContainer.rowContainerFromString(input, "/base/", false, isWindows = true)
 
         assertEquals("/src\\main\\kotlin\\com\\mituuz\\fuzzier\\components\\TestBenchComponent.kt", rc.filePath)
         assertEquals("/base/", rc.basePath)

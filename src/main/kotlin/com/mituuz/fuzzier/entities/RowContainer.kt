@@ -53,7 +53,12 @@ class RowContainer(
          * ```
          */
         fun rowContainerFromString(row: String, basePath: String, isRg: Boolean, isWindows: Boolean): RowContainer {
-            val parts = row.split(":")
+            val parts = if (isRg) {
+                row.split(":", limit = 4)
+            } else {
+                row.split(":", limit = 3)
+            }
+
             var filePath = parts[0].removePrefix(".")
             val filename = filePath.substringAfterLast(if (isWindows) "\\" else "/")
             val rowNumber = parts[1].toInt() - 1
