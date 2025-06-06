@@ -59,6 +59,16 @@ class RowContainer(
                 row.split(":", limit = 3)
             }
 
+            if (isRg) {
+                require(parts.size > 3) {
+                    throw IllegalArgumentException("Invalid row string: $row")
+                }
+            } else {
+                require(parts.size > 2) {
+                    throw IllegalArgumentException("Invalid row string: $row")
+                }
+            }
+
             var filePath = parts[0].removePrefix(".")
             val filename = filePath.substringAfterLast(if (isWindows) "\\" else "/")
             val rowNumber = parts[1].toInt() - 1

@@ -69,7 +69,6 @@ import kotlin.coroutines.cancellation.CancellationException
 open class FuzzyGrep() : FuzzyAction() {
     companion object {
         const val FUZZIER_NOTIFICATION_GROUP: String = "Fuzzier Notification Group"
-        const val COLORS: String = "--colors"
     }
     override var popupTitle: String = "Fuzzy Grep"
     override var dimensionKey = "FuzzyGrepPopup"
@@ -263,14 +262,7 @@ open class FuzzyGrep() : FuzzyAction() {
                 listOf(
                     "rg",
                     "--no-heading",
-                    COLORS,
-                    "path:none",
-                    COLORS,
-                    "line:none",
-                    COLORS,
-                    "column:none",
-                    COLORS,
-                    "column:none",
+                    "--color=never",
                     "-n",
                     "--with-filename",
                     "--column",
