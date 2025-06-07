@@ -26,6 +26,7 @@
 package com.mituuz.fuzzier.entities
 
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
+import java.io.File
 
 class RowContainer(
     filePath: String,
@@ -36,6 +37,8 @@ class RowContainer(
     val trimmedRow: String
 ) : FuzzyContainer(filePath, basePath, filename) {
     companion object {
+        val FILE_SEPARATOR: String = File.separator
+
         /**
          * Create a row container from a string
          * <br><br>
@@ -52,10 +55,15 @@ class RowContainer(
          * src\main\kotlin\com\mituuz\fuzzier\components\TestBenchComponent.kt:205:            moduleFileIndex.iterateContent(contentIterator)
          * ```
          */
-        fun rowContainerFromString(row: String, basePath: String, isRg: Boolean, isWindows: Boolean): RowContainer {
-            val parts = row.split(":")
+        fun rowContainerFromString(row: String, basePath: String, isRg: Boolean): RowContainer {
+            val parts = if (isRg) {
+                row.split(":", limit = 4)
+            } else {
+                row.split(":", limit = 3)
+            }
+
             var filePath = parts[0].removePrefix(".")
-            val filename = filePath.substringAfterLast(if (isWindows) "\\" else "/")
+            val filename = filePath.substringAfterLast(FILE_SEPARATOR)
             val rowNumber = parts[1].toInt() - 1
             val columnNumber: Int
             val trimmedRow: String
@@ -63,8 +71,8 @@ class RowContainer(
                 columnNumber = parts[2].toInt() - 1
                 trimmedRow = parts[3]
             } else {
-                if (isWindows) {
-                    filePath = "/$filePath"
+                if (!filePath.startsWith(FILE_SEPARATOR)) {
+                    filePath = "$FILE_SEPARATOR$filePath"
                 }
                 columnNumber = 0
                 trimmedRow = parts[2]

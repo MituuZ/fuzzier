@@ -71,6 +71,7 @@ open class FuzzyGrep() : FuzzyAction() {
         const val FUZZIER_NOTIFICATION_GROUP: String = "Fuzzier Notification Group"
         const val COLORS: String = "--colors"
     }
+
     override var popupTitle: String = "Fuzzy Grep"
     override var dimensionKey = "FuzzyGrepPopup"
     private var lock = ReentrantLock()
@@ -263,14 +264,7 @@ open class FuzzyGrep() : FuzzyAction() {
                 listOf(
                     "rg",
                     "--no-heading",
-                    COLORS,
-                    "path:none",
-                    COLORS,
-                    "line:none",
-                    COLORS,
-                    "column:none",
-                    COLORS,
-                    "column:none",
+                    "color=never",
                     "-n",
                     "--with-filename",
                     "--column",
@@ -290,7 +284,7 @@ open class FuzzyGrep() : FuzzyAction() {
             res.lines()
                 .forEach { line ->
                     if (line.matches(Regex("""^.+:\d+:\d+:\s*.+$""")) || line.matches(Regex("""^.+:\d+:\s*.+$"""))) {
-                        val rowContainer = RowContainer.rowContainerFromString(line, projectBasePath, useRg, isWindows)
+                        val rowContainer = RowContainer.rowContainerFromString(line, projectBasePath, useRg)
                         listModel.addElement(rowContainer)
                     }
                 }
