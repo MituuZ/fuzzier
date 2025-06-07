@@ -38,7 +38,7 @@ class RowContainerTest {
         val state = FuzzierGlobalSettingsService.State()
         val container = RowContainer("", "", "filename", 0, 3, "trimmed row content")
 
-        assertEquals("filename 0:3:trimmed row content", container.getDisplayString(state))
+        assertEquals("filename:0:3: trimmed row content", container.getDisplayString(state))
     }
 
     @Test
@@ -53,7 +53,7 @@ class RowContainerTest {
         assertEquals("TestBenchComponent.kt", rc.filename)
         assertEquals(204, rc.rowNumber)
         assertEquals(32, rc.columnNumber)
-        assertEquals("            moduleFileIndex.iterateContent(contentIterator)", rc.trimmedRow)
+        assertEquals("moduleFileIndex.iterateContent(contentIterator)", rc.trimmedRow)
     }
 
     @Test
@@ -68,7 +68,7 @@ class RowContainerTest {
         assertEquals("TestBenchComponent.kt", rc.filename)
         assertEquals(204, rc.rowNumber)
         assertEquals(0, rc.columnNumber)
-        assertEquals("            moduleFileIndex.iterateContent(contentIterator)", rc.trimmedRow)
+        assertEquals("moduleFileIndex.iterateContent(contentIterator)", rc.trimmedRow)
     }
 
     @Test
@@ -83,7 +83,7 @@ class RowContainerTest {
         assertEquals("TestBenchComponent.kt", rc.filename)
         assertEquals(204, rc.rowNumber)
         assertEquals(32, rc.columnNumber)
-        assertEquals("            moduleFileIndex.iterateContent(contentIterator)", rc.trimmedRow)
+        assertEquals("moduleFileIndex.iterateContent(contentIterator)", rc.trimmedRow)
     }
 
     @Test
@@ -98,7 +98,7 @@ class RowContainerTest {
         assertEquals("TestBenchComponent.kt", rc.filename)
         assertEquals(204, rc.rowNumber)
         assertEquals(0, rc.columnNumber)
-        assertEquals("            moduleFileIndex.iterateContent(contentIterator)", rc.trimmedRow)
+        assertEquals("moduleFileIndex.iterateContent(contentIterator)", rc.trimmedRow)
     }
 
     private fun getRowContainer(input: String, isRg: Boolean): RowContainer {

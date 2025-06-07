@@ -79,13 +79,13 @@ class RowContainer(
             val trimmedRow: String
             if (isRg) {
                 columnNumber = parts[2].toInt() - 1
-                trimmedRow = parts[3]
+                trimmedRow = parts[3].trim()
             } else {
                 if (!filePath.startsWith(FILE_SEPARATOR)) {
                     filePath = "$FILE_SEPARATOR$filePath"
                 }
                 columnNumber = 0
-                trimmedRow = parts[2]
+                trimmedRow = parts[2].trim()
             }
             return RowContainer(filePath, basePath, filename, rowNumber, columnNumber, trimmedRow)
         }
@@ -95,7 +95,7 @@ class RowContainer(
         if (state.filenameType == FilenameType.DEBUG) {
             return toString()
         }
-        return "$filename $rowNumber:$columnNumber:$trimmedRow"
+        return "$filename:$rowNumber:$columnNumber: $trimmedRow"
     }
 
     override fun toString(): String {
