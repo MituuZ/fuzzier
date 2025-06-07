@@ -284,49 +284,25 @@ open class FuzzyGrep() : FuzzyAction() {
 
         if (res != null) {
             if (useRg) {
-                val jsonBuffer = StringBuilder()
-                var openBraces = 0
+                val jsonText = res.lines().drop(1).joinToString("")
 
-                print("res: $res")
-
-                res.lines().drop(1).forEach { line ->
-                    // Process line character by character to track JSON object boundaries
-                    for (char in line) {
-                        jsonBuffer.append(char)
-                        if (char == '{') openBraces++
-                        if (char == '}') openBraces--
-
-                        // If we've completed a JSON object
-                        if (openBraces == 0 && jsonBuffer.isNotEmpty() && jsonBuffer.toString().trim().startsWith("{")) {
-                            try {
-                                val jsonStr = jsonBuffer.toString()
-                                val json = JsonParser.parseString(jsonStr).asJsonObject
-
-                                if (json.has("type") && json["type"].asString == "match") {
-                                    val rowContainer = RowContainer.fromRipGrepJson(json, projectBasePath)
-                                    listModel.addElement(rowContainer)
-                                }
-                            } catch (e: Exception) {
-                                // Handle parsing errors - might be incomplete JSON
-                            } finally {
-                                // Reset buffer for next JSON object
-                                jsonBuffer.clear()
-                            }
+                val jsonParts = jsonText.split("}{")
+                    .map { part ->
+                        when {
+                            part.startsWith("{") && part.endsWith("}") -> part
+                            part.startsWith("{") -> "$part}"
+                            part.endsWith("}") -> "{$part"
+                            else -> "{$part}"
                         }
                     }
-                }
 
-                // Handle any remaining content in the buffer
-                if (openBraces == 0 && jsonBuffer.isNotEmpty()) {
-                    try {
-                        val json = JsonParser.parseString(jsonBuffer.toString()).asJsonObject
 
-                        if (json.has("type") && json["type"].asString == "match") {
-                            val rowContainer = RowContainer.fromRipGrepJson(json, projectBasePath)
-                            listModel.addElement(rowContainer)
-                        }
-                    } catch (e: Exception) {
-                        // Handle parsing errors
+                jsonParts.forEach { jsonStr ->
+                    val json = JsonParser.parseString(jsonStr).asJsonObject
+
+                    if (json.has("type") && json["type"].asString == "match") {
+                        val rowContainer = RowContainer.fromRipGrepJson(json, projectBasePath)
+                        listModel.addElement(rowContainer)
                     }
                 }
             } else {
