@@ -37,7 +37,9 @@ class RowContainer(
     val trimmedRow: String
 ) : FuzzyContainer(filePath, basePath, filename) {
     companion object {
-        val FILE_SEPARATOR: String = File.separator
+        private val FILE_SEPARATOR: String = File.separator
+        private val RG_PATTERN: Regex = Regex("""^.+:\d+:\d+:\s*.+$""")
+        private val COMMON_PATTERN: Regex = Regex("""^.+:\d+:\s*.+$""")
 
         /**
          * Create a row container from a string
@@ -56,8 +58,12 @@ class RowContainer(
          * ```
          */
         fun rowContainerFromString(row: String, basePath: String, isRg: Boolean): RowContainer? {
+            if (!row.matches(if (isRg) RG_PATTERN else COMMON_PATTERN)) {
+                return null
+            }
+
             val parts = getParts(row, isRg)
-            if (invalidParts(parts, isRg)) {
+            if (parts.size != if (isRg) 4 else 3) {
                 return null
             }
 
@@ -85,16 +91,6 @@ class RowContainer(
             } else {
                 row.split(":", limit = 3)
             }
-        }
-
-        private fun invalidParts(parts: List<String>, isRg: Boolean): Boolean {
-            if (isRg && parts.size != 4) {
-                return true
-            } else if (!isRg && parts.size != 3) {
-                return true
-            }
-
-            return false
         }
     }
 

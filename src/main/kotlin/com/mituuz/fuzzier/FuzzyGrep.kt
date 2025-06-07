@@ -69,7 +69,6 @@ import kotlin.coroutines.cancellation.CancellationException
 open class FuzzyGrep() : FuzzyAction() {
     companion object {
         const val FUZZIER_NOTIFICATION_GROUP: String = "Fuzzier Notification Group"
-        const val COLORS: String = "--colors"
     }
 
     override var popupTitle: String = "Fuzzy Grep"
@@ -162,7 +161,7 @@ open class FuzzyGrep() : FuzzyAction() {
     }
 
     /**
-     * OS specific to see if a specific executable is found
+     * OS-specific to see if a specific executable is found
      * @return the used command if no installation detected, otherwise null
      */
     private fun checkInstallation(executable: String, projectBasePath: String): String? {
@@ -283,11 +282,9 @@ open class FuzzyGrep() : FuzzyAction() {
         if (res != null) {
             res.lines()
                 .forEach { line ->
-                    if (line.matches(Regex("""^.+:\d+:\d+:\s*.+$""")) || line.matches(Regex("""^.+:\d+:\s*.+$"""))) {
-                        val rowContainer = RowContainer.rowContainerFromString(line, projectBasePath, useRg)
-                        if (rowContainer != null) {
-                            listModel.addElement(rowContainer)
-                        }
+                    val rowContainer = RowContainer.rowContainerFromString(line, projectBasePath, useRg)
+                    if (rowContainer != null) {
+                        listModel.addElement(rowContainer)
                     }
                 }
         } else {
