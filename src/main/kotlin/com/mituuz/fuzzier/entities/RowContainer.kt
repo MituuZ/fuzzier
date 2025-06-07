@@ -55,11 +55,21 @@ class RowContainer(
          * src\main\kotlin\com\mituuz\fuzzier\components\TestBenchComponent.kt:205:            moduleFileIndex.iterateContent(contentIterator)
          * ```
          */
-        fun rowContainerFromString(row: String, basePath: String, isRg: Boolean): RowContainer {
+        fun rowContainerFromString(row: String, basePath: String, isRg: Boolean): RowContainer? {
             val parts = if (isRg) {
                 row.split(":", limit = 4)
             } else {
                 row.split(":", limit = 3)
+            }
+
+            if (isRg) {
+                if (parts.size != 4) {
+                    return null
+                }
+            } else {
+                if (parts.size != 3) {
+                    return null
+                }
             }
 
             var filePath = parts[0].removePrefix(".")

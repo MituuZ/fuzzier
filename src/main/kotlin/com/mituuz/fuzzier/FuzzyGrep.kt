@@ -285,7 +285,9 @@ open class FuzzyGrep() : FuzzyAction() {
                 .forEach { line ->
                     if (line.matches(Regex("""^.+:\d+:\d+:\s*.+$""")) || line.matches(Regex("""^.+:\d+:\s*.+$"""))) {
                         val rowContainer = RowContainer.rowContainerFromString(line, projectBasePath, useRg)
-                        listModel.addElement(rowContainer)
+                        if (rowContainer != null) {
+                            listModel.addElement(rowContainer)
+                        }
                     }
                 }
         } else {

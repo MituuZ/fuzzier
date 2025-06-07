@@ -46,7 +46,7 @@ class RowContainerTest {
     fun fromRGString() {
         val input =
             "./src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt:205:33:            moduleFileIndex.iterateContent(contentIterator)"
-        val rc = RowContainer.rowContainerFromString(input, "/base/", true)
+        val rc = getRowContainer(input, true)
 
         assertEquals("/src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt", rc.filePath)
         assertEquals("/base/", rc.basePath)
@@ -61,7 +61,7 @@ class RowContainerTest {
     fun fromGrepString() {
         val input =
             "./src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt:205:            moduleFileIndex.iterateContent(contentIterator)"
-        val rc = RowContainer.rowContainerFromString(input, "/base/", false)
+        val rc = getRowContainer(input, false)
 
         assertEquals("/src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt", rc.filePath)
         assertEquals("/base/", rc.basePath)
@@ -76,7 +76,7 @@ class RowContainerTest {
     fun fromRGString_windows() {
         val input =
             ".\\src\\main\\kotlin\\com\\mituuz\\fuzzier\\components\\TestBenchComponent.kt:205:33:            moduleFileIndex.iterateContent(contentIterator)"
-        val rc = RowContainer.rowContainerFromString(input, "/base/", true)
+        val rc = getRowContainer(input, true)
 
         assertEquals("/src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt", rc.filePath)
         assertEquals("/base/", rc.basePath)
@@ -91,7 +91,7 @@ class RowContainerTest {
     fun fromFindstrString_windows() {
         val input =
             ".\\src\\main\\kotlin\\com\\mituuz\\fuzzier\\components\\TestBenchComponent.kt:205:            moduleFileIndex.iterateContent(contentIterator)"
-        val rc = RowContainer.rowContainerFromString(input, "/base/", false)
+        val rc = getRowContainer(input, false)
 
         assertEquals("/src\\main\\kotlin\\com\\mituuz\\fuzzier\\components\\TestBenchComponent.kt", rc.filePath)
         assertEquals("/base/", rc.basePath)
@@ -99,5 +99,14 @@ class RowContainerTest {
         assertEquals(204, rc.rowNumber)
         assertEquals(0, rc.columnNumber)
         assertEquals("            moduleFileIndex.iterateContent(contentIterator)", rc.trimmedRow)
+    }
+
+    private fun getRowContainer(input: String, isRg: Boolean): RowContainer {
+        val rc = RowContainer.rowContainerFromString(input, "/base/", isRg)
+        if (rc == null) {
+            throw Exception("RowContainer could not be created from input: $input")
+        }
+
+        return rc
     }
 }
