@@ -287,6 +287,8 @@ open class FuzzyGrep() : FuzzyAction() {
                 val jsonBuffer = StringBuilder()
                 var openBraces = 0
 
+                print("res: $res")
+
                 res.lines().drop(1).forEach { line ->
                     // Process line character by character to track JSON object boundaries
                     for (char in line) {
