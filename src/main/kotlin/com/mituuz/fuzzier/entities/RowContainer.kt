@@ -56,20 +56,9 @@ class RowContainer(
          * ```
          */
         fun rowContainerFromString(row: String, basePath: String, isRg: Boolean): RowContainer? {
-            val parts = if (isRg) {
-                row.split(":", limit = 4)
-            } else {
-                row.split(":", limit = 3)
-            }
-
-            if (isRg) {
-                if (parts.size != 4) {
-                    return null
-                }
-            } else {
-                if (parts.size != 3) {
-                    return null
-                }
+            val parts = getParts(row, isRg)
+            if (invalidParts(parts, isRg)) {
+                return null
             }
 
             var filePath = parts[0].removePrefix(".")
@@ -88,6 +77,24 @@ class RowContainer(
                 trimmedRow = parts[2].trim()
             }
             return RowContainer(filePath, basePath, filename, rowNumber, columnNumber, trimmedRow)
+        }
+
+        private fun getParts(row: String, isRg: Boolean): List<String> {
+            return if (isRg) {
+                row.split(":", limit = 4)
+            } else {
+                row.split(":", limit = 3)
+            }
+        }
+
+        private fun invalidParts(parts: List<String>, isRg: Boolean): Boolean {
+            if (isRg && parts.size != 4) {
+                return true
+            } else if (!isRg && parts.size != 3) {
+                return true
+            }
+
+            return false
         }
     }
 
