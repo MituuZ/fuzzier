@@ -34,7 +34,7 @@ class FuzzyGrepCaseInsensitive : FuzzyGrep() {
         val modifiedCommands = commands.toMutableList()
         if (isWindows && !useRg) {
             // Customize findstr for case insensitivity
-            modifiedCommands.add("/I")
+            modifiedCommands.add(1, "/I")
         } else {
             // Customize grep and ripgrep for case insensitivity
             modifiedCommands.add(1, "--smart-case")
