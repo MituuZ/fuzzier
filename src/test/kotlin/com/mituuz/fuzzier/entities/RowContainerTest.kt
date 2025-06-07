@@ -78,7 +78,7 @@ class RowContainerTest {
             ".\\src\\main\\kotlin\\com\\mituuz\\fuzzier\\components\\TestBenchComponent.kt:205:33:            moduleFileIndex.iterateContent(contentIterator)"
         val rc = getRowContainer(input, true)
 
-        assertEquals("/src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt", rc.filePath)
+        assertEquals("\\src\\main\\kotlin\\com\\mituuz\\fuzzier\\components\\TestBenchComponent.kt", rc.filePath)
         assertEquals("/base/", rc.basePath)
         assertEquals("TestBenchComponent.kt", rc.filename)
         assertEquals(204, rc.rowNumber)
@@ -93,7 +93,7 @@ class RowContainerTest {
             ".\\src\\main\\kotlin\\com\\mituuz\\fuzzier\\components\\TestBenchComponent.kt:205:            moduleFileIndex.iterateContent(contentIterator)"
         val rc = getRowContainer(input, false)
 
-        assertEquals("/src\\main\\kotlin\\com\\mituuz\\fuzzier\\components\\TestBenchComponent.kt", rc.filePath)
+        assertEquals("\\src\\main\\kotlin\\com\\mituuz\\fuzzier\\components\\TestBenchComponent.kt", rc.filePath)
         assertEquals("/base/", rc.basePath)
         assertEquals("TestBenchComponent.kt", rc.filename)
         assertEquals(204, rc.rowNumber)
