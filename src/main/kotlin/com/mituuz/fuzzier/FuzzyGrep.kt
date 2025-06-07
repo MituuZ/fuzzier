@@ -74,7 +74,7 @@ open class FuzzyGrep() : FuzzyAction() {
     override var popupTitle: String = "Fuzzy Grep"
     override var dimensionKey = "FuzzyGrepPopup"
     private var lock = ReentrantLock()
-    private var useRg = true
+    var useRg = true
     val isWindows = System.getProperty("os.name").lowercase().contains("win")
 
     override fun runAction(
