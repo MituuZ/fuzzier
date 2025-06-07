@@ -264,7 +264,7 @@ open class FuzzyGrep() : FuzzyAction() {
                 listOf(
                     "rg",
                     "--no-heading",
-                    "color=never",
+                    "--color=never",
                     "-n",
                     "--with-filename",
                     "--column",
