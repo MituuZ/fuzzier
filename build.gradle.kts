@@ -45,7 +45,9 @@ intellijPlatform {
       <li>Fix command modification so FuzzyGrepCaseInsensitive now works correctly on Windows</li>
       <li>Improve FuzzyGrep string handling and validation for better performance and stability</li>
       <li>Show trimmed row text content in the popup</li>
-      <li><strong>Known issue</strong>: command output is handled line by line, but sometimes a single result can span more than one line, resulting in incomplete results</li>
+      <li><strong>Known issue</strong>: command output is handled line by line, but sometimes a single result can 
+      span more than one line, resulting in incomplete results. 
+      <a href="https://github.com/MituuZ/fuzzier/issues/120">Tracking issue #120</a></li>
     </ul>
     <h2>Version 1.8.1</h2>
     <ul>
