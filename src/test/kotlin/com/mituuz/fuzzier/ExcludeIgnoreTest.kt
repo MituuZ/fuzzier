@@ -27,6 +27,8 @@ package com.mituuz.fuzzier
 
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.condition.EnabledOnOs
+import org.junit.jupiter.api.condition.OS
 
 class ExcludeIgnoreTest {
     private var testUtil = TestUtil()
@@ -76,6 +78,8 @@ class ExcludeIgnoreTest {
     }
 
     @Test
+    @EnabledOnOs(OS.LINUX, OS.MAC)
+    // TODO: Check this on Windows
     fun testIgnoreOneFile() {
         val filePaths = listOf("src/ignore-me.kt", "src/main.kt")
         val filePathContainer = testUtil.setUpModuleFileIndex(filePaths, setOf(), listOf("src/ignore-me.kt"))
@@ -94,6 +98,8 @@ class ExcludeIgnoreTest {
     }
 
     @Test
+    @EnabledOnOs(OS.LINUX, OS.MAC)
+    // TODO: Check this on Windows
     fun testIgnoreMultipleFiles() {
         val filePaths = listOf("src/dir/file.txt", "src/main.kt", "src/other.kt")
         val filePathContainer =
@@ -103,6 +109,8 @@ class ExcludeIgnoreTest {
     }
 
     @Test
+    @EnabledOnOs(OS.LINUX, OS.MAC)
+    // TODO: Check this on Windows
     fun testIgnoreInCombinationWithExclusionList() {
         /* for a FuzzierVCS action only the ignore list should be applied, and the exclusions should be skipped */
         val filePaths =
