@@ -25,7 +25,10 @@
  */
 package com.mituuz.fuzzier.entities
 
+import com.google.gson.JsonObject
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
+import java.io.File
+import kotlin.io.path.Path
 
 class RowContainer(
     filePath: String,
@@ -36,13 +39,36 @@ class RowContainer(
     val trimmedRow: String
 ) : FuzzyContainer(filePath, basePath, filename) {
     companion object {
+        val FILE_SEPARATOR: String = File.separator
+
+        /**
+         * Create a row container from a RipGrep JSON object
+         */
+        fun fromRipGrepJson(json: JsonObject, basePath: String): RowContainer {
+            try {
+                val data = json.getAsJsonObject("data")
+                val path = data.getAsJsonObject("path")
+                val filePath = "$FILE_SEPARATOR${path["text"].asString}"
+                val filename = filePath.substringAfterLast(FILE_SEPARATOR)
+
+                val lines = data.getAsJsonObject("lines")
+                val trimmedRow = lines["text"].asString.trim()
+                val rowNumber = data.getAsJsonPrimitive("line_number").asInt - 1
+                val columnNumber = if (data.asJsonObject["submatches"].asJsonArray.size() > 0) {
+                    data.asJsonObject["submatches"].asJsonArray[0].asJsonObject["start"].asInt - 1
+                } else {
+                    0
+                }
+
+                return RowContainer(filePath, basePath, filename, rowNumber, columnNumber, trimmedRow)
+            } catch (e: Exception) {
+                throw IllegalArgumentException("Invalid RipGrep JSON: $json", e)
+            }
+        }
+
         /**
          * Create a row container from a string
          * <br><br>
-         * <h2>ripgrep</h2>
-         * ```
-         * ./src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt:205:33:            moduleFileIndex.iterateContent(contentIterator)
-         * ```
          * <h2>grep</h2>
          * ```
          * ./src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt:205:            moduleFileIndex.iterateContent(contentIterator)
@@ -52,39 +78,21 @@ class RowContainer(
          * src\main\kotlin\com\mituuz\fuzzier\components\TestBenchComponent.kt:205:            moduleFileIndex.iterateContent(contentIterator)
          * ```
          */
-        fun rowContainerFromString(row: String, basePath: String, isRg: Boolean, isWindows: Boolean): RowContainer {
-            val parts = if (isRg) {
-                row.split(":", limit = 4)
-            } else {
-                row.split(":", limit = 3)
-            }
+        fun fromString(row: String, basePath: String): RowContainer {
+            val parts = row.split(":", limit = 3)
 
-            if (isRg) {
-                require(parts.size > 3) {
-                    throw IllegalArgumentException("Invalid row string: $row")
-                }
-            } else {
-                require(parts.size > 2) {
-                    throw IllegalArgumentException("Invalid row string: $row")
-                }
+            require(parts.size > 2) {
+                throw IllegalArgumentException("Invalid row string: $row")
             }
 
             var filePath = parts[0].removePrefix(".")
-            val filename = filePath.substringAfterLast(if (isWindows) "\\" else "/")
+            val filename = filePath.substringAfterLast(FILE_SEPARATOR)
             val rowNumber = parts[1].toInt() - 1
-            val columnNumber: Int
-            val trimmedRow: String
-            if (isRg) {
-                columnNumber = parts[2].toInt() - 1
-                trimmedRow = parts[3]
-            } else {
-                if (isWindows) {
-                    filePath = "/$filePath"
-                }
-                columnNumber = 0
-                trimmedRow = parts[2]
+            if (!filePath.startsWith(FILE_SEPARATOR)) {
+                filePath = "$FILE_SEPARATOR$filePath"
             }
-            return RowContainer(filePath, basePath, filename, rowNumber, columnNumber, trimmedRow)
+            val trimmedRow: String = parts[2].trim()
+            return RowContainer(filePath, basePath, filename, rowNumber, 0, trimmedRow)
         }
     }
 

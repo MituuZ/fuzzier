@@ -1,6 +1,6 @@
 # Changelog
 ## Version 1.8.2
-- Fix row parsing for FuzzyGrep
+- Use JSON output for ripgrep
  
 ## Version 1.8.1
 - Remove result limit, fix line and column positions for FuzzyGrep

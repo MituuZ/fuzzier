@@ -34,8 +34,8 @@ import org.junit.jupiter.api.condition.EnabledOnOs
 import org.junit.jupiter.api.condition.OS
 import kotlin.io.path.Path
 
-@EnabledOnOs(OS.LINUX, OS.MAC)
-class RowContainerTest {
+@EnabledOnOs(OS.WINDOWS)
+class RowContainerTestWindows {
     @Test
     fun displayString() {
         val state = FuzzierGlobalSettingsService.State()
@@ -47,7 +47,7 @@ class RowContainerTest {
     @Test
     fun fromRgJSON() {
         val input = """
-            {"type":"match","data":{"path":{"text":"src/main/kotlin/com/mituuz/fuzzier/FuzzyGrepCaseInsensitive.kt"},"lines":{"text":"        val modifiedCommands = commands.toMutableList()\n"},"line_number":8,"absolute_offset":298,"submatches":[{"match":{"text":"modifiedCommands"},"start":12,"end":28}]}}
+            {"type":"match","data":{"path":{"text":"src\\main\\kotlin\\com\\mituuz\\fuzzier\\FuzzyGrepCaseInsensitive.kt"},"lines":{"text":"        val modifiedCommands = commands.toMutableList()\n"},"line_number":8,"absolute_offset":298,"submatches":[{"match":{"text":"modifiedCommands"},"start":12,"end":28}]}}
         """.trimIndent()
         val json = JsonParser.parseString(input).asJsonObject
         val rc = RowContainer.fromRipGrepJson(json, "/base/")
@@ -64,9 +64,25 @@ class RowContainerTest {
     }
 
     @Test
-    fun fromGrepString_complexString() {
-        val input =
-            "./src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt:205:val message = Map.of(\"key:1\", \"value:2\"); // Multiple: colons: here"
+    fun fromFindstrString() {
+        val input = "src\\main\\kotlin\\com\\mituuz\\fuzzier\\components\\TestBenchComponent.kt:205:            moduleFileIndex.iterateContent(contentIterator)"
+        val rc = RowContainer.fromString(input, "/base/")
+
+        val expectedPath = Path("", "src", "main", "kotlin", "com", "mituuz", "fuzzier", "components", "TestBenchComponent.kt")
+        val actualPath = Path(rc.filePath)
+
+        assertTrue(actualPath.startsWith(RowContainer.FILE_SEPARATOR))
+        assertEquals(expectedPath.toString(), actualPath.toString())
+        assertEquals("/base/", rc.basePath)
+        assertEquals("TestBenchComponent.kt", rc.filename)
+        assertEquals(204, rc.rowNumber)
+        assertEquals(0, rc.columnNumber)
+        assertEquals("            moduleFileIndex.iterateContent(contentIterator)", rc.trimmedRow)
+    }
+
+    @Test
+    fun fromFindstrString_complexString() {
+        val input = ".\\src\\main\\kotlin\\com\\mituuz\\fuzzier\\components\\TestBenchComponent.kt:205:val message = Map.of(\"key:1\", \"value:2\"); \\\\ Multiple: colons: here"
         val rc = RowContainer.fromString(input, "/base/")
 
         assertEquals("/src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt", rc.filePath)
@@ -75,19 +91,5 @@ class RowContainerTest {
         assertEquals(204, rc.rowNumber)
         assertEquals(0, rc.columnNumber)
         assertEquals("val message = Map.of(\"key:1\", \"value:2\"); // Multiple: colons: here", rc.trimmedRow)
-    }
-
-    @Test
-    fun fromGrepString() {
-        val input =
-            "./src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt:205:            moduleFileIndex.iterateContent(contentIterator)"
-        val rc = RowContainer.fromString(input, "/base/")
-
-        assertEquals("/src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt", rc.filePath)
-        assertEquals("/base/", rc.basePath)
-        assertEquals("TestBenchComponent.kt", rc.filename)
-        assertEquals(204, rc.rowNumber)
-        assertEquals(0, rc.columnNumber)
-        assertEquals("moduleFileIndex.iterateContent(contentIterator)", rc.trimmedRow)
     }
 }

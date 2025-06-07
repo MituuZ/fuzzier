@@ -26,6 +26,7 @@
 
 package com.mituuz.fuzzier
 
+import com.google.gson.JsonParser
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.execution.process.ProcessAdapter
@@ -70,6 +71,7 @@ open class FuzzyGrep() : FuzzyAction() {
     companion object {
         const val FUZZIER_NOTIFICATION_GROUP: String = "Fuzzier Notification Group"
     }
+
     override var popupTitle: String = "Fuzzy Grep"
     override var dimensionKey = "FuzzyGrepPopup"
     private var lock = ReentrantLock()
@@ -261,8 +263,8 @@ open class FuzzyGrep() : FuzzyAction() {
             runCommand(
                 listOf(
                     "rg",
+                    "--json",
                     "--no-heading",
-                    "--color=never",
                     "-n",
                     "--with-filename",
                     "--column",
@@ -279,13 +281,23 @@ open class FuzzyGrep() : FuzzyAction() {
         }
 
         if (res != null) {
-            res.lines()
-                .forEach { line ->
-                    if (line.matches(Regex("""^.+:\d+:\d+:\s*.+$""")) || line.matches(Regex("""^.+:\d+:\s*.+$"""))) {
-                        val rowContainer = RowContainer.rowContainerFromString(line, projectBasePath, useRg, isWindows)
-                        listModel.addElement(rowContainer)
-                    }
+            if (useRg) {
+                val json = JsonParser.parseString(res).asJsonObject
+
+                if (json.has("type") && json["type"].asString == "match") {
+                    val rowContainer = RowContainer.fromRipGrepJson(json, projectBasePath)
+                    listModel.addElement(rowContainer)
                 }
+            } else {
+                res.lines()
+                    .forEach { line ->
+                        if (line.matches(Regex("""^.+:\d+:\d+:\s*.+$""")) || line.matches(Regex("""^.+:\d+:\s*.+$"""))) {
+                            val rowContainer =
+                                RowContainer.fromString(line, projectBasePath)
+                            listModel.addElement(rowContainer)
+                        }
+                    }
+            }
         } else {
             return
         }
