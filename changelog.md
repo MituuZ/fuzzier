@@ -2,7 +2,7 @@
 
 ## Version 1.8.2
 
-- Fix command modification so FuzzyGrepCaseInsensitive now works correctly on Windows
+- Fix command modification so FuzzyGrepCaseInsensitive now works correctly with findstr and grep
 - Improve FuzzyGrep string handling and validation for better performance and stability
 - Show trimmed row text content in the popup
 - **Known issue**: command output is handled line by line, but sometimes a single result can span more than one line,
