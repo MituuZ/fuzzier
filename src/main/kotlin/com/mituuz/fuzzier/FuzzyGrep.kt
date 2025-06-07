@@ -69,12 +69,12 @@ import kotlin.coroutines.cancellation.CancellationException
 open class FuzzyGrep() : FuzzyAction() {
     companion object {
         const val FUZZIER_NOTIFICATION_GROUP: String = "Fuzzier Notification Group"
-        const val COLORS: String = "--colors"
     }
+
     override var popupTitle: String = "Fuzzy Grep"
     override var dimensionKey = "FuzzyGrepPopup"
     private var lock = ReentrantLock()
-    private var useRg = true
+    var useRg = true
     val isWindows = System.getProperty("os.name").lowercase().contains("win")
 
     override fun runAction(
@@ -161,7 +161,7 @@ open class FuzzyGrep() : FuzzyAction() {
     }
 
     /**
-     * OS specific to see if a specific executable is found
+     * OS-specific to see if a specific executable is found
      * @return the used command if no installation detected, otherwise null
      */
     private fun checkInstallation(executable: String, projectBasePath: String): String? {
@@ -263,14 +263,7 @@ open class FuzzyGrep() : FuzzyAction() {
                 listOf(
                     "rg",
                     "--no-heading",
-                    COLORS,
-                    "path:none",
-                    COLORS,
-                    "line:none",
-                    COLORS,
-                    "column:none",
-                    COLORS,
-                    "column:none",
+                    "--color=never",
                     "-n",
                     "--with-filename",
                     "--column",
@@ -289,8 +282,8 @@ open class FuzzyGrep() : FuzzyAction() {
         if (res != null) {
             res.lines()
                 .forEach { line ->
-                    if (line.matches(Regex("""^.+:\d+:\d+:\s*.+$""")) || line.matches(Regex("""^.+:\d+:\s*.+$"""))) {
-                        val rowContainer = RowContainer.rowContainerFromString(line, projectBasePath, useRg, isWindows)
+                    val rowContainer = RowContainer.rowContainerFromString(line, projectBasePath, useRg)
+                    if (rowContainer != null) {
                         listModel.addElement(rowContainer)
                     }
                 }

@@ -26,6 +26,7 @@
 package com.mituuz.fuzzier.entities
 
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
+import java.io.File
 
 class RowContainer(
     filePath: String,
@@ -36,6 +37,10 @@ class RowContainer(
     val trimmedRow: String
 ) : FuzzyContainer(filePath, basePath, filename) {
     companion object {
+        private val FILE_SEPARATOR: String = File.separator
+        private val RG_PATTERN: Regex = Regex("""^.+:\d+:\d+:\s*.+$""")
+        private val COMMON_PATTERN: Regex = Regex("""^.+:\d+:\s*.+$""")
+
         /**
          * Create a row container from a string
          * <br><br>
@@ -52,24 +57,40 @@ class RowContainer(
          * src\main\kotlin\com\mituuz\fuzzier\components\TestBenchComponent.kt:205:            moduleFileIndex.iterateContent(contentIterator)
          * ```
          */
-        fun rowContainerFromString(row: String, basePath: String, isRg: Boolean, isWindows: Boolean): RowContainer {
-            val parts = row.split(":")
+        fun rowContainerFromString(row: String, basePath: String, isRg: Boolean): RowContainer? {
+            if (!row.matches(if (isRg) RG_PATTERN else COMMON_PATTERN)) {
+                return null
+            }
+
+            val parts = getParts(row, isRg)
+            if (parts.size != if (isRg) 4 else 3) {
+                return null
+            }
+
             var filePath = parts[0].removePrefix(".")
-            val filename = filePath.substringAfterLast(if (isWindows) "\\" else "/")
+            val filename = filePath.substringAfterLast(FILE_SEPARATOR)
             val rowNumber = parts[1].toInt() - 1
             val columnNumber: Int
             val trimmedRow: String
             if (isRg) {
                 columnNumber = parts[2].toInt() - 1
-                trimmedRow = parts[3]
+                trimmedRow = parts[3].trim()
             } else {
-                if (isWindows) {
-                    filePath = "/$filePath"
+                if (!filePath.startsWith(FILE_SEPARATOR)) {
+                    filePath = "$FILE_SEPARATOR$filePath"
                 }
                 columnNumber = 0
-                trimmedRow = parts[2]
+                trimmedRow = parts[2].trim()
             }
             return RowContainer(filePath, basePath, filename, rowNumber, columnNumber, trimmedRow)
+        }
+
+        private fun getParts(row: String, isRg: Boolean): List<String> {
+            return if (isRg) {
+                row.split(":", limit = 4)
+            } else {
+                row.split(":", limit = 3)
+            }
         }
     }
 
@@ -77,7 +98,7 @@ class RowContainer(
         if (state.filenameType == FilenameType.DEBUG) {
             return toString()
         }
-        return "$filename $rowNumber:$columnNumber:$trimmedRow"
+        return "$filename:$rowNumber:$columnNumber: $trimmedRow"
     }
 
     override fun toString(): String {
