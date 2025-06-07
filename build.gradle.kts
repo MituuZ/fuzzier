@@ -42,7 +42,7 @@ intellijPlatform {
         changeNotes = """
     <h2>Version $currentVersion</h2>
     <ul>
-      <li>Fix command modification so FuzzyGrepCaseInsensitive now works correctly with findstr and grep</li>
+      <li>Fix command modification so FuzzyGrepCaseInsensitive now works correctly</li>
       <li>Improve FuzzyGrep string handling and validation for better performance and stability</li>
       <li>Show trimmed row text content in the popup</li>
       <li><strong>Known issue</strong>: command output is handled line by line, but sometimes a single result can 
