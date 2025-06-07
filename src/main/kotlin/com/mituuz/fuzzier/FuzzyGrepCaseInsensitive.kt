@@ -35,8 +35,11 @@ class FuzzyGrepCaseInsensitive : FuzzyGrep() {
         if (isWindows && !useRg) {
             // Customize findstr for case insensitivity
             modifiedCommands.add(1, "/I")
+        } else if (!useRg) {
+            // Customize grep for case insensitivity
+            modifiedCommands.add(1, "-i")
         } else {
-            // Customize grep and ripgrep for case insensitivity
+            // Customize ripgrep for case insensitivity
             modifiedCommands.add(1, "--smart-case")
             modifiedCommands.add(2, "-F")
         }
