@@ -27,6 +27,7 @@
 package com.mituuz.fuzzier
 
 import com.google.gson.JsonParser
+import com.google.gson.stream.JsonReader
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.execution.process.ProcessAdapter
@@ -59,6 +60,7 @@ import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.io.IOException
+import java.io.StringReader
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
 import javax.swing.AbstractAction
@@ -282,11 +284,48 @@ open class FuzzyGrep() : FuzzyAction() {
 
         if (res != null) {
             if (useRg) {
-                val json = JsonParser.parseString(res).asJsonObject
+                val jsonBuffer = StringBuilder()
+                var openBraces = 0
 
-                if (json.has("type") && json["type"].asString == "match") {
-                    val rowContainer = RowContainer.fromRipGrepJson(json, projectBasePath)
-                    listModel.addElement(rowContainer)
+                res.lines().drop(1).forEach { line ->
+                    // Process line character by character to track JSON object boundaries
+                    for (char in line) {
+                        jsonBuffer.append(char)
+                        if (char == '{') openBraces++
+                        if (char == '}') openBraces--
+
+                        // If we've completed a JSON object
+                        if (openBraces == 0 && jsonBuffer.isNotEmpty() && jsonBuffer.toString().trim().startsWith("{")) {
+                            try {
+                                val jsonStr = jsonBuffer.toString()
+                                val json = JsonParser.parseString(jsonStr).asJsonObject
+
+                                if (json.has("type") && json["type"].asString == "match") {
+                                    val rowContainer = RowContainer.fromRipGrepJson(json, projectBasePath)
+                                    listModel.addElement(rowContainer)
+                                }
+                            } catch (e: Exception) {
+                                // Handle parsing errors - might be incomplete JSON
+                            } finally {
+                                // Reset buffer for next JSON object
+                                jsonBuffer.clear()
+                            }
+                        }
+                    }
+                }
+
+                // Handle any remaining content in the buffer
+                if (openBraces == 0 && jsonBuffer.isNotEmpty()) {
+                    try {
+                        val json = JsonParser.parseString(jsonBuffer.toString()).asJsonObject
+
+                        if (json.has("type") && json["type"].asString == "match") {
+                            val rowContainer = RowContainer.fromRipGrepJson(json, projectBasePath)
+                            listModel.addElement(rowContainer)
+                        }
+                    } catch (e: Exception) {
+                        // Handle parsing errors
+                    }
                 }
             } else {
                 res.lines()
