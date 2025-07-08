@@ -35,6 +35,7 @@ import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.EDT
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ScrollType
@@ -52,6 +53,7 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.RowContainer
+import kotlinx.coroutines.*
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
@@ -76,59 +78,58 @@ open class FuzzyGrep() : FuzzyAction() {
     private var lock = ReentrantLock()
     var useRg = true
     val isWindows = System.getProperty("os.name").lowercase().contains("win")
+    var currentJob: Job? = null
 
     override fun runAction(
         project: Project,
         actionEvent: AnActionEvent
     ) {
+        currentJob?.cancel()
         setCustomHandlers()
 
         val projectBasePath = project.basePath.toString()
-        val rgCommand = checkInstallation("rg", projectBasePath)
-        if (rgCommand != null) {
-            val rgNotification = Notification(
-                FUZZIER_NOTIFICATION_GROUP,
-                "No `rg` command found",
-                """
+        currentJob = CoroutineScope(Dispatchers.EDT).launch {
+            val rgCommand = checkInstallation("rg", projectBasePath)
+            if (rgCommand != null) {
+                showNotification(
+                    "No `rg` command found",
+                    """
                     No ripgrep found with command: $rgCommand<br>
                     Fallback to `grep` or `findstr`<br>
                     This notification can be disabled
                 """.trimIndent(),
-                NotificationType.WARNING
-            )
-            Notifications.Bus.notify(rgNotification, project)
+                    project,
+                    NotificationType.WARNING
+                )
 
-            if (isWindows) {
-                val findstrCommand = checkInstallation("findstr", projectBasePath)
-                if (findstrCommand != null) {
-                    val findstrNotification = Notification(
-                        FUZZIER_NOTIFICATION_GROUP,
-                        "No `findstr` command found",
-                        "No findstr found with command: $findstrCommand",
-                        NotificationType.ERROR
-                    )
-                    Notifications.Bus.notify(findstrNotification, project)
-                    return
+                if (isWindows) {
+                    val findstrCommand = checkInstallation("findstr", projectBasePath)
+                    if (findstrCommand != null) {
+                        showNotification(
+                            "No `findstr` command found",
+                            "No findstr found with command: $findstrCommand",
+                            project
+                        )
+                        return@launch
+                    }
+                    popupTitle = "Fuzzy Grep (findstr)"
+                } else {
+                    val grepCommand = checkInstallation("grep", projectBasePath)
+                    if (grepCommand != null) {
+                        showNotification(
+                            "No `grep` command found",
+                            "No grep found with command: $grepCommand",
+                            project
+                        )
+                        return@launch
+                    }
+                    popupTitle = "Fuzzy Grep (grep)"
                 }
-                popupTitle = "Fuzzy Grep (findstr)"
+                useRg = false
             } else {
-                val grepCommand = checkInstallation("grep", projectBasePath)
-                if (grepCommand != null) {
-                    val grepNotification = Notification(
-                        FUZZIER_NOTIFICATION_GROUP,
-                        "No `grep` command found",
-                        "No grep found with command: $grepCommand",
-                        NotificationType.ERROR
-                    )
-                    Notifications.Bus.notify(grepNotification, project)
-                    return
-                }
-                popupTitle = "Fuzzy Grep (grep)"
+                popupTitle = "Fuzzy Grep (ripgrep)"
+                useRg = true
             }
-            useRg = false
-        } else {
-            popupTitle = "Fuzzy Grep (ripgrep)"
-            useRg = true
         }
 
         ApplicationManager.getApplication().invokeLater {
@@ -142,6 +143,21 @@ open class FuzzyGrep() : FuzzyAction() {
             (component as FuzzyFinderComponent).splitPane.dividerLocation =
                 globalState.splitPosition
         }
+    }
+
+    private fun showNotification(
+        title: String,
+        content: String,
+        project: Project,
+        type: NotificationType = NotificationType.ERROR
+    ) {
+        val grepNotification = Notification(
+            FUZZIER_NOTIFICATION_GROUP,
+            title,
+            content,
+            type
+        )
+        Notifications.Bus.notify(grepNotification, project)
     }
 
     override fun createPopup(screenDimensionKey: String): JBPopup {
@@ -164,14 +180,14 @@ open class FuzzyGrep() : FuzzyAction() {
      * OS-specific to see if a specific executable is found
      * @return the used command if no installation detected, otherwise null
      */
-    private fun checkInstallation(executable: String, projectBasePath: String): String? {
+    private suspend fun checkInstallation(executable: String, projectBasePath: String): String? {
         val command = if (isWindows) {
             listOf("where", executable)
         } else {
             listOf("which", executable)
         }
 
-        val result = runCommand(command, projectBasePath)
+        val result = withContext(Dispatchers.IO) { runCommand(command, projectBasePath) }
         if (result.isNullOrBlank() || result.contains("Could not find files")) {
             return command.joinToString(" ")
         }
