@@ -42,6 +42,11 @@ intellijPlatform {
         changeNotes = """
     <h2>Version $currentVersion</h2>
     <ul>
+      <li>Update some dependencies</li>
+      <li>Increase the minimum version to 2025.1</li>
+    </ul>
+    <h2>Version 1.8.2</h2>
+    <ul>
       <li>Fix command modification so FuzzyGrepCaseInsensitive now works correctly</li>
       <li>Improve FuzzyGrep string handling and validation for better performance and stability</li>
       <li>Show trimmed row text content in the popup</li>
