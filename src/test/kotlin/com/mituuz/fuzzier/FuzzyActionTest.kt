@@ -31,9 +31,9 @@ import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import com.mituuz.fuzzier.components.SimpleFinderComponent
+import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType.*
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FuzzyScore
-import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.awt.event.InputEvent
@@ -173,8 +173,8 @@ class FuzzyActionTest {
             override fun runAction(project: Project, actionEvent: AnActionEvent) {
             }
 
-            override fun createPopup(screenDimensionKey1: String): JBPopup {
-                TODO("Not yet implemented")
+            override fun createPopup(screenDimensionKey: String): JBPopup {
+                throw Exception("Not required for testing")
             }
 
             override fun updateListContents(project: Project, searchString: String) {

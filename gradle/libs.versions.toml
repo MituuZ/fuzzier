@@ -1,13 +1,13 @@
 [versions]
 junit5 = "5.11.4"
 junit4 = "4.13.2"
-mockito = "5.14.2"
+mockito = "5.18.0"
 jmh = "1.37"
-kotlin = "2.1.10"
+kotlin = "2.2.0"
 intellijPlatform = "2.6.0"
 kover = "0.9.1"
 jmhPlugin = "0.7.3"
-communityVersion = "2024.3"
+communityVersion = "2025.1"
 
 [libraries]
 junit5Api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit5" }

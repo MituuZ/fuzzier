@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 1.8.3
+
+- Update some dependencies
+- Increase the minimum version to 2025.1
+
 ## Version 1.8.2
 
 - Fix command modification so FuzzyGrepCaseInsensitive now works correctly
