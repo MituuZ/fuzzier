@@ -40,9 +40,6 @@ import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.fileEditor.FileEditorManager
-import com.intellij.openapi.progress.ProgressIndicator
-import com.intellij.openapi.progress.ProgressManager
-import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupListener
@@ -59,36 +56,35 @@ import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import java.io.IOException
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.locks.ReentrantLock
 import javax.swing.AbstractAction
 import javax.swing.DefaultListModel
 import javax.swing.JComponent
 import javax.swing.KeyStroke
-import kotlin.coroutines.cancellation.CancellationException
 
 open class FuzzyGrep() : FuzzyAction() {
     companion object {
         const val FUZZIER_NOTIFICATION_GROUP: String = "Fuzzier Notification Group"
+        const val MAX_OUTPUT_SIZE = 20_000_000 // 20 MB
+        const val MAX_NUMBER_OR_RESULTS = 1000
     }
 
     override var popupTitle: String = "Fuzzy Grep"
     override var dimensionKey = "FuzzyGrepPopup"
-    private var lock = ReentrantLock()
     var useRg = true
     val isWindows = System.getProperty("os.name").lowercase().contains("win")
-    var currentJob: Job? = null
+    var currentLaunchJob: Job? = null
+    var currentUpdateListContentJob: Job? = null
+    private var actionScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     override fun runAction(
         project: Project,
         actionEvent: AnActionEvent
     ) {
-        currentJob?.cancel()
+        currentLaunchJob?.cancel()
         setCustomHandlers()
 
         val projectBasePath = project.basePath.toString()
-        currentJob = CoroutineScope(Dispatchers.EDT).launch {
+        currentLaunchJob = actionScope.launch(Dispatchers.EDT) {
             val rgCommand = checkInstallation("rg", projectBasePath)
             if (rgCommand != null) {
                 showNotification(
@@ -130,9 +126,8 @@ open class FuzzyGrep() : FuzzyAction() {
                 popupTitle = "Fuzzy Grep (ripgrep)"
                 useRg = true
             }
-        }
 
-        ApplicationManager.getApplication().invokeLater {
+            yield()
             defaultDoc = EditorFactory.getInstance().createDocument("")
             component = FuzzyFinderComponent(project)
             createListeners(project)
@@ -169,7 +164,8 @@ open class FuzzyGrep() : FuzzyAction() {
                     (component as FuzzyFinderComponent).splitPane.dividerLocation
                 resetOriginalHandlers()
                 super.onClosed(event)
-                currentTask?.cancel(true)
+                currentLaunchJob?.cancel()
+                currentUpdateListContentJob?.cancel()
             }
         })
 
@@ -187,7 +183,7 @@ open class FuzzyGrep() : FuzzyAction() {
             listOf("which", executable)
         }
 
-        val result = withContext(Dispatchers.IO) { runCommand(command, projectBasePath) }
+        val result = runCommand(command, projectBasePath)
         if (result.isNullOrBlank() || result.contains("Could not find files")) {
             return command.joinToString(" ")
         }
@@ -201,80 +197,109 @@ open class FuzzyGrep() : FuzzyAction() {
             return
         }
 
-        currentTask?.takeIf { !it.isDone }?.cancel(true)
-        if (lock.tryLock(500, TimeUnit.MILLISECONDS)) {
+        currentUpdateListContentJob?.cancel()
+        currentUpdateListContentJob = actionScope.launch(Dispatchers.EDT) {
+            val currentJob = currentUpdateListContentJob
 
-            try {
-                currentTask = ApplicationManager.getApplication().executeOnPooledThread {
-                    try {
-                        val task = currentTask
+            if (currentJob?.isCancelled == true) return@launch
 
-                        if (task?.isCancelled == true) return@executeOnPooledThread
+            component.fileList.setPaintBusy(true)
+            val listModel = DefaultListModel<FuzzyContainer>()
 
-                        component.fileList.setPaintBusy(true)
-                        val listModel = DefaultListModel<FuzzyContainer>()
+            if (currentJob?.isCancelled == true) return@launch
 
-                        if (task?.isCancelled == true) return@executeOnPooledThread
-
-                        findInFiles(searchString, listModel, project.basePath.toString())
-
-                        if (task?.isCancelled == true) return@executeOnPooledThread
-
-                        ApplicationManager.getApplication().invokeLater {
-                            synchronized(component.fileList.model) {
-                                component.fileList.model = listModel
-                                component.fileList.cellRenderer = getCellRenderer()
-                                if (!listModel.isEmpty) {
-                                    component.fileList.selectedIndex = 0
-                                }
-                                component.fileList.setPaintBusy(false)
-                            }
-                        }
-                    } catch (_: InterruptedException) {
-                        return@executeOnPooledThread
-                    } catch (_: CancellationException) {
-                        return@executeOnPooledThread
-                    }
-                }
-                try {
-                    currentTask?.get()
-                } catch (_: InterruptedException) {
-                } catch (_: CancellationException) {
-                }
-            } finally {
-                lock.unlock()
+            val results = withContext(Dispatchers.IO) {
+                findInFiles(searchString, listModel, project.basePath.toString())
+                listModel
             }
+
+            if (currentJob?.isCancelled == true) return@launch
+
+            component.fileList.model = results
+            component.fileList.cellRenderer = getCellRenderer()
+            if (!results.isEmpty) {
+                component.fileList.selectedIndex = 0
+            }
+            component.fileList.setPaintBusy(false)
         }
     }
 
-    protected open fun runCommand(commands: List<String>, projectBasePath: String): String? {
+    /**
+     * Run the command and collect the output to a string variable with a limited size
+     */
+    protected open suspend fun runCommand(commands: List<String>, projectBasePath: String): String? {
         return try {
             val commandLine = GeneralCommandLine(commands)
                 .withWorkDirectory(projectBasePath)
                 .withRedirectErrorStream(true)
             val output = StringBuilder()
             val processHandler = OSProcessHandler(commandLine)
+
             processHandler.addProcessListener(object : ProcessAdapter() {
                 override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
-                    output.appendLine(event.text.replace("\n", ""))
+                    if (output.length < MAX_OUTPUT_SIZE) {
+                        output.appendLine(event.text.replace("\n", ""))
+                    }
                 }
             })
-            processHandler.startNotify()
-            processHandler.waitFor(2000)
+
+            withContext(Dispatchers.IO) {
+                processHandler.startNotify()
+                processHandler.waitFor(2000)
+            }
             output.toString()
-        } catch (_: IOException) {
-            null
         } catch (_: InterruptedException) {
-            null
+            throw InterruptedException()
         }
     }
 
-    private fun findInFiles(
+    /**
+     * Run the command and stream a limited number of results to the list model
+     */
+    protected open suspend fun runCommand(
+        commands: List<String>,
+        listModel: DefaultListModel<FuzzyContainer>,
+        projectBasePath: String
+    ) {
+        try {
+            val commandLine = GeneralCommandLine(commands)
+                .withWorkDirectory(projectBasePath)
+                .withRedirectErrorStream(true)
+
+            val processHandler = OSProcessHandler(commandLine)
+            var count = 0
+
+            processHandler.addProcessListener(object : ProcessAdapter() {
+                override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
+                    if (count >= MAX_NUMBER_OR_RESULTS) return
+
+                    event.text.lines().forEach { line ->
+                        if (count >= MAX_NUMBER_OR_RESULTS) return@forEach
+                        if (line.isNotBlank()) {
+                            val rowContainer = RowContainer.rowContainerFromString(line, projectBasePath, useRg)
+                            if (rowContainer != null) {
+                                listModel.addElement(rowContainer)
+                                count++
+                            }
+                        }
+                    }
+                }
+            })
+
+            withContext(Dispatchers.IO) {
+                processHandler.startNotify()
+                processHandler.waitFor(2000)
+            }
+        } catch (_: InterruptedException) {
+            throw InterruptedException()
+        }
+    }
+
+    private suspend fun findInFiles(
         searchString: String, listModel: DefaultListModel<FuzzyContainer>,
         projectBasePath: String
     ) {
-
-        val res = if (useRg) {
+        if (useRg) {
             runCommand(
                 listOf(
                     "rg",
@@ -285,26 +310,14 @@ open class FuzzyGrep() : FuzzyAction() {
                     "--column",
                     searchString,
                     "."
-                ), projectBasePath
+                ), listModel, projectBasePath
             )
         } else {
             if (isWindows) {
-                runCommand(listOf("findstr", "/p", "/s", "/n", searchString, "*"), projectBasePath)
+                runCommand(listOf("findstr", "/p", "/s", "/n", searchString, "*"), listModel, projectBasePath)
             } else {
-                runCommand(listOf("grep", "--color=none", "-r", "-n", searchString, "."), projectBasePath)
+                runCommand(listOf("grep", "--color=none", "-r", "-n", searchString, "."), listModel, projectBasePath)
             }
-        }
-
-        if (res != null) {
-            res.lines()
-                .forEach { line ->
-                    val rowContainer = RowContainer.rowContainerFromString(line, projectBasePath, useRg)
-                    if (rowContainer != null) {
-                        listModel.addElement(rowContainer)
-                    }
-                }
-        } else {
-            return
         }
     }
 
@@ -313,7 +326,7 @@ open class FuzzyGrep() : FuzzyAction() {
         component.fileList.addListSelectionListener { event ->
             if (!event.valueIsAdjusting) {
                 if (component.fileList.isEmpty) {
-                    ApplicationManager.getApplication().invokeLater {
+                    actionScope.launch(Dispatchers.EDT) {
                         defaultDoc?.let { (component as FuzzyFinderComponent).previewPane.updateFile(it) }
                     }
                     return@addListSelectionListener
@@ -321,17 +334,18 @@ open class FuzzyGrep() : FuzzyAction() {
                 val selectedValue = component.fileList.selectedValue
                 val fileUrl = "file://${selectedValue?.getFileUri()}"
 
-                ProgressManager.getInstance().run(object : Task.Backgroundable(null, "Loading file", false) {
-                    override fun run(indicator: ProgressIndicator) {
-                        val file = VirtualFileManager.getInstance().findFileByUrl(fileUrl)
-                        file?.let {
-                            (component as FuzzyFinderComponent).previewPane.updateFile(
-                                file,
-                                (selectedValue as RowContainer).rowNumber
-                            )
-                        }
+                actionScope.launch(Dispatchers.Default) {
+                    val file = withContext(Dispatchers.IO) {
+                        VirtualFileManager.getInstance().findFileByUrl(fileUrl)
                     }
-                })
+
+                    file?.let {
+                        (component as FuzzyFinderComponent).previewPane.coUpdateFile(
+                            file,
+                            (selectedValue as RowContainer).rowNumber
+                        )
+                    }
+                }
             }
         }
 

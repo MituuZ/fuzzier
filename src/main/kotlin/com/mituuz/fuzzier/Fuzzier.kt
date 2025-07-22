@@ -72,6 +72,7 @@ open class Fuzzier : FuzzyAction() {
 
         ApplicationManager.getApplication().invokeLater {
             defaultDoc = EditorFactory.getInstance().createDocument("")
+            loadingDoc = EditorFactory.getInstance().createDocument("Loading file")
             component = FuzzyFinderComponent(project)
             createListeners(project)
             createSharedListeners(project)

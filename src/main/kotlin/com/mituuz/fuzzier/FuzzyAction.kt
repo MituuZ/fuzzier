@@ -68,6 +68,7 @@ abstract class FuzzyAction : AnAction() {
     protected lateinit var projectState: FuzzierSettingsService.State
     protected val globalState = service<FuzzierGlobalSettingsService>().state
     protected var defaultDoc: Document? = null
+    protected var loadingDoc: Document? = null
     @Volatile
     var currentTask: Future<*>? = null
     val fuzzierUtil = FuzzierUtil()
