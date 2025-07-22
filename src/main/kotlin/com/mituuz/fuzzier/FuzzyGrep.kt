@@ -64,7 +64,11 @@ import javax.swing.KeyStroke
 open class FuzzyGrep() : FuzzyAction() {
     companion object {
         const val FUZZIER_NOTIFICATION_GROUP: String = "Fuzzier Notification Group"
-        const val MAX_OUTPUT_SIZE = 20_000_000 // 20 MB
+
+        /**
+         * Limit command output size, this is only used to check installations
+         */
+        const val MAX_OUTPUT_SIZE = 10000
         const val MAX_NUMBER_OR_RESULTS = 1000
     }
 
@@ -72,8 +76,8 @@ open class FuzzyGrep() : FuzzyAction() {
     override var dimensionKey = "FuzzyGrepPopup"
     var useRg = true
     val isWindows = System.getProperty("os.name").lowercase().contains("win")
-    var currentLaunchJob: Job? = null
-    var currentUpdateListContentJob: Job? = null
+    private var currentLaunchJob: Job? = null
+    private var currentUpdateListContentJob: Job? = null
     private var actionScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     override fun runAction(
@@ -224,6 +228,7 @@ open class FuzzyGrep() : FuzzyAction() {
 
     /**
      * Run the command and collect the output to a string variable with a limited size
+     * @see MAX_OUTPUT_SIZE
      */
     protected open suspend fun runCommand(commands: List<String>, projectBasePath: String): String? {
         return try {
@@ -253,6 +258,7 @@ open class FuzzyGrep() : FuzzyAction() {
 
     /**
      * Run the command and stream a limited number of results to the list model
+     * @see MAX_NUMBER_OR_RESULTS
      */
     protected open suspend fun runCommand(
         commands: List<String>,
