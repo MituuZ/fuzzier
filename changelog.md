@@ -1,7 +1,10 @@
 # Changelog
 
-## Version 1.8.3
+## Version 1.9.0
 
+- Refactor FuzzyGrep to use coroutines
+- Limit results size to avoid possible oom and increase speed
+- Slightly increase the default dimensions of the popup
 - Update some dependencies
 - Increase the minimum version to 2025.1
 

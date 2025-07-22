@@ -26,11 +26,14 @@
 
 package com.mituuz.fuzzier
 
+import com.mituuz.fuzzier.entities.FuzzyContainer
+import javax.swing.DefaultListModel
+
 class FuzzyGrepCaseInsensitive : FuzzyGrep() {
     override var popupTitle: String = "Fuzzy Grep (Case Insensitive)"
     override var dimensionKey = "FuzzyGrepCaseInsensitivePopup"
 
-    override fun runCommand(commands: List<String>, projectBasePath: String): String? {
+    override suspend fun runCommand(commands: List<String>, listModel: DefaultListModel<FuzzyContainer>, projectBasePath: String) {
         val modifiedCommands = commands.toMutableList()
         if (isWindows && !useRg) {
             // Customize findstr for case insensitivity
@@ -43,6 +46,6 @@ class FuzzyGrepCaseInsensitive : FuzzyGrep() {
             modifiedCommands.add(1, "--smart-case")
             modifiedCommands.add(2, "-F")
         }
-        return super.runCommand(modifiedCommands, projectBasePath)
+        super.runCommand(modifiedCommands, listModel, projectBasePath)
     }
 }
