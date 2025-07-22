@@ -28,8 +28,8 @@ package com.mituuz.fuzzier
 
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
-import com.intellij.execution.process.ProcessAdapter
 import com.intellij.execution.process.ProcessEvent
+import com.intellij.execution.process.ProcessListener
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
@@ -238,7 +238,7 @@ open class FuzzyGrep() : FuzzyAction() {
             val output = StringBuilder()
             val processHandler = OSProcessHandler(commandLine)
 
-            processHandler.addProcessListener(object : ProcessAdapter() {
+            processHandler.addProcessListener(object : ProcessListener {
                 override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
                     if (output.length < MAX_OUTPUT_SIZE) {
                         output.appendLine(event.text.replace("\n", ""))
@@ -273,7 +273,7 @@ open class FuzzyGrep() : FuzzyAction() {
             val processHandler = OSProcessHandler(commandLine)
             var count = 0
 
-            processHandler.addProcessListener(object : ProcessAdapter() {
+            processHandler.addProcessListener(object : ProcessListener {
                 override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
                     if (count >= MAX_NUMBER_OR_RESULTS) return
 
