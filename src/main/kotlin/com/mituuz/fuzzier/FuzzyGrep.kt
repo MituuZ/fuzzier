@@ -85,12 +85,13 @@ open class FuzzyGrep() : FuzzyAction() {
 
         val projectBasePath = project.basePath.toString()
         currentLaunchJob = actionScope.launch(Dispatchers.EDT) {
-            val rgCommand = checkInstallation("rg", projectBasePath)
-            if (rgCommand != null) {
+            val currentJob = currentLaunchJob
+
+            if (!isInstalled("rg", projectBasePath)) {
                 showNotification(
                     "No `rg` command found",
                     """
-                    No ripgrep found with command: $rgCommand<br>
+                    No ripgrep found<br>
                     Fallback to `grep` or `findstr`<br>
                     This notification can be disabled
                 """.trimIndent(),
@@ -99,22 +100,20 @@ open class FuzzyGrep() : FuzzyAction() {
                 )
 
                 if (isWindows) {
-                    val findstrCommand = checkInstallation("findstr", projectBasePath)
-                    if (findstrCommand != null) {
+                    if (!isInstalled("findstr", projectBasePath)) {
                         showNotification(
                             "No `findstr` command found",
-                            "No findstr found with command: $findstrCommand",
+                            "Fuzzy Grep failed: no `findstr` found",
                             project
                         )
                         return@launch
                     }
                     popupTitle = "Fuzzy Grep (findstr)"
                 } else {
-                    val grepCommand = checkInstallation("grep", projectBasePath)
-                    if (grepCommand != null) {
+                    if (!isInstalled("grep", projectBasePath)) {
                         showNotification(
                             "No `grep` command found",
-                            "No grep found with command: $grepCommand",
+                            "Fuzzy Grep failed: no `grep` found",
                             project
                         )
                         return@launch
@@ -126,6 +125,8 @@ open class FuzzyGrep() : FuzzyAction() {
                 popupTitle = "Fuzzy Grep (ripgrep)"
                 useRg = true
             }
+
+            if (currentJob?.isCancelled == true) return@launch
 
             yield()
             defaultDoc = EditorFactory.getInstance().createDocument("")
@@ -174,9 +175,9 @@ open class FuzzyGrep() : FuzzyAction() {
 
     /**
      * OS-specific to see if a specific executable is found
-     * @return the used command if no installation detected, otherwise null
+     * @return true if the command was found (possibly not a general check/solution)
      */
-    private suspend fun checkInstallation(executable: String, projectBasePath: String): String? {
+    private suspend fun isInstalled(executable: String, projectBasePath: String): Boolean {
         val command = if (isWindows) {
             listOf("where", executable)
         } else {
@@ -184,11 +185,8 @@ open class FuzzyGrep() : FuzzyAction() {
         }
 
         val result = runCommand(command, projectBasePath)
-        if (result.isNullOrBlank() || result.contains("Could not find files")) {
-            return command.joinToString(" ")
-        }
 
-        return null
+        return !(result.isNullOrBlank() || result.contains("Could not find files"))
     }
 
     override fun updateListContents(project: Project, searchString: String) {

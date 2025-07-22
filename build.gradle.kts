@@ -29,7 +29,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 // Use the same version and group for the jar and the plugin
-val currentVersion = "1.8.3"
+val currentVersion = "1.9.0"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -42,22 +42,11 @@ intellijPlatform {
         changeNotes = """
     <h2>Version $currentVersion</h2>
     <ul>
+      <li>Refactor FuzzyGrep to use coroutines</li>
+      <li>Limit results size to avoid possible oom and increase speed</li>
+      <li>Slightly increase the default dimensions of the popup</li>
       <li>Update some dependencies</li>
       <li>Increase the minimum version to 2025.1</li>
-    </ul>
-    <h2>Version 1.8.2</h2>
-    <ul>
-      <li>Fix command modification so FuzzyGrepCaseInsensitive now works correctly</li>
-      <li>Improve FuzzyGrep string handling and validation for better performance and stability</li>
-      <li>Show trimmed row text content in the popup</li>
-      <li><strong>Known issue</strong>: command output is handled line by line, but sometimes a single result can 
-      span more than one line, resulting in incomplete results. 
-      <a href="https://github.com/MituuZ/fuzzier/issues/120">Tracking issue #120</a></li>
-    </ul>
-    <h2>Version 1.8.1</h2>
-    <ul>
-      <li>Remove result limit, fix line and column positions for FuzzyGrep</li>
-      <li>Update IntelliJ platform plugin to 2.6.0</li>
     </ul>
     """.trimIndent()
 
