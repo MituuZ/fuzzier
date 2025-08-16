@@ -39,8 +39,9 @@ import javax.swing.*
 class FuzzierGlobalSettingsComponent {
     var jPanel: JPanel
 
-    val newTabSelect = SettingsComponent(JBCheckBox(), "Open files in a new tab")
-
+    /////////////////////////////////////////////////////////////////
+    // General settings
+    /////////////////////////////////////////////////////////////////
     val recentFileModeSelector = SettingsComponent(
         ComboBox<RecentFilesMode>(), "Show recent files on start", """
         Show recent files when opening a search window.
@@ -63,6 +64,23 @@ class FuzzierGlobalSettingsComponent {
         false
     )
 
+    val newTabSelect = SettingsComponent(JBCheckBox(), "Open files in a new tab")
+
+    val fileListLimit = SettingsComponent(
+        JBIntSpinner(50, 1, 5000), "File list limit",
+        """
+            Controls how many files are shown and listed on the popup.
+        """.trimIndent(),
+        false
+    )
+
+    val fuzzyGrepShowFullFile = SettingsComponent(
+        JBCheckBox(), "Show full file with complete syntax highlighting in preview",
+        """
+            Toggles showing the full file in the preview. If set, preview will use full highlighting.
+        """.trimIndent(),
+        false
+    )
 
     /////////////////////////////////////////////////////////////////
     // Popup styling and configuration
@@ -107,6 +125,14 @@ class FuzzierGlobalSettingsComponent {
         false
     )
 
+    val searchPosition = SettingsComponent(
+        ComboBox<SearchPosition>(), "Search bar location",
+        """
+            Controls where the search bar is located on the popup.
+        """.trimIndent(),
+        false
+    )
+
     val dimensionComponent = JPanel().apply {
         layout = BoxLayout(this, BoxLayout.X_AXIS)
         add(JBLabel("Width: "))
@@ -124,27 +150,12 @@ class FuzzierGlobalSettingsComponent {
         false
     )
 
-    val searchPosition = SettingsComponent(
-        ComboBox<SearchPosition>(), "Search bar location",
+    val previewFontSize = SettingsComponent(
+        JBIntSpinner(0, 0, 30), "Preview font size",
         """
-            Controls where the search bar is located on the popup.
-        """.trimIndent(),
-        false
-    )
-
-
-    val fileListLimit = SettingsComponent(
-        JBIntSpinner(50, 1, 5000), "File list limit",
-        """
-            Controls how many files are shown and listed on the popup.
-        """.trimIndent(),
-        false
-    )
-
-    val fuzzyGrepShowFullFile = SettingsComponent(
-        JBCheckBox(), "Show full file path in preview",
-        """
-            Toggles showing the full file path in the preview. If set, preview will use full highlighting.
+            Controls the font size of the preview in the search and selector popups.
+            <br>
+            When value is zero, use the current font size of the editor.
         """.trimIndent(),
         false
     )
@@ -157,16 +168,6 @@ class FuzzierGlobalSettingsComponent {
         false
     )
 
-    val previewFontSize = SettingsComponent(
-        JBIntSpinner(0, 0, 30), "Preview font size",
-        """
-            Controls the font size of the preview in the search and selector popups.
-            <br>
-            When value is zero, use the current font size of the editor.
-        """.trimIndent(),
-        false
-    )
-
     val fileListSpacing = SettingsComponent(
         JBIntSpinner(0, 0, 10), "File list vertical spacing",
         """
@@ -174,7 +175,6 @@ class FuzzierGlobalSettingsComponent {
         """.trimIndent(),
         false
     )
-
 
     /////////////////////////////////////////////////////////////////
     // Match settings
@@ -236,14 +236,21 @@ class FuzzierGlobalSettingsComponent {
         false
     )
 
+    /////////////////////////////////////////////////////////////////
+    // Test bench
+    /////////////////////////////////////////////////////////////////
     private val startTestBench = SettingsComponent(
         JButton("Launch Test Bench"), "Test Bench",
         """
             Test settings live with the current project's file index.
         """.trimIndent()
     )
+
     private var testBench = TestBenchComponent()
 
+    /////////////////////////////////////////////////////////////////
+    // Reset window
+    /////////////////////////////////////////////////////////////////
     private var resetWindowDimension = JButton("Reset popup location")
 
     init {
