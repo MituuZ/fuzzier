@@ -1,26 +1,26 @@
 /*
-MIT License
-
-Copyright (c) 2025 Mitja Leino
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+ *  MIT License
+ *
+ *  Copyright (c) 2025 Mitja Leino
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
+ */
 package com.mituuz.fuzzier.components
 
 import com.intellij.openapi.components.service
@@ -34,40 +34,41 @@ import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.SearchPosition
 import java.awt.Component
-import javax.swing.Box
-import javax.swing.BoxLayout
-import javax.swing.DefaultListCellRenderer
-import javax.swing.JButton
-import javax.swing.JLabel
-import javax.swing.JList
-import javax.swing.JPanel
+import javax.swing.*
 
 class FuzzierGlobalSettingsComponent {
     var jPanel: JPanel
 
     val newTabSelect = SettingsComponent(JBCheckBox(), "Open files in a new tab")
 
-    val recentFileModeSelector = SettingsComponent(ComboBox<RecentFilesMode>(), "Show recent files on start", """
+    val recentFileModeSelector = SettingsComponent(
+        ComboBox<RecentFilesMode>(), "Show recent files on start", """
         Show recent files when opening a search window.
     """.trimIndent(),
-        false)
+        false
+    )
 
-    val prioritizeShortDirs = SettingsComponent(JBCheckBox(), "Prioritize shorter dir paths", """
+    val prioritizeShortDirs = SettingsComponent(
+        JBCheckBox(), "Prioritize shorter dir paths", """
         When having a directory selector active, prioritize shorter file paths over pure score calculation.
     """.trimIndent(),
-        false)
+        false
+    )
 
-    val debounceTimerValue = SettingsComponent(JBIntSpinner(150, 0, 2000), "Debounce period (ms)",
+    val debounceTimerValue = SettingsComponent(
+        JBIntSpinner(150, 0, 2000), "Debounce period (ms)",
         """
             Controls how long the search field must be idle before starting the search process.
         """.trimIndent(),
-        false)
+        false
+    )
 
 
     /////////////////////////////////////////////////////////////////
     // Popup styling and configuration
     /////////////////////////////////////////////////////////////////
-    val filenameTypeSelector = SettingsComponent(ComboBox<FilenameType>(), "Filename type",
+    val filenameTypeSelector = SettingsComponent(
+        ComboBox<FilenameType>(), "Filename type",
         """
             Controls how the filename is shown on the file search and selector popups.<br><br>
             Choices are as follows (/path/to/file):<br><br>
@@ -93,15 +94,18 @@ class FuzzierGlobalSettingsComponent {
             <br>
             <strong>Note! </strong>This is more performance intensive, you should not use too high file list limit with this option.
     """.trimIndent(),
-        false)
+        false
+    )
 
-    val highlightFilename = SettingsComponent(JBCheckBox(), "Highlight filename in file list",
+    val highlightFilename = SettingsComponent(
+        JBCheckBox(), "Highlight filename in file list",
         """
             Toggles highlighting of the filename on the file list.
             <br>
             Only works with styled file list, which supports html styling.
         """.trimIndent(),
-        false)
+        false
+    )
 
     val dimensionComponent = JPanel().apply {
         layout = BoxLayout(this, BoxLayout.X_AXIS)
@@ -111,99 +115,133 @@ class FuzzierGlobalSettingsComponent {
         add(JBLabel("Height: "))
         add(JBIntSpinner(400, 100, 4000))
     }
-    val defaultDimension = SettingsComponent(dimensionComponent, "Default dimensions",
+    val defaultDimension = SettingsComponent(
+        dimensionComponent, "Default dimensions",
         """
             Default dimensions for the finder popup. Affects reset window behaviour.<br><br>
             Min: 100, Max: 4000
         """.trimIndent(),
-        false)
+        false
+    )
 
-    val searchPosition = SettingsComponent(ComboBox<SearchPosition>(), "Search bar location",
+    val searchPosition = SettingsComponent(
+        ComboBox<SearchPosition>(), "Search bar location",
         """
             Controls where the search bar is located on the popup.
         """.trimIndent(),
-        false)
+        false
+    )
 
 
-    val fileListLimit = SettingsComponent(JBIntSpinner(50, 1, 5000), "File list limit",
+    val fileListLimit = SettingsComponent(
+        JBIntSpinner(50, 1, 5000), "File list limit",
         """
             Controls how many files are shown and listed on the popup.
         """.trimIndent(),
-        false)
+        false
+    )
 
-    val fileListFontSize = SettingsComponent(JBIntSpinner(14, 4, 30), "File list font size",
+    val fuzzyGrepShowFullFile = SettingsComponent(
+        JBCheckBox(), "Show full file path in preview",
+        """
+            Toggles showing the full file path in the preview. If set, preview will use full highlighting.
+        """.trimIndent(),
+        false
+    )
+
+    val fileListFontSize = SettingsComponent(
+        JBIntSpinner(14, 4, 30), "File list font size",
         """
             Controls the font size of the file list in the search and selector popups.
         """.trimIndent(),
-        false)
+        false
+    )
 
-    val previewFontSize = SettingsComponent(JBIntSpinner(0, 0, 30), "Preview font size",
+    val previewFontSize = SettingsComponent(
+        JBIntSpinner(0, 0, 30), "Preview font size",
         """
             Controls the font size of the preview in the search and selector popups.
             <br>
             When value is zero, use the current font size of the editor.
         """.trimIndent(),
-        false)
+        false
+    )
 
-    val fileListSpacing = SettingsComponent(JBIntSpinner(0, 0, 10), "File list vertical spacing",
+    val fileListSpacing = SettingsComponent(
+        JBIntSpinner(0, 0, 10), "File list vertical spacing",
         """
             Controls the vertical spacing between the file list items in the search and selector popups.
         """.trimIndent(),
-        false)
+        false
+    )
 
 
     /////////////////////////////////////////////////////////////////
     // Match settings
     /////////////////////////////////////////////////////////////////
-    val tolerance = SettingsComponent(JBIntSpinner(0, 0, 5), "Match tolerance",
+    val tolerance = SettingsComponent(
+        JBIntSpinner(0, 0, 5), "Match tolerance",
         """
             How many non-matching letters are allowed when calculating matches.<br><br>
             e.g. korlin would still match kotlin.
         """.trimIndent(),
-        false)
+        false
+    )
 
-    val multiMatchActive = SettingsComponent(JBCheckBox(), "Match characters multiple times",
+    val multiMatchActive = SettingsComponent(
+        JBCheckBox(), "Match characters multiple times",
         """
             Count score for each instance of a character in the search string.<br><br>
             Normally file list sorting is done based on the longest streak,
             but similar package or folder names might make finding correct files inconvenient.<br><br>
             e.g. kotlin/is/fun contains "i" two times, so search "if" would score three points.
         """.trimIndent(),
-        false)
+        false
+    )
 
-    val matchWeightPartialPath = SettingsComponent(JBIntSpinner(10, 0, 100), "Match weight: Partial path match",
+    val matchWeightPartialPath = SettingsComponent(
+        JBIntSpinner(10, 0, 100), "Match weight: Partial path match",
         """
             How much score should a partial path match give.<br><br>
             Partial matches are checked against file path parts, delimited by "/" and ".".<br><br>
             e.g. search string "is" is a partial path match for kotlin/<strong>is</strong>/fun, where as "isf" is not.
         """.trimIndent(),
-        false)
+        false
+    )
 
-    val matchWeightSingleChar = SettingsComponent(JBIntSpinner(5, 0, 50), "Match weight: Single char (* 0.1)",
+    val matchWeightSingleChar = SettingsComponent(
+        JBIntSpinner(5, 0, 50), "Match weight: Single char (* 0.1)",
         """
             How much score should a single char give. Only applies when multi match is active.<br><br>
             Is divided by 10 when calculating score.
         """.trimIndent(),
-        false)
+        false
+    )
 
-    val matchWeightStreakModifier = SettingsComponent(JBIntSpinner(10, 0, 100), "Match weight: Streak modifier (* 0.1)",
+    val matchWeightStreakModifier = SettingsComponent(
+        JBIntSpinner(10, 0, 100), "Match weight: Streak modifier (* 0.1)",
         """
             Longest streak score is multiplied by this amount (divided by 10).<br><br>
             e.g. 10 = 1, so highest streak is added as the number of matched letters.
         """.trimIndent(),
-        false)
+        false
+    )
 
-    val matchWeightFilename = SettingsComponent(JBIntSpinner(5, 0, 100), "Match weight: Filename modifier (* 0.1)",
+    val matchWeightFilename = SettingsComponent(
+        JBIntSpinner(5, 0, 100), "Match weight: Filename modifier (* 0.1)",
         """
             How much score should a filename match give (divided by 10). Considers the longest streak that matches.<br><br>
             e.g. search string "file" is a filename match for kotlin/<strong>file</strong>.kt
         """.trimIndent(),
-        false)
+        false
+    )
 
-    private val startTestBench = SettingsComponent(JButton("Launch Test Bench"), "Test Bench",
+    private val startTestBench = SettingsComponent(
+        JButton("Launch Test Bench"), "Test Bench",
         """
             Test settings live with the current project's file index.
-        """.trimIndent())
+        """.trimIndent()
+    )
     private var testBench = TestBenchComponent()
 
     private var resetWindowDimension = JButton("Reset popup location")
@@ -217,6 +255,7 @@ class FuzzierGlobalSettingsComponent {
             .addComponent(prioritizeShortDirs)
             .addComponent(debounceTimerValue)
             .addComponent(fileListLimit)
+            .addComponent(fuzzyGrepShowFullFile)
 
             .addSeparator()
             .addComponent(JBLabel("<html><h2>Popup styling</h2></html>"))
@@ -282,8 +321,9 @@ class FuzzierGlobalSettingsComponent {
                 index: Int,
                 isSelected: Boolean,
                 cellHasFocus: Boolean
-            ): Component? {
-                val renderer = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) as JLabel
+            ): Component {
+                val renderer =
+                    super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) as JLabel
                 val position = value as SearchPosition
                 renderer.text = position.text
                 return renderer
