@@ -112,8 +112,11 @@ class PreviewEditor(project: Project?) : EditorTextField(
                 val startIndex = sourceDocument.getLineStartOffset(startLine)
                 val endIndex = sourceDocument.getLineEndOffset(endLine)
 
+                val startNanos = System.nanoTime()
                 if (globalState.fuzzyGrepShowFullFile) {
                     this@PreviewEditor.document = sourceDocument
+                    val elapsedMs = (System.nanoTime() - startNanos) / 1_000_000
+                    println("[Fuzzier] PreviewEditor: fuzzyGrepShowFullFile=true took ${elapsedMs}ms for ${virtualFile.path}")
                 } else {
                     val previewText = withContext(Dispatchers.IO) {
                         readAction {
@@ -121,6 +124,8 @@ class PreviewEditor(project: Project?) : EditorTextField(
                         }
                     }
                     this@PreviewEditor.document = EditorFactory.getInstance().createDocument(previewText)
+                    val elapsedMs = (System.nanoTime() - startNanos) / 1_000_000
+                    println("[Fuzzier] PreviewEditor: fuzzyGrepShowFullFile=false took ${elapsedMs}ms for ${virtualFile.path} [lines $startLine..$endLine]")
                 }
 
                 this@PreviewEditor.fileType = fileType
