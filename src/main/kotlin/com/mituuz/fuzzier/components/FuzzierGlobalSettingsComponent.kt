@@ -78,9 +78,9 @@ class FuzzierGlobalSettingsComponent {
         JBCheckBox(), "Fuzzy Grep: Preview entire file",
         """
             Toggles showing the full file in the preview. If set, preview will use full syntax highlighting.
-            Otherwise, preview will only use limited syntax highlighting and show a slice around the match.
+            Otherwise, preview will only use limited syntax highlighting and show a slice around the match.<br><br>
             
-            <strong>Note! </strong>Disabling this option may improve performance on very large files, 
+            Disabling this option may improve performance on very large files, 
             for small-to-medium files the performance impact is negligible.
         """.trimIndent(),
         false
