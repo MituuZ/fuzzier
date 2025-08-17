@@ -40,11 +40,14 @@ intellijPlatform {
         changeNotes = """
     <h2>Version $currentVersion</h2>
     <ul>
-      <li>Refactor FuzzyGrep to use coroutines</li>
-      <li>Limit results size to avoid possible oom and increase speed</li>
-      <li>Slightly increase the default dimensions of the popup</li>
-      <li>Update some dependencies</li>
-      <li>Increase the minimum version to 2025.1</li>
+      <li>Add an option to load full file contents in the FuzzyGrep preview window
+          <ul>
+            <li>Uses full highlighting</li>
+            <li>On by default</li>
+          </ul>
+      </li>
+      <li>Update IntelliJ platform plugin to 2.7.2</li>
+      <li>Update Gradle to 9.0.0</li>
     </ul>
     """.trimIndent()
 
@@ -100,6 +103,9 @@ dependencies {
     // Required to fix issue where JUnit5 Test Framework refers to JUnit4
     // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-faq.html#junit5-test-framework-refers-to-junit4
     testRuntimeOnly(libs.junit4)
+
+    // Required by Gradle version 9.0.0
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // JMH dependencies
     implementation(libs.jmhCore)

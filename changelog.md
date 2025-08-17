@@ -5,6 +5,8 @@
 - Add an option to load full file contents in the FuzzyGrep preview window
     - Uses full highlighting
     - On by default
+- Update IntelliJ platform plugin to 2.7.2
+- Update Gradle to 9.0.0
 
 ## Version 1.9.0
 
