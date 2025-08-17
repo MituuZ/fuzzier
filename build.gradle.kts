@@ -44,6 +44,7 @@ intellijPlatform {
           <ul>
             <li>Uses full highlighting</li>
             <li>On by default</li>
+            <li>Thanks to <a href="https://github.com/givemeurhats">givemeurhats</a> for highlighting this issue</li>
           </ul>
       </li>
       <li>Update IntelliJ platform plugin to 2.7.2</li>
