@@ -1,5 +1,14 @@
 # Changelog
 
+## Version 1.10.0
+
+- Add an option to load full file contents in the FuzzyGrep preview window
+    - Uses full highlighting
+    - On by default
+    - Thanks to [givemeurhats](https://github.com/givemeurhats) for highlighting this issue
+- Update IntelliJ platform plugin to 2.7.2
+- Update Gradle to 9.0.0
+
 ## Version 1.9.0
 
 - Refactor FuzzyGrep to use coroutines

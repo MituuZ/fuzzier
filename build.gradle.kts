@@ -1,27 +1,25 @@
 /*
-
- MIT License
-
- Copyright (c) 2025 Mitja Leino
-
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
-
- The above copyright notice and this permission notice shall be included in all
- copies or substantial portions of the Software.
-
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- SOFTWARE.
-
+ *  MIT License
+ *
+ *  Copyright (c) 2025 Mitja Leino
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
  */
 
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
@@ -29,7 +27,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 // Use the same version and group for the jar and the plugin
-val currentVersion = "1.9.0"
+val currentVersion = "1.10.0"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -42,11 +40,15 @@ intellijPlatform {
         changeNotes = """
     <h2>Version $currentVersion</h2>
     <ul>
-      <li>Refactor FuzzyGrep to use coroutines</li>
-      <li>Limit results size to avoid possible oom and increase speed</li>
-      <li>Slightly increase the default dimensions of the popup</li>
-      <li>Update some dependencies</li>
-      <li>Increase the minimum version to 2025.1</li>
+      <li>Add an option to load full file contents in the FuzzyGrep preview window
+          <ul>
+            <li>Uses full highlighting</li>
+            <li>On by default</li>
+            <li>Thanks to <a href="https://github.com/givemeurhats">givemeurhats</a> for highlighting this issue</li>
+          </ul>
+      </li>
+      <li>Update IntelliJ platform plugin to 2.7.2</li>
+      <li>Update Gradle to 9.0.0</li>
     </ul>
     """.trimIndent()
 
@@ -102,6 +104,9 @@ dependencies {
     // Required to fix issue where JUnit5 Test Framework refers to JUnit4
     // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-faq.html#junit5-test-framework-refers-to-junit4
     testRuntimeOnly(libs.junit4)
+
+    // Required by Gradle version 9.0.0
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // JMH dependencies
     implementation(libs.jmhCore)
