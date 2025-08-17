@@ -77,7 +77,9 @@ class FuzzierGlobalSettingsComponent {
     val fuzzyGrepShowFullFile = SettingsComponent(
         JBCheckBox(), "Fuzzy Grep: Preview entire file",
         """
-            Toggles showing the full file in the preview. If set, preview will use full syntax highlighting.
+            Toggles showing the full file in the preview.<br><br>
+            
+            If set, preview will use full syntax highlighting.<br>
             Otherwise, preview will only use limited syntax highlighting and show a slice around the match.<br><br>
             
             Disabling this option may improve performance on very large files, 
