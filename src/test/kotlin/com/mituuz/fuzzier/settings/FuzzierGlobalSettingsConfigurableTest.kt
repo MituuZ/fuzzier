@@ -49,6 +49,7 @@ class FuzzierGlobalSettingsConfigurableTest {
         state.debouncePeriod = 140
         state.resetWindow = false
         state.fileListLimit = 200
+        state.fuzzyGrepShowFullFile = true
 
         state.filenameType = FILENAME_WITH_PATH_STYLED
         state.highlightFilename = false
@@ -137,7 +138,7 @@ class FuzzierGlobalSettingsConfigurableTest {
     @Test
     fun fuzzyGrepShowFullFile() {
         pre()
-        state.fuzzyGrepShowFullFile = true
+        state.fuzzyGrepShowFullFile = false
         assertTrue(settingsConfigurable.isModified)
     }
 

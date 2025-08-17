@@ -54,7 +54,7 @@ class FuzzierGlobalSettingsService : PersistentStateComponent<FuzzierGlobalSetti
         var fileListFontSize = 14
         var previewFontSize = 0
         var fileListSpacing = 0
-        var fuzzyGrepShowFullFile = false
+        var fuzzyGrepShowFullFile = true
 
         var newTab: Boolean = false
         var prioritizeShorterDirPaths = true
