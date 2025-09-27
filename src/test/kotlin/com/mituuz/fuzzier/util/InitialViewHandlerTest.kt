@@ -37,7 +37,6 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import javax.swing.DefaultListModel
 
@@ -66,7 +65,6 @@ class InitialViewHandlerTest {
     }
 
     @Test
-    @Disabled
     fun `Recent project files - Verify that list is truncated when it goes over the file limit`() {
         val virtualFile1 = mockk<VirtualFile>()
         val virtualFile2 = mockk<VirtualFile>()
@@ -88,7 +86,6 @@ class InitialViewHandlerTest {
     }
 
     @Test
-    @Disabled
     fun `Recent project files - Skip files that do not belong to the project`() {
         val virtualFile1 = mockk<VirtualFile>()
         val virtualFile2 = mockk<VirtualFile>()
