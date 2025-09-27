@@ -27,7 +27,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 // Use the same version and group for the jar and the plugin
-val currentVersion = "1.11.0"
+val currentVersion = "1.10.1"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -43,6 +43,7 @@ intellijPlatform {
       <li>Update deprecated method calls</li>
       <li>Update dependencies</li>
       <li>Remove JMH deps</li>
+      <li>Migrate from mockito to mockk</li>
     </ul>
     """.trimIndent()
 
@@ -86,22 +87,25 @@ dependencies {
         testFramework(TestFrameworkType.Platform)
     }
 
-    // Test dependencies
-    testImplementation(libs.mockito)
     testImplementation(libs.junit5Api)
     testImplementation(libs.junit5Engine)
+    testImplementation(libs.mockk)
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    // Required to fix issue where JUnit5 Test Framework refers to JUnit4
+    // Required to fix an issue where JUnit5 Test Framework refers to JUnit4
     // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-faq.html#junit5-test-framework-refers-to-junit4
     testRuntimeOnly(libs.junit4)
-
-    // Required by Gradle version 9.0.0
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
+
+// mockk brings its own coroutines version, so exclude it from the classpath
+configurations.matching { it.name in listOf("implementation", "compileClasspath", "runtimeClasspath") }
+    .all {
+        exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-core")
+    }
 
 tasks.test {
     useJUnitPlatform()
-    finalizedBy(tasks.koverHtmlReport) // report is always generated after tests run
+    finalizedBy(tasks.koverHtmlReport)
 }
 
 kover {
