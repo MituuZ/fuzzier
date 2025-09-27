@@ -115,7 +115,7 @@ class TestBenchComponent : JPanel(), Disposable {
 
         // Add a listener that updates the search list every time a change is made
         val document = searchField.document
-        val listener = object : DocumentListener {
+        val listener: DocumentListener = object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
                 debounceTimer?.cancel()
                 val debouncePeriod = liveSettingsComponent.debounceTimerValue.getIntSpinner().value as Int
