@@ -55,6 +55,7 @@ class FuzzyActionTest {
         val myFixture: CodeInsightTestFixture = testUtil.setUpProject(emptyList())
 
         action.component = SimpleFinderComponent()
+        // Popup is required so document listener has a valid disposable parent
         action.popup = JBPopupFactory.getInstance().createComponentPopupBuilder(action.component, null).createPopup()
         action.createSharedListeners(myFixture.project)
         assertNotNull(action.component)
