@@ -4,6 +4,7 @@
 
 - Update deprecated method calls
 - Update dependencies
+- Remove JMH deps
 
 ## Version 1.10.0
 
