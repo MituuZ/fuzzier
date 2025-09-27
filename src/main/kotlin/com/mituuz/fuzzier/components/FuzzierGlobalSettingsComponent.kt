@@ -23,8 +23,10 @@
  */
 package com.mituuz.fuzzier.components
 
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.service
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.openapi.util.Disposer
 import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
@@ -36,7 +38,9 @@ import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.SearchPosition
 import java.awt.Component
 import javax.swing.*
 
-class FuzzierGlobalSettingsComponent {
+class FuzzierGlobalSettingsComponent(
+    val disposable: Disposable,
+) {
     var jPanel: JPanel
 
     /////////////////////////////////////////////////////////////////
@@ -299,6 +303,7 @@ class FuzzierGlobalSettingsComponent {
             .addComponent(JBLabel("<html><h2>Reset window</h2></html>"))
             .addComponent(resetWindowDimension)
             .panel
+        Disposer.register(disposable, testBench)
     }
 
 

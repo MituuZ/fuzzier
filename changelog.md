@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.11.0
+
+- Update deprecated method calls
+
 ## Version 1.10.0
 
 - Add an option to load full file contents in the FuzzyGrep preview window

@@ -27,7 +27,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 // Use the same version and group for the jar and the plugin
-val currentVersion = "1.10.0"
+val currentVersion = "1.11.0"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -40,15 +40,7 @@ intellijPlatform {
         changeNotes = """
     <h2>Version $currentVersion</h2>
     <ul>
-      <li>Add an option to load full file contents in the FuzzyGrep preview window
-          <ul>
-            <li>Uses full highlighting</li>
-            <li>On by default</li>
-            <li>Thanks to <a href="https://github.com/givemeurhats">givemeurhats</a> for highlighting this issue</li>
-          </ul>
-      </li>
-      <li>Update IntelliJ platform plugin to 2.7.2</li>
-      <li>Update Gradle to 9.0.0</li>
+      <li>Update deprecated method calls</li>
     </ul>
     """.trimIndent()
 

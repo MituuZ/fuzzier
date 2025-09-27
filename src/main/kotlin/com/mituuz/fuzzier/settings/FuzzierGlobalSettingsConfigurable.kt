@@ -23,8 +23,10 @@
  */
 package com.mituuz.fuzzier.settings
 
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
+import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.NlsContexts
 import com.mituuz.fuzzier.components.FuzzierGlobalSettingsComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
@@ -34,13 +36,15 @@ import javax.swing.JComponent
 class FuzzierGlobalSettingsConfigurable : Configurable {
     private lateinit var component: FuzzierGlobalSettingsComponent
     private var state = service<FuzzierGlobalSettingsService>().state
+    private var uiDisposable: Disposable? = null
 
-    override fun getDisplayName(): @NlsContexts.ConfigurableName String? {
+    override fun getDisplayName(): @NlsContexts.ConfigurableName String {
         return "Fuzzier Global Settings"
     }
 
-    override fun createComponent(): JComponent? {
-        component = FuzzierGlobalSettingsComponent()
+    override fun createComponent(): JComponent {
+        uiDisposable = Disposer.newDisposable("FuzzierGlobalSettingsConfigurable")
+        component = FuzzierGlobalSettingsComponent(uiDisposable!!)
         component.newTabSelect.getCheckBox().isSelected = state.newTab
         component.recentFileModeSelector.getRecentFilesTypeComboBox().selectedIndex = state.recentFilesMode.ordinal
         component.defaultDimension.getIntSpinner(4).value = state.defaultPopupHeight
@@ -131,5 +135,10 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
         state.matchWeightSingleChar = component.matchWeightSingleChar.getIntSpinner().value as Int
         state.matchWeightStreakModifier = component.matchWeightStreakModifier.getIntSpinner().value as Int
         state.matchWeightFilename = component.matchWeightFilename.getIntSpinner().value as Int
+    }
+
+    override fun disposeUIResources() {
+        Disposer.dispose(uiDisposable ?: return)
+        uiDisposable = null
     }
 }
