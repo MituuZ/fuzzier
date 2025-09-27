@@ -5,11 +5,13 @@ kotlin = "2.2.20"
 intellijPlatform = "2.9.0"
 kover = "0.9.2"
 communityVersion = "2025.1"
+mockk = "1.14.5"
 
 [libraries]
 junit5Api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit5" }
 junit5Engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit5" }
 junit4 = { module = "junit:junit", version.ref = "junit4" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 
 [plugins]
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

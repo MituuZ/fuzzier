@@ -88,12 +88,19 @@ dependencies {
 
     testImplementation(libs.junit5Api)
     testImplementation(libs.junit5Engine)
+    testImplementation(libs.mockk)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // Required to fix an issue where JUnit5 Test Framework refers to JUnit4
     // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-faq.html#junit5-test-framework-refers-to-junit4
     testRuntimeOnly(libs.junit4)
 }
+
+// mockk brings its own coroutines version, so exclude it from the classpath
+configurations.matching { it.name in listOf("implementation", "compileClasspath", "runtimeClasspath") }
+    .all {
+        exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-core")
+    }
 
 tasks.test {
     useJUnitPlatform()
