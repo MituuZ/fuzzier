@@ -1,33 +1,29 @@
 /*
-MIT License
-
-Copyright (c) 2025 Mitja Leino
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+ *  MIT License
+ *
+ *  Copyright (c) 2025 Mitja Leino
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
+ */
 package com.mituuz.fuzzier
 
-import com.intellij.openapi.actionSystem.AnAction
-import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.DataContext
-import com.intellij.openapi.actionSystem.IdeActions
-import com.intellij.openapi.actionSystem.KeyboardShortcut
+import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Document
@@ -68,6 +64,7 @@ abstract class FuzzyAction : AnAction() {
     protected lateinit var projectState: FuzzierSettingsService.State
     protected val globalState = service<FuzzierGlobalSettingsService>().state
     protected var defaultDoc: Document? = null
+
     @Volatile
     var currentTask: Future<*>? = null
     val fuzzierUtil = FuzzierUtil()
@@ -152,7 +149,7 @@ abstract class FuzzyAction : AnAction() {
         })
 
         val document = component.searchField.document
-        document.addDocumentListener(object : DocumentListener {
+        val listener: DocumentListener = object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
                 debounceTimer?.cancel()
                 val debouncePeriod = globalState.debouncePeriod
@@ -160,7 +157,9 @@ abstract class FuzzyAction : AnAction() {
                     updateListContents(project, component.searchField.text)
                 }
             }
-        })
+        }
+
+        document.addDocumentListener(listener, popup)
     }
 
     abstract fun updateListContents(project: Project, searchString: String)
@@ -180,7 +179,8 @@ abstract class FuzzyAction : AnAction() {
         actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_UP, originalUpHandler)
     }
 
-    class FuzzyListActionHandler(private val fuzzyAction: FuzzyAction, private val isUp: Boolean) : EditorActionHandler() {
+    class FuzzyListActionHandler(private val fuzzyAction: FuzzyAction, private val isUp: Boolean) :
+        EditorActionHandler() {
         override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext?) {
             if (isUp) {
                 fuzzyAction.moveListUp()
