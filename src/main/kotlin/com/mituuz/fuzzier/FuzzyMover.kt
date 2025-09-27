@@ -1,26 +1,26 @@
 /*
-MIT License
-
-Copyright (c) 2025 Mitja Leino
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+ *  MIT License
+ *
+ *  Copyright (c) 2025 Mitja Leino
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
+ */
 package com.mituuz.fuzzier
 
 import com.intellij.notification.Notification
@@ -47,10 +47,16 @@ import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.StringEvaluator
 import com.mituuz.fuzzier.util.FuzzierUtil
 import org.apache.commons.lang3.StringUtils
-import java.awt.event.*
+import java.awt.event.ActionEvent
+import java.awt.event.KeyEvent
+import java.awt.event.MouseAdapter
+import java.awt.event.MouseEvent
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Future
-import javax.swing.*
+import javax.swing.AbstractAction
+import javax.swing.DefaultListModel
+import javax.swing.JComponent
+import javax.swing.KeyStroke
 import kotlin.coroutines.cancellation.CancellationException
 
 class FuzzyMover : FuzzyAction() {
@@ -65,8 +71,6 @@ class FuzzyMover : FuzzyAction() {
         ApplicationManager.getApplication().invokeLater {
             component = SimpleFinderComponent()
             createListeners(project)
-            createSharedListeners(project)
-
             val currentEditor = FileEditorManager.getInstance(project).selectedTextEditor
             if (currentEditor != null) {
                 currentFile = currentEditor.virtualFile
@@ -74,6 +78,7 @@ class FuzzyMover : FuzzyAction() {
             }
 
             showPopup(project)
+            createSharedListeners(project)
         }
     }
 
@@ -126,7 +131,7 @@ class FuzzyMover : FuzzyAction() {
                     }
                 }
             }
-           ApplicationManager.getApplication().invokeLater {
+            ApplicationManager.getApplication().invokeLater {
                 component.isDirSelector = true
                 component.searchField.text = ""
                 component.fileList.setEmptyText("Select target folder")
@@ -218,9 +223,11 @@ class FuzzyMover : FuzzyAction() {
             projectState.modules
         )
     }
-    
-    private fun process(project: Project, stringEvaluator: StringEvaluator, searchString: String,
-                        listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?) {
+
+    private fun process(
+        project: Project, stringEvaluator: StringEvaluator, searchString: String,
+        listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?
+    ) {
         val moduleManager = ModuleManager.getInstance(project)
         val ss = FuzzierUtil.cleanSearchString(searchString, projectState.ignoredCharacters)
         if (projectState.isProject) {
@@ -230,8 +237,10 @@ class FuzzyMover : FuzzyAction() {
         }
     }
 
-    private fun processProject(project: Project, stringEvaluator: StringEvaluator,
-                               searchString: String, listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?) {
+    private fun processProject(
+        project: Project, stringEvaluator: StringEvaluator,
+        searchString: String, listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?
+    ) {
         val contentIterator = if (!component.isDirSelector) {
             stringEvaluator.getContentIterator(project.name, searchString, listModel, task)
         } else {
@@ -240,8 +249,10 @@ class FuzzyMover : FuzzyAction() {
         ProjectFileIndex.getInstance(project).iterateContent(contentIterator)
     }
 
-    private fun processModules(moduleManager: ModuleManager, stringEvaluator: StringEvaluator,
-                               searchString: String, listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?) {
+    private fun processModules(
+        moduleManager: ModuleManager, stringEvaluator: StringEvaluator,
+        searchString: String, listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?
+    ) {
         for (module in moduleManager.modules) {
             val moduleFileIndex = module.rootManager.fileIndex
 

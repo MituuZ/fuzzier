@@ -41,6 +41,8 @@ intellijPlatform {
     <h2>Version $currentVersion</h2>
     <ul>
       <li>Update deprecated method calls</li>
+      <li>Update dependencies</li>
+      <li>Remove JMH deps</li>
     </ul>
     """.trimIndent()
 
@@ -65,7 +67,6 @@ plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.intellijPlatform)
     alias(libs.plugins.kover)
-    alias(libs.plugins.jmh)
 }
 
 repositories {
@@ -78,13 +79,10 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        // Downgraded from 2024.3.1.1
-        // https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1838
+        // TODO: Update minimum version to 2025.3 and replace this deprecated config
         intellijIdeaCommunity(libs.versions.communityVersion.get())
-
         pluginVerifier()
         zipSigner()
-
         testFramework(TestFrameworkType.Platform)
     }
 
@@ -99,16 +97,6 @@ dependencies {
 
     // Required by Gradle version 9.0.0
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-
-    // JMH dependencies
-    implementation(libs.jmhCore)
-    annotationProcessor(libs.jmhAnnprocessor)
-    jmh(libs.kotlinStdlib)
-    jmh(fileTree("./libs") { include("*.jar") }) // libs folder contains idea:ideaIC:2024.3 jars
-}
-
-tasks.named<Jar>("jmhJar") {
-    isZip64 = true
 }
 
 tasks.test {
@@ -133,15 +121,4 @@ tasks.withType<KotlinCompile> {
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
-}
-
-jmh {
-    fork = 1
-    warmupIterations = 2
-    iterations = 2
-    timeOnIteration = "2s"
-    resultFormat = "JSON"
-    jvmArgs = listOf("-Xms2G", "-Xmx2G")
-    jmhTimeout = "30s"
-    benchmarkMode = listOf("Throughput")
 }
