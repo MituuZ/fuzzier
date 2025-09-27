@@ -27,7 +27,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 // Use the same version and group for the jar and the plugin
-val currentVersion = "1.11.0"
+val currentVersion = "1.10.1"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -43,6 +43,7 @@ intellijPlatform {
       <li>Update deprecated method calls</li>
       <li>Update dependencies</li>
       <li>Remove JMH deps</li>
+      <li>Migrate from mockito to mockk</li>
     </ul>
     """.trimIndent()
 

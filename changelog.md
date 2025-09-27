@@ -1,10 +1,11 @@
 # Changelog
 
-## Version 1.11.0
+## Version 1.10.1
 
 - Update deprecated method calls
 - Update dependencies
 - Remove JMH deps
+- Migrate from mockito to mockk
 
 ## Version 1.10.0
 
