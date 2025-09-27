@@ -1,36 +1,34 @@
 /*
-MIT License
-
-Copyright (c) 2025 Mitja Leino
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+ *  MIT License
+ *
+ *  Copyright (c) 2025 Mitja Leino
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
+ */
 package com.mituuz.fuzzier
 
 import com.intellij.openapi.application.WriteAction
-import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.modules
 import com.intellij.openapi.project.rootManager
-import com.intellij.openapi.vcs.changes.ChangeListManager
-import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.testFramework.PsiTestUtil
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
@@ -39,12 +37,14 @@ import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.runInEdtAndWait
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.StringEvaluator
-import org.mockito.ArgumentMatchers.any
 import javax.swing.DefaultListModel
-import org.mockito.Mockito
 
 class TestUtil {
-    private fun addFilesToProject(filesToAdd: List<String>, myFixture: CodeInsightTestFixture, fixture: IdeaProjectTestFixture) {
+    private fun addFilesToProject(
+        filesToAdd: List<String>,
+        myFixture: CodeInsightTestFixture,
+        fixture: IdeaProjectTestFixture
+    ) {
         if (filesToAdd.isEmpty()) {
             return
         }
@@ -62,7 +62,11 @@ class TestUtil {
         DumbService.getInstance(fixture.project).waitForSmartMode()
     }
 
-    fun setUpModuleFileIndex(filesToAdd: List<String>, exclusionList: Set<String>, ignoredFiles: List<String>? = null) : DefaultListModel<FuzzyContainer> {
+    fun setUpModuleFileIndex(
+        filesToAdd: List<String>,
+        exclusionList: Set<String>,
+        ignoredFiles: List<String>? = null
+    ): DefaultListModel<FuzzyContainer> {
         val filePathContainer = DefaultListModel<FuzzyContainer>()
         val factory = IdeaTestFixtureFactory.getFixtureFactory()
         val fixtureBuilder = factory.createLightFixtureBuilder(null, "Test")
@@ -79,13 +83,14 @@ class TestUtil {
         map[module.name] = module.rootManager.contentRoots[1].path
 
         if (ignoredFiles !== null) {
-            val changeListManager = Mockito.mock(ChangeListManager::class.java)
-            Mockito.`when`(changeListManager.isIgnoredFile(any<VirtualFile>())).thenAnswer { invocation ->
-                val file = invocation.getArgument<VirtualFile>(0)
-                val tempDirPath = myFixture.tempDirPath
-                ignoredFiles.any{ ("$tempDirPath/$it") == file.path }
-            }
-            stringEvaluator = StringEvaluator(exclusionList, map, changeListManager)
+//            val changeListManager = Mockito.mock(ChangeListManager::class.java)
+//            Mockito.`when`(changeListManager.isIgnoredFile(any<VirtualFile>())).thenAnswer { invocation ->
+//                val file = invocation.getArgument<VirtualFile>(0)
+//                val tempDirPath = myFixture.tempDirPath
+//                ignoredFiles.any{ ("$tempDirPath/$it") == file.path }
+//            }
+//            stringEvaluator = StringEvaluator(exclusionList, map, changeListManager)
+            stringEvaluator = StringEvaluator(exclusionList, map)
         } else {
             stringEvaluator = StringEvaluator(exclusionList, map)
         }
@@ -137,8 +142,12 @@ class TestUtil {
 
         return myFixture
     }
-    
-    fun setUpDuoModuleProject(module1Files: List<String>, module2Files: List<String>, customModule2Path: String = "src2"): CodeInsightTestFixture {
+
+    fun setUpDuoModuleProject(
+        module1Files: List<String>,
+        module2Files: List<String>,
+        customModule2Path: String = "src2"
+    ): CodeInsightTestFixture {
         val module2List: MutableList<String> = ArrayList()
         module2List.add(customModule2Path)
         module2List.addAll(module2Files)

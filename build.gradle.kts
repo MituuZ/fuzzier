@@ -86,22 +86,18 @@ dependencies {
         testFramework(TestFrameworkType.Platform)
     }
 
-    // Test dependencies
-    testImplementation(libs.mockito)
     testImplementation(libs.junit5Api)
     testImplementation(libs.junit5Engine)
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    // Required to fix issue where JUnit5 Test Framework refers to JUnit4
+    // Required to fix an issue where JUnit5 Test Framework refers to JUnit4
     // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-faq.html#junit5-test-framework-refers-to-junit4
     testRuntimeOnly(libs.junit4)
-
-    // Required by Gradle version 9.0.0
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.test {
     useJUnitPlatform()
-    finalizedBy(tasks.koverHtmlReport) // report is always generated after tests run
+    finalizedBy(tasks.koverHtmlReport)
 }
 
 kover {
