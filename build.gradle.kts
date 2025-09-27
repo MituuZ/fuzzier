@@ -78,13 +78,10 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        // Downgraded from 2024.3.1.1
-        // https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1838
+        // TODO: Update minimum version to 2025.3 and replace this deprecated config
         intellijIdeaCommunity(libs.versions.communityVersion.get())
-
         pluginVerifier()
         zipSigner()
-
         testFramework(TestFrameworkType.Platform)
     }
 
