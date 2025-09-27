@@ -3,6 +3,8 @@
 ## Version 1.11.0
 
 - Update deprecated method calls
+- Update Gradle to 9.1.0
+- Update IntelliJ platform plugin to 2.9.0
 
 ## Version 1.10.0
 
