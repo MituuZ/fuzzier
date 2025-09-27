@@ -1,28 +1,29 @@
 /*
-MIT License
-
-Copyright (c) 2025 Mitja Leino
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+ *  MIT License
+ *
+ *  Copyright (c) 2025 Mitja Leino
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
+ */
 package com.mituuz.fuzzier.components
 
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.event.DocumentEvent
@@ -38,8 +39,8 @@ import com.intellij.ui.table.JBTable
 import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
 import com.mituuz.fuzzier.entities.FuzzyContainer
-import com.mituuz.fuzzier.entities.StringEvaluator
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
+import com.mituuz.fuzzier.entities.StringEvaluator
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.util.FuzzierUtil
 import org.apache.commons.lang3.StringUtils
@@ -51,11 +52,13 @@ import javax.swing.JPanel
 import javax.swing.table.DefaultTableModel
 import kotlin.concurrent.schedule
 
-class TestBenchComponent : JPanel() {
-    private val columnNames = arrayOf("Filename", "Filepath", "Streak", "MultiMatch", "PartialPath", "Filename", "Total")
+class TestBenchComponent : JPanel(), Disposable {
+    private val columnNames =
+        arrayOf("Filename", "Filepath", "Streak", "MultiMatch", "PartialPath", "Filename", "Total")
     private val table = JBTable()
     private var searchField = EditorTextField()
     private var debounceTimer: TimerTask? = null
+
     @Volatile
     var currentTask: Future<*>? = null
     private lateinit var liveSettingsComponent: FuzzierGlobalSettingsComponent
@@ -112,8 +115,7 @@ class TestBenchComponent : JPanel() {
 
         // Add a listener that updates the search list every time a change is made
         val document = searchField.document
-
-        document.addDocumentListener(object : DocumentListener {
+        val listener = object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
                 debounceTimer?.cancel()
                 val debouncePeriod = liveSettingsComponent.debounceTimerValue.getIntSpinner().value as Int
@@ -121,12 +123,14 @@ class TestBenchComponent : JPanel() {
                     updateListContents(project, searchField.text)
                 }
             }
-        })
+        }
+
+        document.addDocumentListener(listener, liveSettingsComponent.disposable)
     }
 
     fun updateListContents(project: Project, searchString: String) {
         if (StringUtils.isBlank(searchString)) {
-           ApplicationManager.getApplication().invokeLater {
+            ApplicationManager.getApplication().invokeLater {
                 table.model = DefaultTableModel()
             }
             return
@@ -164,8 +168,10 @@ class TestBenchComponent : JPanel() {
         }
     }
 
-    private fun process(project: Project, stringEvaluator: StringEvaluator, searchString: String, 
-                        listModel: DefaultListModel<FuzzyContainer>) {
+    private fun process(
+        project: Project, stringEvaluator: StringEvaluator, searchString: String,
+        listModel: DefaultListModel<FuzzyContainer>
+    ) {
         val moduleManager = ModuleManager.getInstance(project)
         if (project.service<FuzzierSettingsService>().state.isProject) {
             processProject(project, stringEvaluator, searchString, listModel)
@@ -174,8 +180,10 @@ class TestBenchComponent : JPanel() {
         }
     }
 
-    private fun processProject(project: Project, stringEvaluator: StringEvaluator,
-                               searchString: String, listModel: DefaultListModel<FuzzyContainer>) {
+    private fun processProject(
+        project: Project, stringEvaluator: StringEvaluator,
+        searchString: String, listModel: DefaultListModel<FuzzyContainer>
+    ) {
         val ss = FuzzierUtil.cleanSearchString(searchString, projectState.ignoredCharacters)
         val contentIterator = stringEvaluator.getContentIterator(project.name, ss, listModel, null)
 
@@ -188,8 +196,10 @@ class TestBenchComponent : JPanel() {
         ProjectFileIndex.getInstance(project).iterateContent(contentIterator)
     }
 
-    private fun processModules(moduleManager: ModuleManager, stringEvaluator: StringEvaluator,
-                               searchString: String, listModel: DefaultListModel<FuzzyContainer>) {
+    private fun processModules(
+        moduleManager: ModuleManager, stringEvaluator: StringEvaluator,
+        searchString: String, listModel: DefaultListModel<FuzzyContainer>
+    ) {
         for (module in moduleManager.modules) {
             val moduleFileIndex = module.rootManager.fileIndex
             val ss = FuzzierUtil.cleanSearchString(searchString, projectState.ignoredCharacters)
@@ -203,6 +213,24 @@ class TestBenchComponent : JPanel() {
             scoreCalculator.setFilenameMatchWeight(liveSettingsComponent.matchWeightFilename.getIntSpinner().value as Int)
 
             moduleFileIndex.iterateContent(contentIterator)
+        }
+    }
+
+    override fun dispose() {
+        debounceTimer?.cancel()
+        debounceTimer = null
+
+        currentTask?.let { task ->
+            if (!task.isDone) task.cancel(true)
+        }
+        currentTask = null
+
+        ApplicationManager.getApplication().invokeLater {
+            try {
+                table.setPaintBusy(false)
+            } catch (_: Throwable) {
+                // Ignore this
+            }
         }
     }
 }
