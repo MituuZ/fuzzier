@@ -271,8 +271,8 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
 
     fun getSecondaryText(): String = secondaryField.text
 
-    fun addSecondaryDocumentListener(listener: DocumentListener, parent: Disposable) {
+    fun addSecondaryDocumentListener(listener: DocumentListener, parentDisposable: Disposable) {
         // Attach the same document listener used for the main search field
-        secondaryField.document.addDocumentListener(listener, parent)
+        secondaryField.document.addDocumentListener(listener, parentDisposable)
     }
 }

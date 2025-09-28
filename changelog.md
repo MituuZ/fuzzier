@@ -2,6 +2,7 @@
 
 ## Version 1.10.1
 
+- Support file type globs in FuzzyGrep when using ripgrep
 - Update deprecated method calls
 - Update dependencies
 - Remove JMH deps
