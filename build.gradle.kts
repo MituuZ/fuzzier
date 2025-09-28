@@ -97,8 +97,10 @@ dependencies {
     testRuntimeOnly(libs.junit4)
 }
 
-// mockk brings its own coroutines version, so exclude it from the classpath
-configurations.matching { it.name in listOf("implementation", "compileClasspath", "runtimeClasspath") }
+// mockk brings its own coroutines version (1.10.1), so exclude it from the classpath
+// and use the one provided by the platform (1.8.0)
+// TODO: Check later if the coroutine versions can be aligned
+configurations.matching { it.name in listOf("testImplementation", "testCompileClasspath") }
     .all {
         exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-core")
     }
