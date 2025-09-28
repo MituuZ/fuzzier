@@ -134,7 +134,7 @@ open class FuzzyGrep() : FuzzyAction() {
 
             yield()
             defaultDoc = EditorFactory.getInstance().createDocument("")
-            component = FuzzyFinderComponent(project)
+            component = FuzzyFinderComponent(project, showSecondaryField = useRg)
             createListeners(project)
             showPopup(project)
             createSharedListeners(project)
