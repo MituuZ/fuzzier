@@ -303,18 +303,22 @@ open class FuzzyGrep() : FuzzyAction() {
         projectBasePath: String
     ) {
         if (useRg) {
-            runCommand(
-                listOf(
-                    "rg",
-                    "--no-heading",
-                    "--color=never",
-                    "-n",
-                    "--with-filename",
-                    "--column",
-                    searchString,
-                    "."
-                ), listModel, projectBasePath
+            val secondary = (component as FuzzyFinderComponent).getSecondaryText().trim()
+            val commands = mutableListOf(
+                "rg",
+                "--no-heading",
+                "--color=never",
+                "-n",
+                "--with-filename",
+                "--column"
             )
+            if (secondary.isNotEmpty()) {
+                val ext = secondary.removePrefix(".")
+                val glob = "*.${ext}"
+                commands.addAll(listOf("-g", glob))
+            }
+            commands.addAll(listOf(searchString, "."))
+            runCommand(commands, listModel, projectBasePath)
         } else {
             if (isWindows) {
                 runCommand(listOf("findstr", "/p", "/s", "/n", searchString, "*"), listModel, projectBasePath)

@@ -266,4 +266,6 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
             false
         )
     }
+
+    fun getSecondaryText(): String = secondaryField.text
 }
