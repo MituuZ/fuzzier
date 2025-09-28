@@ -160,6 +160,8 @@ abstract class FuzzyAction : AnAction() {
         }
 
         document.addDocumentListener(listener, popup)
+        // Also listen to changes in the secondary search field (if present)
+        (component as? com.mituuz.fuzzier.components.FuzzyFinderComponent)?.addSecondaryDocumentListener(listener, popup)
     }
 
     abstract fun updateListContents(project: Project, searchString: String)

@@ -23,10 +23,12 @@
  */
 package com.mituuz.fuzzier.components
 
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CustomShortcutSet
 import com.intellij.openapi.components.service
+import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.fileTypes.PlainTextFileType
 import com.intellij.openapi.project.Project
 import com.intellij.ui.EditorTextField
@@ -268,4 +270,9 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
     }
 
     fun getSecondaryText(): String = secondaryField.text
+
+    fun addSecondaryDocumentListener(listener: DocumentListener, parent: Disposable) {
+        // Attach the same document listener used for the main search field
+        secondaryField.document.addDocumentListener(listener, parent)
+    }
 }
