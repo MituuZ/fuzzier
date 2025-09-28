@@ -23,6 +23,9 @@
  */
 package com.mituuz.fuzzier.components
 
+import com.intellij.openapi.actionSystem.AnAction
+import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.CustomShortcutSet
 import com.intellij.openapi.components.service
 import com.intellij.openapi.fileTypes.PlainTextFileType
 import com.intellij.openapi.project.Project
@@ -37,8 +40,13 @@ import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.SearchPosition.*
 import java.awt.BorderLayout
 import java.awt.Dimension
+import java.awt.KeyboardFocusManager
+import java.awt.event.InputEvent
+import java.awt.event.KeyEvent
 import javax.swing.JPanel
 import javax.swing.JSplitPane
+import javax.swing.KeyStroke
+import javax.swing.SwingUtilities
 
 class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boolean = false) : FuzzyComponent() {
     var previewPane: PreviewEditor = PreviewEditor(project)
@@ -80,6 +88,43 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
             BOTTOM, TOP -> vertical(searchPosition, searchPanel, fileListScrollPane)
             RIGHT, LEFT -> horizontal(searchPosition, searchPanel, fileListScrollPane)
         }
+
+        setupTabBetweenFields()
+    }
+
+    private fun setupTabBetweenFields() {
+        if (!showSecondaryField) return
+
+        fun isBothShowing(): Boolean = searchField.isShowing && secondaryField.isShowing
+
+        fun registerTabSwitch(forward: Boolean, field: EditorTextField, other: EditorTextField) {
+            field.addSettingsProvider { editorEx ->
+                val action = object : AnAction() {
+                    override fun actionPerformed(e: AnActionEvent) {
+                        if (!isBothShowing()) return
+                        val focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().focusOwner
+                        val onThis = SwingUtilities.isDescendingFrom(focusOwner, field)
+                        val onOther = SwingUtilities.isDescendingFrom(focusOwner, other)
+                        if (onThis) {
+                            other.requestFocusInWindow()
+                        } else if (onOther) {
+                            field.requestFocusInWindow()
+                        } else {
+                            // If the focus is elsewhere, do nothing
+                        }
+                    }
+                }
+                val ks = if (forward) KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0)
+                else KeyStroke.getKeyStroke(KeyEvent.VK_TAB, InputEvent.SHIFT_DOWN_MASK)
+                action.registerCustomShortcutSet(CustomShortcutSet(ks), editorEx.contentComponent)
+            }
+        }
+
+        // Register for both fields: forward and backward
+        registerTabSwitch(true, searchField, secondaryField)
+        registerTabSwitch(false, searchField, secondaryField)
+        registerTabSwitch(true, secondaryField, searchField)
+        registerTabSwitch(false, secondaryField, searchField)
     }
 
     fun vertical(
