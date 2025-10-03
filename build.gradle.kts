@@ -40,6 +40,7 @@ intellijPlatform {
         changeNotes = """
     <h2>Version $currentVersion</h2>
     <ul>
+      <li>Support file type globs in FuzzyGrep when using ripgrep</li>
       <li>Update deprecated method calls</li>
       <li>Update dependencies</li>
       <li>Remove JMH deps</li>
