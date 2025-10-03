@@ -269,6 +269,8 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
 
     fun getSecondaryText(): String = secondaryField.text
 
+    fun getSecondaryField(): EditorTextField = secondaryField
+
     fun addSecondaryDocumentListener(listener: DocumentListener, parentDisposable: Disposable) {
         secondaryField.document.addDocumentListener(listener, parentDisposable)
     }
