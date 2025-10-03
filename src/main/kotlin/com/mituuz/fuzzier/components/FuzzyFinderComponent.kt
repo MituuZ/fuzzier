@@ -84,9 +84,7 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
 
         splitPane.dividerSize = 10
 
-        val searchPosition = settingsState.searchPosition
-
-        when (searchPosition) {
+        when (val searchPosition = settingsState.searchPosition) {
             BOTTOM, TOP -> vertical(searchPosition, searchPanel, fileListScrollPane)
             RIGHT, LEFT -> horizontal(searchPosition, searchPanel, fileListScrollPane)
         }
@@ -161,7 +159,7 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
         if (showSecondaryField) {
             searchPanel.add(
                 secondaryField,
-                getSecondaryConstraints(searchFieldGridRow, 1)
+                getSecondaryConstraints(searchFieldGridRow)
             )
         }
         val colSpan = if (showSecondaryField) 2 else 1
@@ -187,7 +185,7 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
         if (showSecondaryField) {
             searchPanel.add(
                 secondaryField,
-                getSecondaryConstraints(1, 1)
+                getSecondaryConstraints(1)
             )
         }
         val colSpan = if (showSecondaryField) 2 else 1
@@ -251,10 +249,10 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
         )
     }
 
-    private fun getSecondaryConstraints(row: Int, column: Int): GridConstraints {
+    private fun getSecondaryConstraints(row: Int): GridConstraints {
         return GridConstraints(
             row,
-            column,
+            1,
             1,
             1,
             GridConstraints.ANCHOR_CENTER,
@@ -272,7 +270,6 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
     fun getSecondaryText(): String = secondaryField.text
 
     fun addSecondaryDocumentListener(listener: DocumentListener, parentDisposable: Disposable) {
-        // Attach the same document listener used for the main search field
         secondaryField.document.addDocumentListener(listener, parentDisposable)
     }
 }

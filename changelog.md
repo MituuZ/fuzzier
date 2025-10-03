@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.10.1
+## Version 1.11.0
 
 - Support file type globs in FuzzyGrep when using ripgrep
 - Update deprecated method calls
