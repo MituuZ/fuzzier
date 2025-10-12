@@ -89,12 +89,48 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
             RIGHT, LEFT -> horizontal(searchPosition, searchPanel, fileListScrollPane)
         }
 
-        setupTabBetweenFields()
+        if (showSecondaryField) {
+            setupTabBetweenFields()
+        }
+        setupCtrlDUShortcuts()
+    }
+
+    private fun setupCtrlDUShortcuts() {
+        fun moveHalfPage(down: Boolean) {
+            val size = fileList.model.size
+            if (size <= 0) return
+            val first = fileList.firstVisibleIndex
+            val last = fileList.lastVisibleIndex
+            val visibleCount = if (first != -1 && last != -1 && last >= first) (last - first + 1) else 10
+            val delta = maxOf(1, visibleCount / 2)
+            val current = fileList.selectedIndex.coerceIn(0, size - 1)
+            val target = if (down) (current + delta).coerceAtMost(size - 1) else (current - delta).coerceAtLeast(0)
+            fileList.selectedIndex = target
+            fileList.ensureIndexIsVisible(target)
+        }
+
+        fun registerCtrlKey(field: EditorTextField, keyCode: Int, down: Boolean) {
+            field.addSettingsProvider { editorEx ->
+                val action = object : AnAction() {
+                    override fun actionPerformed(e: AnActionEvent) {
+                        moveHalfPage(down)
+                    }
+                }
+                val ks = KeyStroke.getKeyStroke(keyCode, InputEvent.CTRL_DOWN_MASK)
+                action.registerCustomShortcutSet(CustomShortcutSet(ks), editorEx.contentComponent)
+            }
+        }
+        // Main field
+        registerCtrlKey(searchField, KeyEvent.VK_D, true)
+        registerCtrlKey(searchField, KeyEvent.VK_U, false)
+        // Secondary field, when shown
+        if (showSecondaryField) {
+            registerCtrlKey(secondaryField, KeyEvent.VK_D, true)
+            registerCtrlKey(secondaryField, KeyEvent.VK_U, false)
+        }
     }
 
     private fun setupTabBetweenFields() {
-        if (!showSecondaryField) return
-
         fun isBothShowing(): Boolean = searchField.isShowing && secondaryField.isShowing
 
         fun registerTabSwitch(forward: Boolean, field: EditorTextField, other: EditorTextField) {
