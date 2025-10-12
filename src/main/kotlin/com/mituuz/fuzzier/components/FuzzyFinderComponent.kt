@@ -96,24 +96,22 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
     }
 
     private fun setupCtrlDUShortcuts() {
-        fun moveHalfPage(down: Boolean) {
-            val size = fileList.model.size
-            if (size <= 0) return
-            val first = fileList.firstVisibleIndex
-            val last = fileList.lastVisibleIndex
-            val visibleCount = if (first != -1 && last != -1 && last >= first) (last - first + 1) else 10
-            val delta = maxOf(1, visibleCount / 2)
-            val current = fileList.selectedIndex.coerceIn(0, size - 1)
-            val target = if (down) (current + delta).coerceAtMost(size - 1) else (current - delta).coerceAtLeast(0)
-            fileList.selectedIndex = target
-            fileList.ensureIndexIsVisible(target)
+        fun movePreviewHalfPage(down: Boolean) {
+            val editor = previewPane.editor ?: return
+            val scrollingModel = editor.scrollingModel
+            val visible = scrollingModel.visibleArea
+            val lineHeight = editor.lineHeight
+            if (lineHeight <= 0) return
+            val halfPagePx = (visible.height / 2).coerceAtLeast(lineHeight)
+            val newY = visible.y + if (down) halfPagePx else -halfPagePx
+            scrollingModel.scrollVertically(newY)
         }
 
         fun registerCtrlKey(field: EditorTextField, keyCode: Int, down: Boolean) {
             field.addSettingsProvider { editorEx ->
                 val action = object : AnAction() {
                     override fun actionPerformed(e: AnActionEvent) {
-                        moveHalfPage(down)
+                        movePreviewHalfPage(down)
                     }
                 }
                 val ks = KeyStroke.getKeyStroke(keyCode, InputEvent.CTRL_DOWN_MASK)
