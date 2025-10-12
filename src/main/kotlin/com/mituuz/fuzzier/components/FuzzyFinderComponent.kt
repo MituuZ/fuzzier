@@ -103,7 +103,7 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
             val lineHeight = editor.lineHeight
             if (lineHeight <= 0) return
             val halfPagePx = (visible.height / 2).coerceAtLeast(lineHeight)
-            val newY = visible.y + if (down) halfPagePx else -halfPagePx
+            val newY = (visible.y + if (down) halfPagePx else -halfPagePx).coerceAtLeast(0)
             scrollingModel.scrollVertically(newY)
         }
 
