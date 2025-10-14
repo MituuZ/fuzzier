@@ -89,12 +89,46 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
             RIGHT, LEFT -> horizontal(searchPosition, searchPanel, fileListScrollPane)
         }
 
-        setupTabBetweenFields()
+        if (showSecondaryField) {
+            setupTabBetweenFields()
+        }
+        setupCtrlDUShortcuts()
+    }
+
+    private fun setupCtrlDUShortcuts() {
+        fun movePreviewHalfPage(down: Boolean) {
+            val editor = previewPane.editor ?: return
+            val scrollingModel = editor.scrollingModel
+            val visible = scrollingModel.visibleArea
+            val lineHeight = editor.lineHeight
+            if (lineHeight <= 0) return
+            val halfPagePx = (visible.height / 2).coerceAtLeast(lineHeight)
+            val newY = (visible.y + if (down) halfPagePx else -halfPagePx).coerceAtLeast(0)
+            scrollingModel.scrollVertically(newY)
+        }
+
+        fun registerCtrlKey(field: EditorTextField, keyCode: Int, down: Boolean) {
+            field.addSettingsProvider { editorEx ->
+                val action = object : AnAction() {
+                    override fun actionPerformed(e: AnActionEvent) {
+                        movePreviewHalfPage(down)
+                    }
+                }
+                val ks = KeyStroke.getKeyStroke(keyCode, InputEvent.CTRL_DOWN_MASK)
+                action.registerCustomShortcutSet(CustomShortcutSet(ks), editorEx.contentComponent)
+            }
+        }
+        // Main field
+        registerCtrlKey(searchField, KeyEvent.VK_D, true)
+        registerCtrlKey(searchField, KeyEvent.VK_U, false)
+        // Secondary field, when shown
+        if (showSecondaryField) {
+            registerCtrlKey(secondaryField, KeyEvent.VK_D, true)
+            registerCtrlKey(secondaryField, KeyEvent.VK_U, false)
+        }
     }
 
     private fun setupTabBetweenFields() {
-        if (!showSecondaryField) return
-
         fun isBothShowing(): Boolean = searchField.isShowing && secondaryField.isShowing
 
         fun registerTabSwitch(forward: Boolean, field: EditorTextField, other: EditorTextField) {

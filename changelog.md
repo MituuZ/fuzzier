@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.12.0
+
+- Add keybindings for CTRL + D/U for half page down/up scroll for the preview
+
 ## Version 1.11.0
 
 - Support file type globs in FuzzyGrep when using ripgrep
