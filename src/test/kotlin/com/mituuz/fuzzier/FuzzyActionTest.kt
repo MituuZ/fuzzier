@@ -168,6 +168,8 @@ class FuzzyActionTest {
         assertEquals("/src/asd", component.text)
     }
 
+    // TODO: create unit tests for the icons
+
     private fun getAction(): FuzzyAction {
         return object : FuzzyAction() {
             override fun actionPerformed(actionEvent: AnActionEvent) {

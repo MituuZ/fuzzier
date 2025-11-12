@@ -23,6 +23,7 @@
  */
 package com.mituuz.fuzzier
 
+import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Caret
@@ -32,6 +33,7 @@ import com.intellij.openapi.editor.actionSystem.EditorActionHandler
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
+import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.keymap.KeymapManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
@@ -227,6 +229,10 @@ abstract class FuzzyAction : AnAction() {
                     true -> container.getDirDisplayString()
                     false -> container.getDisplayString(globalState)
                 }
+
+                val ft = FileTypeManager.getInstance().getFileTypeByFileName(container.filename)
+                val icon = ft.icon ?: AllIcons.FileTypes.Unknown
+                renderer.icon = icon
 
                 globalState.fileListSpacing.let {
                     renderer.border = BorderFactory.createEmptyBorder(it, 0, it, 0)
