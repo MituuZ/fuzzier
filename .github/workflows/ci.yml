@@ -22,7 +22,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Run tests and generate coverage
-        run: gradle koverXmlReport
+        run: ./gradlew koverXmlReport
 
       - name: Upload coverage report artifact
         uses: actions/upload-artifact@v4
