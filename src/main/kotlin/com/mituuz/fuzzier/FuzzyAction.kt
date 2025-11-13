@@ -66,6 +66,7 @@ abstract class FuzzyAction : AnAction() {
     protected lateinit var projectState: FuzzierSettingsService.State
     protected val globalState = service<FuzzierGlobalSettingsService>().state
     protected var defaultDoc: Document? = null
+    private val fileTypeManager = FileTypeManager.getInstance()
 
     @Volatile
     var currentTask: Future<*>? = null
@@ -230,7 +231,7 @@ abstract class FuzzyAction : AnAction() {
                     false -> container.getDisplayString(globalState)
                 }
 
-                val ft = FileTypeManager.getInstance().getFileTypeByFileName(container.filename)
+                val ft = fileTypeManager.getFileTypeByFileName(container.filename)
                 val icon = ft.icon ?: AllIcons.FileTypes.Unknown
                 renderer.icon = icon
 
