@@ -26,6 +26,7 @@ package com.mituuz.fuzzier
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
+import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
@@ -166,6 +167,21 @@ class FuzzyActionTest {
         val component = renderer.getListCellRendererComponent(dummyList, container, 0, false, false) as JLabel
         assertNotNull(component)
         assertEquals("/src/asd", component.text)
+    }
+
+    @Test
+    fun `Check renderer icon for different file types`() {
+        val action = getAction()
+        action.setFiletype(FILENAME_ONLY)
+        action.component = SimpleFinderComponent()
+        action.component.isDirSelector = true
+        val renderer = action.getCellRenderer()
+        val dummyList = JList<FuzzyMatchContainer>()
+        val container = FuzzyMatchContainer(FuzzyScore(), "/src/asd", "asd.kt", "")
+        val expectedIcon = FileTypeManager.getInstance().getFileTypeByFileName("asd.kt").icon
+        val component = renderer.getListCellRendererComponent(dummyList, container, 0, false, false) as JLabel
+        assertNotNull(component.icon)
+        assertEquals(expectedIcon, component.icon)
     }
 
     private fun getAction(): FuzzyAction {
