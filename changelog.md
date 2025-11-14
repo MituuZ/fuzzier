@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 1.13.0
+
+- Update dependencies
+- Add file icons to the list renderer
+    - Thanks to [jspmarc](https://github.com/jspmarc) for implementing this
+
 ## Version 1.12.0
 
 - Add keybindings for CTRL + D/U for half page down/up scroll for the preview
