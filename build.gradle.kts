@@ -27,7 +27,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 // Use the same version and group for the jar and the plugin
-val currentVersion = "1.12.0"
+val currentVersion = "1.13.0"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -40,7 +40,11 @@ intellijPlatform {
         changeNotes = """
     <h2>Version $currentVersion</h2>
     <ul>
-      <li>Add keybindings for CTRL + D/U for half page down/up scroll for the preview</li>
+      <li>Update dependencies</li>
+      <li>Add file icons to the list renderer</li>
+        <ul>
+          <li>Huge thanks to <a href="https://github.com/jspmarc">jspmarc</a> for this!</li>
+        </ul>
     </ul>
     """.trimIndent()
 

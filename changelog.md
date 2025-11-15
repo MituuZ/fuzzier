@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 1.13.0
+
+- Update dependencies
+- Add file icons to the list renderer
+  - Huge thanks to [jspmarc](https://github.com/jspmarc) for this!
+
 ## Version 1.12.0
 
 - Add keybindings for CTRL + D/U for half page down/up scroll for the preview
@@ -15,9 +21,9 @@
 ## Version 1.10.0
 
 - Add an option to load full file contents in the FuzzyGrep preview window
-    - Uses full highlighting
-    - On by default
-    - Thanks to [givemeurhats](https://github.com/givemeurhats) for highlighting this issue
+  - Uses full highlighting
+  - On by default
+  - Thanks to [givemeurhats](https://github.com/givemeurhats) for highlighting this issue
 - Update IntelliJ platform plugin to 2.7.2
 - Update Gradle to 9.0.0
 
@@ -45,7 +51,7 @@
 ## Version 1.8.0
 
 - Improve FuzzyGrep process handling for consistent behavior
-    - Huge thanks to [jspmarc](https://github.com/jspmarc) for this
+  - Huge thanks to [jspmarc](https://github.com/jspmarc) for this
 - Update IntelliJ platform plugin to 2.5.0
 
 ## Version 1.7.1
@@ -60,21 +66,21 @@
 
 - Update gradle and plugins
 - Improve FuzzyGrep PATH handling by using GeneralCommandline
-    - Thanks to [gymynnym](https://github.com/gymynnym) for finding the issue and the solution
+  - Thanks to [gymynnym](https://github.com/gymynnym) for finding the issue and the solution
 - Indicate which command FuzzyGrep is running
 
 ## Version 1.6.0
 
 - Introduce the first, experimental version of Fuzzy Grep
-    - Call [ripgrep](https://github.com/BurntSushi/ripgrep) in the background
-    - Attempt to fall back to `grep` or `findstr` if rg is not found
+  - Call [ripgrep](https://github.com/BurntSushi/ripgrep) in the background
+  - Attempt to fall back to `grep` or `findstr` if rg is not found
 
 ## Version 1.5.0
 
 - Allow configuring the default finder popup size
 - Fix a bug where the correct dimension key wasn't used
 - Enable changing the search field location on the popup
-    - Top, bottom, left and right
+  - Top, bottom, left and right
 - Improve mover popup's default size
 
 ## Version 1.4.2
@@ -102,7 +108,7 @@
 
 - Make popup dimensions persistent across projects
 - Improve popup location consistency (fixes right screen, left half issue)
-    - Popup dimensions are saved per screen bounds (location and size)
+  - Popup dimensions are saved per screen bounds (location and size)
 - Update kotlin-jvm and intellij-platform plugins to 2.1.0
 
 ## Version 1.1.1
@@ -175,10 +181,10 @@
 ## Version 0.20.0
 
 - Score calculation rewrite
-    - Upgraded and made more transparent
-    - Each individual score for each file can be seen in the test bench
+  - Upgraded and made more transparent
+  - Each individual score for each file can be seen in the test bench
 - Multi match correction
-    - Correctly calculates each occurrence of unique search string characters in the filepath
+  - Correctly calculates each occurrence of unique search string characters in the filepath
 - Introduced filename match weight
 - Set up automated publishing to marketplace from GitHub on new tags
 
@@ -190,9 +196,9 @@
 
 - Create changelog.md
 - Add Fuzzy search only for VCS tracked files (FuzzierVCS)
-    - Huge thanks to [ramonvermeulen](https://github.com/ramonvermeulen) for implementing this feature
+  - Huge thanks to [ramonvermeulen](https://github.com/ramonvermeulen) for implementing this feature
 - Change versioning scheme to more clearly indicate development status
-    - Version 0.19.0 is the first release under the new scheme
+  - Version 0.19.0 is the first release under the new scheme
 
 ## Earlier Versions
 
