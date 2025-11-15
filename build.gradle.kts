@@ -43,7 +43,7 @@ intellijPlatform {
       <li>Update dependencies</li>
       <li>Add file icons to the list renderer</li>
         <ul>
-          <li>Thanks to [jspmarc](https://github.com/jspmarc) for implementing this</li>
+          <li>Huge thanks to [jspmarc](https://github.com/jspmarc) for this!</li>
         </ul>
     </ul>
     """.trimIndent()
