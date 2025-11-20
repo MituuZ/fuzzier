@@ -33,9 +33,9 @@ Double-clicking a list item opens the file
 
 When focused on the search field, you can use:
 
-- Arrow keys to move up and down
-- CTRL + j to move down (modifiable through keymap)
-- CTRL + k to move up (modifiable through keymap)
+- Arrow keys to move the list selection up and down
+- CTRL + k/j to move the list selection up/down (modifiable through keymap)
+- CTRL + u/d to move the file preview half page up/down
 - Enter to open the currently selected file
 
 List movement can be remapped from settings -> keymaps, but do not support chorded shortcuts.
@@ -45,7 +45,7 @@ List movement can be remapped from settings -> keymaps, but do not support chord
 - Fuzzy file finder
     - Search all except excluded files
     - Search only from VCS-tracked files
-- Text search by leveraging [ripgrep](https://github.com/BurntSushi/ripgrep), grep or findstr
+- Text search leveraging [ripgrep](https://github.com/BurntSushi/ripgrep "Link to GitHub - ripgrep"), grep or findstr
     - With file globbing support for ripgrep
 - File mover
 
