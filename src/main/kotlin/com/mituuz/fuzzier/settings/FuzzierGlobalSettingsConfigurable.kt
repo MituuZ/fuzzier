@@ -54,6 +54,9 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
         component.debounceTimerValue.getIntSpinner().value = state.debouncePeriod
         component.fileListLimit.getIntSpinner().value = state.fileListLimit
 
+        val combinedGlobalString = state.globalExclusionSet.joinToString("\n")
+        component.globalExclusionSet.getJBTextArea().text = combinedGlobalString
+
         component.filenameTypeSelector.getFilenameTypeComboBox().selectedIndex = state.filenameType.ordinal
         component.highlightFilename.getCheckBox().isSelected = state.highlightFilename
         component.fileListFontSize.getIntSpinner().value = state.fileListFontSize
@@ -72,6 +75,11 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
     }
 
     override fun isModified(): Boolean {
+        val newGlobalSet = component.globalExclusionSet.getJBTextArea().text
+            .split("\n")
+            .filter { it.isNotBlank() }
+            .toSet()
+
         return state.newTab != component.newTabSelect.getCheckBox().isSelected
                 || state.recentFilesMode != component.recentFileModeSelector.getRecentFilesTypeComboBox().selectedItem
                 || state.defaultPopupHeight != component.defaultDimension.getIntSpinner(4).value
@@ -94,6 +102,7 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
                 || state.matchWeightSingleChar != component.matchWeightSingleChar.getIntSpinner().value
                 || state.matchWeightStreakModifier != component.matchWeightStreakModifier.getIntSpinner().value
                 || state.matchWeightFilename != component.matchWeightFilename.getIntSpinner().value
+                || state.globalExclusionSet != newGlobalSet
     }
 
     override fun apply() {
@@ -135,6 +144,12 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
         state.matchWeightSingleChar = component.matchWeightSingleChar.getIntSpinner().value as Int
         state.matchWeightStreakModifier = component.matchWeightStreakModifier.getIntSpinner().value as Int
         state.matchWeightFilename = component.matchWeightFilename.getIntSpinner().value as Int
+
+        val newGlobalSet = component.globalExclusionSet.getJBTextArea().text
+            .split("\n")
+            .filter { it.isNotBlank() }
+            .toSet()
+        state.globalExclusionSet = newGlobalSet
     }
 
     override fun disposeUIResources() {
