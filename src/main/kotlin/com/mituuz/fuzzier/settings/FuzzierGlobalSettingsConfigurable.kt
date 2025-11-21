@@ -55,7 +55,7 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
         component.fileListLimit.getIntSpinner().value = state.fileListLimit
 
         val combinedGlobalString = state.globalExclusionSet.joinToString("\n")
-        component.globalExclusionSet.getJBTextArea().text = combinedGlobalString
+        component.globalExclusionTextArea.text = combinedGlobalString
 
         component.filenameTypeSelector.getFilenameTypeComboBox().selectedIndex = state.filenameType.ordinal
         component.highlightFilename.getCheckBox().isSelected = state.highlightFilename
@@ -75,7 +75,7 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
     }
 
     override fun isModified(): Boolean {
-        val newGlobalSet = component.globalExclusionSet.getJBTextArea().text
+        val newGlobalSet = component.globalExclusionTextArea.text
             .split("\n")
             .filter { it.isNotBlank() }
             .toSet()
@@ -145,7 +145,7 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
         state.matchWeightStreakModifier = component.matchWeightStreakModifier.getIntSpinner().value as Int
         state.matchWeightFilename = component.matchWeightFilename.getIntSpinner().value as Int
 
-        val newGlobalSet = component.globalExclusionSet.getJBTextArea().text
+        val newGlobalSet = component.globalExclusionTextArea.text
             .split("\n")
             .filter { it.isNotBlank() }
             .toSet()

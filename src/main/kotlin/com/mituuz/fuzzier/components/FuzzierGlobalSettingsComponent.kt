@@ -31,6 +31,7 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
+import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.FormBuilder
 import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
@@ -95,8 +96,14 @@ class FuzzierGlobalSettingsComponent(
         false
     )
 
+    val globalExclusionTextArea: JBTextArea = JBTextArea().apply {
+        rows = 5
+        lineWrap = true
+        wrapStyleWord = true
+    }
+
     val globalExclusionSet = SettingsComponent(
-        JBTextArea(), "Global file path exclusions",
+        JBScrollPane(globalExclusionTextArea), "Global file path exclusions",
         """
             Global exclusions apply to Fuzzier search and FuzzyMover across all projects. One line per exclusion.<br><br>
             Empty lines are skipped and all files in the project root start with "/"<br><br>
@@ -323,7 +330,7 @@ class FuzzierGlobalSettingsComponent(
 
 
     private fun setupComponents() {
-        globalExclusionSet.component.border = LineBorder(JBColor.BLACK, 1)
+        globalExclusionTextArea.border = LineBorder(JBColor.BLACK, 1)
         multiMatchActive.getCheckBox().addChangeListener {
             matchWeightSingleChar.getIntSpinner().isEnabled = multiMatchActive.getCheckBox().isSelected
         }
