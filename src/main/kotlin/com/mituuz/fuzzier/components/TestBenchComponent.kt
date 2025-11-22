@@ -136,8 +136,20 @@ class TestBenchComponent : JPanel(), Disposable {
             return
         }
 
+        // Use live settings from the component (unsaved UI state) so changes are reflected immediately
+        val liveGlobalExclusions = liveSettingsComponent.globalExclusionTextArea.text
+            .lines()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .toSet()
+
+        val combinedExclusions = buildSet {
+            addAll(projectState.exclusionSet)
+            addAll(liveGlobalExclusions)
+        }
+
         val stringEvaluator = StringEvaluator(
-            projectState.exclusionSet,
+            combinedExclusions,
             project.service<FuzzierSettingsService>().state.modules
         )
 
@@ -193,6 +205,7 @@ class TestBenchComponent : JPanel(), Disposable {
         scoreCalculator.setMatchWeightStreakModifier(liveSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int)
         scoreCalculator.setMatchWeightPartialPath(liveSettingsComponent.matchWeightPartialPath.getIntSpinner().value as Int)
         scoreCalculator.setFilenameMatchWeight(liveSettingsComponent.matchWeightFilename.getIntSpinner().value as Int)
+        scoreCalculator.setTolerance(liveSettingsComponent.tolerance.getIntSpinner().value as Int)
         ProjectFileIndex.getInstance(project).iterateContent(contentIterator)
     }
 
@@ -211,6 +224,7 @@ class TestBenchComponent : JPanel(), Disposable {
             scoreCalculator.setMatchWeightStreakModifier(liveSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int)
             scoreCalculator.setMatchWeightPartialPath(liveSettingsComponent.matchWeightPartialPath.getIntSpinner().value as Int)
             scoreCalculator.setFilenameMatchWeight(liveSettingsComponent.matchWeightFilename.getIntSpinner().value as Int)
+            scoreCalculator.setTolerance(liveSettingsComponent.tolerance.getIntSpinner().value as Int)
 
             moduleFileIndex.iterateContent(contentIterator)
         }
