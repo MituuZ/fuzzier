@@ -34,7 +34,7 @@ import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode
 import javax.swing.JComponent
 
 class FuzzierGlobalSettingsConfigurable : Configurable {
-    private lateinit var component: FuzzierGlobalSettingsComponent
+    internal lateinit var component: FuzzierGlobalSettingsComponent
     private var state = service<FuzzierGlobalSettingsService>().state
     private var uiDisposable: Disposable? = null
 
