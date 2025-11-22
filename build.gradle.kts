@@ -27,7 +27,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 // Use the same version and group for the jar and the plugin
-val currentVersion = "1.13.0"
+val currentVersion = "1.14.0"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -40,10 +40,9 @@ intellijPlatform {
         changeNotes = """
     <h2>Version $currentVersion</h2>
     <ul>
-      <li>Update dependencies</li>
-      <li>Add file icons to the list renderer</li>
+      <li>Add a global exclusion list for convenience when working with multiple projects</li>
         <ul>
-          <li>Huge thanks to <a href="https://github.com/jspmarc">jspmarc</a> for this!</li>
+          <li>Combined with the project exclusions at runtime</li>
         </ul>
     </ul>
     """.trimIndent()

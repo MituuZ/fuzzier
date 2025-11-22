@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 1.14.0
+
+- Add a global exclusion list for convenience when working with multiple projects
+  - Combined with the project exclusions at runtime
+
 ## Version 1.13.0
 
 - Update dependencies
