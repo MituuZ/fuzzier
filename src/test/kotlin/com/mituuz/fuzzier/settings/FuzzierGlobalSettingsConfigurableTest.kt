@@ -203,7 +203,7 @@ class FuzzierGlobalSettingsConfigurableTest {
 
         settingsConfigurable.apply()
 
-        assertEquals(setOf("/foo", "/bar", "   /baz  "), state.globalExclusionSet)
+        assertEquals(setOf("/foo", "/bar", "/baz"), state.globalExclusionSet)
         assertFalse(settingsConfigurable.isModified)
     }
 

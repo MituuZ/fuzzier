@@ -76,8 +76,9 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
 
     override fun isModified(): Boolean {
         val newGlobalSet = component.globalExclusionTextArea.text
-            .split("\n")
-            .filter { it.isNotBlank() }
+            .lines()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
             .toSet()
 
         return state.newTab != component.newTabSelect.getCheckBox().isSelected
@@ -146,8 +147,9 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
         state.matchWeightFilename = component.matchWeightFilename.getIntSpinner().value as Int
 
         val newGlobalSet = component.globalExclusionTextArea.text
-            .split("\n")
-            .filter { it.isNotBlank() }
+            .lines()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
             .toSet()
         state.globalExclusionSet = newGlobalSet
     }

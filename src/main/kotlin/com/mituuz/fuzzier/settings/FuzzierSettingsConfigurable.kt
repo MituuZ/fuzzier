@@ -69,8 +69,9 @@ class FuzzierSettingsConfigurable(project: Project) : Configurable {
 
     override fun isModified(): Boolean {
         val newSet = component.exclusionSet.getJBTextArea().text
-            .split("\n")
-            .filter { it.isNotBlank() }
+            .lines()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
             .toSet()
 
         return state.exclusionSet != newSet
@@ -79,8 +80,9 @@ class FuzzierSettingsConfigurable(project: Project) : Configurable {
 
     override fun apply() {
         val newSet = component.exclusionSet.getJBTextArea().text
-            .split("\n")
-            .filter { it.isNotBlank() }
+            .lines()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
             .toSet()
         state.exclusionSet = newSet as MutableSet<String>
         state.ignoredCharacters = component.ignoredCharacters.getJBTextField().text
