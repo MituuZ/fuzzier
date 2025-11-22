@@ -25,13 +25,14 @@ package com.mituuz.fuzzier.settings
 
 import com.intellij.openapi.components.service
 import com.intellij.testFramework.TestApplicationManager
+import com.intellij.ui.components.JBTextArea
+import com.mituuz.fuzzier.components.FuzzierGlobalSettingsComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType.FILENAME_ONLY
 import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType.FILENAME_WITH_PATH_STYLED
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode.NONE
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode.RECENT_PROJECT_FILES
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.SearchPosition.TOP
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -185,6 +186,28 @@ class FuzzierGlobalSettingsConfigurableTest {
     }
 
     @Test
+    fun globalExclusionSet_textIsPopulatedFromState() {
+        state.globalExclusionSet = setOf("/foo", "/bar")
+        pre()
+        val textArea = getGlobalExclusionTextArea()
+        val lines = textArea.text.split("\n").filter { it.isNotBlank() }.toSet()
+        assertEquals(state.globalExclusionSet, lines)
+    }
+
+    @Test
+    fun globalExclusionSet_parsesTextToSetOnApply() {
+        pre()
+        val textArea = getGlobalExclusionTextArea()
+        textArea.text = "/foo\n\n/bar\n/bar\n   /baz  \n\n"
+        assertTrue(settingsConfigurable.isModified)
+
+        settingsConfigurable.apply()
+
+        assertEquals(setOf("/foo", "/bar", "   /baz  "), state.globalExclusionSet)
+        assertFalse(settingsConfigurable.isModified)
+    }
+
+    @Test
     fun dimensionKeyWidth() {
         pre()
         state.defaultPopupWidth = 400
@@ -215,5 +238,12 @@ class FuzzierGlobalSettingsConfigurableTest {
         settingsConfigurable.createComponent()
         assertFalse(settingsConfigurable.isModified)
         assertFalse(state.resetWindow)
+    }
+
+    private fun getGlobalExclusionTextArea(): JBTextArea {
+        val componentField = FuzzierGlobalSettingsConfigurable::class.java.getDeclaredField("component")
+        componentField.isAccessible = true
+        val componentInstance = componentField.get(settingsConfigurable) as FuzzierGlobalSettingsComponent
+        return componentInstance.globalExclusionTextArea
     }
 }
