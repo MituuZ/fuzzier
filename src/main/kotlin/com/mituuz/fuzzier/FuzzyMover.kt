@@ -218,8 +218,12 @@ class FuzzyMover : FuzzyAction() {
     }
 
     private fun getStringEvaluator(): StringEvaluator {
+        val combinedExclusions = buildSet {
+            addAll(projectState.exclusionSet)
+            addAll(globalState.globalExclusionSet)
+        }
         return StringEvaluator(
-            projectState.exclusionSet,
+            combinedExclusions,
             projectState.modules
         )
     }

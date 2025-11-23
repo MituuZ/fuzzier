@@ -42,6 +42,8 @@ class FuzzierSettingsComponent {
             Empty lines are skipped and all files in the project root start with "/"<br><br>
             Supports wildcards (*) for starts with and ends with. Defaults to contains if no wildcards are present.<br><br>
             e.g. "kt" excludes all files/file paths that contain the "kt" string. (main.<strong>kt</strong>, <strong>kt</strong>lin.java)
+            <br><br>
+            <strong>Warning:</strong> Using "*" or "/" will match all files in the project.
     """.trimIndent())
 
     val ignoredCharacters = SettingsComponent(JBTextField(), "Ignored characters",

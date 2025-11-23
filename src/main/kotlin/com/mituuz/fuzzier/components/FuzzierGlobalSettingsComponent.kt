@@ -27,9 +27,12 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.service
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.util.Disposer
+import com.intellij.ui.JBColor
 import com.intellij.ui.JBIntSpinner
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
+import com.intellij.ui.components.JBScrollPane
+import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.FormBuilder
 import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
@@ -37,6 +40,7 @@ import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.SearchPosition
 import java.awt.Component
 import javax.swing.*
+import javax.swing.border.LineBorder
 
 class FuzzierGlobalSettingsComponent(
     val disposable: Disposable,
@@ -88,6 +92,25 @@ class FuzzierGlobalSettingsComponent(
             
             Disabling this option may improve performance on very large files, 
             for small-to-medium files the performance impact is negligible.
+        """.trimIndent(),
+        false
+    )
+
+    val globalExclusionTextArea: JBTextArea = JBTextArea().apply {
+        rows = 5
+        lineWrap = true
+        wrapStyleWord = true
+    }
+
+    val globalExclusionSet = SettingsComponent(
+        JBScrollPane(globalExclusionTextArea), "Global file path exclusions",
+        """
+            Global exclusions apply to Fuzzier search and FuzzyMover across all projects. One line per exclusion.<br><br>
+            Empty lines are skipped and all files in the project root start with "/"<br><br>
+            Supports wildcards (*) for starts with and ends with. Defaults to contains if no wildcards are present.<br><br>
+            e.g. "kt" excludes all files/file paths that contain the "kt" string. (main.<strong>kt</strong>, <strong>kt</strong>lin.java)
+            <br><br>
+            <strong>Warning:</strong> Using "*" or "/" will match all files in the project.
         """.trimIndent(),
         false
     )
@@ -273,6 +296,7 @@ class FuzzierGlobalSettingsComponent(
             .addComponent(debounceTimerValue)
             .addComponent(fileListLimit)
             .addComponent(fuzzyGrepShowFullFile)
+            .addComponent(globalExclusionSet)
 
             .addSeparator()
             .addComponent(JBLabel("<html><h2>Popup styling</h2></html>"))
@@ -308,6 +332,7 @@ class FuzzierGlobalSettingsComponent(
 
 
     private fun setupComponents() {
+        globalExclusionTextArea.border = LineBorder(JBColor.BLACK, 1)
         multiMatchActive.getCheckBox().addChangeListener {
             matchWeightSingleChar.getIntSpinner().isEnabled = multiMatchActive.getCheckBox().isSelected
         }

@@ -30,8 +30,7 @@ import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType.FILENAME_WITH_PAT
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode.NONE
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode.RECENT_PROJECT_FILES
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.SearchPosition.TOP
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -182,6 +181,28 @@ class FuzzierGlobalSettingsConfigurableTest {
         pre()
         state.matchWeightFilename = 16
         assertTrue(settingsConfigurable.isModified)
+    }
+
+    @Test
+    fun globalExclusionSet_textIsPopulatedFromState() {
+        state.globalExclusionSet = setOf("/foo", "/bar")
+        pre()
+        val textArea = settingsConfigurable.component.globalExclusionTextArea
+        val lines = textArea.text.split("\n").filter { it.isNotBlank() }.toSet()
+        assertEquals(state.globalExclusionSet, lines)
+    }
+
+    @Test
+    fun globalExclusionSet_parsesTextToSetOnApply() {
+        pre()
+        val textArea = settingsConfigurable.component.globalExclusionTextArea
+        textArea.text = "/foo\n\n/bar\n/bar\n   /baz  \n\n"
+        assertTrue(settingsConfigurable.isModified)
+
+        settingsConfigurable.apply()
+
+        assertEquals(setOf("/foo", "/bar", "/baz"), state.globalExclusionSet)
+        assertFalse(settingsConfigurable.isModified)
     }
 
     @Test

@@ -62,6 +62,8 @@ class FuzzierGlobalSettingsService : PersistentStateComponent<FuzzierGlobalSetti
         var resetWindow = false
         var fileListLimit: Int = 50
 
+        var globalExclusionSet: Set<String> = emptySet()
+
         var tolerance = 0
         var multiMatch = false
         var matchWeightPartialPath = 10
