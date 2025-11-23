@@ -59,6 +59,7 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
 
         component.filenameTypeSelector.getFilenameTypeComboBox().selectedIndex = state.filenameType.ordinal
         component.highlightFilename.getCheckBox().isSelected = state.highlightFilename
+        component.fileListUseEditorFont.getCheckBox().isSelected = state.fileListUseEditorFont
         component.fileListFontSize.getIntSpinner().value = state.fileListFontSize
         component.previewFontSize.getIntSpinner().value = state.previewFontSize
         component.fileListSpacing.getIntSpinner().value = state.fileListSpacing
@@ -92,6 +93,7 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
 
                 || state.filenameType != component.filenameTypeSelector.getFilenameTypeComboBox().selectedItem
                 || state.highlightFilename != component.highlightFilename.getCheckBox().isSelected
+                || state.fileListUseEditorFont != component.fileListUseEditorFont.getCheckBox().isSelected
                 || state.fileListFontSize != component.fileListFontSize.getIntSpinner().value
                 || state.previewFontSize != component.previewFontSize.getIntSpinner().value
                 || state.fileListSpacing != component.fileListSpacing.getIntSpinner().value
@@ -134,6 +136,7 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
         state.filenameType =
             FilenameType.entries.toTypedArray()[component.filenameTypeSelector.getFilenameTypeComboBox().selectedIndex]
         state.highlightFilename = component.highlightFilename.getCheckBox().isSelected
+        state.fileListUseEditorFont = component.fileListUseEditorFont.getCheckBox().isSelected
         state.fileListFontSize = component.fileListFontSize.getIntSpinner().value as Int
         state.previewFontSize = component.previewFontSize.getIntSpinner().value as Int
         state.fileListSpacing = component.fileListSpacing.getIntSpinner().value as Int
