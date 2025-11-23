@@ -271,12 +271,10 @@ private fun JLabel.updateStyling(globalState: FuzzierGlobalSettingsService.State
     }
 
     val fileListFontSize = globalState.fileListFontSize
-    val fileListFont = if (globalState.fileListUseEditorFont) {
-        EditorColorsManager.getInstance().globalScheme.editorFontName
+    val fileListFontName = if (globalState.fileListUseEditorFont) {
+        EditorColorsManager.getInstance().globalScheme.editorFontName.takeIf { !it.isNullOrBlank() }
     } else {
         this.font.name
-    }
-    globalState.fileListFontSize.let {
-        this.font = Font(fileListFont, Font.PLAIN, fileListFontSize)
-    }
+    } ?: this.font.name
+    this.font = Font(fileListFontName, Font.PLAIN, fileListFontSize)
 }
