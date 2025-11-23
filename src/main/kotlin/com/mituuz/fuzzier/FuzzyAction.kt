@@ -54,6 +54,7 @@ import java.awt.Font
 import java.awt.event.ActionEvent
 import java.util.*
 import java.util.Timer
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Future
 import javax.swing.*
 import kotlin.concurrent.schedule
@@ -276,5 +277,12 @@ private fun JLabel.updateStyling(globalState: FuzzierGlobalSettingsService.State
     } else {
         this.font.name
     } ?: this.font.name
-    this.font = Font(fileListFontName, Font.PLAIN, fileListFontSize)
+
+    val cacheKey = fileListFontName to fileListFontSize
+    val cachedFont = FONT_CACHE[cacheKey]
+        ?: Font(fileListFontName, Font.PLAIN, fileListFontSize).also { FONT_CACHE[cacheKey] = it }
+    this.font = cachedFont
 }
+
+// Font cache used by updateStyling. Keyed by Pair(fontName, size).
+private val FONT_CACHE: MutableMap<Pair<String, Int>, Font> = ConcurrentHashMap()
