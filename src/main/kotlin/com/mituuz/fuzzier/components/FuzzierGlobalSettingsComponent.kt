@@ -201,6 +201,12 @@ class FuzzierGlobalSettingsComponent(
         false
     )
 
+    val fileListUseEditorFont = SettingsComponent(
+        JBCheckBox(), "File list use editor font",
+        "If disabled, the file list will use the IDE's default font. Defaults to editor font.",
+        false
+    )
+
     val fileListSpacing = SettingsComponent(
         JBIntSpinner(0, 0, 10), "File list vertical spacing",
         """
@@ -305,6 +311,7 @@ class FuzzierGlobalSettingsComponent(
             .addComponent(searchPosition)
             .addComponent(defaultDimension)
             .addComponent(previewFontSize)
+            .addComponent(fileListUseEditorFont)
             .addComponent(fileListFontSize)
             .addComponent(fileListSpacing)
 

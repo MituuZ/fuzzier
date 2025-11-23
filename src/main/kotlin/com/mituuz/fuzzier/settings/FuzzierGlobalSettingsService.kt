@@ -51,6 +51,7 @@ class FuzzierGlobalSettingsService : PersistentStateComponent<FuzzierGlobalSetti
         var recentFilesMode: RecentFilesMode = RecentFilesMode.RECENT_PROJECT_FILES
         var filenameType: FilenameType = FILE_PATH_ONLY
         var highlightFilename = false
+        var fileListUseEditorFont = true
         var fileListFontSize = 14
         var previewFontSize = 0
         var fileListSpacing = 0

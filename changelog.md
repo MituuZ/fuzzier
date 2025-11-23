@@ -4,6 +4,8 @@
 
 - Add a global exclusion list for convenience when working with multiple projects
   - Combined with the project exclusions at runtime
+- Add an option to use the editor font on the file list
+  - Defaults to true
 
 ## Version 1.13.0
 

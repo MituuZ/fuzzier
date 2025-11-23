@@ -44,6 +44,10 @@ intellijPlatform {
         <ul>
           <li>Combined with the project exclusions at runtime</li>
         </ul>
+      <li>Add an option to use the editor font on the file list</li>
+        <ul>
+          <li>Defaults to true</li>
+        </ul>
     </ul>
     """.trimIndent()
 

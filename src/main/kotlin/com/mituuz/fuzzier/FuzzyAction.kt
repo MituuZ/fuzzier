@@ -31,8 +31,10 @@ import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorActionHandler
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
+import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
+import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.keymap.KeymapManager
 import com.intellij.openapi.project.Project
@@ -48,9 +50,11 @@ import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.util.FuzzierUtil
 import com.mituuz.fuzzier.util.FuzzierUtil.Companion.createDimensionKey
 import java.awt.Component
+import java.awt.Font
 import java.awt.event.ActionEvent
 import java.util.*
 import java.util.Timer
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Future
 import javax.swing.*
 import kotlin.concurrent.schedule
@@ -164,7 +168,10 @@ abstract class FuzzyAction : AnAction() {
 
         document.addDocumentListener(listener, popup)
         // Also listen to changes in the secondary search field (if present)
-        (component as? com.mituuz.fuzzier.components.FuzzyFinderComponent)?.addSecondaryDocumentListener(listener, popup)
+        (component as? com.mituuz.fuzzier.components.FuzzyFinderComponent)?.addSecondaryDocumentListener(
+            listener,
+            popup
+        )
     }
 
     abstract fun updateListContents(project: Project, searchString: String)
@@ -232,15 +239,7 @@ abstract class FuzzyAction : AnAction() {
                 }
 
                 val ft = fileTypeManager.getFileTypeByFileName(container.filename)
-                val icon = ft.icon ?: AllIcons.FileTypes.Unknown
-                renderer.icon = icon
-
-                globalState.fileListSpacing.let {
-                    renderer.border = BorderFactory.createEmptyBorder(it, 0, it, 0)
-                }
-                globalState.fileListFontSize.let {
-                    renderer.font = renderer.font.deriveFont(it.toFloat())
-                }
+                renderer.updateStyling(globalState, ft)
                 return renderer
             }
         }
@@ -255,3 +254,35 @@ abstract class FuzzyAction : AnAction() {
         globalState.highlightFilename = highlight
     }
 }
+
+/**
+ * Updates the styling of a JLabel based on the provided global state and file type.
+ *
+ * @param globalState The global settings state that includes properties such as font size,
+ *                    font choice, and spacing for file list elements.
+ * @param ft The file type whose associated icon is used for the JLabel. If the file type does not
+ *           have an icon, a default icon is used instead.
+ */
+private fun JLabel.updateStyling(globalState: FuzzierGlobalSettingsService.State, ft: FileType) {
+    val icon = ft.icon ?: AllIcons.FileTypes.Unknown
+    this.icon = icon
+
+    globalState.fileListSpacing.let {
+        this.border = BorderFactory.createEmptyBorder(it, 0, it, 0)
+    }
+
+    val fileListFontSize = globalState.fileListFontSize
+    val fileListFontName = if (globalState.fileListUseEditorFont) {
+        EditorColorsManager.getInstance().globalScheme.editorFontName.takeIf { !it.isNullOrBlank() }
+    } else {
+        this.font.name
+    } ?: this.font.name
+
+    val cacheKey = fileListFontName to fileListFontSize
+    val cachedFont = FONT_CACHE[cacheKey]
+        ?: Font(fileListFontName, Font.PLAIN, fileListFontSize).also { FONT_CACHE[cacheKey] = it }
+    this.font = cachedFont
+}
+
+// Font cache used by updateStyling. Keyed by Pair(fontName, size).
+private val FONT_CACHE: MutableMap<Pair<String, Int>, Font> = ConcurrentHashMap()
