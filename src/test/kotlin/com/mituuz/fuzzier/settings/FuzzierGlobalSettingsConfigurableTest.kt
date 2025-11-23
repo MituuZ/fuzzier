@@ -114,6 +114,28 @@ class FuzzierGlobalSettingsConfigurableTest {
     }
 
     @Test
+    fun fileListUseEditorFont_isPopulatedFromState() {
+        state.fileListUseEditorFont = true
+        pre()
+        assertTrue(settingsConfigurable.component.fileListUseEditorFont.getCheckBox().isSelected)
+    }
+
+    @Test
+    fun fileListUseEditorFont_isModifiedAndApply() {
+        pre()
+        state.fileListUseEditorFont = !state.fileListUseEditorFont
+        assertTrue(settingsConfigurable.isModified)
+
+        // Applying should copy the UI value back to state and clear the modification flag
+        settingsConfigurable.apply()
+        assertEquals(
+            settingsConfigurable.component.fileListUseEditorFont.getCheckBox().isSelected,
+            state.fileListUseEditorFont
+        )
+        assertFalse(settingsConfigurable.isModified)
+    }
+
+    @Test
     fun fileListFontSize() {
         pre()
         state.fileListFontSize = 16
