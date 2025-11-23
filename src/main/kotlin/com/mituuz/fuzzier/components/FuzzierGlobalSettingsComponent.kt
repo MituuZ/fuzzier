@@ -203,7 +203,7 @@ class FuzzierGlobalSettingsComponent(
 
     val fileListUseEditorFont = SettingsComponent(
         JBCheckBox(), "File list use editor font",
-        "If enabled, the file list will use the same font family as the editor.",
+        "If disabled, the file list will use the IDE's default font. Defaults to editor font.",
         false
     )
 
