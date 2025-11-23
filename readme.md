@@ -34,7 +34,7 @@ Double-clicking a list item opens the file
 When focused on the search field, you can use:
 
 - Arrow keys to move the list selection up and down
-- CTRL + k/j to move the list selection up/down (modifiable through keymap)
+- CTRL + p/n to move the list selection up/down (modifiable through keymap)
 - CTRL + u/d to move the file preview half page up/down
 - Enter to open the currently selected file
 
@@ -76,7 +76,7 @@ map <Leader>ff <action>(com.mituuz.fuzzier.FuzzyGrepCaseInsensitive)
 
 ## Installation
 
-The plugin can be installed from the [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/23451-fuzzier)
+The plugin can be installed from the [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/23451-fuzzier "Link to the JetBrains Marketplace - Fuzzier")
 
 ## Contact
 
