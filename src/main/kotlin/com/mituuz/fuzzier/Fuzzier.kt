@@ -152,15 +152,15 @@ open class Fuzzier : FuzzyAction() {
                 var listModel = DefaultListModel<FuzzyContainer>()
 
                 val stringEvaluator = getStringEvaluator()
-
                 if (task?.isCancelled == true) return@executeOnPooledThread
 
-                process(project, stringEvaluator, searchString, listModel, task)
+                val iterationFiles = collectIterationFiles(project, task)
+                if (task?.isCancelled == true) return@executeOnPooledThread
 
+                processFiles(iterationFiles, stringEvaluator, listModel, searchString, task)
                 if (task?.isCancelled == true) return@executeOnPooledThread
 
                 listModel = fuzzierUtil.sortAndLimit(listModel)
-
                 if (task?.isCancelled == true) return@executeOnPooledThread
 
                 ApplicationManager.getApplication().invokeLater {
@@ -202,10 +202,7 @@ open class Fuzzier : FuzzyAction() {
         )
     }
 
-    private fun process(
-        project: Project, stringEvaluator: StringEvaluator, searchString: String,
-        listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?
-    ) {
+    private fun collectIterationFiles(project: Project, task: Future<*>?): List<FuzzierUtil.IterationFile> {
         val indexTargets = if (projectState.isProject) {
             listOf(ProjectFileIndex.getInstance(project) to project.name)
         } else {
@@ -213,13 +210,11 @@ open class Fuzzier : FuzzyAction() {
             moduleManager.modules.map { it.rootManager.fileIndex to it.name }
         }
 
-        val iterationFiles = buildList {
+        return buildList {
             indexTargets.forEach { (fileIndex, moduleName) ->
                 FuzzierUtil.fileIndexToIterationFile(this, fileIndex, moduleName, task)
             }
         }
-
-        processFiles(iterationFiles, stringEvaluator, listModel, searchString, task)
     }
 
     /**
