@@ -207,30 +207,22 @@ open class Fuzzier : FuzzyAction() {
         listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?
     ) {
         val moduleManager = ModuleManager.getInstance(project)
+        val filesToIterate = ConcurrentHashMap.newKeySet<FuzzierUtil.IterationFile>()
+
         if (projectState.isProject) {
-            processProject(project, stringEvaluator, searchString, listModel, task)
+            FuzzierUtil.fileIndexToIterationFile(
+                filesToIterate,
+                ProjectFileIndex.getInstance(project),
+                project.name,
+                task
+            )
+            processFiles(filesToIterate, stringEvaluator, listModel, searchString, task)
         } else {
-            processModules(moduleManager, stringEvaluator, searchString, listModel, task)
+            for (module in moduleManager.modules) {
+                FuzzierUtil.fileIndexToIterationFile(filesToIterate, module.rootManager.fileIndex, module.name, task)
+            }
         }
-    }
 
-    private fun processProject(
-        project: Project, stringEvaluator: StringEvaluator,
-        searchString: String, listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?
-    ) {
-        val filesToIterate = ConcurrentHashMap.newKeySet<FuzzierUtil.IterationFile>()
-        FuzzierUtil.fileIndexToIterationFile(filesToIterate, ProjectFileIndex.getInstance(project), project.name, task)
-        processFiles(filesToIterate, stringEvaluator, listModel, searchString, task)
-    }
-
-    private fun processModules(
-        moduleManager: ModuleManager, stringEvaluator: StringEvaluator,
-        searchString: String, listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?
-    ) {
-        val filesToIterate = ConcurrentHashMap.newKeySet<FuzzierUtil.IterationFile>()
-        for (module in moduleManager.modules) {
-            FuzzierUtil.fileIndexToIterationFile(filesToIterate, module.rootManager.fileIndex, module.name, task)
-        }
         processFiles(filesToIterate, stringEvaluator, listModel, searchString, task)
     }
 
