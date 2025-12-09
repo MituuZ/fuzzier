@@ -206,20 +206,16 @@ open class Fuzzier : FuzzyAction() {
         project: Project, stringEvaluator: StringEvaluator, searchString: String,
         listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?
     ) {
-        val moduleManager = ModuleManager.getInstance(project)
-        val iterationFiles = mutableListOf<FuzzierUtil.IterationFile>()
-
-        if (projectState.isProject) {
-            FuzzierUtil.fileIndexToIterationFile(
-                iterationFiles,
-                ProjectFileIndex.getInstance(project),
-                project.name,
-                task
-            )
-            processFiles(iterationFiles, stringEvaluator, listModel, searchString, task)
+        val indexTargets = if (projectState.isProject) {
+            listOf(ProjectFileIndex.getInstance(project) to project.name)
         } else {
-            for (module in moduleManager.modules) {
-                FuzzierUtil.fileIndexToIterationFile(iterationFiles, module.rootManager.fileIndex, module.name, task)
+            val moduleManager = ModuleManager.getInstance(project)
+            moduleManager.modules.map { it.rootManager.fileIndex to it.name }
+        }
+
+        val iterationFiles = buildList {
+            indexTargets.forEach { (fileIndex, moduleName) ->
+                FuzzierUtil.fileIndexToIterationFile(this, fileIndex, moduleName, task)
             }
         }
 
