@@ -56,8 +56,18 @@ class FuzzierUtil {
             return "${baseDimensionKey}_${screenBounds.width}_${screenBounds.height}_${screenBounds.x}_${screenBounds.y}"
         }
 
+        /**
+         * Iterates through the content of a file index and adds matching files to the provided collection.
+         * This copies the file index state quickly to not block unnecessarily.
+         *
+         * @param iterationFiles a thread-safe `KeySetView` collection to hold the iteration results.
+         * @param fileIndex a `FileIndex` to iterate through its content.
+         * @param moduleName a string representing the name of the module associated with the files.
+         * @param task an optional `Future` instance to check for cancellation during iteration.
+         * @param isDir a boolean flag indicating whether to process directories (true) or files (false); defaults to false.
+         */
         fun fileIndexToIterationFile(
-            iterationFiles: ConcurrentHashMap.KeySetView<IterationFile, Boolean>,
+            iterationFiles: MutableList<IterationFile>,
             fileIndex: FileIndex, moduleName: String, task: Future<*>?,
             isDir: Boolean = false
         ) {

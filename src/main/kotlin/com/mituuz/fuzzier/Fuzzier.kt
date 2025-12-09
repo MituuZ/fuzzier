@@ -207,30 +207,30 @@ open class Fuzzier : FuzzyAction() {
         listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?
     ) {
         val moduleManager = ModuleManager.getInstance(project)
-        val filesToIterate = ConcurrentHashMap.newKeySet<FuzzierUtil.IterationFile>()
+        val iterationFiles = mutableListOf<FuzzierUtil.IterationFile>()
 
         if (projectState.isProject) {
             FuzzierUtil.fileIndexToIterationFile(
-                filesToIterate,
+                iterationFiles,
                 ProjectFileIndex.getInstance(project),
                 project.name,
                 task
             )
-            processFiles(filesToIterate, stringEvaluator, listModel, searchString, task)
+            processFiles(iterationFiles, stringEvaluator, listModel, searchString, task)
         } else {
             for (module in moduleManager.modules) {
-                FuzzierUtil.fileIndexToIterationFile(filesToIterate, module.rootManager.fileIndex, module.name, task)
+                FuzzierUtil.fileIndexToIterationFile(iterationFiles, module.rootManager.fileIndex, module.name, task)
             }
         }
 
-        processFiles(filesToIterate, stringEvaluator, listModel, searchString, task)
+        processFiles(iterationFiles, stringEvaluator, listModel, searchString, task)
     }
 
     /**
      * Processes a set of IterationFiles concurrently
      */
     private fun processFiles(
-        filesToIterate: ConcurrentHashMap.KeySetView<FuzzierUtil.IterationFile, Boolean>,
+        iterationFiles: List<FuzzierUtil.IterationFile>,
         stringEvaluator: StringEvaluator, listModel: DefaultListModel<FuzzyContainer>,
         searchString: String, task: Future<*>?
     ) {
@@ -238,7 +238,7 @@ open class Fuzzier : FuzzyAction() {
         val processedFiles = ConcurrentHashMap.newKeySet<String>()
         runBlocking {
             withContext(Dispatchers.IO) {
-                filesToIterate.forEach { iterationFile ->
+                iterationFiles.forEach { iterationFile ->
                     if (task?.isCancelled == true) return@forEach
                     if (processedFiles.add(iterationFile.file.path)) {
                         launch {
