@@ -43,6 +43,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.StringEvaluator
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode.*
 import com.mituuz.fuzzier.util.FuzzierUtil
@@ -56,8 +57,8 @@ import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Future
 import javax.swing.AbstractAction
 import javax.swing.DefaultListModel
@@ -150,7 +151,6 @@ open class Fuzzier : FuzzyAction() {
                 // Create a reference to the current task to check if it has been cancelled
                 val task = currentTask
                 component.fileList.setPaintBusy(true)
-                var listModel = DefaultListModel<FuzzyContainer>()
 
                 val stringEvaluator = getStringEvaluator()
                 if (task?.isCancelled == true) return@executeOnPooledThread
@@ -158,10 +158,7 @@ open class Fuzzier : FuzzyAction() {
                 val iterationFiles = collectIterationFiles(project, task)
                 if (task?.isCancelled == true) return@executeOnPooledThread
 
-                processFiles(iterationFiles, stringEvaluator, listModel, searchString, task)
-                if (task?.isCancelled == true) return@executeOnPooledThread
-
-                listModel = fuzzierUtil.sortAndLimit(listModel)
+                val listModel = processFiles(iterationFiles, stringEvaluator, searchString, task)
                 if (task?.isCancelled == true) return@executeOnPooledThread
 
                 ApplicationManager.getApplication().invokeLater {
@@ -223,12 +220,19 @@ open class Fuzzier : FuzzyAction() {
      */
     private fun processFiles(
         iterationFiles: List<FuzzierUtil.IterationFile>,
-        stringEvaluator: StringEvaluator, listModel: DefaultListModel<FuzzyContainer>,
+        stringEvaluator: StringEvaluator,
         searchString: String, task: Future<*>?
-    ) {
+    ): DefaultListModel<FuzzyContainer> {
         val ss = FuzzierUtil.cleanSearchString(searchString, projectState.ignoredCharacters)
         val processedFiles = ConcurrentHashMap.newKeySet<String>()
-        val results = ConcurrentLinkedQueue<FuzzyContainer>()
+        val listLimit = globalState.fileListLimit
+        val priorityQueue = PriorityQueue(
+            listLimit + 1,
+            compareBy<FuzzyMatchContainer> { it.getScore() }
+        )
+
+        var minimumScore: Int? = null
+
         runBlocking {
             withContext(Dispatchers.IO) {
                 iterationFiles.forEach { iterationFile ->
@@ -236,14 +240,39 @@ open class Fuzzier : FuzzyAction() {
                     if (processedFiles.add(iterationFile.file.path)) {
                         launch {
                             val container = stringEvaluator.evaluateFile(iterationFile, ss)
-                            container?.let { results.add(it) }
+                            container?.let { fuzzyMatchContainer ->
+                                minimumScore = priorityQueue.maybeAdd(minimumScore, fuzzyMatchContainer)
+                            }
                         }
                     }
                 }
             }
         }
 
-        results.forEach { listModel.addElement(it) }
+
+        val result = DefaultListModel<FuzzyContainer>()
+        result.addAll(
+            priorityQueue.sortedWith(
+                compareByDescending<FuzzyMatchContainer> { it.getScore() })
+        )
+        return result
+    }
+
+    private fun PriorityQueue<FuzzyMatchContainer>.maybeAdd(
+        minimumScore: Int?,
+        fuzzyMatchContainer: FuzzyMatchContainer
+    ): Int? {
+        var ret = minimumScore
+
+        if (minimumScore == null || fuzzyMatchContainer.getScore() > minimumScore) {
+            this.add(fuzzyMatchContainer)
+            if (this.size > globalState.fileListLimit) {
+                this.remove()
+                ret = this.peek().getScore()
+            }
+        }
+
+        return ret
     }
 
     private fun openFile(project: Project, fuzzyContainer: FuzzyContainer?, virtualFile: VirtualFile) {
