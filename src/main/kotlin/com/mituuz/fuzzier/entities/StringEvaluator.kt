@@ -95,27 +95,25 @@ class StringEvaluator(
         }
     }
 
-    fun evaluateFile(
-        iterationFile: FuzzierUtil.IterationFile, listModel: DefaultListModel<FuzzyContainer>,
-        searchString: String
-    ) {
+    fun evaluateFile(iterationFile: FuzzierUtil.IterationFile, searchString: String): FuzzyMatchContainer? {
         val scoreCalculator = ScoreCalculator(searchString)
         val file = iterationFile.file
         val moduleName = iterationFile.module
+
         if (!file.isDirectory) {
-            val moduleBasePath = modules[moduleName] ?: return
+            val moduleBasePath = modules[moduleName] ?: return null
 
             val filePath = file.path.removePrefix(moduleBasePath)
             if (isExcluded(file, filePath)) {
-                return
+                return null
             }
             if (filePath.isNotBlank()) {
                 val fuzzyMatchContainer = createFuzzyContainer(filePath, moduleBasePath, scoreCalculator)
-                if (fuzzyMatchContainer != null) {
-                    listModel.addElement(fuzzyMatchContainer)
-                }
+                return fuzzyMatchContainer
             }
         }
+
+        return null
     }
 
     private fun getDirPath(virtualFile: VirtualFile, basePath: String, module: String): String {

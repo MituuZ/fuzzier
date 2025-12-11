@@ -57,6 +57,7 @@ import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Future
 import javax.swing.AbstractAction
 import javax.swing.DefaultListModel
@@ -227,18 +228,22 @@ open class Fuzzier : FuzzyAction() {
     ) {
         val ss = FuzzierUtil.cleanSearchString(searchString, projectState.ignoredCharacters)
         val processedFiles = ConcurrentHashMap.newKeySet<String>()
+        val results = ConcurrentLinkedQueue<FuzzyContainer>()
         runBlocking {
             withContext(Dispatchers.IO) {
                 iterationFiles.forEach { iterationFile ->
                     if (task?.isCancelled == true) return@forEach
                     if (processedFiles.add(iterationFile.file.path)) {
                         launch {
-                            stringEvaluator.evaluateFile(iterationFile, listModel, ss)
+                            val container = stringEvaluator.evaluateFile(iterationFile, ss)
+                            container?.let { results.add(it) }
                         }
                     }
                 }
             }
         }
+
+        results.forEach { listModel.addElement(it) }
     }
 
     private fun openFile(project: Project, fuzzyContainer: FuzzyContainer?, virtualFile: VirtualFile) {
