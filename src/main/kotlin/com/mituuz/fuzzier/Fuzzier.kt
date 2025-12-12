@@ -231,6 +231,7 @@ open class Fuzzier : FuzzyAction() {
             compareBy<FuzzyMatchContainer> { it.getScore() }
         )
 
+        val queueLock = Any()
         var minimumScore: Int? = null
 
         runBlocking {
@@ -241,7 +242,9 @@ open class Fuzzier : FuzzyAction() {
                         launch {
                             val container = stringEvaluator.evaluateFile(iterationFile, ss)
                             container?.let { fuzzyMatchContainer ->
-                                minimumScore = priorityQueue.maybeAdd(minimumScore, fuzzyMatchContainer)
+                                synchronized(queueLock) {
+                                    minimumScore = priorityQueue.maybeAdd(minimumScore, fuzzyMatchContainer)
+                                }
                             }
                         }
                     }
