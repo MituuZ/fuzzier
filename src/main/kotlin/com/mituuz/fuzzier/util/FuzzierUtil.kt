@@ -1,52 +1,51 @@
 /*
-MIT License
-
-Copyright (c) 2025 Mitja Leino
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+ *  MIT License
+ *
+ *  Copyright (c) 2025 Mitja Leino
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
+ */
 package com.mituuz.fuzzier.util
 
 import com.intellij.openapi.components.service
+import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.rootManager
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer
-import com.mituuz.fuzzier.settings.FuzzierSettingsService
-import java.util.*
-import javax.swing.DefaultListModel
-import com.intellij.openapi.module.Module
 import com.intellij.openapi.roots.FileIndex
 import com.intellij.openapi.vfs.VirtualFile
 import com.mituuz.fuzzier.entities.FuzzyContainer
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
+import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import java.awt.Rectangle
-import java.util.concurrent.ConcurrentHashMap
+import java.util.*
 import java.util.concurrent.Future
+import javax.swing.DefaultListModel
 
 class FuzzierUtil {
     private var globalState = service<FuzzierGlobalSettingsService>().state
     private var listLimit: Int = globalState.fileListLimit
     private var prioritizeShorterDirPaths = globalState.prioritizeShorterDirPaths
-    
+
     data class IterationFile(val file: VirtualFile, val module: String)
-    
+
     companion object {
         /**
          * Create a dimension key for a specific screen bounds
@@ -60,7 +59,7 @@ class FuzzierUtil {
          * Iterates through the content of a file index and adds matching files to the provided collection.
          * This copies the file index state quickly to not block unnecessarily.
          *
-         * @param iterationFiles a thread-safe `KeySetView` collection to hold the iteration results.
+         * @param iterationFiles a mutable list to hold the iteration files
          * @param fileIndex a `FileIndex` to iterate through its content.
          * @param moduleName a string representing the name of the module associated with the files.
          * @param task an optional `Future` instance to check for cancellation during iteration.
