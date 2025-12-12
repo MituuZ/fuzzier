@@ -51,7 +51,6 @@ import com.mituuz.fuzzier.util.InitialViewHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
@@ -234,17 +233,17 @@ open class Fuzzier : FuzzyAction() {
         val queueLock = Any()
         var minimumScore: Int? = null
 
-        runBlocking {
-            withContext(Dispatchers.IO) {
+        runBlocking(Dispatchers.IO) {
+            kotlinx.coroutines.coroutineScope {
                 iterationFiles.forEach { iterationFile ->
                     if (task?.isCancelled == true) return@forEach
-                    if (processedFiles.add(iterationFile.file.path)) {
-                        launch {
-                            val container = stringEvaluator.evaluateFile(iterationFile, ss)
-                            container?.let { fuzzyMatchContainer ->
-                                synchronized(queueLock) {
-                                    minimumScore = priorityQueue.maybeAdd(minimumScore, fuzzyMatchContainer)
-                                }
+                    if (!processedFiles.add(iterationFile.file.path)) return@forEach
+
+                    launch {
+                        val container = stringEvaluator.evaluateFile(iterationFile, ss)
+                        container?.let { fuzzyMatchContainer ->
+                            synchronized(queueLock) {
+                                minimumScore = priorityQueue.maybeAdd(minimumScore, fuzzyMatchContainer)
                             }
                         }
                     }
