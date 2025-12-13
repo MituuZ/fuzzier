@@ -25,11 +25,13 @@
 package com.mituuz.fuzzier.intellij.iteration
 
 import com.intellij.openapi.roots.FileIndex
+import com.intellij.openapi.vfs.VirtualFile
 import com.mituuz.fuzzier.util.FuzzierUtil
 
 interface IterationFileCollector {
     fun collectFiles(
         targets: List<Pair<FileIndex, String>>,
         shouldContinue: () -> Boolean,
+        fileFilter: (VirtualFile) -> Boolean,
     ): List<FuzzierUtil.IterationFile>
 }

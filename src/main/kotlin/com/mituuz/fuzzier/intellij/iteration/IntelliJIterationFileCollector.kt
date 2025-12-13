@@ -25,19 +25,19 @@
 package com.mituuz.fuzzier.intellij.iteration
 
 import com.intellij.openapi.roots.FileIndex
+import com.intellij.openapi.vfs.VirtualFile
 import com.mituuz.fuzzier.util.FuzzierUtil
 
 class IntelliJIterationFileCollector : IterationFileCollector {
     override fun collectFiles(
         targets: List<Pair<FileIndex, String>>,
         shouldContinue: () -> Boolean,
+        fileFilter: (VirtualFile) -> Boolean
     ): List<FuzzierUtil.IterationFile> = buildList {
         for ((fileIndex, moduleName) in targets) {
             fileIndex.iterateContent { vf ->
                 if (!shouldContinue()) return@iterateContent false
-                if (!vf.isDirectory) {
-                    add(FuzzierUtil.IterationFile(vf, moduleName))
-                }
+                if (fileFilter(vf)) add(FuzzierUtil.IterationFile(vf, moduleName))
                 true
             }
         }

@@ -36,7 +36,6 @@ import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
-import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.util.SingleAlarm
@@ -71,9 +70,6 @@ open class Fuzzier : FuzzyAction() {
     private var previewAlarm: SingleAlarm? = null
     private var lastPreviewKey: String? = null
     private var collector: IterationFileCollector = IntelliJIterationFileCollector()
-
-    // Used by FuzzierVCS to check if files are tracked by the VCS
-    protected var changeListManager: ChangeListManager? = null
 
     override fun runAction(project: Project, actionEvent: AnActionEvent) {
         setCustomHandlers()
@@ -201,7 +197,6 @@ open class Fuzzier : FuzzyAction() {
         return StringEvaluator(
             combinedExclusions,
             projectState.modules,
-            changeListManager
         )
     }
 
@@ -216,8 +211,15 @@ open class Fuzzier : FuzzyAction() {
             moduleManager.modules.map { it.rootManager.fileIndex to it.name }
         }
 
-        return collector.collectFiles(indexTargets, shouldContinue = { job.isActive })
+        return collector.collectFiles(
+            targets = indexTargets,
+            shouldContinue = { job.isActive },
+            fileFilter = buildFileFilter(project)
+        )
     }
+
+    protected open fun buildFileFilter(project: Project): (VirtualFile) -> Boolean =
+        { vf -> !vf.isDirectory }
 
     /**
      * Processes a set of IterationFiles concurrently
