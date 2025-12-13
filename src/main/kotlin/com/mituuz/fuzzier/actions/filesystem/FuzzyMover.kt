@@ -29,7 +29,6 @@ import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.application.EDT
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
@@ -42,21 +41,15 @@ import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.mituuz.fuzzier.components.SimpleFinderComponent
-import com.mituuz.fuzzier.entities.FuzzyContainer
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer
-import com.mituuz.fuzzier.entities.IterationEntry
-import com.mituuz.fuzzier.entities.StringEvaluator
-import com.mituuz.fuzzier.util.FuzzierUtil
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
-import org.apache.commons.lang3.StringUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
-import java.util.*
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.ConcurrentHashMap
 import javax.swing.AbstractAction
 import javax.swing.DefaultListModel
 import javax.swing.JComponent
@@ -107,6 +100,12 @@ class FuzzyMover : FilesystemAction() {
         })
 
         return popup
+    }
+
+    override fun handleEmptySearchString(project: Project) {
+        ApplicationManager.getApplication().invokeLater {
+            component.fileList.model = DefaultListModel()
+        }
     }
 
     private fun createListeners(project: Project) {
@@ -185,105 +184,5 @@ class FuzzyMover : FilesystemAction() {
             }
         }
         return completableFuture
-    }
-
-    override fun updateListContents(project: Project, searchString: String) {
-        if (StringUtils.isBlank(searchString)) {
-            ApplicationManager.getApplication().invokeLater {
-                component.fileList.model = DefaultListModel()
-            }
-            return
-        }
-
-        currentUpdateListContentJob?.cancel()
-        currentUpdateListContentJob = actionScope?.launch(Dispatchers.EDT) {
-            component.fileList.setPaintBusy(true)
-
-            try {
-                val stringEvaluator = getStringEvaluator()
-                coroutineContext.ensureActive()
-
-                val iterationEntries = withContext(Dispatchers.Default) {
-                    collectIterationFiles(project)
-                }
-                coroutineContext.ensureActive()
-
-                val listModel = withContext(Dispatchers.Default) {
-                    processIterationEntries(iterationEntries, stringEvaluator, searchString)
-                }
-                coroutineContext.ensureActive()
-
-                component.refreshModel(listModel, getCellRenderer())
-            } finally {
-                component.fileList.setPaintBusy(false)
-            }
-        }
-    }
-
-    private suspend fun processIterationEntries(
-        fileEntries: List<IterationEntry>,
-        stringEvaluator: StringEvaluator,
-        searchString: String
-    ): DefaultListModel<FuzzyContainer> {
-        val ss = FuzzierUtil.Companion.cleanSearchString(searchString, projectState.ignoredCharacters)
-        val processedFiles = ConcurrentHashMap.newKeySet<String>()
-        val listLimit = globalState.fileListLimit
-        val priorityQueue = PriorityQueue(
-            listLimit + 1,
-            compareBy<FuzzyMatchContainer> { it.getScore() }
-        )
-
-        val queueLock = Any()
-        var minimumScore: Int? = null
-
-        val cores = Runtime.getRuntime().availableProcessors().coerceAtLeast(1)
-        val parallelism = (cores - 1).coerceIn(1, 8)
-
-        coroutineScope {
-            val ch = Channel<IterationEntry>(capacity = parallelism * 2)
-
-            repeat(parallelism) {
-                launch {
-                    for (iterationFile in ch) {
-                        val container = stringEvaluator.evaluateIteratorEntry(iterationFile, ss)
-                        container?.let { fuzzyMatchContainer ->
-                            synchronized(queueLock) {
-                                minimumScore = priorityQueue.maybeAdd(minimumScore, fuzzyMatchContainer)
-                            }
-                        }
-                    }
-                }
-            }
-
-            fileEntries
-                .filter { processedFiles.add(it.path) }
-                .forEach { ch.send(it) }
-            ch.close()
-        }
-
-
-        val result = DefaultListModel<FuzzyContainer>()
-        result.addAll(
-            priorityQueue.sortedWith(
-                compareByDescending<FuzzyMatchContainer> { it.getScore() })
-        )
-        return result
-    }
-
-    private fun PriorityQueue<FuzzyMatchContainer>.maybeAdd(
-        minimumScore: Int?,
-        fuzzyMatchContainer: FuzzyMatchContainer
-    ): Int? {
-        var ret = minimumScore
-
-        if (minimumScore == null || fuzzyMatchContainer.getScore() > minimumScore) {
-            this.add(fuzzyMatchContainer)
-            if (this.size > globalState.fileListLimit) {
-                this.remove()
-                ret = this.peek().getScore()
-            }
-        }
-
-        return ret
     }
 }

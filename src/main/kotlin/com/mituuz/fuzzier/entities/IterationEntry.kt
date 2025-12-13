@@ -29,15 +29,3 @@ data class IterationEntry(
     val path: String,
     val module: String
 )
-
-//data class FileEntry(
-//    override val name: String,
-//    override val path: String,
-//    override val module: String,
-//) : IterationEntry
-//
-//data class DirEntry(
-//    override val name: String,
-//    override val path: String,
-//    override val module: String,
-//) : IterationEntry
