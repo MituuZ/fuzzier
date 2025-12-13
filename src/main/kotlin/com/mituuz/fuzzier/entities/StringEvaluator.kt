@@ -126,14 +126,9 @@ class StringEvaluator(
     /**
      * Checks if file should be excluded from the results.
      *
-     * If change list manager is set, only use it to decide if file should be ignored.
-     *
-     * Otherwise, use exclusion list from settings.
-     *
-     * @param file virtual file to check with change list manager
      * @param filePath to check against the exclusion list
      *
-     * @return true if file should be excluded
+     * @return true if filePath should be excluded
      */
     private fun isExcluded(filePath: String): Boolean {
         return exclusionList.any { e ->
