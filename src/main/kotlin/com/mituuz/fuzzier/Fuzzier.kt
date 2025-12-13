@@ -44,6 +44,8 @@ import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.StringEvaluator
+import com.mituuz.fuzzier.intellij.iteration.IntelliJIterationFileCollector
+import com.mituuz.fuzzier.intellij.iteration.IterationFileCollector
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode.*
 import com.mituuz.fuzzier.util.FuzzierUtil
 import com.mituuz.fuzzier.util.InitialViewHandler
@@ -68,6 +70,7 @@ open class Fuzzier : FuzzyAction() {
     private var actionScope: CoroutineScope? = null
     private var previewAlarm: SingleAlarm? = null
     private var lastPreviewKey: String? = null
+    private var collector: IterationFileCollector = IntelliJIterationFileCollector()
 
     // Used by FuzzierVCS to check if files are tracked by the VCS
     protected var changeListManager: ChangeListManager? = null
@@ -213,12 +216,7 @@ open class Fuzzier : FuzzyAction() {
             moduleManager.modules.map { it.rootManager.fileIndex to it.name }
         }
 
-        return buildList {
-            indexTargets.forEach { (fileIndex, moduleName) ->
-                ctx.ensureActive()
-                FuzzierUtil.fileIndexToIterationFile(this, fileIndex, moduleName, job)
-            }
-        }
+        return collector.collectFiles(indexTargets, shouldContinue = { job.isActive })
     }
 
     /**
@@ -379,5 +377,9 @@ open class Fuzzier : FuzzyAction() {
             },
             75,
         )
+    }
+
+    fun setCollector(iterationFileCollector: IterationFileCollector) {
+        this.collector = iterationFileCollector
     }
 }
