@@ -91,21 +91,17 @@ class StringEvaluator(
         }
     }
 
-    fun evaluateFile(fileEntry: FileEntry, searchString: String): FuzzyMatchContainer? {
+    fun evaluateIteratorEntry(iteratorEntry: IterationEntry, searchString: String): FuzzyMatchContainer? {
         val scoreCalculator = ScoreCalculator(searchString)
-        val moduleName = fileEntry.module
+        val moduleName = iteratorEntry.module
 
-        if (!fileEntry.isDirectory) {
-            val moduleBasePath = modules[moduleName] ?: return null
+        val moduleBasePath = modules[moduleName] ?: return null
 
-            val filePath = fileEntry.path.removePrefix(moduleBasePath)
-            if (isExcluded(filePath)) {
-                return null
-            }
-            if (filePath.isNotBlank()) {
-                val fuzzyMatchContainer = createFuzzyContainer(filePath, moduleBasePath, scoreCalculator)
-                return fuzzyMatchContainer
-            }
+        val dirPath = iteratorEntry.path.removePrefix(moduleBasePath)
+        if (isExcluded(dirPath)) return null
+
+        if (dirPath.isNotBlank()) {
+            return createFuzzyContainer(dirPath, moduleBasePath, scoreCalculator)
         }
 
         return null

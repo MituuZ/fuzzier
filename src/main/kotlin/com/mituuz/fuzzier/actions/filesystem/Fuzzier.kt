@@ -38,7 +38,10 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.util.SingleAlarm
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
-import com.mituuz.fuzzier.entities.*
+import com.mituuz.fuzzier.entities.FuzzyContainer
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer
+import com.mituuz.fuzzier.entities.IterationEntry
+import com.mituuz.fuzzier.entities.StringEvaluator
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.util.FuzzierUtil
 import com.mituuz.fuzzier.util.InitialViewHandler
@@ -220,12 +223,12 @@ open class Fuzzier : FilesystemAction() {
         val parallelism = (cores - 1).coerceIn(1, 8)
 
         coroutineScope {
-            val ch = Channel<FileEntry>(capacity = parallelism * 2)
+            val ch = Channel<IterationEntry>(capacity = parallelism * 2)
 
             repeat(parallelism) {
                 launch {
                     for (iterationFile in ch) {
-                        val container = stringEvaluator.evaluateFile(iterationFile, ss)
+                        val container = stringEvaluator.evaluateIteratorEntry(iterationFile, ss)
                         container?.let { fuzzyMatchContainer ->
                             synchronized(queueLock) {
                                 minimumScore = priorityQueue.maybeAdd(minimumScore, fuzzyMatchContainer)
@@ -236,7 +239,6 @@ open class Fuzzier : FilesystemAction() {
             }
 
             fileEntries
-                .filterIsInstance<FileEntry>()
                 .filter { processedFiles.add(it.path) }
                 .forEach { ch.send(it) }
             ch.close()
