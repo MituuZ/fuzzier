@@ -51,7 +51,6 @@ class StringEvaluator(
                 val moduleBasePath = modules[moduleName] ?: return@ContentIterator true
 
                 val filePath = file.path.removePrefix(moduleBasePath)
-                // TODO: Might have broken VCS check
                 if (isExcluded(filePath)) {
                     return@ContentIterator true
                 }
@@ -78,7 +77,6 @@ class StringEvaluator(
             if (file.isDirectory) {
                 val moduleBasePath = modules[moduleName] ?: return@ContentIterator true
                 val filePath = getDirPath(file, moduleBasePath, moduleName)
-                // TODO: Might have broken VCS check
                 if (isExcluded(filePath)) {
                     return@ContentIterator true
                 }
