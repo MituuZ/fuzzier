@@ -341,7 +341,7 @@ open class FuzzyGrep() : FuzzyAction() {
         component.fileList.addListSelectionListener { event ->
             if (!event.valueIsAdjusting) {
                 if (component.fileList.isEmpty) {
-                    actionScope.launch(Dispatchers.EDT) {
+                    actionScope?.launch(Dispatchers.EDT) {
                         defaultDoc?.let { (component as FuzzyFinderComponent).previewPane.updateFile(it) }
                     }
                     return@addListSelectionListener
@@ -349,7 +349,7 @@ open class FuzzyGrep() : FuzzyAction() {
                 val selectedValue = component.fileList.selectedValue
                 val fileUrl = "file://${selectedValue?.getFileUri()}"
 
-                actionScope.launch(Dispatchers.Default) {
+                actionScope?.launch(Dispatchers.Default) {
                     val file = withContext(Dispatchers.IO) {
                         VirtualFileManager.getInstance().findFileByUrl(fileUrl)
                     }

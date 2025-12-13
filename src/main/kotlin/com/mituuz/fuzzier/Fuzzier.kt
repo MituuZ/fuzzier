@@ -30,9 +30,6 @@ import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.impl.EditorHistoryManager
 import com.intellij.openapi.module.ModuleManager
-import com.intellij.openapi.progress.ProgressIndicator
-import com.intellij.openapi.progress.ProgressManager
-import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.rootManager
 import com.intellij.openapi.roots.ProjectFileIndex
@@ -42,6 +39,7 @@ import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
+import com.intellij.util.SingleAlarm
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
@@ -68,6 +66,8 @@ open class Fuzzier : FuzzyAction() {
     override var dimensionKey = "FuzzySearchPopup"
     private var currentUpdateListContentJob: Job? = null
     private var actionScope: CoroutineScope? = null
+    private var previewAlarm: SingleAlarm? = null
+    private var lastPreviewKey: String? = null
 
     // Used by FuzzierVCS to check if files are tracked by the VCS
     protected var changeListManager: ChangeListManager? = null
@@ -81,6 +81,7 @@ open class Fuzzier : FuzzyAction() {
         ApplicationManager.getApplication().invokeLater {
             defaultDoc = EditorFactory.getInstance().createDocument("")
             component = FuzzyFinderComponent(project)
+            previewAlarm = getPreviewAlarm()
             createListeners(project)
             showPopup(project)
             createSharedListeners(project)
@@ -108,40 +109,40 @@ open class Fuzzier : FuzzyAction() {
                 currentUpdateListContentJob = null
 
                 actionScope?.cancel()
+
+                previewAlarm?.dispose()
+                lastPreviewKey = null
             }
         })
 
         return popup
     }
 
-    /**
-     * Populates the file list with recently opened files
-     */
     private fun createInitialView(project: Project) {
+        component.fileList.setPaintBusy(true)
         ApplicationManager.getApplication().executeOnPooledThread {
-            val editorHistoryManager = EditorHistoryManager.getInstance(project)
+            try {
+                val editorHistoryManager = EditorHistoryManager.getInstance(project)
 
-            val listModel = when (globalState.recentFilesMode) {
-                RECENT_PROJECT_FILES -> InitialViewHandler.getRecentProjectFiles(
-                    globalState,
-                    fuzzierUtil,
-                    editorHistoryManager,
-                    project
-                )
+                val listModel = when (globalState.recentFilesMode) {
+                    RECENT_PROJECT_FILES -> InitialViewHandler.getRecentProjectFiles(
+                        globalState,
+                        fuzzierUtil,
+                        editorHistoryManager,
+                        project
+                    )
 
-                RECENTLY_SEARCHED_FILES -> InitialViewHandler.getRecentlySearchedFiles(projectState)
-                else -> {
-                    DefaultListModel<FuzzyContainer>()
+                    RECENTLY_SEARCHED_FILES -> InitialViewHandler.getRecentlySearchedFiles(projectState)
+                    else -> {
+                        DefaultListModel<FuzzyContainer>()
+                    }
                 }
-            }
 
-            ApplicationManager.getApplication().invokeLater {
-                component.fileList.model = listModel
-                component.fileList.cellRenderer = getCellRenderer()
+                ApplicationManager.getApplication().invokeLater {
+                    component.refreshModel(listModel, getCellRenderer())
+                }
+            } finally {
                 component.fileList.setPaintBusy(false)
-                if (!component.fileList.isEmpty) {
-                    component.fileList.setSelectedValue(listModel[0], true)
-                }
             }
         }
     }
@@ -318,24 +319,10 @@ open class Fuzzier : FuzzyAction() {
     private fun createListeners(project: Project) {
         // Add a listener that updates the contents of the preview pane
         component.fileList.addListSelectionListener { event ->
-            if (!event.valueIsAdjusting) {
-                if (component.fileList.isEmpty) {
-                    ApplicationManager.getApplication().invokeLater {
-                        defaultDoc?.let { (component as FuzzyFinderComponent).previewPane.updateFile(it) }
-                    }
-                    return@addListSelectionListener
-                }
-                val selectedValue = component.fileList.selectedValue
-                val fileUrl = "file://${selectedValue?.getFileUri()}"
-
-                ProgressManager.getInstance().run(object : Task.Backgroundable(null, "Loading file", false) {
-                    override fun run(indicator: ProgressIndicator) {
-                        val file = VirtualFileManager.getInstance().findFileByUrl(fileUrl)
-                        file?.let {
-                            (component as FuzzyFinderComponent).previewPane.updateFile(file)
-                        }
-                    }
-                })
+            if (event.valueIsAdjusting) {
+                return@addListSelectionListener
+            } else {
+                previewAlarm?.cancelAndRequest()
             }
         }
 
@@ -369,5 +356,28 @@ open class Fuzzier : FuzzyAction() {
                 }
             }
         })
+    }
+
+    private fun getPreviewAlarm(): SingleAlarm {
+        return SingleAlarm(
+            {
+                val fuzzyFinderComponent = (component as FuzzyFinderComponent)
+                val selected = component.fileList.selectedValue
+
+                if (selected == null || component.fileList.isEmpty) {
+                    defaultDoc?.let { fuzzyFinderComponent.previewPane.updateFile(it) }
+                    lastPreviewKey = null
+                    return@SingleAlarm
+                }
+
+                val fileUrl = "file://${selected.getFileUri()}"
+                if (fileUrl == lastPreviewKey) return@SingleAlarm
+                lastPreviewKey = fileUrl
+
+                val vf = VirtualFileManager.getInstance().findFileByUrl(fileUrl)
+                if (vf != null) fuzzyFinderComponent.previewPane.updateFile(vf)
+            },
+            75,
+        )
     }
 }
