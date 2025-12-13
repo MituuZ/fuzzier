@@ -50,6 +50,7 @@ import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode.
 import com.mituuz.fuzzier.util.FuzzierUtil
 import com.mituuz.fuzzier.util.InitialViewHandler
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
@@ -57,7 +58,6 @@ import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.Future
 import javax.swing.AbstractAction
 import javax.swing.DefaultListModel
 import javax.swing.JComponent
@@ -147,17 +147,20 @@ open class Fuzzier : FuzzyAction() {
         currentUpdateListContentJob?.cancel()
         currentUpdateListContentJob = actionScope.launch(Dispatchers.EDT) {
             // Create a reference to the current task to check if it has been cancelled
-            val task = currentTask
             component.fileList.setPaintBusy(true)
 
             val stringEvaluator = getStringEvaluator()
-            if (task?.isCancelled == true) return@launch
+            coroutineContext.ensureActive()
 
-            val iterationFiles = collectIterationFiles(project, task)
-            if (task?.isCancelled == true) return@launch
+            val iterationFiles = withContext(Dispatchers.Default) {
+                collectIterationFiles(project)
+            }
+            coroutineContext.ensureActive()
 
-            val listModel = processFiles(iterationFiles, stringEvaluator, searchString, task)
-            if (task?.isCancelled == true) return@launch
+            val listModel = withContext(Dispatchers.Default) {
+                processFiles(iterationFiles, stringEvaluator, searchString)
+            }
+            coroutineContext.ensureActive()
 
             // Does this need to still happen in an invokeLater block?
             component.refreshModel(listModel, getCellRenderer())
@@ -187,7 +190,7 @@ open class Fuzzier : FuzzyAction() {
         )
     }
 
-    private fun collectIterationFiles(project: Project, task: Future<*>?): List<FuzzierUtil.IterationFile> {
+    private suspend fun collectIterationFiles(project: Project): List<FuzzierUtil.IterationFile> {
         val indexTargets = if (projectState.isProject) {
             listOf(ProjectFileIndex.getInstance(project) to project.name)
         } else {
@@ -197,7 +200,8 @@ open class Fuzzier : FuzzyAction() {
 
         return buildList {
             indexTargets.forEach { (fileIndex, moduleName) ->
-                FuzzierUtil.fileIndexToIterationFile(this, fileIndex, moduleName, task)
+                currentCoroutineContext().ensureActive()
+                FuzzierUtil.fileIndexToIterationFile(this, fileIndex, moduleName, currentCoroutineContext().job)
             }
         }
     }
@@ -206,10 +210,10 @@ open class Fuzzier : FuzzyAction() {
      * Processes a set of IterationFiles concurrently
      * @return a priority list which has been size limited and sorted
      */
-    private fun processFiles(
+    private suspend fun processFiles(
         iterationFiles: List<FuzzierUtil.IterationFile>,
         stringEvaluator: StringEvaluator,
-        searchString: String, task: Future<*>?
+        searchString: String
     ): DefaultListModel<FuzzyContainer> {
         val ss = FuzzierUtil.cleanSearchString(searchString, projectState.ignoredCharacters)
         val processedFiles = ConcurrentHashMap.newKeySet<String>()
@@ -222,21 +226,31 @@ open class Fuzzier : FuzzyAction() {
         val queueLock = Any()
         var minimumScore: Int? = null
 
-        runBlocking(Dispatchers.IO) {
-            kotlinx.coroutines.coroutineScope {
-                iterationFiles.forEach { iterationFile ->
-                    if (task?.isCancelled == true) return@forEach
-                    if (!processedFiles.add(iterationFile.file.path)) return@forEach
+        val cores = Runtime.getRuntime().availableProcessors().coerceAtLeast(1)
+        val parallelism = (cores - 1).coerceIn(1, 8)
 
+        withContext(Dispatchers.Default) {
+            coroutineScope {
+                val ch = Channel<FuzzierUtil.IterationFile>(capacity = parallelism * 2)
+
+                repeat(parallelism) {
                     launch {
-                        val container = stringEvaluator.evaluateFile(iterationFile, ss)
-                        container?.let { fuzzyMatchContainer ->
-                            synchronized(queueLock) {
-                                minimumScore = priorityQueue.maybeAdd(minimumScore, fuzzyMatchContainer)
+                        for (iterationFile in ch) {
+                            val container = stringEvaluator.evaluateFile(iterationFile, ss)
+                            container?.let { fuzzyMatchContainer ->
+                                synchronized(queueLock) {
+                                    minimumScore = priorityQueue.maybeAdd(minimumScore, fuzzyMatchContainer)
+                                }
                             }
                         }
                     }
                 }
+
+                for (iterationFile in iterationFiles) {
+                    if (!processedFiles.add(iterationFile.file.path)) continue
+                    ch.send(iterationFile)
+                }
+                ch.close()
             }
         }
 

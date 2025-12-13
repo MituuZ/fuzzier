@@ -23,6 +23,7 @@
  */
 package com.mituuz.fuzzier.util
 
+import com.intellij.ide.plugins.newui.OneLineProgressIndicator.task
 import com.intellij.openapi.components.service
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
@@ -34,10 +35,12 @@ import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
 import java.awt.Rectangle
 import java.util.*
-import java.util.concurrent.Future
 import javax.swing.DefaultListModel
+import kotlin.coroutines.cancellation.CancellationException
 
 class FuzzierUtil {
     private var globalState = service<FuzzierGlobalSettingsService>().state
@@ -67,13 +70,18 @@ class FuzzierUtil {
          */
         fun fileIndexToIterationFile(
             iterationFiles: MutableList<IterationFile>,
-            fileIndex: FileIndex, moduleName: String, task: Future<*>?,
-            isDir: Boolean = false
+            fileIndex: FileIndex,
+            moduleName: String,
+            job: Job,
+            isDir: Boolean = false,
         ) {
             fileIndex.iterateContent { file ->
-                if (task?.isCancelled == true) {
+                try {
+                    job.ensureActive()
+                } catch (_: CancellationException) {
                     return@iterateContent false
                 }
+
                 if (file.isDirectory == isDir) {
                     iterationFiles.add(IterationFile(file, moduleName))
                 }
