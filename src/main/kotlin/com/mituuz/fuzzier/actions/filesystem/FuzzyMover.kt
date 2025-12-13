@@ -21,7 +21,8 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
-package com.mituuz.fuzzier
+
+package com.mituuz.fuzzier.actions.filesystem
 
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
@@ -45,7 +46,6 @@ import com.intellij.psi.PsiManager
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.StringEvaluator
-import com.mituuz.fuzzier.fileaction.FileAction
 import com.mituuz.fuzzier.util.FuzzierUtil
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.ActionEvent
@@ -60,7 +60,7 @@ import javax.swing.JComponent
 import javax.swing.KeyStroke
 import kotlin.coroutines.cancellation.CancellationException
 
-class FuzzyMover : FileAction() {
+class FuzzyMover : FilesystemAction() {
     override var popupTitle = "Fuzzy File Mover"
     override var dimensionKey = "FuzzyMoverPopup"
     lateinit var movableFile: PsiFile
@@ -238,8 +238,8 @@ class FuzzyMover : FileAction() {
         project: Project, stringEvaluator: StringEvaluator, searchString: String,
         listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?
     ) {
-        val moduleManager = ModuleManager.getInstance(project)
-        val ss = FuzzierUtil.cleanSearchString(searchString, projectState.ignoredCharacters)
+        val moduleManager = ModuleManager.Companion.getInstance(project)
+        val ss = FuzzierUtil.Companion.cleanSearchString(searchString, projectState.ignoredCharacters)
         if (projectState.isProject) {
             processProject(project, stringEvaluator, ss, listModel, task)
         } else {

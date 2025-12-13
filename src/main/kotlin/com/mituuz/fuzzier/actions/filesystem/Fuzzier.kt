@@ -21,7 +21,8 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
-package com.mituuz.fuzzier
+
+package com.mituuz.fuzzier.actions.filesystem
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
@@ -38,8 +39,7 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.util.SingleAlarm
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.*
-import com.mituuz.fuzzier.fileaction.FileAction
-import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode.*
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.util.FuzzierUtil
 import com.mituuz.fuzzier.util.InitialViewHandler
 import kotlinx.coroutines.*
@@ -56,7 +56,7 @@ import javax.swing.DefaultListModel
 import javax.swing.JComponent
 import javax.swing.KeyStroke
 
-open class Fuzzier : FileAction() {
+open class Fuzzier : FilesystemAction() {
     override var popupTitle = "Fuzzy Search"
     override var dimensionKey = "FuzzySearchPopup"
     private var previewAlarm: SingleAlarm? = null
@@ -82,7 +82,7 @@ open class Fuzzier : FileAction() {
             (component as FuzzyFinderComponent).splitPane.dividerLocation =
                 globalState.splitPosition
 
-            if (globalState.recentFilesMode != NONE) {
+            if (globalState.recentFilesMode != FuzzierGlobalSettingsService.RecentFilesMode.NONE) {
                 createInitialView(project)
             }
         }
@@ -115,17 +115,20 @@ open class Fuzzier : FileAction() {
         component.fileList.setPaintBusy(true)
         ApplicationManager.getApplication().executeOnPooledThread {
             try {
-                val editorHistoryManager = EditorHistoryManager.getInstance(project)
+                val editorHistoryManager = EditorHistoryManager.Companion.getInstance(project)
 
                 val listModel = when (globalState.recentFilesMode) {
-                    RECENT_PROJECT_FILES -> InitialViewHandler.getRecentProjectFiles(
+                    FuzzierGlobalSettingsService.RecentFilesMode.RECENT_PROJECT_FILES -> InitialViewHandler.Companion.getRecentProjectFiles(
                         globalState,
                         fuzzierUtil,
                         editorHistoryManager,
                         project
                     )
 
-                    RECENTLY_SEARCHED_FILES -> InitialViewHandler.getRecentlySearchedFiles(projectState)
+                    FuzzierGlobalSettingsService.RecentFilesMode.RECENTLY_SEARCHED_FILES -> InitialViewHandler.Companion.getRecentlySearchedFiles(
+                        projectState
+                    )
+
                     else -> {
                         DefaultListModel<FuzzyContainer>()
                     }
@@ -172,7 +175,7 @@ open class Fuzzier : FileAction() {
     }
 
     private fun handleEmptySearchString(project: Project) {
-        if (globalState.recentFilesMode != NONE) {
+        if (globalState.recentFilesMode != FuzzierGlobalSettingsService.RecentFilesMode.NONE) {
             createInitialView(project)
         } else {
             ApplicationManager.getApplication().invokeLater {
@@ -202,7 +205,7 @@ open class Fuzzier : FileAction() {
         stringEvaluator: StringEvaluator,
         searchString: String
     ): DefaultListModel<FuzzyContainer> {
-        val ss = FuzzierUtil.cleanSearchString(searchString, projectState.ignoredCharacters)
+        val ss = FuzzierUtil.Companion.cleanSearchString(searchString, projectState.ignoredCharacters)
         val processedFiles = ConcurrentHashMap.newKeySet<String>()
         val listLimit = globalState.fileListLimit
         val priorityQueue = PriorityQueue(
@@ -283,7 +286,7 @@ open class Fuzzier : FileAction() {
             }
         }
         if (fuzzyContainer != null) {
-            InitialViewHandler.addFileToRecentlySearchedFiles(fuzzyContainer, projectState, globalState)
+            InitialViewHandler.Companion.addFileToRecentlySearchedFiles(fuzzyContainer, projectState, globalState)
         }
         popup.cancel()
     }

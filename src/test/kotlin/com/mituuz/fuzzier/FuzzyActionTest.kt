@@ -32,6 +32,7 @@ import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
+import com.mituuz.fuzzier.actions.FuzzyAction
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType.*
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer

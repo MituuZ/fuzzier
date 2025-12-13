@@ -21,37 +21,33 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
-package com.mituuz.fuzzier
 
-import com.intellij.testFramework.TestApplicationManager
-import com.mituuz.fuzzier.actions.filesystem.Fuzzier
-import io.mockk.every
-import io.mockk.mockk
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Test
+package com.mituuz.fuzzier.actions.grep
 
-class FuzzierTest {
-    @Suppress("unused")
-    private var testApplicationManager: TestApplicationManager = TestApplicationManager.getInstance()
+import com.mituuz.fuzzier.entities.FuzzyContainer
+import javax.swing.DefaultListModel
 
-    @Test
-    fun `actionPerformed does nothing when project is null`() {
-        class TestFuzzier : Fuzzier() {
-            var ran = false
-            override fun runAction(
-                project: com.intellij.openapi.project.Project,
-                actionEvent: com.intellij.openapi.actionSystem.AnActionEvent
-            ) {
-                ran = true
-            }
+class FuzzyGrepCaseInsensitive : FuzzyGrep() {
+    override var popupTitle: String = "Fuzzy Grep (Case Insensitive)"
+    override var dimensionKey = "FuzzyGrepCaseInsensitivePopup"
+
+    override suspend fun runCommand(
+        commands: List<String>,
+        listModel: DefaultListModel<FuzzyContainer>,
+        projectBasePath: String
+    ) {
+        val modifiedCommands = commands.toMutableList()
+        if (isWindows && !useRg) {
+            // Customize findstr for case insensitivity
+            modifiedCommands.add(1, "/I")
+        } else if (!useRg) {
+            // Customize grep for case insensitivity
+            modifiedCommands.add(1, "-i")
+        } else {
+            // Customize ripgrep for case insensitivity
+            modifiedCommands.add(1, "--smart-case")
+            modifiedCommands.add(2, "-F")
         }
-
-        val fuzzier = TestFuzzier()
-        val event = mockk<com.intellij.openapi.actionSystem.AnActionEvent>(relaxed = true)
-        every { event.project } returns null
-
-        fuzzier.actionPerformed(event)
-
-        assertFalse(fuzzier.ran, "runAction should not be called when project is null")
+        super.runCommand(modifiedCommands, listModel, projectBasePath)
     }
 }

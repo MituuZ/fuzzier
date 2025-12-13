@@ -22,7 +22,7 @@
  *  SOFTWARE.
  */
 
-package com.mituuz.fuzzier
+package com.mituuz.fuzzier.actions.grep
 
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
@@ -45,8 +45,9 @@ import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
-import com.mituuz.fuzzier.FuzzyGrep.Companion.MAX_NUMBER_OR_RESULTS
-import com.mituuz.fuzzier.FuzzyGrep.Companion.MAX_OUTPUT_SIZE
+import com.mituuz.fuzzier.actions.FuzzyAction
+import com.mituuz.fuzzier.actions.grep.FuzzyGrep.Companion.MAX_NUMBER_OR_RESULTS
+import com.mituuz.fuzzier.actions.grep.FuzzyGrep.Companion.MAX_OUTPUT_SIZE
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.RowContainer

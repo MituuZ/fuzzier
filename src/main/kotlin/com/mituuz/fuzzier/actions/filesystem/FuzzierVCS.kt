@@ -21,7 +21,8 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
-package com.mituuz.fuzzier
+
+package com.mituuz.fuzzier.actions.filesystem
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vcs.changes.ChangeListManager
@@ -35,6 +36,6 @@ class FuzzierVCS : Fuzzier() {
 
     override fun buildFileFilter(project: Project): (VirtualFile) -> Boolean {
         val clm = ChangeListManager.getInstance(project)
-        return { vf -> !vf.isDirectory && !clm.isIgnoredFile(vf)}
+        return { vf -> !vf.isDirectory && !clm.isIgnoredFile(vf) }
     }
 }

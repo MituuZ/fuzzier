@@ -21,7 +21,7 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
-package com.mituuz.fuzzier
+package com.mituuz.fuzzier.actions
 
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.*
@@ -43,6 +43,7 @@ import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.util.DimensionService
 import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.components.FuzzyComponent
+import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
@@ -172,7 +173,7 @@ abstract class FuzzyAction : AnAction() {
 
         document.addDocumentListener(listener, popup)
         // Also listen to changes in the secondary search field (if present)
-        (component as? com.mituuz.fuzzier.components.FuzzyFinderComponent)?.addSecondaryDocumentListener(
+        (component as? FuzzyFinderComponent)?.addSecondaryDocumentListener(
             listener,
             popup
         )

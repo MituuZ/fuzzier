@@ -1,27 +1,25 @@
 /*
-
- MIT License
-
- Copyright (c) 2025 Mitja Leino
-
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
-
- The above copyright notice and this permission notice shall be included in all
- copies or substantial portions of the Software.
-
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- SOFTWARE.
-
+ *  MIT License
+ *
+ *  Copyright (c) 2025 Mitja Leino
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
  */
 package com.mituuz.fuzzier
 
@@ -35,6 +33,7 @@ import com.intellij.psi.PsiManager
 import com.intellij.testFramework.LightVirtualFile
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
+import com.mituuz.fuzzier.actions.filesystem.FuzzyMover
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
@@ -42,7 +41,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import javax.swing.DefaultListModel
 import javax.swing.ListModel
-import javax.swing.PopupFactory
 
 class FuzzyMoverTest {
     @Suppress("unused")
@@ -64,12 +62,13 @@ class FuzzyMoverTest {
         fuzzyMover.component.fileList.model = getListModel(virtualDir)
         fuzzyMover.component.fileList.selectedIndex = 0
         fuzzyMover.component.isDirSelector = true
-        fuzzyMover.popup = JBPopupFactory.getInstance().createComponentPopupBuilder(fuzzyMover.component, null).createPopup()
+        fuzzyMover.popup =
+            JBPopupFactory.getInstance().createComponentPopupBuilder(fuzzyMover.component, null).createPopup()
         ApplicationManager.getApplication().runReadAction {
             fuzzyMover.movableFile = virtualFile?.let { PsiManager.getInstance(project).findFile(it) }!!
         }
         if (basePath != null) {
-            fuzzyMover.handleInput(project).thenRun{
+            fuzzyMover.handleInput(project).thenRun {
                 var targetFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/asd/nope")
                 assertNotNull(targetFile)
                 targetFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/nope")
@@ -89,7 +88,8 @@ class FuzzyMoverTest {
         fuzzyMover.component = SimpleFinderComponent()
         val virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/nope")
         val virtualDir = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/asd/")
-        fuzzyMover.popup = JBPopupFactory.getInstance().createComponentPopupBuilder(fuzzyMover.component, null).createPopup()
+        fuzzyMover.popup =
+            JBPopupFactory.getInstance().createComponentPopupBuilder(fuzzyMover.component, null).createPopup()
 
         fuzzyMover.component.fileList.model = getListModel(virtualFile)
         fuzzyMover.component.fileList.selectedIndex = 0
@@ -98,7 +98,7 @@ class FuzzyMoverTest {
             fuzzyMover.component.fileList.model = getListModel(virtualDir)
             fuzzyMover.component.fileList.selectedIndex = 0
 
-            fuzzyMover.handleInput(project).thenRun{
+            fuzzyMover.handleInput(project).thenRun {
                 var targetFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/asd/nope")
                 assertNotNull(targetFile)
                 targetFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/nope")
@@ -123,7 +123,8 @@ class FuzzyMoverTest {
         fuzzyMover.currentFile = LightVirtualFile("")
         val virtualFile = VirtualFileManager.getInstance().findFileByUrl("$basePath/main.kt")
         val virtualDir = VirtualFileManager.getInstance().findFileByUrl("$basePath/test/")
-        fuzzyMover.popup = JBPopupFactory.getInstance().createComponentPopupBuilder(fuzzyMover.component, null).createPopup()
+        fuzzyMover.popup =
+            JBPopupFactory.getInstance().createComponentPopupBuilder(fuzzyMover.component, null).createPopup()
 
         fuzzyMover.component.fileList.model = getListModel(virtualFile)
         fuzzyMover.component.fileList.selectedIndex = 0
@@ -132,7 +133,7 @@ class FuzzyMoverTest {
             fuzzyMover.component.fileList.model = getListModel(virtualDir)
             fuzzyMover.component.fileList.selectedIndex = 0
 
-            fuzzyMover.handleInput(project).thenRun{
+            fuzzyMover.handleInput(project).thenRun {
                 var targetFile = VirtualFileManager.getInstance().findFileByUrl("$basePath/test/main.kt")
                 assertNotNull(targetFile)
                 targetFile = VirtualFileManager.getInstance().findFileByUrl("$basePath/main.kt")
@@ -165,9 +166,10 @@ class FuzzyMoverTest {
             fuzzyMover.handleInput(project).join()
             fuzzyMover.component.fileList.model = getListModel(virtualDir)
             fuzzyMover.component.fileList.selectedIndex = 0
-            fuzzyMover.popup = JBPopupFactory.getInstance().createComponentPopupBuilder(fuzzyMover.component, null).createPopup()
+            fuzzyMover.popup =
+                JBPopupFactory.getInstance().createComponentPopupBuilder(fuzzyMover.component, null).createPopup()
 
-            fuzzyMover.handleInput(project).thenRun{
+            fuzzyMover.handleInput(project).thenRun {
                 var targetFile = VirtualFileManager.getInstance().findFileByUrl("$module2BasePath/target/MoveMe.kt")
                 assertNotNull(targetFile)
                 targetFile = VirtualFileManager.getInstance().findFileByUrl("$module1BasePath/MoveMe.kt")
@@ -180,7 +182,8 @@ class FuzzyMoverTest {
     private fun getListModel(virtualFile: VirtualFile?): ListModel<FuzzyContainer?> {
         val listModel = DefaultListModel<FuzzyContainer?>()
         if (virtualFile != null) {
-        val container = FuzzyMatchContainer(FuzzyMatchContainer.FuzzyScore(), virtualFile.path, virtualFile.name, "")
+            val container =
+                FuzzyMatchContainer(FuzzyMatchContainer.FuzzyScore(), virtualFile.path, virtualFile.name, "")
             listModel.addElement(container)
         }
         return listModel

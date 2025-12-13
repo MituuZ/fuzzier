@@ -22,7 +22,7 @@
  *  SOFTWARE.
  */
 
-package com.mituuz.fuzzier.fileaction
+package com.mituuz.fuzzier.actions.filesystem
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.module.ModuleManager
@@ -31,14 +31,14 @@ import com.intellij.openapi.project.rootManager
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.vfs.VirtualFile
-import com.mituuz.fuzzier.FuzzyAction
+import com.mituuz.fuzzier.actions.FuzzyAction
 import com.mituuz.fuzzier.entities.IterationEntry
 import com.mituuz.fuzzier.intellij.iteration.IntelliJIterationFileCollector
 import com.mituuz.fuzzier.intellij.iteration.IterationFileCollector
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.job
 
-abstract class FileAction : FuzzyAction() {
+abstract class FilesystemAction : FuzzyAction() {
     private var collector: IterationFileCollector = IntelliJIterationFileCollector()
 
     abstract override fun runAction(
