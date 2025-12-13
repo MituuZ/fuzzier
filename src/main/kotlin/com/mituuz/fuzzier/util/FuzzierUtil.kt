@@ -28,13 +28,11 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.rootManager
-import com.intellij.openapi.roots.FileIndex
 import com.intellij.openapi.vfs.VirtualFile
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
-import kotlinx.coroutines.Job
 import java.awt.Rectangle
 import java.util.*
 import javax.swing.DefaultListModel
@@ -53,33 +51,6 @@ class FuzzierUtil {
          */
         fun createDimensionKey(baseDimensionKey: String, screenBounds: Rectangle): String {
             return "${baseDimensionKey}_${screenBounds.width}_${screenBounds.height}_${screenBounds.x}_${screenBounds.y}"
-        }
-
-        /**
-         * Iterates through the content of a file index and adds matching files to the provided collection.
-         * This copies the file index state quickly to not block unnecessarily.
-         *
-         * @param iterationFiles a mutable list to hold the iteration files
-         * @param fileIndex a `FileIndex` to iterate through its content.
-         * @param moduleName a string representing the name of the module associated with the files.
-         * @param job current coroutine context, which can be used to stop the iteration
-         * @param isDir a boolean flag indicating whether to process directories (true) or files (false); defaults to false.
-         */
-        fun fileIndexToIterationFile(
-            iterationFiles: MutableList<IterationFile>,
-            fileIndex: FileIndex,
-            moduleName: String,
-            job: Job,
-            isDir: Boolean = false,
-        ) {
-            fileIndex.iterateContent { file ->
-                if (!job.isActive) return@iterateContent false
-
-                if (file.isDirectory == isDir) {
-                    iterationFiles.add(IterationFile(file, moduleName))
-                }
-                true
-            }
         }
 
         fun cleanSearchString(ss: String, ignoredChars: String): String {
