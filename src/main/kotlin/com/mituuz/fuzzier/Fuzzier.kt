@@ -42,7 +42,7 @@ import com.intellij.util.SingleAlarm
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
-import com.mituuz.fuzzier.entities.IterationFile
+import com.mituuz.fuzzier.entities.FileEntry
 import com.mituuz.fuzzier.entities.StringEvaluator
 import com.mituuz.fuzzier.intellij.iteration.IntelliJIterationFileCollector
 import com.mituuz.fuzzier.intellij.iteration.IterationFileCollector
@@ -201,7 +201,7 @@ open class Fuzzier : FuzzyAction() {
         )
     }
 
-    private suspend fun collectIterationFiles(project: Project): List<IterationFile> {
+    private suspend fun collectIterationFiles(project: Project): List<FileEntry> {
         val ctx = currentCoroutineContext()
         val job = ctx.job
 
@@ -227,7 +227,7 @@ open class Fuzzier : FuzzyAction() {
      * @return a priority list which has been size limited and sorted
      */
     private suspend fun processFiles(
-        iterationFiles: List<IterationFile>,
+        fileEntries: List<FileEntry>,
         stringEvaluator: StringEvaluator,
         searchString: String
     ): DefaultListModel<FuzzyContainer> {
@@ -246,7 +246,7 @@ open class Fuzzier : FuzzyAction() {
         val parallelism = (cores - 1).coerceIn(1, 8)
 
         coroutineScope {
-            val ch = Channel<IterationFile>(capacity = parallelism * 2)
+            val ch = Channel<FileEntry>(capacity = parallelism * 2)
 
             repeat(parallelism) {
                 launch {
@@ -261,7 +261,7 @@ open class Fuzzier : FuzzyAction() {
                 }
             }
 
-            for (iterationFile in iterationFiles) {
+            for (iterationFile in fileEntries) {
                 if (!processedFiles.add(iterationFile.path)) continue
                 ch.send(iterationFile)
             }

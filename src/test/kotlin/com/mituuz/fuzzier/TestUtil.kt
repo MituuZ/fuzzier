@@ -93,7 +93,7 @@ class TestUtil {
                 val tempDirPath = myFixture.tempDirPath
                 ignoredFiles.any { ("$tempDirPath/$it") == file.path }
             }
-            stringEvaluator = StringEvaluator(exclusionList, map, changeListManager)
+            stringEvaluator = StringEvaluator(exclusionList, map)
         } else {
             stringEvaluator = StringEvaluator(exclusionList, map)
         }

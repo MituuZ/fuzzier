@@ -24,5 +24,21 @@
 
 package com.mituuz.fuzzier.entities
 
-// I think we can remove the dir check from here
-data class IterationFile(val name: String, val path: String, val module: String, val isDirectory: Boolean)
+sealed interface IterationEntry {
+    val name: String
+    val path: String
+    val module: String
+}
+
+data class FileEntry(
+    val name: String,
+    val path: String,
+    val module: String,
+    val isDirectory: Boolean = false
+)
+
+data class DirEntry(
+    val name: String,
+    val path: String,
+    val module: String,
+)

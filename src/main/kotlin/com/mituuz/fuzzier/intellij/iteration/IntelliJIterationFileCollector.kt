@@ -26,21 +26,21 @@ package com.mituuz.fuzzier.intellij.iteration
 
 import com.intellij.openapi.roots.FileIndex
 import com.intellij.openapi.vfs.VirtualFile
-import com.mituuz.fuzzier.entities.IterationFile
+import com.mituuz.fuzzier.entities.FileEntry
 
 class IntelliJIterationFileCollector : IterationFileCollector {
     override fun collectFiles(
         targets: List<Pair<FileIndex, String>>,
         shouldContinue: () -> Boolean,
         fileFilter: (VirtualFile) -> Boolean
-    ): List<IterationFile> = buildList {
+    ): List<FileEntry> = buildList {
         for ((fileIndex, moduleName) in targets) {
             fileIndex.iterateContent { vf ->
                 if (!shouldContinue()) return@iterateContent false
 
                 if (fileFilter(vf)) {
-                    val iterationFile = IterationFile(vf.name, vf.path, moduleName, vf.isDirectory)
-                    add(iterationFile)
+                    val fileEntry = FileEntry(vf.name, vf.path, moduleName, vf.isDirectory)
+                    add(fileEntry)
                 }
 
                 true

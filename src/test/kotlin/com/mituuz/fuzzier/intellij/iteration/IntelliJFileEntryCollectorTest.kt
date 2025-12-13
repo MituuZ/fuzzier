@@ -36,7 +36,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.concurrent.atomic.AtomicInteger
 
-class IntelliJIterationFileCollectorTest {
+class IntelliJFileEntryCollectorTest {
     private lateinit var collector: IntelliJIterationFileCollector
 
     @BeforeEach
@@ -46,7 +46,11 @@ class IntelliJIterationFileCollectorTest {
 
     @Test
     fun `collectFiles returns empty list when targets are empty`() {
-        val result = collector.collectFiles(emptyList()) { true }
+        val result = collector.collectFiles(
+            targets = emptyList(),
+            shouldContinue = { true },
+            fileFilter = { true },
+        )
         assertTrue(result.isEmpty())
     }
 
@@ -66,15 +70,16 @@ class IntelliJIterationFileCollectorTest {
         val calls = AtomicInteger(0)
         val res = collector.collectFiles(
             targets = listOf(index to "mod"),
-            shouldContinue = { calls.incrementAndGet() == 1 } // true for first file, false after
+            shouldContinue = { calls.incrementAndGet() == 1 },
+            fileFilter = { true }
         )
 
         assertEquals(1, res.size)
-        assertEquals("a.txt", res[0].file.name)
+        assertEquals("a.txt", res[0].name)
     }
 
     @Test
-    fun `skips directories`() {
+    fun `skips files that match filter`() {
         val file1 = LightVirtualFile("a.txt")
         val dir = mockk<LightVirtualFile>()
         val file2 = LightVirtualFile("b.txt")
@@ -91,12 +96,13 @@ class IntelliJIterationFileCollectorTest {
 
         val res = collector.collectFiles(
             targets = listOf(index to "mod"),
-            shouldContinue = { true }
+            shouldContinue = { true },
+            fileFilter = { vf -> !vf.isDirectory }
         )
 
         assertEquals(2, res.size)
-        assertEquals("a.txt", res[0].file.name)
-        assertEquals("b.txt", res[1].file.name)
+        assertEquals("a.txt", res[0].name)
+        assertEquals("b.txt", res[1].name)
     }
 
     @Test
@@ -125,17 +131,18 @@ class IntelliJIterationFileCollectorTest {
 
         val res = collector.collectFiles(
             targets = listOf(index1 to "mod1", index2 to "mod2"),
-            shouldContinue = { true }
+            shouldContinue = { true },
+            fileFilter = { true }
         )
 
         assertEquals(4, res.size)
-        assertEquals("a.txt", res[0].file.name)
+        assertEquals("a.txt", res[0].name)
         assertEquals("mod1", res[0].module)
-        assertEquals("b.txt", res[1].file.name)
+        assertEquals("b.txt", res[1].name)
         assertEquals("mod1", res[1].module)
-        assertEquals("c.txt", res[2].file.name)
+        assertEquals("c.txt", res[2].name)
         assertEquals("mod2", res[2].module)
-        assertEquals("d.txt", res[3].file.name)
+        assertEquals("d.txt", res[3].name)
         assertEquals("mod2", res[3].module)
     }
 }

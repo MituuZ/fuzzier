@@ -26,12 +26,12 @@ package com.mituuz.fuzzier.intellij.iteration
 
 import com.intellij.openapi.roots.FileIndex
 import com.intellij.openapi.vfs.VirtualFile
-import com.mituuz.fuzzier.entities.IterationFile
+import com.mituuz.fuzzier.entities.FileEntry
 
 interface IterationFileCollector {
     fun collectFiles(
         targets: List<Pair<FileIndex, String>>,
         shouldContinue: () -> Boolean,
         fileFilter: (VirtualFile) -> Boolean,
-    ): List<IterationFile>
+    ): List<FileEntry>
 }
