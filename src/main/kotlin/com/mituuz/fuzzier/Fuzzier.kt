@@ -42,6 +42,7 @@ import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
+import com.intellij.platform.ide.progress.ModalTaskOwner.component
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
@@ -235,29 +236,27 @@ open class Fuzzier : FuzzyAction() {
         val cores = Runtime.getRuntime().availableProcessors().coerceAtLeast(1)
         val parallelism = (cores - 1).coerceIn(1, 8)
 
-        withContext(Dispatchers.Default) {
-            coroutineScope {
-                val ch = Channel<FuzzierUtil.IterationFile>(capacity = parallelism * 2)
+        coroutineScope {
+            val ch = Channel<FuzzierUtil.IterationFile>(capacity = parallelism * 2)
 
-                repeat(parallelism) {
-                    launch {
-                        for (iterationFile in ch) {
-                            val container = stringEvaluator.evaluateFile(iterationFile, ss)
-                            container?.let { fuzzyMatchContainer ->
-                                synchronized(queueLock) {
-                                    minimumScore = priorityQueue.maybeAdd(minimumScore, fuzzyMatchContainer)
-                                }
+            repeat(parallelism) {
+                launch {
+                    for (iterationFile in ch) {
+                        val container = stringEvaluator.evaluateFile(iterationFile, ss)
+                        container?.let { fuzzyMatchContainer ->
+                            synchronized(queueLock) {
+                                minimumScore = priorityQueue.maybeAdd(minimumScore, fuzzyMatchContainer)
                             }
                         }
                     }
                 }
-
-                for (iterationFile in iterationFiles) {
-                    if (!processedFiles.add(iterationFile.file.path)) continue
-                    ch.send(iterationFile)
-                }
-                ch.close()
             }
+
+            for (iterationFile in iterationFiles) {
+                if (!processedFiles.add(iterationFile.file.path)) continue
+                ch.send(iterationFile)
+            }
+            ch.close()
         }
 
 
