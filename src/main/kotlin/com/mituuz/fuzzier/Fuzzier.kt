@@ -216,6 +216,7 @@ open class Fuzzier : FuzzyAction() {
 
     /**
      * Processes a set of IterationFiles concurrently
+     * @return a priority list which has been size limited and sorted
      */
     private fun processFiles(
         iterationFiles: List<FuzzierUtil.IterationFile>,
