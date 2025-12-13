@@ -200,23 +200,27 @@ open class FuzzyGrep() : FuzzyAction() {
 
         currentUpdateListContentJob?.cancel()
         currentUpdateListContentJob = actionScope.launch(Dispatchers.EDT) {
-            val currentJob = currentUpdateListContentJob
-
-            if (currentJob?.isCancelled == true) return@launch
-
             component.fileList.setPaintBusy(true)
-            val listModel = DefaultListModel<FuzzyContainer>()
+            try {
+                val currentJob = currentUpdateListContentJob
 
-            if (currentJob?.isCancelled == true) return@launch
+                if (currentJob?.isCancelled == true) return@launch
 
-            val results = withContext(Dispatchers.IO) {
-                findInFiles(searchString, listModel, project.basePath.toString())
-                listModel
+                val listModel = DefaultListModel<FuzzyContainer>()
+
+                if (currentJob?.isCancelled == true) return@launch
+
+                val results = withContext(Dispatchers.IO) {
+                    findInFiles(searchString, listModel, project.basePath.toString())
+                    listModel
+                }
+
+                if (currentJob?.isCancelled == true) return@launch
+
+                component.refreshModel(results, getCellRenderer())
+            } finally {
+                component.fileList.setPaintBusy(false)
             }
-
-            if (currentJob?.isCancelled == true) return@launch
-
-            component.refreshModel(results, getCellRenderer())
         }
     }
 

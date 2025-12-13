@@ -42,6 +42,5 @@ open class FuzzyComponent : JPanel() {
         if (!fileList.isEmpty) {
             fileList.selectedIndex = 0
         }
-        fileList.setPaintBusy(false)
     }
 }

@@ -149,21 +149,24 @@ open class Fuzzier : FuzzyAction() {
             // Create a reference to the current task to check if it has been cancelled
             component.fileList.setPaintBusy(true)
 
-            val stringEvaluator = getStringEvaluator()
-            coroutineContext.ensureActive()
+            try {
+                val stringEvaluator = getStringEvaluator()
+                coroutineContext.ensureActive()
 
-            val iterationFiles = withContext(Dispatchers.Default) {
-                collectIterationFiles(project)
+                val iterationFiles = withContext(Dispatchers.Default) {
+                    collectIterationFiles(project)
+                }
+                coroutineContext.ensureActive()
+
+                val listModel = withContext(Dispatchers.Default) {
+                    processFiles(iterationFiles, stringEvaluator, searchString)
+                }
+                coroutineContext.ensureActive()
+
+                component.refreshModel(listModel, getCellRenderer())
+            } finally {
+                component.fileList.setPaintBusy(false)
             }
-            coroutineContext.ensureActive()
-
-            val listModel = withContext(Dispatchers.Default) {
-                processFiles(iterationFiles, stringEvaluator, searchString)
-            }
-            coroutineContext.ensureActive()
-
-            // Does this need to still happen in an invokeLater block?
-            component.refreshModel(listModel, getCellRenderer())
         }
     }
 
@@ -191,6 +194,9 @@ open class Fuzzier : FuzzyAction() {
     }
 
     private suspend fun collectIterationFiles(project: Project): List<FuzzierUtil.IterationFile> {
+        val ctx = currentCoroutineContext()
+        val job = ctx.job
+
         val indexTargets = if (projectState.isProject) {
             listOf(ProjectFileIndex.getInstance(project) to project.name)
         } else {
@@ -200,8 +206,8 @@ open class Fuzzier : FuzzyAction() {
 
         return buildList {
             indexTargets.forEach { (fileIndex, moduleName) ->
-                currentCoroutineContext().ensureActive()
-                FuzzierUtil.fileIndexToIterationFile(this, fileIndex, moduleName, currentCoroutineContext().job)
+                ctx.ensureActive()
+                FuzzierUtil.fileIndexToIterationFile(this, fileIndex, moduleName, job)
             }
         }
     }
