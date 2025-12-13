@@ -25,14 +25,12 @@ package com.mituuz.fuzzier.entities
 
 import com.intellij.openapi.roots.ContentIterator
 import com.intellij.openapi.vfs.VirtualFile
-import com.mituuz.fuzzier.util.FuzzierUtil
 import java.util.concurrent.Future
 import javax.swing.DefaultListModel
 
 /**
  * Handles creating the content iterators used for string handling and excluding files
  * @param exclusionList exclusion list from settings
- * @param changeListManager handles VCS check if file is being tracked. Null if VCS search should not be used
  */
 class StringEvaluator(
     private var exclusionList: Set<String>,
@@ -53,7 +51,8 @@ class StringEvaluator(
                 val moduleBasePath = modules[moduleName] ?: return@ContentIterator true
 
                 val filePath = file.path.removePrefix(moduleBasePath)
-                if (isExcluded(file, filePath)) {
+                // TODO: Might have broken VCS check
+                if (isExcluded(filePath)) {
                     return@ContentIterator true
                 }
                 if (filePath.isNotBlank()) {
@@ -79,7 +78,8 @@ class StringEvaluator(
             if (file.isDirectory) {
                 val moduleBasePath = modules[moduleName] ?: return@ContentIterator true
                 val filePath = getDirPath(file, moduleBasePath, moduleName)
-                if (isExcluded(file, filePath)) {
+                // TODO: Might have broken VCS check
+                if (isExcluded(filePath)) {
                     return@ContentIterator true
                 }
                 if (filePath.isNotBlank()) {
@@ -93,16 +93,15 @@ class StringEvaluator(
         }
     }
 
-    fun evaluateFile(iterationFile: FuzzierUtil.IterationFile, searchString: String): FuzzyMatchContainer? {
+    fun evaluateFile(iterationFile: IterationFile, searchString: String): FuzzyMatchContainer? {
         val scoreCalculator = ScoreCalculator(searchString)
-        val file = iterationFile.file
         val moduleName = iterationFile.module
 
-        if (!file.isDirectory) {
+        if (!iterationFile.isDirectory) {
             val moduleBasePath = modules[moduleName] ?: return null
 
-            val filePath = file.path.removePrefix(moduleBasePath)
-            if (isExcluded(file, filePath)) {
+            val filePath = iterationFile.path.removePrefix(moduleBasePath)
+            if (isExcluded(filePath)) {
                 return null
             }
             if (filePath.isNotBlank()) {
@@ -138,7 +137,7 @@ class StringEvaluator(
      *
      * @return true if file should be excluded
      */
-    private fun isExcluded(file: VirtualFile, filePath: String): Boolean {
+    private fun isExcluded(filePath: String): Boolean {
         return exclusionList.any { e ->
             when {
                 e.startsWith("*") -> filePath.endsWith(e.substring(1))

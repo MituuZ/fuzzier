@@ -28,7 +28,6 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.rootManager
-import com.intellij.openapi.vfs.VirtualFile
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
@@ -41,8 +40,6 @@ class FuzzierUtil {
     private var globalState = service<FuzzierGlobalSettingsService>().state
     private var listLimit: Int = globalState.fileListLimit
     private var prioritizeShorterDirPaths = globalState.prioritizeShorterDirPaths
-
-    data class IterationFile(val file: VirtualFile, val module: String)
 
     companion object {
         /**

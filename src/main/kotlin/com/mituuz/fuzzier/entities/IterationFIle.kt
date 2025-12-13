@@ -22,16 +22,7 @@
  *  SOFTWARE.
  */
 
-package com.mituuz.fuzzier.intellij.iteration
+package com.mituuz.fuzzier.entities
 
-import com.intellij.openapi.roots.FileIndex
-import com.intellij.openapi.vfs.VirtualFile
-import com.mituuz.fuzzier.entities.IterationFile
-
-interface IterationFileCollector {
-    fun collectFiles(
-        targets: List<Pair<FileIndex, String>>,
-        shouldContinue: () -> Boolean,
-        fileFilter: (VirtualFile) -> Boolean,
-    ): List<IterationFile>
-}
+// I think we can remove the dir check from here
+data class IterationFile(val name: String, val path: String, val module: String, val isDirectory: Boolean)
