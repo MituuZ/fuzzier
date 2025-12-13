@@ -78,7 +78,7 @@ open class FuzzyGrep() : FuzzyAction() {
     val isWindows = System.getProperty("os.name").lowercase().contains("win")
     private var currentLaunchJob: Job? = null
     private var currentUpdateListContentJob: Job? = null
-    private var actionScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private var actionScope: CoroutineScope? = null
 
     override fun runAction(
         project: Project,
@@ -87,8 +87,11 @@ open class FuzzyGrep() : FuzzyAction() {
         currentLaunchJob?.cancel()
         setCustomHandlers()
 
+        actionScope?.cancel()
+        actionScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
         val projectBasePath = project.basePath.toString()
-        currentLaunchJob = actionScope.launch(Dispatchers.EDT) {
+        currentLaunchJob = actionScope?.launch(Dispatchers.EDT) {
             val currentJob = currentLaunchJob
 
             if (!isInstalled("rg", projectBasePath)) {
@@ -175,7 +178,7 @@ open class FuzzyGrep() : FuzzyAction() {
                 currentUpdateListContentJob?.cancel()
                 currentUpdateListContentJob = null
 
-                actionScope.cancel()
+                actionScope?.cancel()
             }
         })
 
@@ -205,7 +208,7 @@ open class FuzzyGrep() : FuzzyAction() {
         }
 
         currentUpdateListContentJob?.cancel()
-        currentUpdateListContentJob = actionScope.launch(Dispatchers.EDT) {
+        currentUpdateListContentJob = actionScope?.launch(Dispatchers.EDT) {
             component.fileList.setPaintBusy(true)
             try {
                 val currentJob = currentUpdateListContentJob

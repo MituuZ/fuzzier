@@ -67,13 +67,16 @@ open class Fuzzier : FuzzyAction() {
     override var popupTitle = "Fuzzy Search"
     override var dimensionKey = "FuzzySearchPopup"
     private var currentUpdateListContentJob: Job? = null
-    private var actionScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private var actionScope: CoroutineScope? = null
 
     // Used by FuzzierVCS to check if files are tracked by the VCS
     protected var changeListManager: ChangeListManager? = null
 
     override fun runAction(project: Project, actionEvent: AnActionEvent) {
         setCustomHandlers()
+
+        actionScope?.cancel()
+        actionScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
         ApplicationManager.getApplication().invokeLater {
             defaultDoc = EditorFactory.getInstance().createDocument("")
@@ -104,7 +107,7 @@ open class Fuzzier : FuzzyAction() {
                 currentUpdateListContentJob?.cancel()
                 currentUpdateListContentJob = null
 
-                actionScope.cancel()
+                actionScope?.cancel()
             }
         })
 
@@ -150,7 +153,7 @@ open class Fuzzier : FuzzyAction() {
         }
 
         currentUpdateListContentJob?.cancel()
-        currentUpdateListContentJob = actionScope.launch(Dispatchers.EDT) {
+        currentUpdateListContentJob = actionScope?.launch(Dispatchers.EDT) {
             // Create a reference to the current task to check if it has been cancelled
             component.fileList.setPaintBusy(true)
 
