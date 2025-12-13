@@ -42,7 +42,6 @@ import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
-import com.intellij.platform.ide.progress.ModalTaskOwner.component
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
@@ -99,8 +98,13 @@ open class Fuzzier : FuzzyAction() {
             override fun onClosed(event: LightweightWindowEvent) {
                 globalState.splitPosition =
                     (component as FuzzyFinderComponent).splitPane.dividerLocation
+
                 resetOriginalHandlers()
-                super.onClosed(event)
+
+                currentUpdateListContentJob?.cancel()
+                currentUpdateListContentJob = null
+
+                actionScope.cancel()
             }
         })
 

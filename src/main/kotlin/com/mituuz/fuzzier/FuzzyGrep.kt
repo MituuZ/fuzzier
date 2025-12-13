@@ -166,10 +166,16 @@ open class FuzzyGrep() : FuzzyAction() {
             override fun onClosed(event: LightweightWindowEvent) {
                 globalState.splitPosition =
                     (component as FuzzyFinderComponent).splitPane.dividerLocation
+
                 resetOriginalHandlers()
-                super.onClosed(event)
+
                 currentLaunchJob?.cancel()
+                currentLaunchJob = null
+
                 currentUpdateListContentJob?.cancel()
+                currentUpdateListContentJob = null
+
+                actionScope.cancel()
             }
         })
 
