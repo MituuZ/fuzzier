@@ -45,6 +45,7 @@ import com.intellij.psi.PsiManager
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.StringEvaluator
+import com.mituuz.fuzzier.fileaction.FileAction
 import com.mituuz.fuzzier.util.FuzzierUtil
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.ActionEvent
@@ -59,11 +60,18 @@ import javax.swing.JComponent
 import javax.swing.KeyStroke
 import kotlin.coroutines.cancellation.CancellationException
 
-class FuzzyMover : FuzzyAction() {
+class FuzzyMover : FileAction() {
     override var popupTitle = "Fuzzy File Mover"
     override var dimensionKey = "FuzzyMoverPopup"
     lateinit var movableFile: PsiFile
     lateinit var currentFile: VirtualFile
+
+    override fun buildFileFilter(project: Project): (VirtualFile) -> Boolean {
+        if (component.isDirSelector) {
+            return { vf -> vf.isDirectory }
+        }
+        return { vf -> !vf.isDirectory }
+    }
 
     override fun runAction(project: Project, actionEvent: AnActionEvent) {
         setCustomHandlers()
@@ -183,10 +191,11 @@ class FuzzyMover : FuzzyAction() {
 
         currentTask?.takeIf { !it.isDone }?.cancel(true)
         currentTask = ApplicationManager.getApplication().executeOnPooledThread {
+            component.fileList.setPaintBusy(true)
+
             try {
                 // Create a reference to the current task to check if it has been cancelled
                 val task = currentTask
-                component.fileList.setPaintBusy(true)
                 var listModel = DefaultListModel<FuzzyContainer>()
 
                 val stringEvaluator = getStringEvaluator()
@@ -202,17 +211,14 @@ class FuzzyMover : FuzzyAction() {
                 if (task?.isCancelled == true) return@executeOnPooledThread
 
                 ApplicationManager.getApplication().invokeLater {
-                    component.fileList.model = listModel
-                    component.fileList.cellRenderer = getCellRenderer()
-                    component.fileList.setPaintBusy(false)
-                    if (!component.fileList.isEmpty) {
-                        component.fileList.setSelectedValue(listModel[0], true)
-                    }
+                    component.refreshModel(listModel, getCellRenderer())
                 }
             } catch (_: InterruptedException) {
                 return@executeOnPooledThread
             } catch (_: CancellationException) {
                 return@executeOnPooledThread
+            } finally {
+                component.fileList.setPaintBusy(false)
             }
         }
     }

@@ -31,14 +31,14 @@ sealed interface IterationEntry {
 }
 
 data class FileEntry(
-    val name: String,
-    val path: String,
-    val module: String,
+    override val name: String,
+    override val path: String,
+    override val module: String,
     val isDirectory: Boolean = false
-)
+) : IterationEntry
 
 data class DirEntry(
-    val name: String,
-    val path: String,
-    val module: String,
-)
+    override val name: String,
+    override val path: String,
+    override val module: String,
+) : IterationEntry

@@ -49,6 +49,8 @@ import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.util.FuzzierUtil
 import com.mituuz.fuzzier.util.FuzzierUtil.Companion.createDimensionKey
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import java.awt.Component
 import java.awt.Font
 import java.awt.event.ActionEvent
@@ -75,6 +77,8 @@ abstract class FuzzyAction : AnAction() {
     @Volatile
     var currentTask: Future<*>? = null
     val fuzzierUtil = FuzzierUtil()
+    protected open var currentUpdateListContentJob: Job? = null
+    protected open var actionScope: CoroutineScope? = null
 
     override fun actionPerformed(actionEvent: AnActionEvent) {
         val project = actionEvent.project

@@ -29,10 +29,7 @@ import com.intellij.openapi.application.EDT
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.impl.EditorHistoryManager
-import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.rootManager
-import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
@@ -40,12 +37,8 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.util.SingleAlarm
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
-import com.mituuz.fuzzier.entities.FuzzyContainer
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer
-import com.mituuz.fuzzier.entities.FileEntry
-import com.mituuz.fuzzier.entities.StringEvaluator
-import com.mituuz.fuzzier.intellij.iteration.IntelliJIterationFileCollector
-import com.mituuz.fuzzier.intellij.iteration.IterationFileCollector
+import com.mituuz.fuzzier.entities.*
+import com.mituuz.fuzzier.fileaction.FileAction
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode.*
 import com.mituuz.fuzzier.util.FuzzierUtil
 import com.mituuz.fuzzier.util.InitialViewHandler
@@ -63,14 +56,14 @@ import javax.swing.DefaultListModel
 import javax.swing.JComponent
 import javax.swing.KeyStroke
 
-open class Fuzzier : FuzzyAction() {
+open class Fuzzier : FileAction() {
     override var popupTitle = "Fuzzy Search"
     override var dimensionKey = "FuzzySearchPopup"
-    private var currentUpdateListContentJob: Job? = null
-    private var actionScope: CoroutineScope? = null
     private var previewAlarm: SingleAlarm? = null
     private var lastPreviewKey: String? = null
-    private var collector: IterationFileCollector = IntelliJIterationFileCollector()
+
+    override fun buildFileFilter(project: Project): (VirtualFile) -> Boolean =
+        { vf -> !vf.isDirectory }
 
     override fun runAction(project: Project, actionEvent: AnActionEvent) {
         setCustomHandlers()
@@ -155,7 +148,6 @@ open class Fuzzier : FuzzyAction() {
 
         currentUpdateListContentJob?.cancel()
         currentUpdateListContentJob = actionScope?.launch(Dispatchers.EDT) {
-            // Create a reference to the current task to check if it has been cancelled
             component.fileList.setPaintBusy(true)
 
             try {
@@ -201,33 +193,12 @@ open class Fuzzier : FuzzyAction() {
         )
     }
 
-    private suspend fun collectIterationFiles(project: Project): List<FileEntry> {
-        val ctx = currentCoroutineContext()
-        val job = ctx.job
-
-        val indexTargets = if (projectState.isProject) {
-            listOf(ProjectFileIndex.getInstance(project) to project.name)
-        } else {
-            val moduleManager = ModuleManager.getInstance(project)
-            moduleManager.modules.map { it.rootManager.fileIndex to it.name }
-        }
-
-        return collector.collectFiles(
-            targets = indexTargets,
-            shouldContinue = { job.isActive },
-            fileFilter = buildFileFilter(project)
-        )
-    }
-
-    protected open fun buildFileFilter(project: Project): (VirtualFile) -> Boolean =
-        { vf -> !vf.isDirectory }
-
     /**
      * Processes a set of IterationFiles concurrently
      * @return a priority list which has been size limited and sorted
      */
     private suspend fun processFiles(
-        fileEntries: List<FileEntry>,
+        fileEntries: List<IterationEntry>,
         stringEvaluator: StringEvaluator,
         searchString: String
     ): DefaultListModel<FuzzyContainer> {
@@ -261,10 +232,10 @@ open class Fuzzier : FuzzyAction() {
                 }
             }
 
-            for (iterationFile in fileEntries) {
-                if (!processedFiles.add(iterationFile.path)) continue
-                ch.send(iterationFile)
-            }
+            fileEntries
+                .filterIsInstance<FileEntry>()
+                .filter { processedFiles.add(it.path) }
+                .forEach { ch.send(it) }
             ch.close()
         }
 

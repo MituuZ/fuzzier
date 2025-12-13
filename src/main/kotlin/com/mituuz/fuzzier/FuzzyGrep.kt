@@ -77,8 +77,6 @@ open class FuzzyGrep() : FuzzyAction() {
     var useRg = true
     val isWindows = System.getProperty("os.name").lowercase().contains("win")
     private var currentLaunchJob: Job? = null
-    private var currentUpdateListContentJob: Job? = null
-    private var actionScope: CoroutineScope? = null
 
     override fun runAction(
         project: Project,
