@@ -29,8 +29,6 @@ import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.modules
 import com.intellij.openapi.project.rootManager
-import com.intellij.openapi.vcs.changes.ChangeListManager
-import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.testFramework.PsiTestUtil
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
@@ -39,8 +37,6 @@ import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.runInEdtAndWait
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.StringEvaluator
-import io.mockk.every
-import io.mockk.mockk
 import javax.swing.DefaultListModel
 
 class TestUtil {
@@ -69,14 +65,12 @@ class TestUtil {
     fun setUpModuleFileIndex(
         filesToAdd: List<String>,
         exclusionList: Set<String>,
-        ignoredFiles: List<String>? = null
     ): DefaultListModel<FuzzyContainer> {
         val filePathContainer = DefaultListModel<FuzzyContainer>()
         val factory = IdeaTestFixtureFactory.getFixtureFactory()
         val fixtureBuilder = factory.createLightFixtureBuilder(null, "Test")
         val fixture = fixtureBuilder.fixture
         val myFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture)
-        val stringEvaluator: StringEvaluator
 
         myFixture.setUp()
         addFilesToProject(filesToAdd, myFixture, fixture)
@@ -86,18 +80,7 @@ class TestUtil {
         val module = myFixture.project.modules[0]
         map[module.name] = module.rootManager.contentRoots[1].path
 
-        if (ignoredFiles !== null) {
-            val changeListManager = mockk<ChangeListManager>()
-            every { changeListManager.isIgnoredFile(any<VirtualFile>()) } answers {
-                val file = firstArg<VirtualFile>()
-                val tempDirPath = myFixture.tempDirPath
-                ignoredFiles.any { ("$tempDirPath/$it") == file.path }
-            }
-            stringEvaluator = StringEvaluator(exclusionList, map)
-        } else {
-            stringEvaluator = StringEvaluator(exclusionList, map)
-        }
-
+        val stringEvaluator = StringEvaluator(exclusionList, map)
         val contentIterator = stringEvaluator.getContentIterator(myFixture.module.name, "", filePathContainer, null)
         val index = myFixture.module.rootManager.fileIndex
         runInEdtAndWait {
