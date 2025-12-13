@@ -23,7 +23,6 @@
  */
 package com.mituuz.fuzzier.util
 
-import com.intellij.ide.plugins.newui.OneLineProgressIndicator.task
 import com.intellij.openapi.components.service
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
@@ -36,11 +35,9 @@ import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.ensureActive
 import java.awt.Rectangle
 import java.util.*
 import javax.swing.DefaultListModel
-import kotlin.coroutines.cancellation.CancellationException
 
 class FuzzierUtil {
     private var globalState = service<FuzzierGlobalSettingsService>().state
@@ -65,7 +62,7 @@ class FuzzierUtil {
          * @param iterationFiles a mutable list to hold the iteration files
          * @param fileIndex a `FileIndex` to iterate through its content.
          * @param moduleName a string representing the name of the module associated with the files.
-         * @param task an optional `Future` instance to check for cancellation during iteration.
+         * @param job current coroutine context, which can be used to stop the iteration
          * @param isDir a boolean flag indicating whether to process directories (true) or files (false); defaults to false.
          */
         fun fileIndexToIterationFile(
@@ -76,11 +73,7 @@ class FuzzierUtil {
             isDir: Boolean = false,
         ) {
             fileIndex.iterateContent { file ->
-                try {
-                    job.ensureActive()
-                } catch (_: CancellationException) {
-                    return@iterateContent false
-                }
+                if (!job.isActive) return@iterateContent false
 
                 if (file.isDirectory == isDir) {
                     iterationFiles.add(IterationFile(file, moduleName))
