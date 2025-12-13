@@ -25,6 +25,7 @@ package com.mituuz.fuzzier
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.EDT
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.impl.EditorHistoryManager
@@ -48,9 +49,7 @@ import com.mituuz.fuzzier.entities.StringEvaluator
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode.*
 import com.mituuz.fuzzier.util.FuzzierUtil
 import com.mituuz.fuzzier.util.InitialViewHandler
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
@@ -63,11 +62,12 @@ import javax.swing.AbstractAction
 import javax.swing.DefaultListModel
 import javax.swing.JComponent
 import javax.swing.KeyStroke
-import kotlin.coroutines.cancellation.CancellationException
 
 open class Fuzzier : FuzzyAction() {
     override var popupTitle = "Fuzzy Search"
     override var dimensionKey = "FuzzySearchPopup"
+    private var currentUpdateListContentJob: Job? = null
+    private var actionScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     // Used by FuzzierVCS to check if files are tracked by the VCS
     protected var changeListManager: ChangeListManager? = null
@@ -144,35 +144,23 @@ open class Fuzzier : FuzzyAction() {
             return
         }
 
-        currentTask?.takeIf { !it.isDone }?.cancel(true)
-        currentTask = ApplicationManager.getApplication().executeOnPooledThread {
-            try {
-                // Create a reference to the current task to check if it has been cancelled
-                val task = currentTask
-                component.fileList.setPaintBusy(true)
+        currentUpdateListContentJob?.cancel()
+        currentUpdateListContentJob = actionScope.launch(Dispatchers.EDT) {
+            // Create a reference to the current task to check if it has been cancelled
+            val task = currentTask
+            component.fileList.setPaintBusy(true)
 
-                val stringEvaluator = getStringEvaluator()
-                if (task?.isCancelled == true) return@executeOnPooledThread
+            val stringEvaluator = getStringEvaluator()
+            if (task?.isCancelled == true) return@launch
 
-                val iterationFiles = collectIterationFiles(project, task)
-                if (task?.isCancelled == true) return@executeOnPooledThread
+            val iterationFiles = collectIterationFiles(project, task)
+            if (task?.isCancelled == true) return@launch
 
-                val listModel = processFiles(iterationFiles, stringEvaluator, searchString, task)
-                if (task?.isCancelled == true) return@executeOnPooledThread
+            val listModel = processFiles(iterationFiles, stringEvaluator, searchString, task)
+            if (task?.isCancelled == true) return@launch
 
-                ApplicationManager.getApplication().invokeLater {
-                    component.fileList.model = listModel
-                    component.fileList.cellRenderer = getCellRenderer()
-                    component.fileList.setPaintBusy(false)
-                    if (!component.fileList.isEmpty) {
-                        component.fileList.setSelectedValue(listModel[0], true)
-                    }
-                }
-            } catch (_: InterruptedException) {
-                return@executeOnPooledThread
-            } catch (_: CancellationException) {
-                return@executeOnPooledThread
-            }
+            // Does this need to still happen in an invokeLater block?
+            component.refreshModel(listModel, getCellRenderer())
         }
     }
 

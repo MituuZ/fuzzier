@@ -216,12 +216,7 @@ open class FuzzyGrep() : FuzzyAction() {
 
             if (currentJob?.isCancelled == true) return@launch
 
-            component.fileList.model = results
-            component.fileList.cellRenderer = getCellRenderer()
-            if (!results.isEmpty) {
-                component.fileList.selectedIndex = 0
-            }
-            component.fileList.setPaintBusy(false)
+            component.refreshModel(results, getCellRenderer())
         }
     }
 

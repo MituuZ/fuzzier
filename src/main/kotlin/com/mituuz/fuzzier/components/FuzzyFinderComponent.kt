@@ -78,7 +78,7 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
         }
         searchField.text = ""
         val fileListScrollPane = JBScrollPane()
-        fileList = JBList<FuzzyContainer?>()
+        fileList = JBList<FuzzyContainer>()
         fileList.selectionMode = 0
         fileListScrollPane.setViewportView(fileList)
 
