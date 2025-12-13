@@ -24,21 +24,20 @@
 
 package com.mituuz.fuzzier.entities
 
-sealed interface IterationEntry {
-    val name: String
-    val path: String
+data class IterationEntry(
+    val name: String,
+    val path: String,
     val module: String
-}
+)
 
-data class FileEntry(
-    override val name: String,
-    override val path: String,
-    override val module: String,
-    val isDirectory: Boolean = false
-) : IterationEntry
-
-data class DirEntry(
-    override val name: String,
-    override val path: String,
-    override val module: String,
-) : IterationEntry
+//data class FileEntry(
+//    override val name: String,
+//    override val path: String,
+//    override val module: String,
+//) : IterationEntry
+//
+//data class DirEntry(
+//    override val name: String,
+//    override val path: String,
+//    override val module: String,
+//) : IterationEntry

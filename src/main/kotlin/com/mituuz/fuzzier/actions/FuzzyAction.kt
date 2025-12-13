@@ -58,7 +58,6 @@ import java.awt.event.ActionEvent
 import java.util.*
 import java.util.Timer
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.Future
 import javax.swing.*
 import kotlin.concurrent.schedule
 
@@ -75,8 +74,6 @@ abstract class FuzzyAction : AnAction() {
     protected var defaultDoc: Document? = null
     private val fileTypeManager = FileTypeManager.getInstance()
 
-    @Volatile
-    var currentTask: Future<*>? = null
     val fuzzierUtil = FuzzierUtil()
     protected open var currentUpdateListContentJob: Job? = null
     protected open var actionScope: CoroutineScope? = null

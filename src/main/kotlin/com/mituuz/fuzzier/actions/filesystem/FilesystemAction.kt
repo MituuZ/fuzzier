@@ -33,6 +33,7 @@ import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.vfs.VirtualFile
 import com.mituuz.fuzzier.actions.FuzzyAction
 import com.mituuz.fuzzier.entities.IterationEntry
+import com.mituuz.fuzzier.entities.StringEvaluator
 import com.mituuz.fuzzier.intellij.iteration.IntelliJIterationFileCollector
 import com.mituuz.fuzzier.intellij.iteration.IterationFileCollector
 import kotlinx.coroutines.currentCoroutineContext
@@ -69,4 +70,16 @@ abstract class FilesystemAction : FuzzyAction() {
             fileFilter = buildFileFilter(project)
         )
     }
+
+    fun getStringEvaluator(): StringEvaluator {
+        val combinedExclusions = buildSet {
+            addAll(projectState.exclusionSet)
+            addAll(globalState.globalExclusionSet)
+        }
+        return StringEvaluator(
+            combinedExclusions,
+            projectState.modules,
+        )
+    }
+
 }

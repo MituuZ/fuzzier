@@ -160,13 +160,13 @@ open class Fuzzier : FilesystemAction() {
                 val stringEvaluator = getStringEvaluator()
                 coroutineContext.ensureActive()
 
-                val iterationFiles = withContext(Dispatchers.Default) {
+                val iterationEntries = withContext(Dispatchers.Default) {
                     collectIterationFiles(project)
                 }
                 coroutineContext.ensureActive()
 
                 val listModel = withContext(Dispatchers.Default) {
-                    processFiles(iterationFiles, stringEvaluator, searchString)
+                    processIterationEntries(iterationEntries, stringEvaluator, searchString)
                 }
                 coroutineContext.ensureActive()
 
@@ -188,22 +188,11 @@ open class Fuzzier : FilesystemAction() {
         }
     }
 
-    private fun getStringEvaluator(): StringEvaluator {
-        val combinedExclusions = buildSet {
-            addAll(projectState.exclusionSet)
-            addAll(globalState.globalExclusionSet)
-        }
-        return StringEvaluator(
-            combinedExclusions,
-            projectState.modules,
-        )
-    }
-
     /**
      * Processes a set of IterationFiles concurrently
      * @return a priority list which has been size limited and sorted
      */
-    private suspend fun processFiles(
+    private suspend fun processIterationEntries(
         fileEntries: List<IterationEntry>,
         stringEvaluator: StringEvaluator,
         searchString: String

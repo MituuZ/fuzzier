@@ -29,12 +29,10 @@ import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.EDT
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.fileEditor.FileEditorManager
-import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.rootManager
-import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
@@ -45,20 +43,24 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer
+import com.mituuz.fuzzier.entities.IterationEntry
 import com.mituuz.fuzzier.entities.StringEvaluator
 import com.mituuz.fuzzier.util.FuzzierUtil
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
+import java.util.*
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.Future
+import java.util.concurrent.ConcurrentHashMap
 import javax.swing.AbstractAction
 import javax.swing.DefaultListModel
 import javax.swing.JComponent
 import javax.swing.KeyStroke
-import kotlin.coroutines.cancellation.CancellationException
 
 class FuzzyMover : FilesystemAction() {
     override var popupTitle = "Fuzzy File Mover"
@@ -67,14 +69,14 @@ class FuzzyMover : FilesystemAction() {
     lateinit var currentFile: VirtualFile
 
     override fun buildFileFilter(project: Project): (VirtualFile) -> Boolean {
-        if (component.isDirSelector) {
-            return { vf -> vf.isDirectory }
-        }
-        return { vf -> !vf.isDirectory }
+        return { vf -> if (component.isDirSelector) vf.isDirectory else !vf.isDirectory }
     }
 
     override fun runAction(project: Project, actionEvent: AnActionEvent) {
         setCustomHandlers()
+
+        actionScope?.cancel()
+        actionScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
         ApplicationManager.getApplication().invokeLater {
             component = SimpleFinderComponent()
@@ -96,7 +98,11 @@ class FuzzyMover : FilesystemAction() {
         popup.addListener(object : JBPopupListener {
             override fun onClosed(event: LightweightWindowEvent) {
                 resetOriginalHandlers()
-                super.onClosed(event)
+
+                currentUpdateListContentJob?.cancel()
+                currentUpdateListContentJob = null
+
+                actionScope?.cancel()
             }
         })
 
@@ -189,89 +195,95 @@ class FuzzyMover : FilesystemAction() {
             return
         }
 
-        currentTask?.takeIf { !it.isDone }?.cancel(true)
-        currentTask = ApplicationManager.getApplication().executeOnPooledThread {
+        currentUpdateListContentJob?.cancel()
+        currentUpdateListContentJob = actionScope?.launch(Dispatchers.EDT) {
             component.fileList.setPaintBusy(true)
 
             try {
-                // Create a reference to the current task to check if it has been cancelled
-                val task = currentTask
-                var listModel = DefaultListModel<FuzzyContainer>()
-
                 val stringEvaluator = getStringEvaluator()
+                coroutineContext.ensureActive()
 
-                if (task?.isCancelled == true) return@executeOnPooledThread
-
-                process(project, stringEvaluator, searchString, listModel, task)
-
-                if (task?.isCancelled == true) return@executeOnPooledThread
-
-                listModel = fuzzierUtil.sortAndLimit(listModel, true)
-
-                if (task?.isCancelled == true) return@executeOnPooledThread
-
-                ApplicationManager.getApplication().invokeLater {
-                    component.refreshModel(listModel, getCellRenderer())
+                val iterationEntries = withContext(Dispatchers.Default) {
+                    collectIterationFiles(project)
                 }
-            } catch (_: InterruptedException) {
-                return@executeOnPooledThread
-            } catch (_: CancellationException) {
-                return@executeOnPooledThread
+                coroutineContext.ensureActive()
+
+                val listModel = withContext(Dispatchers.Default) {
+                    processIterationEntries(iterationEntries, stringEvaluator, searchString)
+                }
+                coroutineContext.ensureActive()
+
+                component.refreshModel(listModel, getCellRenderer())
             } finally {
                 component.fileList.setPaintBusy(false)
             }
         }
     }
 
-    private fun getStringEvaluator(): StringEvaluator {
-        val combinedExclusions = buildSet {
-            addAll(projectState.exclusionSet)
-            addAll(globalState.globalExclusionSet)
-        }
-        return StringEvaluator(
-            combinedExclusions,
-            projectState.modules
-        )
-    }
-
-    private fun process(
-        project: Project, stringEvaluator: StringEvaluator, searchString: String,
-        listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?
-    ) {
-        val moduleManager = ModuleManager.Companion.getInstance(project)
+    private suspend fun processIterationEntries(
+        fileEntries: List<IterationEntry>,
+        stringEvaluator: StringEvaluator,
+        searchString: String
+    ): DefaultListModel<FuzzyContainer> {
         val ss = FuzzierUtil.Companion.cleanSearchString(searchString, projectState.ignoredCharacters)
-        if (projectState.isProject) {
-            processProject(project, stringEvaluator, ss, listModel, task)
-        } else {
-            processModules(moduleManager, stringEvaluator, ss, listModel, task)
-        }
-    }
+        val processedFiles = ConcurrentHashMap.newKeySet<String>()
+        val listLimit = globalState.fileListLimit
+        val priorityQueue = PriorityQueue(
+            listLimit + 1,
+            compareBy<FuzzyMatchContainer> { it.getScore() }
+        )
 
-    private fun processProject(
-        project: Project, stringEvaluator: StringEvaluator,
-        searchString: String, listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?
-    ) {
-        val contentIterator = if (!component.isDirSelector) {
-            stringEvaluator.getContentIterator(project.name, searchString, listModel, task)
-        } else {
-            stringEvaluator.getDirIterator(project.name, searchString, listModel, task)
-        }
-        ProjectFileIndex.getInstance(project).iterateContent(contentIterator)
-    }
+        val queueLock = Any()
+        var minimumScore: Int? = null
 
-    private fun processModules(
-        moduleManager: ModuleManager, stringEvaluator: StringEvaluator,
-        searchString: String, listModel: DefaultListModel<FuzzyContainer>, task: Future<*>?
-    ) {
-        for (module in moduleManager.modules) {
-            val moduleFileIndex = module.rootManager.fileIndex
+        val cores = Runtime.getRuntime().availableProcessors().coerceAtLeast(1)
+        val parallelism = (cores - 1).coerceIn(1, 8)
 
-            val contentIterator = if (!component.isDirSelector) {
-                stringEvaluator.getContentIterator(module.name, searchString, listModel, task)
-            } else {
-                stringEvaluator.getDirIterator(module.name, searchString, listModel, task)
+        coroutineScope {
+            val ch = Channel<IterationEntry>(capacity = parallelism * 2)
+
+            repeat(parallelism) {
+                launch {
+                    for (iterationFile in ch) {
+                        val container = stringEvaluator.evaluateIteratorEntry(iterationFile, ss)
+                        container?.let { fuzzyMatchContainer ->
+                            synchronized(queueLock) {
+                                minimumScore = priorityQueue.maybeAdd(minimumScore, fuzzyMatchContainer)
+                            }
+                        }
+                    }
+                }
             }
-            moduleFileIndex.iterateContent(contentIterator)
+
+            fileEntries
+                .filter { processedFiles.add(it.path) }
+                .forEach { ch.send(it) }
+            ch.close()
         }
+
+
+        val result = DefaultListModel<FuzzyContainer>()
+        result.addAll(
+            priorityQueue.sortedWith(
+                compareByDescending<FuzzyMatchContainer> { it.getScore() })
+        )
+        return result
+    }
+
+    private fun PriorityQueue<FuzzyMatchContainer>.maybeAdd(
+        minimumScore: Int?,
+        fuzzyMatchContainer: FuzzyMatchContainer
+    ): Int? {
+        var ret = minimumScore
+
+        if (minimumScore == null || fuzzyMatchContainer.getScore() > minimumScore) {
+            this.add(fuzzyMatchContainer)
+            if (this.size > globalState.fileListLimit) {
+                this.remove()
+                ret = this.peek().getScore()
+            }
+        }
+
+        return ret
     }
 }
