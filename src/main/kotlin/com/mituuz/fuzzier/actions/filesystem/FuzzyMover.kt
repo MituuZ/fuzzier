@@ -32,7 +32,6 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.vfs.VirtualFile
@@ -41,6 +40,8 @@ import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.mituuz.fuzzier.components.SimpleFinderComponent
+import com.mituuz.fuzzier.ui.DefaultPopupProvider
+import com.mituuz.fuzzier.ui.PopupConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -60,6 +61,7 @@ class FuzzyMover : FilesystemAction() {
     override var dimensionKey = "FuzzyMoverPopup"
     lateinit var movableFile: PsiFile
     lateinit var currentFile: VirtualFile
+    private val popupProvider = DefaultPopupProvider()
 
     override fun buildFileFilter(project: Project): (VirtualFile) -> Boolean {
         return { vf -> if (component.isDirSelector) vf.isDirectory else !vf.isDirectory }
@@ -80,14 +82,25 @@ class FuzzyMover : FilesystemAction() {
                 component.fileList.setEmptyText("Press enter to use current file: ${currentFile.path}")
             }
 
-            showPopup(project)
+            // showPopup(project)
+            popup = popupProvider.show(
+                project = project,
+                content = component,
+                focus = component.searchField,
+                config = PopupConfig(
+                    title = popupTitle,
+                    preferredSizeProvider = component.preferredSize,
+                    dimensionKey = dimensionKey,
+                    resetWindow = { globalState.resetWindow },
+                    clearResetWindowFlag = { globalState.resetWindow = false }
+                )
+            )
+            createPopup()
             createSharedListeners(project)
         }
     }
 
-    override fun createPopup(screenDimensionKey: String): JBPopup {
-        val popup = getInitialPopup(screenDimensionKey)
-
+    fun createPopup() {
         popup.addListener(object : JBPopupListener {
             override fun onClosed(event: LightweightWindowEvent) {
                 resetOriginalHandlers()
@@ -98,8 +111,6 @@ class FuzzyMover : FilesystemAction() {
                 actionScope?.cancel()
             }
         })
-
-        return popup
     }
 
     override fun handleEmptySearchString(project: Project) {

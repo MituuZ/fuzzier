@@ -30,7 +30,6 @@ import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.impl.EditorHistoryManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.vfs.VirtualFile
@@ -39,6 +38,8 @@ import com.intellij.util.SingleAlarm
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
+import com.mituuz.fuzzier.ui.DefaultPopupProvider
+import com.mituuz.fuzzier.ui.PopupConfig
 import com.mituuz.fuzzier.util.InitialViewHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -58,6 +59,7 @@ open class Fuzzier : FilesystemAction() {
     override var dimensionKey = "FuzzySearchPopup"
     private var previewAlarm: SingleAlarm? = null
     private var lastPreviewKey: String? = null
+    private val popupProvider = DefaultPopupProvider()
 
     override fun buildFileFilter(project: Project): (VirtualFile) -> Boolean =
         { vf -> !vf.isDirectory }
@@ -73,7 +75,20 @@ open class Fuzzier : FilesystemAction() {
             component = FuzzyFinderComponent(project)
             previewAlarm = getPreviewAlarm()
             createListeners(project)
-            showPopup(project)
+            popup = popupProvider.show(
+                project = project,
+                content = component,
+                focus = component.searchField,
+                config = PopupConfig(
+                    title = popupTitle,
+                    preferredSizeProvider = component.preferredSize,
+                    dimensionKey = dimensionKey,
+                    resetWindow = { globalState.resetWindow },
+                    clearResetWindowFlag = { globalState.resetWindow = false }
+                )
+            )
+            createPopup()
+
             createSharedListeners(project)
 
             (component as FuzzyFinderComponent).splitPane.dividerLocation =
@@ -85,9 +100,7 @@ open class Fuzzier : FilesystemAction() {
         }
     }
 
-    override fun createPopup(screenDimensionKey: String): JBPopup {
-        val popup = getInitialPopup(screenDimensionKey)
-
+    fun createPopup() {
         popup.addListener(object : JBPopupListener {
             override fun onClosed(event: LightweightWindowEvent) {
                 globalState.splitPosition =
@@ -104,8 +117,6 @@ open class Fuzzier : FilesystemAction() {
                 lastPreviewKey = null
             }
         })
-
-        return popup
     }
 
     override fun handleEmptySearchString(project: Project) {

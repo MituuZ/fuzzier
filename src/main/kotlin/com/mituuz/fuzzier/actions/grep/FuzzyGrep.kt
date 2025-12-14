@@ -39,7 +39,6 @@ import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupListener
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.util.Key
@@ -51,6 +50,8 @@ import com.mituuz.fuzzier.actions.grep.FuzzyGrep.Companion.MAX_OUTPUT_SIZE
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.RowContainer
+import com.mituuz.fuzzier.ui.DefaultPopupProvider
+import com.mituuz.fuzzier.ui.PopupConfig
 import kotlinx.coroutines.*
 import org.apache.commons.lang3.StringUtils
 import java.awt.event.ActionEvent
@@ -62,7 +63,7 @@ import javax.swing.DefaultListModel
 import javax.swing.JComponent
 import javax.swing.KeyStroke
 
-open class FuzzyGrep() : FuzzyAction() {
+open class FuzzyGrep : FuzzyAction() {
     companion object {
         const val FUZZIER_NOTIFICATION_GROUP: String = "Fuzzier Notification Group"
 
@@ -78,6 +79,7 @@ open class FuzzyGrep() : FuzzyAction() {
     var useRg = true
     val isWindows = System.getProperty("os.name").lowercase().contains("win")
     private var currentLaunchJob: Job? = null
+    private val popupProvider = DefaultPopupProvider()
 
     override fun runAction(
         project: Project,
@@ -138,7 +140,20 @@ open class FuzzyGrep() : FuzzyAction() {
             defaultDoc = EditorFactory.getInstance().createDocument("")
             component = FuzzyFinderComponent(project, showSecondaryField = useRg)
             createListeners(project)
-            showPopup(project)
+            popup = popupProvider.show(
+                project = project,
+                content = component,
+                focus = component.searchField,
+                config = PopupConfig(
+                    title = popupTitle,
+                    preferredSizeProvider = component.preferredSize,
+                    dimensionKey = dimensionKey,
+                    resetWindow = { globalState.resetWindow },
+                    clearResetWindowFlag = { globalState.resetWindow = false }
+                )
+            )
+
+            createPopup()
             createSharedListeners(project)
 
             (component as FuzzyFinderComponent).splitPane.dividerLocation =
@@ -161,9 +176,7 @@ open class FuzzyGrep() : FuzzyAction() {
         Notifications.Bus.notify(grepNotification, project)
     }
 
-    override fun createPopup(screenDimensionKey: String): JBPopup {
-        val popup = getInitialPopup(screenDimensionKey)
-
+    fun createPopup() {
         popup.addListener(object : JBPopupListener {
             override fun onClosed(event: LightweightWindowEvent) {
                 globalState.splitPosition =
@@ -180,8 +193,6 @@ open class FuzzyGrep() : FuzzyAction() {
                 actionScope?.cancel()
             }
         })
-
-        return popup
     }
 
     /**

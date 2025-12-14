@@ -39,9 +39,6 @@ import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.keymap.KeymapManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
-import com.intellij.openapi.ui.popup.JBPopupFactory
-import com.intellij.openapi.util.DimensionService
-import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.components.FuzzyComponent
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
@@ -49,7 +46,6 @@ import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.util.FuzzierUtil
-import com.mituuz.fuzzier.util.FuzzierUtil.Companion.createDimensionKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import java.awt.Component
@@ -88,39 +84,6 @@ abstract class FuzzyAction : AnAction() {
     }
 
     abstract fun runAction(project: Project, actionEvent: AnActionEvent)
-
-    abstract fun createPopup(screenDimensionKey: String): JBPopup
-
-    fun getInitialPopup(screenDimensionKey: String): JBPopup {
-        return JBPopupFactory
-            .getInstance()
-            .createComponentPopupBuilder(component, component.searchField)
-            .setFocusable(true)
-            .setRequestFocus(true)
-            .setResizable(true)
-            .setDimensionServiceKey(null, screenDimensionKey, true)
-            .setTitle(popupTitle)
-            .setMovable(true)
-            .setShowBorder(true)
-            .createPopup()
-    }
-
-    fun showPopup(project: Project) {
-        val mainWindow = WindowManager.getInstance().getIdeFrame(project)?.component
-        mainWindow?.let {
-            val screenBounds = it.graphicsConfiguration.bounds
-            val screenDimensionKey = createDimensionKey(dimensionKey, screenBounds)
-
-            if (globalState.resetWindow) {
-                DimensionService.getInstance().setSize(screenDimensionKey, component.preferredSize, null)
-                DimensionService.getInstance().setLocation(screenDimensionKey, null, null)
-                globalState.resetWindow = false
-            }
-
-            popup = createPopup(screenDimensionKey)
-            popup.showInCenterOf(it)
-        }
-    }
 
     fun createSharedListeners(project: Project) {
         val inputMap = component.searchField.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)

@@ -30,9 +30,7 @@ import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.rootManager
 import com.intellij.openapi.roots.ProjectFileIndex
-import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.platform.runtime.loader.IntellijLoader.launch
 import com.mituuz.fuzzier.actions.FuzzyAction
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
@@ -41,15 +39,9 @@ import com.mituuz.fuzzier.entities.StringEvaluator
 import com.mituuz.fuzzier.intellij.iteration.IntelliJIterationFileCollector
 import com.mituuz.fuzzier.intellij.iteration.IterationFileCollector
 import com.mituuz.fuzzier.util.FuzzierUtil
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.util.PriorityQueue
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import javax.swing.DefaultListModel
 
@@ -60,8 +52,6 @@ abstract class FilesystemAction : FuzzyAction() {
         project: Project,
         actionEvent: AnActionEvent
     )
-
-    abstract override fun createPopup(screenDimensionKey: String): JBPopup
 
     abstract fun buildFileFilter(project: Project): (VirtualFile) -> Boolean
 
