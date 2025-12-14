@@ -43,9 +43,9 @@ class AutoSizePopupProvider : PopupProvider {
         focus: JComponent,
         config: PopupConfig,
         cleanupFunction: () -> Unit,
-    ): JBPopup {
+    ): JBPopup? {
         val mainWindow: Component = WindowManager.getInstance().getIdeFrame(project)?.component
-            ?: error("No IDE frame found for project, cannot setup popup")
+            ?: return null
 
         val windowWidth = (mainWindow.width * 0.8).toInt()
         val windowHeight = (mainWindow.height * 0.8).toInt()

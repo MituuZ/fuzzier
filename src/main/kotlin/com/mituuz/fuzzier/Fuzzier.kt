@@ -58,7 +58,7 @@ open class Fuzzier : FilesystemAction() {
             component = FuzzyFinderComponent(project)
             previewAlarm = getPreviewAlarm()
             createListeners(project)
-            popup = popupProvider.show(
+            val maybePopup = popupProvider.show(
                 project = project,
                 content = component,
                 focus = component.searchField,
@@ -71,6 +71,9 @@ open class Fuzzier : FilesystemAction() {
                 ),
                 cleanupFunction = { cleanupPopup() }
             )
+
+            if (maybePopup == null) return@invokeLater
+            popup = maybePopup
 
             createSharedListeners(project)
 

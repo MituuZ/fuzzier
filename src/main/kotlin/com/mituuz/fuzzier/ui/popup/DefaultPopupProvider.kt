@@ -46,9 +46,9 @@ class DefaultPopupProvider(
         focus: JComponent,
         config: PopupConfig,
         cleanupFunction: () -> Unit,
-    ): JBPopup {
+    ): JBPopup? {
         val mainWindow: Component = windowManager.getIdeFrame(project)?.component
-            ?: error("No IDE frame found for project, cannot setup popup")
+            ?: return null
 
         val screenBounds = mainWindow.graphicsConfiguration.bounds
         val screenDimensionKey = createDimensionKey(config.dimensionKey, screenBounds)

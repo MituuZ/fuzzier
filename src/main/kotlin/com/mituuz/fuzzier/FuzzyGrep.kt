@@ -42,6 +42,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
+import com.mituuz.fuzzier.FuzzyGrep.Companion.MAX_NUMBER_OR_RESULTS
+import com.mituuz.fuzzier.FuzzyGrep.Companion.MAX_OUTPUT_SIZE
 import com.mituuz.fuzzier.actions.FuzzyAction
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
@@ -126,7 +128,7 @@ open class FuzzyGrep : FuzzyAction() {
             defaultDoc = EditorFactory.getInstance().createDocument("")
             component = FuzzyFinderComponent(project, showSecondaryField = useRg)
             createListeners(project)
-            popup = popupProvider.show(
+            val maybePopup = popupProvider.show(
                 project = project,
                 content = component,
                 focus = component.searchField,
@@ -139,6 +141,9 @@ open class FuzzyGrep : FuzzyAction() {
                 ),
                 cleanupFunction = { cleanupPopup() },
             )
+
+            if (maybePopup == null) return@launch
+            popup = maybePopup
 
             createSharedListeners(project)
 

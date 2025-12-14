@@ -63,7 +63,7 @@ class FuzzyMover : FilesystemAction() {
                 component.fileList.setEmptyText("Press enter to use current file: ${currentFile.path}")
             }
 
-            popup = popupProvider.show(
+            val maybePopup = popupProvider.show(
                 project = project,
                 content = component,
                 focus = component.searchField,
@@ -75,6 +75,9 @@ class FuzzyMover : FilesystemAction() {
                     clearResetWindowFlag = { globalState.resetWindow = false }),
                 cleanupFunction = { cleanupPopup() },
             )
+
+            if (maybePopup == null) return@invokeLater
+            popup = maybePopup
 
             createSharedListeners(project)
         }

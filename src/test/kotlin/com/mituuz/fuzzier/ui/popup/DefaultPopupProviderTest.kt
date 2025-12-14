@@ -30,7 +30,8 @@ import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.awt.Dimension
@@ -51,7 +52,7 @@ class DefaultPopupProviderTest {
     }
 
     @Test
-    fun `show throws when no IDE frame is available`() {
+    fun `show returns null and exits when no IDE frame is available`() {
         // Set up a lightweight project fixture to get a Project instance
         val factory = IdeaTestFixtureFactory.getFixtureFactory()
         fixture = factory.createLightFixtureBuilder(null, "Test").fixture
@@ -70,12 +71,10 @@ class DefaultPopupProviderTest {
         )
 
         try {
-            val ex = assertThrows(IllegalStateException::class.java) {
-                provider.show(project, content, focus, cfg) { /* cleanup */ }
-            }
-            assertTrue(ex.message!!.startsWith("No IDE frame found for project"))
-
-            // Since we fail early due to missing IDE frame, ensure no side-effects were triggered
+            val popup = provider.show(project, content, focus, cfg) { /* cleanup */ }
+            // Should return null and not throw
+            assertNull(popup)
+            // Since we exit early due to missing IDE frame, ensure no side-effects were triggered
             assertEquals(false, cleared)
         } finally {
             codeFixture.tearDown()
