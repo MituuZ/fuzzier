@@ -40,14 +40,13 @@ intellijPlatform {
         changeNotes = """
     <h2>Version $currentVersion</h2>
     <ul>
-      <li>Add a global exclusion list for convenience when working with multiple projects</li>
+      <li>Refactor file search to use coroutines</li>
         <ul>
-          <li>Combined with the project exclusions at runtime</li>
+          <li>Handle list size limiting during processing instead of doing them separately</li>
         </ul>
-      <li>Add an option to use the editor font on the file list</li>
-        <ul>
-          <li>Defaults to true</li>
-        </ul>
+      <li>Add debouncing for fuzzy file preview using `SingleAlarm`</li>
+      <li>Refactor everything</li>
+      <li>Add auto sizing option for the popup (default)</li>
     </ul>
     """.trimIndent()
 
