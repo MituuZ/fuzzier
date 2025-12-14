@@ -130,7 +130,7 @@ open class Fuzzier : FilesystemAction() {
         component.fileList.setPaintBusy(true)
         ApplicationManager.getApplication().executeOnPooledThread {
             try {
-                val editorHistoryManager = EditorHistoryManager.Companion.getInstance(project)
+                val editorHistoryManager = EditorHistoryManager.getInstance(project)
 
                 val listModel = when (globalState.recentFilesMode) {
                     FuzzierGlobalSettingsService.RecentFilesMode.RECENT_PROJECT_FILES -> InitialViewHandler.Companion.getRecentProjectFiles(
@@ -176,7 +176,7 @@ open class Fuzzier : FilesystemAction() {
             }
         }
         if (fuzzyContainer != null) {
-            InitialViewHandler.Companion.addFileToRecentlySearchedFiles(fuzzyContainer, projectState, globalState)
+            InitialViewHandler.addFileToRecentlySearchedFiles(fuzzyContainer, projectState, globalState)
         }
         popup.cancel()
     }
