@@ -24,6 +24,7 @@
 package com.mituuz.fuzzier
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.modules
 import com.intellij.openapi.project.rootManager
 import com.intellij.openapi.ui.popup.JBPopupFactory
@@ -31,8 +32,10 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.psi.PsiManager
 import com.intellij.testFramework.LightVirtualFile
+import com.intellij.testFramework.PlatformTestUtil
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
+import com.intellij.testFramework.runInEdtAndWait
 import com.mituuz.fuzzier.actions.filesystem.FuzzyMover
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
@@ -68,12 +71,12 @@ class FuzzyMoverTest {
             fuzzyMover.movableFile = virtualFile?.let { PsiManager.getInstance(project).findFile(it) }!!
         }
         if (basePath != null) {
-            fuzzyMover.handleInput(project).thenRun {
-                var targetFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/asd/nope")
-                assertNotNull(targetFile)
-                targetFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/nope")
-                assertNull(targetFile)
-            }.join()
+            run(project)
+
+            var targetFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/asd/nope")
+            assertNotNull(targetFile)
+            targetFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/nope")
+            assertNull(targetFile)
         }
         myFixture.tearDown()
     }
@@ -94,16 +97,15 @@ class FuzzyMoverTest {
         fuzzyMover.component.fileList.model = getListModel(virtualFile)
         fuzzyMover.component.fileList.selectedIndex = 0
         if (basePath != null) {
-            fuzzyMover.handleInput(project).join()
+            run(project)
             fuzzyMover.component.fileList.model = getListModel(virtualDir)
             fuzzyMover.component.fileList.selectedIndex = 0
 
-            fuzzyMover.handleInput(project).thenRun {
-                var targetFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/asd/nope")
-                assertNotNull(targetFile)
-                targetFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/nope")
-                assertNull(targetFile)
-            }.join()
+            run(project)
+            var targetFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/asd/nope")
+            assertNotNull(targetFile)
+            targetFile = VirtualFileManager.getInstance().findFileByUrl("file://$basePath/nope")
+            assertNull(targetFile)
         }
         myFixture.tearDown()
     }
@@ -129,16 +131,15 @@ class FuzzyMoverTest {
         fuzzyMover.component.fileList.model = getListModel(virtualFile)
         fuzzyMover.component.fileList.selectedIndex = 0
         if (basePath != null) {
-            fuzzyMover.handleInput(project).join()
+            run(project)
             fuzzyMover.component.fileList.model = getListModel(virtualDir)
             fuzzyMover.component.fileList.selectedIndex = 0
 
-            fuzzyMover.handleInput(project).thenRun {
-                var targetFile = VirtualFileManager.getInstance().findFileByUrl("$basePath/test/main.kt")
-                assertNotNull(targetFile)
-                targetFile = VirtualFileManager.getInstance().findFileByUrl("$basePath/main.kt")
-                assertNull(targetFile)
-            }.join()
+            run(project)
+            var targetFile = VirtualFileManager.getInstance().findFileByUrl("$basePath/test/main.kt")
+            assertNotNull(targetFile)
+            targetFile = VirtualFileManager.getInstance().findFileByUrl("$basePath/main.kt")
+            assertNull(targetFile)
         }
         myFixture.tearDown()
     }
@@ -163,20 +164,26 @@ class FuzzyMoverTest {
         fuzzyMover.component.fileList.model = getListModel(virtualFile)
         fuzzyMover.component.fileList.selectedIndex = 0
         if (module1BasePath != null) {
-            fuzzyMover.handleInput(project).join()
+            run(project)
             fuzzyMover.component.fileList.model = getListModel(virtualDir)
             fuzzyMover.component.fileList.selectedIndex = 0
             fuzzyMover.popup =
                 JBPopupFactory.getInstance().createComponentPopupBuilder(fuzzyMover.component, null).createPopup()
 
-            fuzzyMover.handleInput(project).thenRun {
-                var targetFile = VirtualFileManager.getInstance().findFileByUrl("$module2BasePath/target/MoveMe.kt")
-                assertNotNull(targetFile)
-                targetFile = VirtualFileManager.getInstance().findFileByUrl("$module1BasePath/MoveMe.kt")
-                assertNull(targetFile)
-            }.join()
+            run(project)
+            var targetFile = VirtualFileManager.getInstance().findFileByUrl("$module2BasePath/target/MoveMe.kt")
+            assertNotNull(targetFile)
+            targetFile = VirtualFileManager.getInstance().findFileByUrl("$module1BasePath/MoveMe.kt")
+            assertNull(targetFile)
         }
         myFixture.tearDown()
+    }
+
+    private fun run(project: Project) {
+        runInEdtAndWait {
+            fuzzyMover.handleInput(project)
+            PlatformTestUtil.dispatchAllEventsInIdeEventQueue()
+        }
     }
 
     private fun getListModel(virtualFile: VirtualFile?): ListModel<FuzzyContainer?> {

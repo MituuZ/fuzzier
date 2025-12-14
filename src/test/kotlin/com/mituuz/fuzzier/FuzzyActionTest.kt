@@ -28,7 +28,6 @@ import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
@@ -191,10 +190,6 @@ class FuzzyActionTest {
             }
 
             override fun runAction(project: Project, actionEvent: AnActionEvent) {
-            }
-
-            override fun createPopup(screenDimensionKey: String): JBPopup {
-                throw Exception("Not required for testing")
             }
 
             override fun updateListContents(project: Project, searchString: String) {

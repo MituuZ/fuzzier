@@ -45,7 +45,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import java.util.concurrent.CompletableFuture
 import javax.swing.DefaultListModel
 
 class FuzzyMover : FilesystemAction() {
@@ -83,8 +82,7 @@ class FuzzyMover : FilesystemAction() {
                     preferredSizeProvider = component.preferredSize,
                     dimensionKey = dimensionKey,
                     resetWindow = { globalState.resetWindow },
-                    clearResetWindowFlag = { globalState.resetWindow = false }
-                ),
+                    clearResetWindowFlag = { globalState.resetWindow = false }),
                 cleanupFunction = { cleanupPopup() },
             )
 
@@ -100,9 +98,7 @@ class FuzzyMover : FilesystemAction() {
 
     private fun createListeners(project: Project) {
         ActivationBindings.install(
-            component,
-            onActivate = { handleInput(project) }
-        )
+            component, onActivate = { handleInput(project) })
     }
 
     fun handleInput(project: Project) {
@@ -126,30 +122,25 @@ class FuzzyMover : FilesystemAction() {
             }
         } else {
             ApplicationManager.getApplication().invokeLater {
-                val targetDirectory: CompletableFuture<PsiDirectory> = CompletableFuture.supplyAsync {
-                    ApplicationManager.getApplication().runReadAction<PsiDirectory> {
-                        val virtualDir =
-                            VirtualFileManager.getInstance().findFileByUrl("file://$selectedValue")
-                        virtualDir?.let { PsiManager.getInstance(project).findDirectory(it) }
-                    }
+                val targetDir = ApplicationManager.getApplication().runReadAction<PsiDirectory> {
+                    val virtualDir = VirtualFileManager.getInstance().findFileByUrl("file://$selectedValue")
+                    virtualDir?.let { PsiManager.getInstance(project).findDirectory(it) }
                 }
 
-                targetDirectory.thenAcceptAsync { targetDir ->
-                    val originalFilePath = movableFile.virtualFile.path
-                    if (targetDir != null) {
-                        WriteCommandAction.runWriteCommandAction(project) {
-                            movableFile.virtualFile.move(movableFile.manager, targetDir.virtualFile)
-                        }
-                        val notification = Notification(
-                            "Fuzzier Notification Group",
-                            "File moved successfully",
-                            "Moved $originalFilePath to $selectedValue",
-                            NotificationType.INFORMATION
-                        )
-                        Notifications.Bus.notify(notification, project)
-                        ApplicationManager.getApplication().invokeLater {
-                            popup.cancel()
-                        }
+                val originalFilePath = movableFile.virtualFile.path
+                if (targetDir != null) {
+                    WriteCommandAction.runWriteCommandAction(project) {
+                        movableFile.virtualFile.move(movableFile.manager, targetDir.virtualFile)
+                    }
+                    val notification = Notification(
+                        "Fuzzier Notification Group",
+                        "File moved successfully",
+                        "Moved $originalFilePath to $selectedValue",
+                        NotificationType.INFORMATION
+                    )
+                    Notifications.Bus.notify(notification, project)
+                    ApplicationManager.getApplication().invokeLater {
+                        popup.cancel()
                     }
                 }
             }
