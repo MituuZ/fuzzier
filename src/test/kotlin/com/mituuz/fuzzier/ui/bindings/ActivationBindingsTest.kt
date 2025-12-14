@@ -45,6 +45,30 @@ class ActivationBindingsTest {
     }
 
     @Test
+    fun `Single-click on list doesn't trigger activation`() {
+        var activations = 0
+        ActivationBindings.install(component, onActivate = { activations++ })
+
+        // Simulate double-click on the file list
+        val evt = MouseEvent(
+            component.fileList,
+            MouseEvent.MOUSE_CLICKED,
+            System.currentTimeMillis(),
+            0,
+            1,
+            1,
+            1,
+            false
+        )
+        // Dispatch to all listeners
+        for (listener in component.fileList.mouseListeners) {
+            listener.mouseClicked(evt)
+        }
+
+        assertEquals(0, activations)
+    }
+
+    @Test
     fun `Double-click on list triggers activation`() {
         var activations = 0
         ActivationBindings.install(component, onActivate = { activations++ })
