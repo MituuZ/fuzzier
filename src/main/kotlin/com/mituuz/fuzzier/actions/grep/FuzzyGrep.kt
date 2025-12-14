@@ -50,18 +50,12 @@ import com.mituuz.fuzzier.actions.grep.FuzzyGrep.Companion.MAX_OUTPUT_SIZE
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.RowContainer
-import com.mituuz.fuzzier.ui.DefaultPopupProvider
-import com.mituuz.fuzzier.ui.PopupConfig
+import com.mituuz.fuzzier.ui.bindings.ActivationBindings
+import com.mituuz.fuzzier.ui.popup.DefaultPopupProvider
+import com.mituuz.fuzzier.ui.popup.PopupConfig
 import kotlinx.coroutines.*
 import org.apache.commons.lang3.StringUtils
-import java.awt.event.ActionEvent
-import java.awt.event.KeyEvent
-import java.awt.event.MouseAdapter
-import java.awt.event.MouseEvent
-import javax.swing.AbstractAction
 import javax.swing.DefaultListModel
-import javax.swing.JComponent
-import javax.swing.KeyStroke
 
 open class FuzzyGrep : FuzzyAction() {
     companion object {
@@ -374,36 +368,19 @@ open class FuzzyGrep : FuzzyAction() {
             }
         }
 
-        // Add a mouse listener for double-click
-        component.fileList.addMouseListener(object : MouseAdapter() {
-            override fun mouseClicked(e: MouseEvent) {
-                if (e.clickCount == 2) {
-                    val selectedValue = component.fileList.selectedValue
-                    val virtualFile =
-                        VirtualFileManager.getInstance().findFileByUrl("file://${selectedValue?.getFileUri()}")
-                    // Open the file in the editor
-                    virtualFile?.let {
-                        openFile(project, selectedValue, it)
-                    }
-                }
-            }
-        })
+        ActivationBindings.install(
+            component,
+            onActivate = { handleInput(project) }
+        )
+    }
 
-        // Add a listener that opens the currently selected file when pressing enter (focus on the text box)
-        val enterKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)
-        val enterActionKey = "openFile"
-        val inputMap = component.searchField.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
-        inputMap.put(enterKeyStroke, enterActionKey)
-        component.searchField.actionMap.put(enterActionKey, object : AbstractAction() {
-            override fun actionPerformed(e: ActionEvent?) {
-                val selectedValue = component.fileList.selectedValue
-                val virtualFile =
-                    VirtualFileManager.getInstance().findFileByUrl("file://${selectedValue?.getFileUri()}")
-                virtualFile?.let {
-                    openFile(project, selectedValue, it)
-                }
-            }
-        })
+    private fun handleInput(project: Project) {
+        val selectedValue = component.fileList.selectedValue
+        val virtualFile =
+            VirtualFileManager.getInstance().findFileByUrl("file://${selectedValue?.getFileUri()}")
+        virtualFile?.let {
+            openFile(project, selectedValue, it)
+        }
     }
 
     private fun openFile(project: Project, fuzzyContainer: FuzzyContainer?, virtualFile: VirtualFile) {

@@ -40,21 +40,15 @@ import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.mituuz.fuzzier.components.SimpleFinderComponent
-import com.mituuz.fuzzier.ui.DefaultPopupProvider
-import com.mituuz.fuzzier.ui.PopupConfig
+import com.mituuz.fuzzier.ui.bindings.ActivationBindings
+import com.mituuz.fuzzier.ui.popup.DefaultPopupProvider
+import com.mituuz.fuzzier.ui.popup.PopupConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import java.awt.event.ActionEvent
-import java.awt.event.KeyEvent
-import java.awt.event.MouseAdapter
-import java.awt.event.MouseEvent
 import java.util.concurrent.CompletableFuture
-import javax.swing.AbstractAction
 import javax.swing.DefaultListModel
-import javax.swing.JComponent
-import javax.swing.KeyStroke
 
 class FuzzyMover : FilesystemAction() {
     override var popupTitle = "Fuzzy File Mover"
@@ -120,28 +114,13 @@ class FuzzyMover : FilesystemAction() {
     }
 
     private fun createListeners(project: Project) {
-        // Add a mouse listener for double-click
-        component.fileList.addMouseListener(object : MouseAdapter() {
-            override fun mouseClicked(e: MouseEvent) {
-                if (e.clickCount == 2) {
-                    handleInput(project)
-                }
-            }
-        })
-
-        val enterKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)
-        val enterActionKey = "openFile"
-        val inputMap = component.searchField.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
-        inputMap.put(enterKeyStroke, enterActionKey)
-        component.searchField.actionMap.put(enterActionKey, object : AbstractAction() {
-            override fun actionPerformed(e: ActionEvent?) {
-                handleInput(project)
-            }
-        })
+        ActivationBindings.install(
+            component,
+            onActivate = { handleInput(project) }
+        )
     }
 
-    fun handleInput(project: Project): CompletableFuture<Unit> {
-        val completableFuture = CompletableFuture<Unit>()
+    fun handleInput(project: Project) {
         var selectedValue = component.fileList.selectedValue?.getFileUri()
         if (selectedValue == null) {
             selectedValue = currentFile.path
@@ -159,7 +138,6 @@ class FuzzyMover : FilesystemAction() {
                 component.isDirSelector = true
                 component.searchField.text = ""
                 component.fileList.setEmptyText("Select target folder")
-                completableFuture.complete(null)
             }
         } else {
             ApplicationManager.getApplication().invokeLater {
@@ -187,13 +165,9 @@ class FuzzyMover : FilesystemAction() {
                         ApplicationManager.getApplication().invokeLater {
                             popup.cancel()
                         }
-                        completableFuture.complete(null)
-                    } else {
-                        completableFuture.complete(null)
                     }
                 }
             }
         }
-        return completableFuture
     }
 }

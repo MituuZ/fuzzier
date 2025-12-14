@@ -22,8 +22,9 @@
  *  SOFTWARE.
  */
 
-package com.mituuz.fuzzier.ui
+package com.mituuz.fuzzier.ui.popup
 
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.util.DimensionService
@@ -34,7 +35,7 @@ import javax.swing.JComponent
 
 class DefaultPopupProvider : PopupProvider {
     override fun show(
-        project: com.intellij.openapi.project.Project,
+        project: Project,
         content: JComponent,
         focus: JComponent,
         config: PopupConfig

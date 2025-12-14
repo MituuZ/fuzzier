@@ -22,7 +22,7 @@
  *  SOFTWARE.
  */
 
-package com.mituuz.fuzzier.ui
+package com.mituuz.fuzzier.ui.popup
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
