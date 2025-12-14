@@ -48,6 +48,8 @@ class FuzzierGlobalSettingsService : PersistentStateComponent<FuzzierGlobalSetti
         var defaultPopupWidth: Int = 900
         var defaultPopupHeight: Int = 600
 
+        var popupSizing: PopupSizing = PopupSizing.AUTO_SIZE
+
         var recentFilesMode: RecentFilesMode = RecentFilesMode.RECENT_PROJECT_FILES
         var filenameType: FilenameType = FILE_PATH_ONLY
         var highlightFilename = false
@@ -94,5 +96,10 @@ class FuzzierGlobalSettingsService : PersistentStateComponent<FuzzierGlobalSetti
         BOTTOM("Bottom"),
         LEFT("Left"),
         RIGHT("Right")
+    }
+
+    enum class PopupSizing(val text: String) {
+        AUTO_SIZE("Auto size"),
+        VANILLA("Vanilla")
     }
 }

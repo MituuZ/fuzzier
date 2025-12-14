@@ -36,8 +36,7 @@ import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.FormBuilder
 import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
-import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode
-import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.SearchPosition
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.*
 import java.awt.Component
 import javax.swing.*
 import javax.swing.border.LineBorder
@@ -162,6 +161,16 @@ class FuzzierGlobalSettingsComponent(
         ComboBox<SearchPosition>(), "Search bar location",
         """
             Controls where the search bar is located on the popup.
+        """.trimIndent(),
+        false
+    )
+
+    val popupSizingSelector = SettingsComponent(
+        ComboBox<PopupSizing>(), "Popup sizing",
+        """
+            Select how the popup size is determined.<br><br>
+            <strong>Auto size</strong> uses content-aware sizing and ignores manual dimensions.<br>
+            <strong>Vanilla</strong> uses the persistent DimensionService sizing with default dimensions below.
         """.trimIndent(),
         false
     )
@@ -309,6 +318,7 @@ class FuzzierGlobalSettingsComponent(
             .addComponent(filenameTypeSelector)
             .addComponent(highlightFilename)
             .addComponent(searchPosition)
+            .addComponent(popupSizingSelector)
             .addComponent(defaultDimension)
             .addComponent(previewFontSize)
             .addComponent(fileListUseEditorFont)
@@ -381,6 +391,25 @@ class FuzzierGlobalSettingsComponent(
         }
         for (sp in SearchPosition.entries) {
             searchPosition.getSearchPositionComboBox().addItem(sp)
+        }
+
+        popupSizingSelector.getPopupSizingComboBox().renderer = object : DefaultListCellRenderer() {
+            override fun getListCellRendererComponent(
+                list: JList<*>?,
+                value: Any?,
+                index: Int,
+                isSelected: Boolean,
+                cellHasFocus: Boolean
+            ): Component {
+                val renderer =
+                    super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) as JLabel
+                val sizing = value as PopupSizing
+                renderer.text = sizing.text
+                return renderer
+            }
+        }
+        for (s in PopupSizing.entries) {
+            popupSizingSelector.getPopupSizingComboBox().addItem(s)
         }
 
         filenameTypeSelector.getFilenameTypeComboBox().renderer = object : DefaultListCellRenderer() {

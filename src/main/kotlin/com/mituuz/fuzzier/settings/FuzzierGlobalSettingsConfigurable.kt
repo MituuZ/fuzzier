@@ -30,6 +30,7 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.NlsContexts
 import com.mituuz.fuzzier.components.FuzzierGlobalSettingsComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.PopupSizing
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.RecentFilesMode
 import javax.swing.JComponent
 
@@ -47,6 +48,7 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
         component = FuzzierGlobalSettingsComponent(uiDisposable!!)
         component.newTabSelect.getCheckBox().isSelected = state.newTab
         component.recentFileModeSelector.getRecentFilesTypeComboBox().selectedIndex = state.recentFilesMode.ordinal
+        component.popupSizingSelector.getPopupSizingComboBox().selectedIndex = state.popupSizing.ordinal
         component.defaultDimension.getIntSpinner(4).value = state.defaultPopupHeight
         component.defaultDimension.getIntSpinner(1).value = state.defaultPopupWidth
         component.searchPosition.getSearchPositionComboBox().selectedIndex = state.searchPosition.ordinal
@@ -65,6 +67,13 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
         component.fileListSpacing.getIntSpinner().value = state.fileListSpacing
         component.fuzzyGrepShowFullFile.getCheckBox().isSelected = state.fuzzyGrepShowFullFile
 
+        // Hide dimension settings when Auto size is selected
+        updateDimensionVisibility(state.popupSizing)
+        component.popupSizingSelector.getPopupSizingComboBox().addItemListener {
+            val selected = component.popupSizingSelector.getPopupSizingComboBox().selectedItem as PopupSizing
+            updateDimensionVisibility(selected)
+        }
+
         component.tolerance.getIntSpinner().value = state.tolerance
         component.multiMatchActive.getCheckBox().isSelected = state.multiMatch
         component.matchWeightPartialPath.getIntSpinner().value = state.matchWeightPartialPath
@@ -73,6 +82,12 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
         component.matchWeightStreakModifier.getIntSpinner().value = state.matchWeightStreakModifier
         component.matchWeightFilename.getIntSpinner().value = state.matchWeightFilename
         return component.jPanel
+    }
+
+    private fun updateDimensionVisibility(sizing: PopupSizing) {
+        val visible = sizing != PopupSizing.AUTO_SIZE
+        component.defaultDimension.label.isVisible = visible
+        component.defaultDimension.component.isVisible = visible
     }
 
     override fun isModified(): Boolean {
@@ -84,6 +99,7 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
 
         return state.newTab != component.newTabSelect.getCheckBox().isSelected
                 || state.recentFilesMode != component.recentFileModeSelector.getRecentFilesTypeComboBox().selectedItem
+                || state.popupSizing != component.popupSizingSelector.getPopupSizingComboBox().selectedItem
                 || state.defaultPopupHeight != component.defaultDimension.getIntSpinner(4).value
                 || state.defaultPopupWidth != component.defaultDimension.getIntSpinner(1).value
                 || state.searchPosition != component.searchPosition.getSearchPositionComboBox().selectedItem
@@ -112,6 +128,8 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
         state.newTab = component.newTabSelect.getCheckBox().isSelected
         state.recentFilesMode =
             RecentFilesMode.entries.toTypedArray()[component.recentFileModeSelector.getRecentFilesTypeComboBox().selectedIndex]
+        state.popupSizing =
+            PopupSizing.entries.toTypedArray()[component.popupSizingSelector.getPopupSizingComboBox().selectedIndex]
 
         val newPopupHeight = component.defaultDimension.getIntSpinner(4).value as Int
         val newPopupWidth = component.defaultDimension.getIntSpinner(1).value as Int
