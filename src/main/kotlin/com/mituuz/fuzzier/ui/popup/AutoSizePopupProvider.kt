@@ -27,7 +27,6 @@ package com.mituuz.fuzzier.ui.popup
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
-import com.intellij.openapi.util.DimensionService
 import com.intellij.openapi.wm.WindowManager
 import java.awt.Component
 import java.awt.Dimension
@@ -38,7 +37,6 @@ class AutoSizePopupProvider(
     private val heightFactor: Double,
     windowManager: WindowManager = WindowManager.getInstance(),
     popupFactory: JBPopupFactory = JBPopupFactory.getInstance(),
-    @Suppress("unused") private val dimensionService: DimensionService = DimensionService.getInstance(),
 ) : PopupProviderBase(windowManager, popupFactory) {
 
     override fun show(
