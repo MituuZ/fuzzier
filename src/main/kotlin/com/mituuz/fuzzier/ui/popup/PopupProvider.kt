@@ -43,5 +43,6 @@ interface PopupProvider {
         content: JComponent,
         focus: JComponent,
         config: PopupConfig,
+        cleanupFunction: () -> Unit
     ): JBPopup?
 }

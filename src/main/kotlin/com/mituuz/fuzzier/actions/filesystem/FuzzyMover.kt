@@ -32,8 +32,6 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.popup.JBPopupListener
-import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.psi.PsiDirectory
@@ -76,7 +74,6 @@ class FuzzyMover : FilesystemAction() {
                 component.fileList.setEmptyText("Press enter to use current file: ${currentFile.path}")
             }
 
-            // showPopup(project)
             popup = popupProvider.show(
                 project = project,
                 content = component,
@@ -87,24 +84,12 @@ class FuzzyMover : FilesystemAction() {
                     dimensionKey = dimensionKey,
                     resetWindow = { globalState.resetWindow },
                     clearResetWindowFlag = { globalState.resetWindow = false }
-                )
+                ),
+                cleanupFunction = { cleanupPopup() },
             )
-            createPopup()
+
             createSharedListeners(project)
         }
-    }
-
-    fun createPopup() {
-        popup.addListener(object : JBPopupListener {
-            override fun onClosed(event: LightweightWindowEvent) {
-                resetOriginalHandlers()
-
-                currentUpdateListContentJob?.cancel()
-                currentUpdateListContentJob = null
-
-                actionScope?.cancel()
-            }
-        })
     }
 
     override fun handleEmptySearchString(project: Project) {

@@ -39,8 +39,6 @@ import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.popup.JBPopupListener
-import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
@@ -144,10 +142,10 @@ open class FuzzyGrep : FuzzyAction() {
                     dimensionKey = dimensionKey,
                     resetWindow = { globalState.resetWindow },
                     clearResetWindowFlag = { globalState.resetWindow = false }
-                )
+                ),
+                cleanupFunction = { cleanupPopup() },
             )
 
-            createPopup()
             createSharedListeners(project)
 
             (component as FuzzyFinderComponent).splitPane.dividerLocation =
@@ -170,23 +168,12 @@ open class FuzzyGrep : FuzzyAction() {
         Notifications.Bus.notify(grepNotification, project)
     }
 
-    fun createPopup() {
-        popup.addListener(object : JBPopupListener {
-            override fun onClosed(event: LightweightWindowEvent) {
-                globalState.splitPosition =
-                    (component as FuzzyFinderComponent).splitPane.dividerLocation
+    override fun onPopupClosed() {
+        globalState.splitPosition =
+            (component as FuzzyFinderComponent).splitPane.dividerLocation
 
-                resetOriginalHandlers()
-
-                currentLaunchJob?.cancel()
-                currentLaunchJob = null
-
-                currentUpdateListContentJob?.cancel()
-                currentUpdateListContentJob = null
-
-                actionScope?.cancel()
-            }
-        })
+        currentLaunchJob?.cancel()
+        currentLaunchJob = null
     }
 
     /**

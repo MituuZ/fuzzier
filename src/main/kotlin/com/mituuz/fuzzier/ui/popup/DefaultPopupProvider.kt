@@ -27,6 +27,8 @@ package com.mituuz.fuzzier.ui.popup
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
+import com.intellij.openapi.ui.popup.JBPopupListener
+import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.util.DimensionService
 import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.util.FuzzierUtil.Companion.createDimensionKey
@@ -38,7 +40,8 @@ class DefaultPopupProvider : PopupProvider {
         project: Project,
         content: JComponent,
         focus: JComponent,
-        config: PopupConfig
+        config: PopupConfig,
+        cleanupFunction: () -> Unit,
     ): JBPopup {
         // TODO: Check the error handling here
         val mainWindow: Component = WindowManager.getInstance().getIdeFrame(project)?.component
@@ -65,6 +68,13 @@ class DefaultPopupProvider : PopupProvider {
             .createPopup()
 
         popup.showInCenterOf(mainWindow)
+
+        popup.addListener(object : JBPopupListener {
+            override fun onClosed(event: LightweightWindowEvent) {
+                cleanupFunction()
+            }
+        })
+
         return popup
     }
 }

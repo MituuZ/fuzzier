@@ -48,6 +48,7 @@ import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.util.FuzzierUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import java.awt.Component
 import java.awt.Font
 import java.awt.event.ActionEvent
@@ -140,6 +141,19 @@ abstract class FuzzyAction : AnAction() {
     }
 
     abstract fun updateListContents(project: Project, searchString: String)
+
+    protected open fun onPopupClosed() = Unit
+
+    fun cleanupPopup() {
+        resetOriginalHandlers()
+
+        currentUpdateListContentJob?.cancel()
+        currentUpdateListContentJob = null
+
+        actionScope?.cancel()
+
+        onPopupClosed()
+    }
 
     fun setCustomHandlers() {
         val actionManager = EditorActionManager.getInstance()

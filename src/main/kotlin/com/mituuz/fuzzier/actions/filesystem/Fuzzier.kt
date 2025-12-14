@@ -30,8 +30,6 @@ import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.impl.EditorHistoryManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.popup.JBPopupListener
-import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.util.SingleAlarm
@@ -79,9 +77,9 @@ open class Fuzzier : FilesystemAction() {
                     dimensionKey = dimensionKey,
                     resetWindow = { globalState.resetWindow },
                     clearResetWindowFlag = { globalState.resetWindow = false }
-                )
+                ),
+                cleanupFunction = { cleanupPopup() }
             )
-            createPopup()
 
             createSharedListeners(project)
 
@@ -94,23 +92,11 @@ open class Fuzzier : FilesystemAction() {
         }
     }
 
-    fun createPopup() {
-        popup.addListener(object : JBPopupListener {
-            override fun onClosed(event: LightweightWindowEvent) {
-                globalState.splitPosition =
-                    (component as FuzzyFinderComponent).splitPane.dividerLocation
-
-                resetOriginalHandlers()
-
-                currentUpdateListContentJob?.cancel()
-                currentUpdateListContentJob = null
-
-                actionScope?.cancel()
-
-                previewAlarm?.dispose()
-                lastPreviewKey = null
-            }
-        })
+    override fun onPopupClosed() {
+        globalState.splitPosition =
+            (component as FuzzyFinderComponent).splitPane.dividerLocation
+        previewAlarm?.dispose()
+        lastPreviewKey = null
     }
 
     override fun handleEmptySearchString(project: Project) {
