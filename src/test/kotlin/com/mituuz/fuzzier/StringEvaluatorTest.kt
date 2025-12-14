@@ -23,63 +23,71 @@
  */
 package com.mituuz.fuzzier
 
+import com.intellij.testFramework.TestApplicationManager
+import com.mituuz.fuzzier.entities.IterationEntry
+import com.mituuz.fuzzier.entities.StringEvaluator
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
 class StringEvaluatorTest {
-    private var testUtil = TestUtil()
+    @Suppress("unused")
+    private var testApplicationManager: TestApplicationManager = TestApplicationManager.getInstance()
+
+    private val moduleName = "mod1"
+    private val moduleBasePath = "/m1/src"
+
+    private fun evaluate(filePaths: List<String>, exclusionList: Set<String>): List<String> {
+        val evaluator = StringEvaluator(exclusionList, mapOf(moduleName to moduleBasePath))
+
+        return filePaths.mapNotNull { fp ->
+            // Build absolute path under a fake module root so that removePrefix(moduleBasePath) works like in production
+            val relativeToSrc = fp.removePrefix("src") // e.g., "src/a/b.kt" -> "/a/b.kt"
+            val fullPath = "/m1/src$relativeToSrc"
+            val name = fullPath.substring(fullPath.lastIndexOf('/') + 1)
+            val entry = IterationEntry(name = name, path = fullPath, module = moduleName)
+            evaluator.evaluateIteratorEntry(entry, "")?.filePath
+        }.sorted() // deterministic order for assertions
+    }
 
     @Test
     fun excludeListTest() {
         val filePaths = listOf("src/main.kt", "src/asd/main.kt", "src/asd/asd.kt", "src/not/asd.kt", "src/nope")
-        val filePathContainer = testUtil.setUpModuleFileIndex(filePaths, setOf("asd", "nope"))
-        Assertions.assertEquals(1, filePathContainer.size())
-        Assertions.assertEquals("/main.kt", filePathContainer.get(0).filePath)
+        val results = evaluate(filePaths, setOf("asd", "nope"))
+        Assertions.assertEquals(listOf("/main.kt"), results)
     }
 
     @Test
     fun excludeListTestNoMatches() {
         val filePaths = listOf("src/main.kt", "src/not.kt", "src/dsa/not.kt")
-        val filePathContainer = testUtil.setUpModuleFileIndex(filePaths, setOf("asd"))
-        Assertions.assertEquals(3, filePathContainer.size())
-        Assertions.assertEquals("/main.kt", filePathContainer.get(2).filePath)
-        Assertions.assertEquals("/not.kt", filePathContainer.get(1).filePath)
-        Assertions.assertEquals("/dsa/not.kt", filePathContainer.get(0).filePath)
+        val results = evaluate(filePaths, setOf("asd"))
+        Assertions.assertEquals(setOf("/main.kt", "/not.kt", "/dsa/not.kt"), results.toSet())
     }
 
     @Test
     fun excludeListTestEmptyList() {
         val filePaths = listOf("src/main.kt", "src/not.kt", "src/dsa/not.kt")
-        val filePathContainer = testUtil.setUpModuleFileIndex(filePaths, setOf())
-        Assertions.assertEquals(3, filePathContainer.size())
-        Assertions.assertEquals("/main.kt", filePathContainer.get(2).filePath)
-        Assertions.assertEquals("/not.kt", filePathContainer.get(1).filePath)
-        Assertions.assertEquals("/dsa/not.kt", filePathContainer.get(0).filePath)
+        val results = evaluate(filePaths, emptySet())
+        Assertions.assertEquals(setOf("/main.kt", "/not.kt", "/dsa/not.kt"), results.toSet())
     }
 
     @Test
     fun excludeListTestStartsWith() {
         val filePaths = listOf("src/main.kt", "src/asd/main.kt", "src/asd/asd.kt", "src/not/asd.kt")
-        val filePathContainer = testUtil.setUpModuleFileIndex(filePaths, setOf("/asd*"))
-        Assertions.assertEquals(2, filePathContainer.size())
-        Assertions.assertEquals("/not/asd.kt", filePathContainer.get(0).filePath)
+        val results = evaluate(filePaths, setOf("/asd*"))
+        Assertions.assertEquals(setOf("/main.kt", "/not/asd.kt"), results.toSet())
     }
 
     @Test
     fun excludeListTestEndsWith() {
         val filePaths = listOf("src/main.log", "src/asd/main.log", "src/asd/asd.kt", "src/not/asd.kt", "src/nope")
-        val filePathContainer = testUtil.setUpModuleFileIndex(filePaths, setOf("*.log"))
-        Assertions.assertEquals(3, filePathContainer.size())
-        Assertions.assertEquals("/asd/asd.kt", filePathContainer.get(0).filePath)
+        val results = evaluate(filePaths, setOf("*.log"))
+        Assertions.assertEquals(setOf("/asd/asd.kt", "/not/asd.kt", "/nope"), results.toSet())
     }
 
     @Test
     fun testIgnoreEmptyList() {
         val filePaths = listOf("src/dir/file.txt", "src/main.kt", "src/other.kt")
-        val filePathContainer = testUtil.setUpModuleFileIndex(filePaths, setOf())
-        Assertions.assertEquals(3, filePathContainer.size())
-        Assertions.assertEquals("/dir/file.txt", filePathContainer.get(0).filePath)
-        Assertions.assertEquals("/main.kt", filePathContainer.get(1).filePath)
-        Assertions.assertEquals("/other.kt", filePathContainer.get(2).filePath)
+        val results = evaluate(filePaths, emptySet())
+        Assertions.assertEquals(setOf("/dir/file.txt", "/main.kt", "/other.kt"), results.toSet())
     }
 }

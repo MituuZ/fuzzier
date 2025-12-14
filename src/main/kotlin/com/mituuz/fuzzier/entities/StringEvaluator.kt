@@ -47,6 +47,9 @@ class StringEvaluator(
         return null
     }
 
+    /**
+     * Only used by test bench as it provides it's own custom scoreCalculator
+     */
     fun evaluateIteratorEntry(
         iteratorEntry: IterationEntry,
         scoreCalculator: ScoreCalculator,
