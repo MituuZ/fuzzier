@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 1.15.0
+
+- Refactor fuzzy file search to use coroutines
+  - Handle list size limiting during processing instead of doing them separately
+- Add debouncing for fuzzy file preview using `SingleAlarm`
+- Refactor everything
+
 ## Version 1.14.0
 
 - Add a global exclusion list for convenience when working with multiple projects
