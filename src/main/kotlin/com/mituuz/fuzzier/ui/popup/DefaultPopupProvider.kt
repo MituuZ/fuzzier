@@ -35,7 +35,11 @@ import com.mituuz.fuzzier.util.FuzzierUtil.Companion.createDimensionKey
 import java.awt.Component
 import javax.swing.JComponent
 
-class DefaultPopupProvider : PopupProvider {
+class DefaultPopupProvider(
+    private val windowManager: WindowManager = WindowManager.getInstance(),
+    private val popupFactory: JBPopupFactory = JBPopupFactory.getInstance(),
+    private val dimensionService: DimensionService = DimensionService.getInstance(),
+) : PopupProvider {
     override fun show(
         project: Project,
         content: JComponent,
@@ -43,20 +47,19 @@ class DefaultPopupProvider : PopupProvider {
         config: PopupConfig,
         cleanupFunction: () -> Unit,
     ): JBPopup {
-        // TODO: Check the error handling here
-        val mainWindow: Component = WindowManager.getInstance().getIdeFrame(project)?.component
-            ?: error("No IDE frame found for project")
+        val mainWindow: Component = windowManager.getIdeFrame(project)?.component
+            ?: error("No IDE frame found for project, cannot setup popup")
 
         val screenBounds = mainWindow.graphicsConfiguration.bounds
         val screenDimensionKey = createDimensionKey(config.dimensionKey, screenBounds)
 
         if (config.resetWindow()) {
-            DimensionService.getInstance().setSize(screenDimensionKey, config.preferredSizeProvider, null)
-            DimensionService.getInstance().setLocation(screenDimensionKey, null, null)
+            dimensionService.setSize(screenDimensionKey, config.preferredSizeProvider, null)
+            dimensionService.setLocation(screenDimensionKey, null, null)
             config.clearResetWindowFlag()
         }
 
-        val popup = JBPopupFactory.getInstance()
+        val popup = popupFactory
             .createComponentPopupBuilder(content, focus)
             .setFocusable(true)
             .setRequestFocus(true)
@@ -69,12 +72,14 @@ class DefaultPopupProvider : PopupProvider {
 
         popup.showInCenterOf(mainWindow)
 
-        popup.addListener(object : JBPopupListener {
-            override fun onClosed(event: LightweightWindowEvent) {
-                cleanupFunction()
-            }
-        })
+        popup.addListener(createCleanupListener(cleanupFunction))
 
         return popup
+    }
+
+    internal fun createCleanupListener(cleanupFunction: () -> Unit): JBPopupListener = object : JBPopupListener {
+        override fun onClosed(event: LightweightWindowEvent) {
+            cleanupFunction()
+        }
     }
 }
