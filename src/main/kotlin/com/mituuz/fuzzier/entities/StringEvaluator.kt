@@ -31,29 +31,12 @@ class StringEvaluator(
     private var exclusionList: Set<String>,
     private var modules: Map<String, String>,
 ) {
-    fun evaluateIteratorEntry(iteratorEntry: IterationEntry, searchString: String): FuzzyMatchContainer? {
-        val scoreCalculator = ScoreCalculator(searchString)
-        val moduleName = iteratorEntry.module
-
-        val moduleBasePath = modules[moduleName] ?: return null
-
-        val dirPath = iteratorEntry.path.removePrefix(moduleBasePath)
-        if (isExcluded(dirPath)) return null
-
-        if (dirPath.isNotBlank()) {
-            return createFuzzyContainer(dirPath, moduleBasePath, scoreCalculator)
-        }
-
-        return null
-    }
-
-    /**
-     * Only used by test bench as it provides it's own custom scoreCalculator
-     */
     fun evaluateIteratorEntry(
         iteratorEntry: IterationEntry,
-        scoreCalculator: ScoreCalculator,
+        searchString: String,
+        matchConfig: MatchConfig
     ): FuzzyMatchContainer? {
+        val scoreCalculator = ScoreCalculator(searchString, matchConfig)
         val moduleName = iteratorEntry.module
 
         val moduleBasePath = modules[moduleName] ?: return null

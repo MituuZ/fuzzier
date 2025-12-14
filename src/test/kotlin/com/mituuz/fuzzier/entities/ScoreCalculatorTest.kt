@@ -1,39 +1,35 @@
 /*
-MIT License
-
-Copyright (c) 2025 Mitja Leino
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+ *  MIT License
+ *
+ *  Copyright (c) 2025 Mitja Leino
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
+ */
 package com.mituuz.fuzzier.entities
 
-import com.intellij.testFramework.TestApplicationManager
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class ScoreCalculatorTest {
-    @Suppress("unused") // Required for the tests
-    private var testApplicationManager: TestApplicationManager = TestApplicationManager.getInstance()
-
     @Test
     fun `Search string contained same index`() {
-        val sc = ScoreCalculator("test")
+        val sc = ScoreCalculator("test", MatchConfig())
         sc.searchStringIndex = 0
         sc.searchStringLength = 4
 
@@ -45,7 +41,7 @@ class ScoreCalculatorTest {
 
     @Test
     fun `Search string contained different index`() {
-        val sc = ScoreCalculator("test")
+        val sc = ScoreCalculator("test", MatchConfig())
         sc.searchStringIndex = 0
         sc.searchStringLength = 4
 
@@ -57,82 +53,91 @@ class ScoreCalculatorTest {
 
     @Test
     fun `Basic streak happy case`() {
-        val sc = ScoreCalculator("test")
+        val matchConfig = MatchConfig(
+            matchWeightStreakModifier = 10
+        )
+        val sc = ScoreCalculator("test", matchConfig)
 
-        sc.setMatchWeightStreakModifier(10)
         val fScore = sc.calculateScore("/test")
         assertEquals(4, fScore!!.streakScore)
     }
 
     @Test
     fun `Basic streak longer path`() {
-        val sc = ScoreCalculator("test")
+        val matchConfig = MatchConfig(
+            matchWeightStreakModifier = 10
+        )
+        val sc = ScoreCalculator("test", matchConfig)
 
-        sc.setMatchWeightStreakModifier(10)
         val fScore = sc.calculateScore("/te/st")
         assertEquals(2, fScore!!.streakScore)
     }
 
     @Test
     fun `Basic streak no possible match`() {
-        val sc = ScoreCalculator("test")
+        val matchConfig = MatchConfig(
+            matchWeightStreakModifier = 10
+        )
+        val sc = ScoreCalculator("test", matchConfig)
 
-        sc.setMatchWeightStreakModifier(10)
         val fScore = sc.calculateScore("/te")
         assertNull(fScore)
     }
 
     @Test
     fun `Multi match basic test`() {
-        val sc = ScoreCalculator("test")
+        val matchConfig = MatchConfig(
+            matchWeightSingleChar = 10, multiMatch = true
+        )
+        val sc = ScoreCalculator("test", matchConfig)
 
-        sc.setMultiMatch(true)
-        sc.setMatchWeightSingleChar(10)
         val fScore = sc.calculateScore("/test")
         assertEquals(4, fScore!!.multiMatchScore)
     }
 
     @Test
     fun `Multi match basic test multiples`() {
-        val sc = ScoreCalculator("test")
-
-        sc.setMultiMatch(true)
-        sc.setMatchWeightSingleChar(10)
+        val matchConfig = MatchConfig(
+            matchWeightSingleChar = 10, multiMatch = true
+        )
+        val sc = ScoreCalculator("test", matchConfig)
         val fScore = sc.calculateScore("/testtest")
         assertEquals(8, fScore!!.multiMatchScore)
     }
 
     @Test
     fun `Multi match basic test multiples multiples`() {
-        val sc = ScoreCalculator("test test")
-
-        sc.setMultiMatch(true)
-        sc.setMatchWeightSingleChar(10)
+        val matchConfig = MatchConfig(
+            matchWeightSingleChar = 10, multiMatch = true
+        )
+        val sc = ScoreCalculator("test test", matchConfig)
         val fScore = sc.calculateScore("/testtest")
         assertEquals(8, fScore!!.multiMatchScore)
     }
 
     @Test
     fun `Partial path score basic test`() {
-        val sc = ScoreCalculator("test")
-
-        sc.setMatchWeightPartialPath(1)
+        val matchConfig = MatchConfig(
+            matchWeightPartialPath = 1
+        )
+        val sc = ScoreCalculator("test", matchConfig)
         val fScore = sc.calculateScore("/test.kt")
         assertEquals(1, fScore!!.partialPathScore)
     }
 
     @Test
     fun `Filename score basic test`() {
-        val sc = ScoreCalculator("test")
-
-        sc.setFilenameMatchWeight(10)
+        val matchConfig = MatchConfig(
+            matchWeightFilename = 10
+        )
+        val sc = ScoreCalculator("test", matchConfig)
         val fScore = sc.calculateScore("/test.kt")
         assertEquals(4, fScore!!.filenameScore)
     }
 
     @Test
     fun `Empty ss and fp`() {
-        val sc = ScoreCalculator("")
+        val sc = ScoreCalculator("", MatchConfig())
 
         val fScore = sc.calculateScore("")
         assertEquals(0, fScore!!.getTotalScore())
@@ -141,12 +146,10 @@ class ScoreCalculatorTest {
     // Legacy tests
     @Test
     fun `Non-consecutive streak`() {
-        val sc = ScoreCalculator("kif")
-
-        sc.setMatchWeightStreakModifier(10)
-        sc.setMultiMatch(true)
-        sc.setMatchWeightSingleChar(10)
-        sc.setFilenameMatchWeight(10)
+        val matchConfig = MatchConfig(
+            matchWeightStreakModifier = 10, multiMatch = true, matchWeightSingleChar = 10, matchWeightFilename = 10
+        )
+        val sc = ScoreCalculator("kif", matchConfig)
 
         val fScore = sc.calculateScore("/KotlinIsFun")
 
@@ -158,12 +161,10 @@ class ScoreCalculatorTest {
 
     @Test
     fun `Consecutive streak`() {
-        val sc = ScoreCalculator("kot")
-
-        sc.setMatchWeightStreakModifier(10)
-        sc.setMultiMatch(true)
-        sc.setMatchWeightSingleChar(10)
-        sc.setFilenameMatchWeight(10)
+        val matchConfig = MatchConfig(
+            matchWeightStreakModifier = 10, multiMatch = true, matchWeightSingleChar = 10, matchWeightFilename = 10
+        )
+        val sc = ScoreCalculator("kot", matchConfig)
 
         val fScore = sc.calculateScore("/KotlinIsFun")
 
@@ -175,21 +176,21 @@ class ScoreCalculatorTest {
 
     @Test
     fun `Too long ss`() {
-        val sc = ScoreCalculator("TooLongSearchString")
+        val sc = ScoreCalculator("TooLongSearchString", MatchConfig())
         val fScore = sc.calculateScore("/KIF")
         assertNull(fScore)
     }
 
     @Test
     fun `No possible match`() {
-        val sc = ScoreCalculator("A")
+        val sc = ScoreCalculator("A", MatchConfig())
         val fScore = sc.calculateScore("/KIF")
         assertNull(fScore)
     }
 
     @Test
     fun `Empty ss`() {
-        val sc = ScoreCalculator("")
+        val sc = ScoreCalculator("", MatchConfig())
 
         val fScore = sc.calculateScore("/KIF")
         assertEquals(0, fScore!!.getTotalScore())
@@ -197,26 +198,24 @@ class ScoreCalculatorTest {
 
     @Test
     fun `No possible match split`() {
-        val sc = ScoreCalculator("A A B")
+        val sc = ScoreCalculator("A A B", MatchConfig())
         val fScore = sc.calculateScore("/Kotlin/Is/Fun/kif.kt")
         assertNull(fScore)
     }
 
     @Test
     fun `Partial match split`() {
-        val sc = ScoreCalculator("A A K")
+        val sc = ScoreCalculator("A A K", MatchConfig())
         val fScore = sc.calculateScore("/Kotlin/Is/Fun/kif.kt")
         assertNull(fScore)
     }
 
     @Test
     fun `Split match for space`() {
-        val sc = ScoreCalculator("fun kotlin")
-
-        sc.setMatchWeightStreakModifier(10)
-        sc.setMultiMatch(true)
-        sc.setMatchWeightSingleChar(10)
-        sc.setFilenameMatchWeight(10)
+        val matchConfig = MatchConfig(
+            matchWeightStreakModifier = 10, multiMatch = true, matchWeightSingleChar = 10, matchWeightFilename = 10
+        )
+        val sc = ScoreCalculator("fun kotlin", matchConfig)
 
         val fScore = sc.calculateScore("/Kotlin/Is/Fun/kif.kt")
 
@@ -228,12 +227,10 @@ class ScoreCalculatorTest {
 
     @Test
     fun `Legacy test 1`() {
-        val sc = ScoreCalculator("kif")
-
-        sc.setMatchWeightStreakModifier(10)
-        sc.setMultiMatch(true)
-        sc.setMatchWeightSingleChar(10)
-        sc.setFilenameMatchWeight(10)
+        val matchConfig = MatchConfig(
+            matchWeightStreakModifier = 10, multiMatch = true, matchWeightSingleChar = 10, matchWeightFilename = 10
+        )
+        val sc = ScoreCalculator("kif", matchConfig)
 
         val fScore = sc.calculateScore("/Kotlin/Is/Fun/kif.kt")
 
@@ -245,12 +242,10 @@ class ScoreCalculatorTest {
 
     @Test
     fun `Legacy test 2`() {
-        val sc = ScoreCalculator("kif")
-
-        sc.setMatchWeightStreakModifier(10)
-        sc.setMultiMatch(true)
-        sc.setMatchWeightSingleChar(10)
-        sc.setFilenameMatchWeight(10)
+        val matchConfig = MatchConfig(
+            matchWeightStreakModifier = 10, multiMatch = true, matchWeightSingleChar = 10, matchWeightFilename = 10
+        )
+        val sc = ScoreCalculator("kif", matchConfig)
 
         val fScore = sc.calculateScore("/Kiffer/Is/Fun/kiffer.kt")
 
@@ -262,12 +257,10 @@ class ScoreCalculatorTest {
 
     @Test
     fun `Multiple partial file path matches`() {
-        val sc = ScoreCalculator("kif")
-
-        sc.setMatchWeightStreakModifier(10)
-        sc.setMultiMatch(true)
-        sc.setMatchWeightSingleChar(10)
-        sc.setFilenameMatchWeight(10)
+        val matchConfig = MatchConfig(
+            matchWeightStreakModifier = 10, multiMatch = true, matchWeightSingleChar = 10, matchWeightFilename = 10
+        )
+        val sc = ScoreCalculator("kif", matchConfig)
 
         val fScore = sc.calculateScore("/Kif/Is/Fun/kif.kt")
 
@@ -279,12 +272,10 @@ class ScoreCalculatorTest {
 
     @Test
     fun `Legacy test 3`() {
-        val sc = ScoreCalculator("kif fun kotlin")
-
-        sc.setMatchWeightStreakModifier(10)
-        sc.setMultiMatch(true)
-        sc.setMatchWeightSingleChar(10)
-        sc.setFilenameMatchWeight(10)
+        val matchConfig = MatchConfig(
+            matchWeightStreakModifier = 10, multiMatch = true, matchWeightSingleChar = 10, matchWeightFilename = 10
+        )
+        val sc = ScoreCalculator("kif fun kotlin", matchConfig)
 
         val fScore = sc.calculateScore("/Kotlin/Is/Fun/kif.kt")
 
@@ -296,64 +287,80 @@ class ScoreCalculatorTest {
 
     @Test
     fun `5 tolerance matching normal match`() {
-        val sc = ScoreCalculator("kotlin")
-        sc.setTolerance(5)
+        val matchConfig = MatchConfig(
+            tolerance = 5,
+        )
+        val sc = ScoreCalculator("kotlin", matchConfig)
 
         assertNotNull(sc.calculateScore("/Kotlin"))
     }
 
     @Test
     fun `5 tolerance matching 1 letter difference`() {
-        val sc = ScoreCalculator("korlin")
-        sc.setTolerance(5)
+        val matchConfig = MatchConfig(
+            tolerance = 5,
+        )
+        val sc = ScoreCalculator("korlin", matchConfig)
 
         assertNotNull(sc.calculateScore("/Kotlin"))
     }
 
     @Test
     fun `1 tolerance matching 1 letter difference`() {
-        val sc = ScoreCalculator("korlin")
-        sc.setTolerance(1)
+        val matchConfig = MatchConfig(
+            tolerance = 1,
+        )
+        val sc = ScoreCalculator("korlin", matchConfig)
 
         assertNotNull(sc.calculateScore("/Kotlin"))
     }
 
     @Test
     fun `1 tolerance matching 2 letter difference`() {
-        val sc = ScoreCalculator("korlnn")
-        sc.setTolerance(1)
+        val matchConfig = MatchConfig(
+            tolerance = 1,
+        )
+        val sc = ScoreCalculator("korlnn", matchConfig)
 
         assertNull(sc.calculateScore("/Kotlin"))
     }
 
     @Test
     fun `1 tolerance matching 1 letter difference with split path`() {
-        val sc = ScoreCalculator("korlin")
-        sc.setTolerance(1)
+        val matchConfig = MatchConfig(
+            tolerance = 1,
+        )
+        val sc = ScoreCalculator("korlin", matchConfig)
 
         assertNotNull(sc.calculateScore("/Kot/lin"))
     }
 
     @Test
     fun `1 tolerance matching 2 letter difference with split path`() {
-        val sc = ScoreCalculator("korlin")
-        sc.setTolerance(1)
+        val matchConfig = MatchConfig(
+            tolerance = 1,
+        )
+        val sc = ScoreCalculator("korlin", matchConfig)
 
         assertNull(sc.calculateScore("/Kot/sin"))
     }
 
     @Test
     fun `2 tolerance matching 2 letter difference with split path`() {
-        val sc = ScoreCalculator("korlin")
-        sc.setTolerance(2)
+        val matchConfig = MatchConfig(
+            tolerance = 2,
+        )
+        val sc = ScoreCalculator("korlin", matchConfig)
 
         assertNotNull(sc.calculateScore("/Kot/sin"))
     }
 
     @Test
     fun `Don't match longer strings even if there is tolerance left`() {
-        val sc = ScoreCalculator("kotlin12345")
-        sc.setTolerance(5)
+        val matchConfig = MatchConfig(
+            tolerance = 5,
+        )
+        val sc = ScoreCalculator("kotlin12345", matchConfig)
 
         assertNull(sc.calculateScore("/Kotlin"))
     }

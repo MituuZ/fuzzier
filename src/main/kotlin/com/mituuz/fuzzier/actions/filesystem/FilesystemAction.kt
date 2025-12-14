@@ -32,10 +32,7 @@ import com.intellij.openapi.project.rootManager
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vfs.VirtualFile
 import com.mituuz.fuzzier.actions.FuzzyAction
-import com.mituuz.fuzzier.entities.FuzzyContainer
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer
-import com.mituuz.fuzzier.entities.IterationEntry
-import com.mituuz.fuzzier.entities.StringEvaluator
+import com.mituuz.fuzzier.entities.*
 import com.mituuz.fuzzier.intellij.iteration.IntelliJIterationFileCollector
 import com.mituuz.fuzzier.intellij.iteration.IterationFileCollector
 import com.mituuz.fuzzier.util.FuzzierUtil
@@ -111,13 +108,22 @@ abstract class FilesystemAction : FuzzyAction() {
         val cores = Runtime.getRuntime().availableProcessors().coerceAtLeast(1)
         val parallelism = (cores - 1).coerceIn(1, 8)
 
+        val matchConfig = MatchConfig(
+            globalState.tolerance,
+            globalState.multiMatch,
+            globalState.matchWeightSingleChar,
+            globalState.matchWeightStreakModifier,
+            globalState.matchWeightPartialPath,
+            globalState.matchWeightFilename
+        )
+
         coroutineScope {
             val ch = Channel<IterationEntry>(capacity = parallelism * 2)
 
             repeat(parallelism) {
                 launch {
                     for (iterationFile in ch) {
-                        val container = stringEvaluator.evaluateIteratorEntry(iterationFile, ss)
+                        val container = stringEvaluator.evaluateIteratorEntry(iterationFile, ss, matchConfig)
                         container?.let { fuzzyMatchContainer ->
                             synchronized(queueLock) {
                                 minimumScore = priorityQueue.maybeAdd(

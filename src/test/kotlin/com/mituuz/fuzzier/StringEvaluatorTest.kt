@@ -25,6 +25,7 @@ package com.mituuz.fuzzier
 
 import com.intellij.testFramework.TestApplicationManager
 import com.mituuz.fuzzier.entities.IterationEntry
+import com.mituuz.fuzzier.entities.MatchConfig
 import com.mituuz.fuzzier.entities.StringEvaluator
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -45,7 +46,10 @@ class StringEvaluatorTest {
             val fullPath = "/m1/src$relativeToSrc"
             val name = fullPath.substring(fullPath.lastIndexOf('/') + 1)
             val entry = IterationEntry(name = name, path = fullPath, module = moduleName)
-            evaluator.evaluateIteratorEntry(entry, "")?.filePath
+            evaluator.evaluateIteratorEntry(
+                entry, "",
+                MatchConfig()
+            )?.filePath
         }.sorted() // deterministic order for assertions
     }
 

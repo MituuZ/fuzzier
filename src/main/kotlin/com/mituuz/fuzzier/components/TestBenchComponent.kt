@@ -84,8 +84,7 @@ class TestBenchComponent : JPanel(), Disposable {
         scrollPane.setViewportView(table)
 
         add(
-            scrollPane,
-            GridConstraints(
+            scrollPane, GridConstraints(
                 0,
                 0,
                 1,
@@ -102,8 +101,7 @@ class TestBenchComponent : JPanel(), Disposable {
             )
         )
         add(
-            searchField,
-            GridConstraints(
+            searchField, GridConstraints(
                 1,
                 0,
                 1,
@@ -144,11 +142,9 @@ class TestBenchComponent : JPanel(), Disposable {
         }
 
         // Use live settings from the component (unsaved UI state) so changes are reflected immediately
-        val liveGlobalExclusions = liveSettingsComponent.globalExclusionTextArea.text
-            .lines()
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
-            .toSet()
+        val liveGlobalExclusions =
+            liveSettingsComponent.globalExclusionTextArea.text.lines().map { it.trim() }.filter { it.isNotEmpty() }
+                .toSet()
 
         val combinedExclusions = buildSet {
             addAll(projectState.exclusionSet)
@@ -161,8 +157,7 @@ class TestBenchComponent : JPanel(), Disposable {
 
             try {
                 val stringEvaluator = StringEvaluator(
-                    combinedExclusions,
-                    project.service<FuzzierSettingsService>().state.modules
+                    combinedExclusions, project.service<FuzzierSettingsService>().state.modules
                 )
 
                 val iterationEntries = withContext(Dispatchers.Default) {
@@ -230,14 +225,11 @@ class TestBenchComponent : JPanel(), Disposable {
         }
 
         return collector.collectFiles(
-            targets = indexTargets,
-            shouldContinue = { job.isActive },
-            fileFilter = buildFileFilter()
+            targets = indexTargets, shouldContinue = { job.isActive }, fileFilter = buildFileFilter()
         )
     }
 
-    private fun buildFileFilter(): (VirtualFile) -> Boolean =
-        { vf -> !vf.isDirectory }
+    private fun buildFileFilter(): (VirtualFile) -> Boolean = { vf -> !vf.isDirectory }
 
     suspend fun processIterationEntries(
         fileEntries: List<IterationEntry>,
@@ -248,9 +240,7 @@ class TestBenchComponent : JPanel(), Disposable {
         val ss = FuzzierUtil.cleanSearchString(searchString, projectState.ignoredCharacters)
         val processedFiles = ConcurrentHashMap.newKeySet<String>()
         val priorityQueue = PriorityQueue(
-            fileListLimit + 1,
-            compareBy<FuzzyMatchContainer> { it.getScore() }
-        )
+            fileListLimit + 1, compareBy<FuzzyMatchContainer> { it.getScore() })
 
         val queueLock = Any()
         var minimumScore: Int? = null
@@ -264,21 +254,20 @@ class TestBenchComponent : JPanel(), Disposable {
             repeat(parallelism) {
                 launch {
                     for (iterationFile in ch) {
-                        val scoreCalculator = ScoreCalculator(ss)
-                        scoreCalculator.setMultiMatch(liveSettingsComponent.multiMatchActive.getCheckBox().isSelected)
-                        scoreCalculator.setMatchWeightSingleChar(liveSettingsComponent.matchWeightSingleChar.getIntSpinner().value as Int)
-                        scoreCalculator.setMatchWeightStreakModifier(liveSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int)
-                        scoreCalculator.setMatchWeightPartialPath(liveSettingsComponent.matchWeightPartialPath.getIntSpinner().value as Int)
-                        scoreCalculator.setFilenameMatchWeight(liveSettingsComponent.matchWeightFilename.getIntSpinner().value as Int)
-                        scoreCalculator.setTolerance(liveSettingsComponent.tolerance.getIntSpinner().value as Int)
+                        val matchConfig = MatchConfig(
+                            liveSettingsComponent.tolerance.getIntSpinner().value as Int,
+                            liveSettingsComponent.multiMatchActive.getCheckBox().isSelected,
+                            liveSettingsComponent.matchWeightSingleChar.getIntSpinner().value as Int,
+                            liveSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int,
+                            liveSettingsComponent.matchWeightPartialPath.getIntSpinner().value as Int,
+                            liveSettingsComponent.matchWeightFilename.getIntSpinner().value as Int
+                        )
 
-                        val container = stringEvaluator.evaluateIteratorEntry(iterationFile, scoreCalculator)
+                        val container = stringEvaluator.evaluateIteratorEntry(iterationFile, ss, matchConfig)
                         container?.let { fuzzyMatchContainer ->
                             synchronized(queueLock) {
                                 minimumScore = priorityQueue.maybeAdd(
-                                    minimumScore,
-                                    fuzzyMatchContainer,
-                                    fileListLimit
+                                    minimumScore, fuzzyMatchContainer, fileListLimit
                                 )
                             }
                         }
@@ -286,9 +275,7 @@ class TestBenchComponent : JPanel(), Disposable {
                 }
             }
 
-            fileEntries
-                .filter { processedFiles.add(it.path) }
-                .forEach { ch.send(it) }
+            fileEntries.filter { processedFiles.add(it.path) }.forEach { ch.send(it) }
             ch.close()
         }
 
@@ -302,9 +289,7 @@ class TestBenchComponent : JPanel(), Disposable {
     }
 
     private fun PriorityQueue<FuzzyMatchContainer>.maybeAdd(
-        minimumScore: Int?,
-        fuzzyMatchContainer: FuzzyMatchContainer,
-        fileListLimit: Int
+        minimumScore: Int?, fuzzyMatchContainer: FuzzyMatchContainer, fileListLimit: Int
     ): Int? {
         var ret = minimumScore
 
