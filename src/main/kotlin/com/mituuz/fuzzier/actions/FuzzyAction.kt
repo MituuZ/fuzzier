@@ -46,9 +46,7 @@ import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.util.FuzzierUtil
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.*
 import java.awt.Component
 import java.awt.Font
 import java.awt.event.ActionEvent
@@ -80,6 +78,9 @@ abstract class FuzzyAction : AnAction() {
         if (project != null) {
             projectState = project.service<FuzzierSettingsService>().state
             fuzzierUtil.parseModules(project)
+            setCustomHandlers()
+            actionScope?.cancel()
+            actionScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
             runAction(project, actionEvent)
         }
     }

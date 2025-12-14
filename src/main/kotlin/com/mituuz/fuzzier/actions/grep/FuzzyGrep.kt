@@ -78,10 +78,6 @@ open class FuzzyGrep : FuzzyAction() {
         actionEvent: AnActionEvent
     ) {
         currentLaunchJob?.cancel()
-        setCustomHandlers()
-
-        actionScope?.cancel()
-        actionScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
         val projectBasePath = project.basePath.toString()
         currentLaunchJob = actionScope?.launch(Dispatchers.EDT) {

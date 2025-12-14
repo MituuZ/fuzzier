@@ -41,10 +41,6 @@ import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.ui.bindings.ActivationBindings
 import com.mituuz.fuzzier.ui.popup.DefaultPopupProvider
 import com.mituuz.fuzzier.ui.popup.PopupConfig
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import javax.swing.DefaultListModel
 
 class FuzzyMover : FilesystemAction() {
@@ -59,11 +55,6 @@ class FuzzyMover : FilesystemAction() {
     }
 
     override fun runAction(project: Project, actionEvent: AnActionEvent) {
-        setCustomHandlers()
-
-        actionScope?.cancel()
-        actionScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-
         ApplicationManager.getApplication().invokeLater {
             component = SimpleFinderComponent()
             createListeners(project)

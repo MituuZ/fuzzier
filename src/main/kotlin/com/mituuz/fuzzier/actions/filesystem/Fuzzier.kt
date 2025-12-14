@@ -40,10 +40,6 @@ import com.mituuz.fuzzier.ui.bindings.ActivationBindings
 import com.mituuz.fuzzier.ui.popup.DefaultPopupProvider
 import com.mituuz.fuzzier.ui.popup.PopupConfig
 import com.mituuz.fuzzier.util.InitialViewHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
 import javax.swing.DefaultListModel
 
 open class Fuzzier : FilesystemAction() {
@@ -57,11 +53,6 @@ open class Fuzzier : FilesystemAction() {
         { vf -> !vf.isDirectory }
 
     override fun runAction(project: Project, actionEvent: AnActionEvent) {
-        setCustomHandlers()
-
-        actionScope?.cancel()
-        actionScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-
         ApplicationManager.getApplication().invokeLater {
             defaultDoc = EditorFactory.getInstance().createDocument("")
             component = FuzzyFinderComponent(project)
