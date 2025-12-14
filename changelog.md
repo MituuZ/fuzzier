@@ -2,10 +2,11 @@
 
 ## Version 1.15.0
 
-- Refactor fuzzy file search to use coroutines
+- Refactor file search to use coroutines
   - Handle list size limiting during processing instead of doing them separately
 - Add debouncing for fuzzy file preview using `SingleAlarm`
 - Refactor everything
+- Add auto sizing option for the popup (default)
 
 ## Version 1.14.0
 
