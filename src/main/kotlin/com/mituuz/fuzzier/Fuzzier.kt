@@ -38,7 +38,6 @@ import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.ui.bindings.ActivationBindings
-import com.mituuz.fuzzier.ui.popup.DefaultPopupProvider
 import com.mituuz.fuzzier.ui.popup.PopupConfig
 import com.mituuz.fuzzier.util.InitialViewHandler
 import javax.swing.DefaultListModel
@@ -46,7 +45,6 @@ import javax.swing.DefaultListModel
 open class Fuzzier : FilesystemAction() {
     private var previewAlarm: SingleAlarm? = null
     private var lastPreviewKey: String? = null
-    private val popupProvider = DefaultPopupProvider()
     protected open var popupTitle = "Fuzzy Search"
 
     override fun buildFileFilter(project: Project): (VirtualFile) -> Boolean =
@@ -58,7 +56,7 @@ open class Fuzzier : FilesystemAction() {
             component = FuzzyFinderComponent(project)
             previewAlarm = getPreviewAlarm()
             createListeners(project)
-            val maybePopup = popupProvider.show(
+            val maybePopup = getPopupProvider().show(
                 project = project,
                 content = component,
                 focus = component.searchField,

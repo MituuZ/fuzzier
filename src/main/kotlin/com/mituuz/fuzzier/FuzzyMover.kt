@@ -40,14 +40,12 @@ import com.intellij.psi.PsiManager
 import com.mituuz.fuzzier.actions.filesystem.FilesystemAction
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.ui.bindings.ActivationBindings
-import com.mituuz.fuzzier.ui.popup.DefaultPopupProvider
 import com.mituuz.fuzzier.ui.popup.PopupConfig
 import javax.swing.DefaultListModel
 
 class FuzzyMover : FilesystemAction() {
     lateinit var movableFile: PsiFile
     lateinit var currentFile: VirtualFile
-    private val popupProvider = DefaultPopupProvider()
 
     override fun buildFileFilter(project: Project): (VirtualFile) -> Boolean {
         return { vf -> if (component.isDirSelector) vf.isDirectory else !vf.isDirectory }
@@ -63,7 +61,7 @@ class FuzzyMover : FilesystemAction() {
                 component.fileList.setEmptyText("Press enter to use current file: ${currentFile.path}")
             }
 
-            val maybePopup = popupProvider.show(
+            val maybePopup = getPopupProvider().show(
                 project = project,
                 content = component,
                 focus = component.searchField,

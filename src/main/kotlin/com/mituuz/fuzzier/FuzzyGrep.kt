@@ -49,7 +49,6 @@ import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.RowContainer
 import com.mituuz.fuzzier.ui.bindings.ActivationBindings
-import com.mituuz.fuzzier.ui.popup.DefaultPopupProvider
 import com.mituuz.fuzzier.ui.popup.PopupConfig
 import kotlinx.coroutines.*
 import org.apache.commons.lang3.StringUtils
@@ -70,7 +69,6 @@ open class FuzzyGrep : FuzzyAction() {
     var useRg = true
     val isWindows = System.getProperty("os.name").lowercase().contains("win")
     private var currentLaunchJob: Job? = null
-    private val popupProvider = DefaultPopupProvider()
     protected open lateinit var popupTitle: String
 
     override fun runAction(
@@ -128,7 +126,7 @@ open class FuzzyGrep : FuzzyAction() {
             defaultDoc = EditorFactory.getInstance().createDocument("")
             component = FuzzyFinderComponent(project, showSecondaryField = useRg)
             createListeners(project)
-            val maybePopup = popupProvider.show(
+            val maybePopup = getPopupProvider().show(
                 project = project,
                 content = component,
                 focus = component.searchField,

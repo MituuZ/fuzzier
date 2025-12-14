@@ -45,6 +45,9 @@ import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
+import com.mituuz.fuzzier.ui.popup.AutoSizePopupProvider
+import com.mituuz.fuzzier.ui.popup.DefaultPopupProvider
+import com.mituuz.fuzzier.ui.popup.PopupProvider
 import com.mituuz.fuzzier.util.FuzzierUtil
 import kotlinx.coroutines.*
 import java.awt.Component
@@ -70,6 +73,13 @@ abstract class FuzzyAction : AnAction() {
     val fuzzierUtil = FuzzierUtil()
     protected open var currentUpdateListContentJob: Job? = null
     protected open var actionScope: CoroutineScope? = null
+
+    protected fun getPopupProvider(): PopupProvider {
+        return when (globalState.popupSizing) {
+            FuzzierGlobalSettingsService.PopupSizing.AUTO_SIZE -> AutoSizePopupProvider()
+            FuzzierGlobalSettingsService.PopupSizing.VANILLA -> DefaultPopupProvider()
+        }
+    }
 
     override fun actionPerformed(actionEvent: AnActionEvent) {
         val project = actionEvent.project
