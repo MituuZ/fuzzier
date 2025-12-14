@@ -65,35 +65,35 @@
 
     <actions>
         <action
-                id="com.mituuz.fuzzier.actions.grep.FuzzyGrep"
-                class="com.mituuz.fuzzier.actions.grep.FuzzyGrep"
+                id="com.mituuz.fuzzier.FuzzyGrep"
+                class="com.mituuz.fuzzier.FuzzyGrep"
                 text="Fuzzy Grep"
                 description="Search text">
             <override-text place="MainMenu" text="Fuzzy Grep"/>
         </action>
         <action
-                id="com.mituuz.fuzzier.actions.grep.FuzzyGrepCaseInsensitive"
-                class="com.mituuz.fuzzier.actions.grep.FuzzyGrepCaseInsensitive"
+                id="com.mituuz.fuzzier.FuzzyGrepCaseInsensitive"
+                class="com.mituuz.fuzzier.FuzzyGrepCaseInsensitive"
                 text="Fuzzy Grep (Case Insensitive)"
                 description="Search text with case insensitivity">
             <override-text place="MainMenu" text="Fuzzy Grep (Case Insensitive)"/>
         </action>
         <action
-                id="com.mituuz.fuzzier.actions.filesystem.Fuzzier"
-                class="com.mituuz.fuzzier.actions.filesystem.Fuzzier"
+                id="com.mituuz.fuzzier.Fuzzier"
+                class="com.mituuz.fuzzier.Fuzzier"
                 text="Fuzzy File Search"
                 description="Search files using a basic fuzzy search">
             <override-text place="MainMenu" text="Fuzzy File Search"/>
         </action>
-        <action id="com.mituuz.fuzzier.actions.filesystem.FuzzierVCS"
-                class="com.mituuz.fuzzier.actions.filesystem.FuzzierVCS"
+        <action id="com.mituuz.fuzzier.FuzzierVCS"
+                class="com.mituuz.fuzzier.FuzzierVCS"
                 text="Fuzzy File Search (Only VCS Tracked Files)"
                 description="Search files using a basic fuzzy search on only VCS tracked files">
             <override-text place="MainMenu" text="Fuzzy File Search (Only VCS Tracked Files)"/>
             <add-to-group group-id="ToolsMenu"/>
         </action>
-        <action id="com.mituuz.fuzzier.actions.filesystem.FuzzyMover"
-                class="com.mituuz.fuzzier.actions.filesystem.FuzzyMover"
+        <action id="com.mituuz.fuzzier.FuzzyMover"
+                class="com.mituuz.fuzzier.FuzzyMover"
                 text="Fuzzy File Mover"
                 description="Move a file using a basic fuzzy search">
             <override-text place="MainMenu" text="Fuzzy File Mover"/>

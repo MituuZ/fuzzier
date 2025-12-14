@@ -22,7 +22,7 @@
  *  SOFTWARE.
  */
 
-package com.mituuz.fuzzier.actions.filesystem
+package com.mituuz.fuzzier
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
@@ -33,6 +33,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.util.SingleAlarm
+import com.mituuz.fuzzier.actions.filesystem.FilesystemAction
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService

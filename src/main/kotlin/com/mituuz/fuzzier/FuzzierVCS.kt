@@ -22,32 +22,20 @@
  *  SOFTWARE.
  */
 
-package com.mituuz.fuzzier.actions.grep
+package com.mituuz.fuzzier
 
-import com.mituuz.fuzzier.entities.FuzzyContainer
-import javax.swing.DefaultListModel
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.vcs.changes.ChangeListManager
+import com.intellij.openapi.vfs.VirtualFile
 
-class FuzzyGrepCaseInsensitive : FuzzyGrep() {
-    override var popupTitle: String = "Fuzzy Grep (Case Insensitive)"
-    override var dimensionKey = "FuzzyGrepCaseInsensitivePopup"
+/**
+ * Search for only VCS tracked files
+ */
+class FuzzierVCS : Fuzzier() {
+    override var popupTitle: String = "Fuzzy Search (Only VCS Tracked Files)"
 
-    override suspend fun runCommand(
-        commands: List<String>,
-        listModel: DefaultListModel<FuzzyContainer>,
-        projectBasePath: String
-    ) {
-        val modifiedCommands = commands.toMutableList()
-        if (isWindows && !useRg) {
-            // Customize findstr for case insensitivity
-            modifiedCommands.add(1, "/I")
-        } else if (!useRg) {
-            // Customize grep for case insensitivity
-            modifiedCommands.add(1, "-i")
-        } else {
-            // Customize ripgrep for case insensitivity
-            modifiedCommands.add(1, "--smart-case")
-            modifiedCommands.add(2, "-F")
-        }
-        super.runCommand(modifiedCommands, listModel, projectBasePath)
+    override fun buildFileFilter(project: Project): (VirtualFile) -> Boolean {
+        val clm = ChangeListManager.getInstance(project)
+        return { vf -> !vf.isDirectory && !clm.isIgnoredFile(vf) }
     }
 }

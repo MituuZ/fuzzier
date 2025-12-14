@@ -22,7 +22,7 @@
  *  SOFTWARE.
  */
 
-package com.mituuz.fuzzier.actions.filesystem
+package com.mituuz.fuzzier
 
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
@@ -37,6 +37,7 @@ import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
+import com.mituuz.fuzzier.actions.filesystem.FilesystemAction
 import com.mituuz.fuzzier.components.SimpleFinderComponent
 import com.mituuz.fuzzier.ui.bindings.ActivationBindings
 import com.mituuz.fuzzier.ui.popup.DefaultPopupProvider
