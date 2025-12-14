@@ -66,8 +66,6 @@ open class FuzzyGrep : FuzzyAction() {
         const val MAX_NUMBER_OR_RESULTS = 1000
     }
 
-    override var popupTitle: String = "Fuzzy Grep"
-    override var dimensionKey = "FuzzyGrepPopup"
     var useRg = true
     val isWindows = System.getProperty("os.name").lowercase().contains("win")
     private var currentLaunchJob: Job? = null
@@ -82,6 +80,7 @@ open class FuzzyGrep : FuzzyAction() {
         val projectBasePath = project.basePath.toString()
         currentLaunchJob = actionScope?.launch(Dispatchers.EDT) {
             val currentJob = currentLaunchJob
+            var popupTitle = "Fuzzy Grep"
 
             if (!isInstalled("rg", projectBasePath)) {
                 showNotification(
@@ -135,7 +134,7 @@ open class FuzzyGrep : FuzzyAction() {
                 config = PopupConfig(
                     title = popupTitle,
                     preferredSizeProvider = component.preferredSize,
-                    dimensionKey = dimensionKey,
+                    dimensionKey = "FuzzyGrepPopup",
                     resetWindow = { globalState.resetWindow },
                     clearResetWindowFlag = { globalState.resetWindow = false }
                 ),

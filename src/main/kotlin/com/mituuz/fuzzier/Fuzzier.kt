@@ -44,8 +44,6 @@ import com.mituuz.fuzzier.util.InitialViewHandler
 import javax.swing.DefaultListModel
 
 open class Fuzzier : FilesystemAction() {
-    override var popupTitle = "Fuzzy Search"
-    override var dimensionKey = "FuzzySearchPopup"
     private var previewAlarm: SingleAlarm? = null
     private var lastPreviewKey: String? = null
     private val popupProvider = DefaultPopupProvider()
@@ -64,9 +62,9 @@ open class Fuzzier : FilesystemAction() {
                 content = component,
                 focus = component.searchField,
                 config = PopupConfig(
-                    title = popupTitle,
+                    title = "Fuzzy Search",
                     preferredSizeProvider = component.preferredSize,
-                    dimensionKey = dimensionKey,
+                    dimensionKey = "FuzzySearchPopup",
                     resetWindow = { globalState.resetWindow },
                     clearResetWindowFlag = { globalState.resetWindow = false }
                 ),

@@ -45,8 +45,6 @@ import com.mituuz.fuzzier.ui.popup.PopupConfig
 import javax.swing.DefaultListModel
 
 class FuzzyMover : FilesystemAction() {
-    override var popupTitle = "Fuzzy File Mover"
-    override var dimensionKey = "FuzzyMoverPopup"
     lateinit var movableFile: PsiFile
     lateinit var currentFile: VirtualFile
     private val popupProvider = DefaultPopupProvider()
@@ -70,9 +68,9 @@ class FuzzyMover : FilesystemAction() {
                 content = component,
                 focus = component.searchField,
                 config = PopupConfig(
-                    title = popupTitle,
+                    title = "Fuzzy File Mover",
                     preferredSizeProvider = component.preferredSize,
-                    dimensionKey = dimensionKey,
+                    dimensionKey = "FuzzyMoverPopup",
                     resetWindow = { globalState.resetWindow },
                     clearResetWindowFlag = { globalState.resetWindow = false }),
                 cleanupFunction = { cleanupPopup() },
