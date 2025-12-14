@@ -23,11 +23,6 @@
  */
 package com.mituuz.fuzzier.entities
 
-import com.intellij.openapi.roots.ContentIterator
-import com.intellij.openapi.vfs.VirtualFile
-import java.util.concurrent.Future
-import javax.swing.DefaultListModel
-
 /**
  * Handles creating the content iterators used for string handling and excluding files
  * @param exclusionList exclusion list from settings
@@ -36,37 +31,26 @@ class StringEvaluator(
     private var exclusionList: Set<String>,
     private var modules: Map<String, String>,
 ) {
-    lateinit var scoreCalculator: ScoreCalculator
-
-    fun getContentIterator(
-        moduleName: String, searchString: String, listModel: DefaultListModel<FuzzyContainer>,
-        task: Future<*>?
-    ): ContentIterator {
-        scoreCalculator = ScoreCalculator(searchString)
-        return ContentIterator { file: VirtualFile ->
-            if (task?.isCancelled == true) {
-                return@ContentIterator false
-            }
-            if (!file.isDirectory) {
-                val moduleBasePath = modules[moduleName] ?: return@ContentIterator true
-
-                val filePath = file.path.removePrefix(moduleBasePath)
-                if (isExcluded(filePath)) {
-                    return@ContentIterator true
-                }
-                if (filePath.isNotBlank()) {
-                    val fuzzyMatchContainer = createFuzzyContainer(filePath, moduleBasePath, scoreCalculator)
-                    if (fuzzyMatchContainer != null) {
-                        listModel.addElement(fuzzyMatchContainer)
-                    }
-                }
-            }
-            true
-        }
-    }
-
     fun evaluateIteratorEntry(iteratorEntry: IterationEntry, searchString: String): FuzzyMatchContainer? {
         val scoreCalculator = ScoreCalculator(searchString)
+        val moduleName = iteratorEntry.module
+
+        val moduleBasePath = modules[moduleName] ?: return null
+
+        val dirPath = iteratorEntry.path.removePrefix(moduleBasePath)
+        if (isExcluded(dirPath)) return null
+
+        if (dirPath.isNotBlank()) {
+            return createFuzzyContainer(dirPath, moduleBasePath, scoreCalculator)
+        }
+
+        return null
+    }
+
+    fun evaluateIteratorEntry(
+        iteratorEntry: IterationEntry,
+        scoreCalculator: ScoreCalculator,
+    ): FuzzyMatchContainer? {
         val moduleName = iteratorEntry.module
 
         val moduleBasePath = modules[moduleName] ?: return null

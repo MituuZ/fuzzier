@@ -36,7 +36,6 @@ import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.runInEdtAndWait
 import com.mituuz.fuzzier.entities.FuzzyContainer
-import com.mituuz.fuzzier.entities.StringEvaluator
 import javax.swing.DefaultListModel
 
 class TestUtil {
@@ -80,13 +79,6 @@ class TestUtil {
         val module = myFixture.project.modules[0]
         map[module.name] = module.rootManager.contentRoots[1].path
 
-        val stringEvaluator = StringEvaluator(exclusionList, map)
-        val contentIterator = stringEvaluator.getContentIterator(myFixture.module.name, "", filePathContainer, null)
-        val index = myFixture.module.rootManager.fileIndex
-        runInEdtAndWait {
-            index.iterateContent(contentIterator)
-        }
-        // Handle clearing ProjectFileIndex between tests
         myFixture.tearDown()
 
         return filePathContainer

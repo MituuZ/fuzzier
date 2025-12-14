@@ -26,7 +26,7 @@ package com.mituuz.fuzzier
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-class ExcludeIgnoreTest {
+class StringEvaluatorTest {
     private var testUtil = TestUtil()
 
     @Test

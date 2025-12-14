@@ -93,11 +93,13 @@ abstract class FilesystemAction : FuzzyAction() {
     suspend fun processIterationEntries(
         fileEntries: List<IterationEntry>,
         stringEvaluator: StringEvaluator,
-        searchString: String
+        searchString: String,
+        fileListLimit: Int,
+        ignoredChars: String
     ): DefaultListModel<FuzzyContainer> {
-        val ss = FuzzierUtil.Companion.cleanSearchString(searchString, projectState.ignoredCharacters)
+        val ss = FuzzierUtil.cleanSearchString(searchString, ignoredChars)
         val processedFiles = ConcurrentHashMap.newKeySet<String>()
-        val listLimit = globalState.fileListLimit
+        val listLimit = fileListLimit
         val priorityQueue = PriorityQueue(
             listLimit + 1,
             compareBy<FuzzyMatchContainer> { it.getScore() }
@@ -118,7 +120,11 @@ abstract class FilesystemAction : FuzzyAction() {
                         val container = stringEvaluator.evaluateIteratorEntry(iterationFile, ss)
                         container?.let { fuzzyMatchContainer ->
                             synchronized(queueLock) {
-                                minimumScore = priorityQueue.maybeAdd(minimumScore, fuzzyMatchContainer)
+                                minimumScore = priorityQueue.maybeAdd(
+                                    minimumScore,
+                                    fuzzyMatchContainer,
+                                    fileListLimit
+                                )
                             }
                         }
                     }
@@ -142,13 +148,14 @@ abstract class FilesystemAction : FuzzyAction() {
 
     private fun PriorityQueue<FuzzyMatchContainer>.maybeAdd(
         minimumScore: Int?,
-        fuzzyMatchContainer: FuzzyMatchContainer
+        fuzzyMatchContainer: FuzzyMatchContainer,
+        fileListLimit: Int,
     ): Int? {
         var ret = minimumScore
 
         if (minimumScore == null || fuzzyMatchContainer.getScore() > minimumScore) {
             this.add(fuzzyMatchContainer)
-            if (this.size > globalState.fileListLimit) {
+            if (this.size > fileListLimit) {
                 this.remove()
                 ret = this.peek().getScore()
             }
@@ -177,7 +184,13 @@ abstract class FilesystemAction : FuzzyAction() {
                 coroutineContext.ensureActive()
 
                 val listModel = withContext(Dispatchers.Default) {
-                    processIterationEntries(iterationEntries, stringEvaluator, searchString)
+                    processIterationEntries(
+                        iterationEntries,
+                        stringEvaluator,
+                        searchString,
+                        globalState.fileListLimit,
+                        projectState.ignoredCharacters,
+                    )
                 }
                 coroutineContext.ensureActive()
 
