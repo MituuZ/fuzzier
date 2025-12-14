@@ -27,8 +27,6 @@ package com.mituuz.fuzzier.ui.popup
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
 import com.intellij.openapi.ui.popup.JBPopupFactory
-import com.intellij.openapi.ui.popup.JBPopupListener
-import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.util.DimensionService
 import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.util.FuzzierUtil.Companion.createDimensionKey
@@ -36,10 +34,10 @@ import java.awt.Component
 import javax.swing.JComponent
 
 class DefaultPopupProvider(
-    private val windowManager: WindowManager = WindowManager.getInstance(),
-    private val popupFactory: JBPopupFactory = JBPopupFactory.getInstance(),
+    windowManager: WindowManager = WindowManager.getInstance(),
+    popupFactory: JBPopupFactory = JBPopupFactory.getInstance(),
     private val dimensionService: DimensionService = DimensionService.getInstance(),
-) : PopupProvider {
+) : PopupProviderBase(windowManager, popupFactory) {
     override fun show(
         project: Project,
         content: JComponent,
@@ -47,7 +45,7 @@ class DefaultPopupProvider(
         config: PopupConfig,
         cleanupFunction: () -> Unit,
     ): JBPopup? {
-        val mainWindow: Component = windowManager.getIdeFrame(project)?.component
+        val mainWindow: Component = getMainWindow(project)
             ?: return null
 
         val screenBounds = mainWindow.graphicsConfiguration.bounds
@@ -59,15 +57,8 @@ class DefaultPopupProvider(
             config.clearResetWindowFlag()
         }
 
-        val popup = popupFactory
-            .createComponentPopupBuilder(content, focus)
-            .setFocusable(true)
-            .setRequestFocus(true)
-            .setResizable(true)
+        val popup = baseBuilder(content, focus, config.title)
             .setDimensionServiceKey(null, screenDimensionKey, true)
-            .setTitle(config.title)
-            .setMovable(true)
-            .setShowBorder(true)
             .createPopup()
 
         popup.showInCenterOf(mainWindow)
@@ -75,11 +66,5 @@ class DefaultPopupProvider(
         popup.addListener(createCleanupListener(cleanupFunction))
 
         return popup
-    }
-
-    internal fun createCleanupListener(cleanupFunction: () -> Unit): JBPopupListener = object : JBPopupListener {
-        override fun onClosed(event: LightweightWindowEvent) {
-            cleanupFunction()
-        }
     }
 }

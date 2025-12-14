@@ -51,6 +51,8 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
         component.popupSizingSelector.getPopupSizingComboBox().selectedIndex = state.popupSizing.ordinal
         component.defaultDimension.getIntSpinner(4).value = state.defaultPopupHeight
         component.defaultDimension.getIntSpinner(1).value = state.defaultPopupWidth
+        component.autoSizePercentages.getIntSpinner(4).value = state.autoHeightPercent
+        component.autoSizePercentages.getIntSpinner(1).value = state.autoWidthPercent
         component.searchPosition.getSearchPositionComboBox().selectedIndex = state.searchPosition.ordinal
         component.prioritizeShortDirs.getCheckBox().isSelected = state.prioritizeShorterDirPaths
         component.debounceTimerValue.getIntSpinner().value = state.debouncePeriod
@@ -85,9 +87,12 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
     }
 
     private fun updateDimensionVisibility(sizing: PopupSizing) {
-        val visible = sizing != PopupSizing.AUTO_SIZE
-        component.defaultDimension.label.isVisible = visible
-        component.defaultDimension.component.isVisible = visible
+        val vanillaVisible = sizing != PopupSizing.AUTO_SIZE
+        val autoVisible = sizing == PopupSizing.AUTO_SIZE
+        component.defaultDimension.label.isVisible = vanillaVisible
+        component.defaultDimension.component.isVisible = vanillaVisible
+        component.autoSizePercentages.label.isVisible = autoVisible
+        component.autoSizePercentages.component.isVisible = autoVisible
     }
 
     override fun isModified(): Boolean {
@@ -102,6 +107,8 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
                 || state.popupSizing != component.popupSizingSelector.getPopupSizingComboBox().selectedItem
                 || state.defaultPopupHeight != component.defaultDimension.getIntSpinner(4).value
                 || state.defaultPopupWidth != component.defaultDimension.getIntSpinner(1).value
+                || state.autoHeightPercent != component.autoSizePercentages.getIntSpinner(4).value
+                || state.autoWidthPercent != component.autoSizePercentages.getIntSpinner(1).value
                 || state.searchPosition != component.searchPosition.getSearchPositionComboBox().selectedItem
                 || state.prioritizeShorterDirPaths != component.prioritizeShortDirs.getCheckBox().isSelected
                 || state.debouncePeriod != component.debounceTimerValue.getIntSpinner().value
@@ -133,6 +140,8 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
 
         val newPopupHeight = component.defaultDimension.getIntSpinner(4).value as Int
         val newPopupWidth = component.defaultDimension.getIntSpinner(1).value as Int
+        val newAutoHeightPercent = component.autoSizePercentages.getIntSpinner(4).value as Int
+        val newAutoWidthPercent = component.autoSizePercentages.getIntSpinner(1).value as Int
         val newSearchPosition: FuzzierGlobalSettingsService.SearchPosition =
             FuzzierGlobalSettingsService.SearchPosition.entries.toTypedArray()[component.searchPosition.getSearchPositionComboBox().selectedIndex]
         if (state.searchPosition != newSearchPosition ||
@@ -146,6 +155,8 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
         }
         state.defaultPopupHeight = newPopupHeight
         state.defaultPopupWidth = newPopupWidth
+        state.autoHeightPercent = newAutoHeightPercent
+        state.autoWidthPercent = newAutoWidthPercent
         state.searchPosition = newSearchPosition
         state.prioritizeShorterDirPaths = component.prioritizeShortDirs.getCheckBox().isSelected
         state.debouncePeriod = component.debounceTimerValue.getIntSpinner().value as Int

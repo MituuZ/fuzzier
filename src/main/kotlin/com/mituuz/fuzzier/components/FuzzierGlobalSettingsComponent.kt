@@ -175,6 +175,23 @@ class FuzzierGlobalSettingsComponent(
         false
     )
 
+    val autoSizePercentPanel = JPanel().apply {
+        layout = BoxLayout(this, BoxLayout.X_AXIS)
+        add(JBLabel("Width %: "))
+        add(JBIntSpinner(80, 10, 100))
+        add(Box.createHorizontalStrut(10))
+        add(JBLabel("Height %: "))
+        add(JBIntSpinner(80, 10, 100))
+    }
+    val autoSizePercentages = SettingsComponent(
+        autoSizePercentPanel, "Auto-size (% of window)",
+        """
+            Percentage of the IDE window used when popup sizing is set to Auto size.<br><br>
+            Min: 10, Max: 100
+        """.trimIndent(),
+        false
+    )
+
     val dimensionComponent = JPanel().apply {
         layout = BoxLayout(this, BoxLayout.X_AXIS)
         add(JBLabel("Width: "))
@@ -319,6 +336,7 @@ class FuzzierGlobalSettingsComponent(
             .addComponent(highlightFilename)
             .addComponent(searchPosition)
             .addComponent(popupSizingSelector)
+            .addComponent(autoSizePercentages)
             .addComponent(defaultDimension)
             .addComponent(previewFontSize)
             .addComponent(fileListUseEditorFont)

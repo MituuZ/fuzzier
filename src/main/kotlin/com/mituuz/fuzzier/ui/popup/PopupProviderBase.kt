@@ -25,48 +25,34 @@
 package com.mituuz.fuzzier.ui.popup
 
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.popup.JBPopup
+import com.intellij.openapi.ui.popup.ComponentPopupBuilder
 import com.intellij.openapi.ui.popup.JBPopupFactory
-import com.intellij.openapi.util.DimensionService
+import com.intellij.openapi.ui.popup.JBPopupListener
+import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.wm.WindowManager
 import java.awt.Component
-import java.awt.Dimension
 import javax.swing.JComponent
 
-class AutoSizePopupProvider(
-    private val widthFactor: Double,
-    private val heightFactor: Double,
-    windowManager: WindowManager = WindowManager.getInstance(),
-    popupFactory: JBPopupFactory = JBPopupFactory.getInstance(),
-    @Suppress("unused") private val dimensionService: DimensionService = DimensionService.getInstance(),
-) : PopupProviderBase(windowManager, popupFactory) {
+abstract class PopupProviderBase(
+    protected val windowManager: WindowManager = WindowManager.getInstance(),
+    protected val popupFactory: JBPopupFactory = JBPopupFactory.getInstance(),
+) : PopupProvider {
 
-    override fun show(
-        project: Project,
-        content: JComponent,
-        focus: JComponent,
-        config: PopupConfig,
-        cleanupFunction: () -> Unit,
-    ): JBPopup? {
-        val mainWindow: Component = getMainWindow(project)
-            ?: return null
+    internal fun getMainWindow(project: Project): Component? = windowManager.getIdeFrame(project)?.component
 
-        val popupSize = computePopupSize(mainWindow)
+    internal fun baseBuilder(content: JComponent, focus: JComponent, title: String): ComponentPopupBuilder =
+        popupFactory
+            .createComponentPopupBuilder(content, focus)
+            .setFocusable(true)
+            .setRequestFocus(true)
+            .setResizable(true)
+            .setTitle(title)
+            .setMovable(true)
+            .setShowBorder(true)
 
-        val popup = baseBuilder(content, focus, config.title)
-            .createPopup()
-
-        popup.size = popupSize
-        popup.showInCenterOf(mainWindow)
-
-        popup.addListener(createCleanupListener(cleanupFunction))
-
-        return popup
-    }
-
-    internal fun computePopupSize(mainWindow: Component): Dimension {
-        val windowWidth = (mainWindow.width * widthFactor).toInt()
-        val windowHeight = (mainWindow.height * heightFactor).toInt()
-        return Dimension(windowWidth, windowHeight)
+    internal fun createCleanupListener(cleanupFunction: () -> Unit): JBPopupListener = object : JBPopupListener {
+        override fun onClosed(event: LightweightWindowEvent) {
+            cleanupFunction()
+        }
     }
 }

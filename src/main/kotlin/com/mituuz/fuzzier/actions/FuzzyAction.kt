@@ -76,7 +76,12 @@ abstract class FuzzyAction : AnAction() {
 
     protected fun getPopupProvider(): PopupProvider {
         return when (globalState.popupSizing) {
-            FuzzierGlobalSettingsService.PopupSizing.AUTO_SIZE -> AutoSizePopupProvider()
+            FuzzierGlobalSettingsService.PopupSizing.AUTO_SIZE -> {
+                val wf = (globalState.autoWidthPercent.coerceIn(10, 100)) / 100.0
+                val hf = (globalState.autoHeightPercent.coerceIn(10, 100)) / 100.0
+                AutoSizePopupProvider(wf, hf)
+            }
+
             FuzzierGlobalSettingsService.PopupSizing.VANILLA -> DefaultPopupProvider()
         }
     }

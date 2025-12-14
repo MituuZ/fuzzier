@@ -50,6 +50,10 @@ class FuzzierGlobalSettingsService : PersistentStateComponent<FuzzierGlobalSetti
 
         var popupSizing: PopupSizing = PopupSizing.AUTO_SIZE
 
+        // Auto-size percentages (10-100)
+        var autoWidthPercent: Int = 80
+        var autoHeightPercent: Int = 80
+
         var recentFilesMode: RecentFilesMode = RecentFilesMode.RECENT_PROJECT_FILES
         var filenameType: FilenameType = FILE_PATH_ONLY
         var highlightFilename = false
