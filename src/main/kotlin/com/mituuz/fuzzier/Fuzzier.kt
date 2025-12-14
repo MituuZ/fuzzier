@@ -47,6 +47,7 @@ open class Fuzzier : FilesystemAction() {
     private var previewAlarm: SingleAlarm? = null
     private var lastPreviewKey: String? = null
     private val popupProvider = DefaultPopupProvider()
+    protected open var popupTitle = "Fuzzy Search"
 
     override fun buildFileFilter(project: Project): (VirtualFile) -> Boolean =
         { vf -> !vf.isDirectory }
@@ -62,7 +63,7 @@ open class Fuzzier : FilesystemAction() {
                 content = component,
                 focus = component.searchField,
                 config = PopupConfig(
-                    title = "Fuzzy Search",
+                    title = popupTitle,
                     preferredSizeProvider = component.preferredSize,
                     dimensionKey = "FuzzySearchPopup",
                     resetWindow = { globalState.resetWindow },

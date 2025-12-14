@@ -54,6 +54,7 @@ import com.mituuz.fuzzier.ui.popup.PopupConfig
 import kotlinx.coroutines.*
 import org.apache.commons.lang3.StringUtils
 import javax.swing.DefaultListModel
+import javax.swing.ListModel
 
 open class FuzzyGrep : FuzzyAction() {
     companion object {
@@ -70,6 +71,7 @@ open class FuzzyGrep : FuzzyAction() {
     val isWindows = System.getProperty("os.name").lowercase().contains("win")
     private var currentLaunchJob: Job? = null
     private val popupProvider = DefaultPopupProvider()
+    protected open lateinit var popupTitle: String
 
     override fun runAction(
         project: Project,
@@ -80,7 +82,6 @@ open class FuzzyGrep : FuzzyAction() {
         val projectBasePath = project.basePath.toString()
         currentLaunchJob = actionScope?.launch(Dispatchers.EDT) {
             val currentJob = currentLaunchJob
-            var popupTitle = "Fuzzy Grep"
 
             if (!isInstalled("rg", projectBasePath)) {
                 showNotification(
@@ -197,21 +198,10 @@ open class FuzzyGrep : FuzzyAction() {
         currentUpdateListContentJob = actionScope?.launch(Dispatchers.EDT) {
             component.fileList.setPaintBusy(true)
             try {
-                val currentJob = currentUpdateListContentJob
-
-                if (currentJob?.isCancelled == true) return@launch
-
-                val listModel = DefaultListModel<FuzzyContainer>()
-
-                if (currentJob?.isCancelled == true) return@launch
-
                 val results = withContext(Dispatchers.IO) {
-                    findInFiles(searchString, listModel, project.basePath.toString())
-                    listModel
+                    findInFiles(searchString, project.basePath.toString())
                 }
-
-                if (currentJob?.isCancelled == true) return@launch
-
+                coroutineContext.ensureActive()
                 component.refreshModel(results, getCellRenderer())
             } finally {
                 component.fileList.setPaintBusy(false)
@@ -293,9 +283,10 @@ open class FuzzyGrep : FuzzyAction() {
     }
 
     private suspend fun findInFiles(
-        searchString: String, listModel: DefaultListModel<FuzzyContainer>,
+        searchString: String,
         projectBasePath: String
-    ) {
+    ): ListModel<FuzzyContainer> {
+        val listModel = DefaultListModel<FuzzyContainer>()
         if (useRg) {
             val secondary = (component as FuzzyFinderComponent).getSecondaryText().trim()
             val commands = mutableListOf(
@@ -320,6 +311,8 @@ open class FuzzyGrep : FuzzyAction() {
                 runCommand(listOf("grep", "--color=none", "-r", "-n", searchString, "."), listModel, projectBasePath)
             }
         }
+
+        return listModel
     }
 
     private fun createListeners(project: Project) {
