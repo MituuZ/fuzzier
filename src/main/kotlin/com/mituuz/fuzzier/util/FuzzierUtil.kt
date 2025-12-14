@@ -28,19 +28,10 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.rootManager
-import com.mituuz.fuzzier.entities.FuzzyContainer
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer
-import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import java.awt.Rectangle
-import java.util.*
-import javax.swing.DefaultListModel
 
 class FuzzierUtil {
-    private var globalState = service<FuzzierGlobalSettingsService>().state
-    private var listLimit: Int = globalState.fileListLimit
-    private var prioritizeShorterDirPaths = globalState.prioritizeShorterDirPaths
-
     companion object {
         /**
          * Create a dimension key for a specific screen bounds
@@ -58,62 +49,6 @@ class FuzzierUtil {
 
             return ret
         }
-    }
-
-    /**
-     * Process all the elements in the listModel with a priority queue to limit the size
-     * and keeping the data sorted at all times
-     *
-     * Priority queue's size is limit + 1 to prevent any resizing
-     * Only add entries to the queue if they have larger score than the minimum in the queue
-     *
-     * @param listModel to limit and sort
-     * @param isDirSort defaults to false, enables using different sort for directories
-     *
-     * @return a sorted and sized list model
-     */
-    fun sortAndLimit(
-        listModel: DefaultListModel<FuzzyContainer>,
-        isDirSort: Boolean = false
-    ): DefaultListModel<FuzzyContainer> {
-        val useShortDirPath = isDirSort && prioritizeShorterDirPaths
-        var comparator = getComparator(useShortDirPath, false)
-        val priorityQueue = PriorityQueue(listLimit + 1, comparator)
-
-        var minimumScore: Int? = null
-        listModel.elements().toList().forEach {
-            if (it is FuzzyMatchContainer) {
-                if (minimumScore == null || it.getScore() > minimumScore) {
-                    priorityQueue.add(it)
-                    if (priorityQueue.size > listLimit) {
-                        priorityQueue.remove()
-                        minimumScore = priorityQueue.peek().getScore()
-                    }
-                }
-            }
-        }
-
-        comparator = getComparator(useShortDirPath, true)
-        val result = DefaultListModel<FuzzyContainer>()
-        result.addAll(priorityQueue.toList().sortedWith(comparator))
-
-        return result
-    }
-
-    private fun getComparator(useShortDirPath: Boolean, isDescending: Boolean): Comparator<FuzzyMatchContainer> {
-        return if (isDescending) {
-            compareByDescending { if (useShortDirPath) it.getScoreWithDirLength() else it.getScore() }
-        } else {
-            compareBy { if (useShortDirPath) it.getScoreWithDirLength() else it.getScore() }
-        }
-    }
-
-    fun setListLimit(listLimit: Int) {
-        this.listLimit = listLimit
-    }
-
-    fun setPrioritizeShorterDirPaths(prioritizeShortedFilePaths: Boolean) {
-        this.prioritizeShorterDirPaths = prioritizeShortedFilePaths
     }
 
     /**

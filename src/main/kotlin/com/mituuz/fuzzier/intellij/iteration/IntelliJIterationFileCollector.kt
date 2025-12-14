@@ -39,7 +39,7 @@ class IntelliJIterationFileCollector : IterationFileCollector {
                 if (!shouldContinue()) return@iterateContent false
 
                 if (fileFilter(vf)) {
-                    val iteratorEntry = IterationEntry(vf.name, vf.path, moduleName)
+                    val iteratorEntry = IterationEntry(vf.name, vf.path, moduleName, vf.isDirectory)
                     add(iteratorEntry)
                 }
 

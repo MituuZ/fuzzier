@@ -45,7 +45,7 @@ class StringEvaluatorTest {
             val relativeToSrc = fp.removePrefix("src") // e.g., "src/a/b.kt" -> "/a/b.kt"
             val fullPath = "/m1/src$relativeToSrc"
             val name = fullPath.substring(fullPath.lastIndexOf('/') + 1)
-            val entry = IterationEntry(name = name, path = fullPath, module = moduleName)
+            val entry = IterationEntry(name = name, path = fullPath, module = moduleName, isDir = false)
             evaluator.evaluateIteratorEntry(
                 entry, "",
                 MatchConfig()

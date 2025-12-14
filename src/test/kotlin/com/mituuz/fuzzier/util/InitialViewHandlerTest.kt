@@ -29,6 +29,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.testFramework.TestApplicationManager
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FileType.FILE
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.State
@@ -151,7 +152,7 @@ class InitialViewHandlerTest {
         val fuzzierSettingsServiceInstance: FuzzierSettingsService = service<FuzzierSettingsService>()
         val fgss = service<FuzzierGlobalSettingsService>().state
         val score = FuzzyMatchContainer.FuzzyScore()
-        val container = FuzzyMatchContainer(score, "", "", "")
+        val container = FuzzyMatchContainer(score, "", "", "", FILE)
 
         fuzzierSettingsServiceInstance.state.recentlySearchedFiles = null
         InitialViewHandler.addFileToRecentlySearchedFiles(container, fuzzierSettingsServiceInstance.state, fgss)
@@ -165,11 +166,11 @@ class InitialViewHandlerTest {
         val fgss = service<FuzzierGlobalSettingsService>().state
         val fileListLimit = 2
         val score = FuzzyMatchContainer.FuzzyScore()
-        val container = FuzzyMatchContainer(score, "", "", "")
+        val container = FuzzyMatchContainer(score, "", "", "", FILE)
 
         val largeList: DefaultListModel<FuzzyMatchContainer> = DefaultListModel()
         for (i in 0..25) {
-            largeList.addElement(FuzzyMatchContainer(score, "" + i, "" + i, ""))
+            largeList.addElement(FuzzyMatchContainer(score, "" + i, "" + i, "", FILE))
         }
 
         fgss.fileListLimit = fileListLimit
@@ -189,11 +190,11 @@ class InitialViewHandlerTest {
         val fgss = service<FuzzierGlobalSettingsService>().state
         val fileListLimit = 20
         val score = FuzzyMatchContainer.FuzzyScore()
-        val container = FuzzyMatchContainer(score, "", "", "")
+        val container = FuzzyMatchContainer(score, "", "", "", FILE)
 
         val largeList: DefaultListModel<FuzzyMatchContainer> = DefaultListModel()
         repeat(26) {
-            largeList.addElement(FuzzyMatchContainer(score, "", "", ""))
+            largeList.addElement(FuzzyMatchContainer(score, "", "", "", FILE))
         }
 
         fgss.fileListLimit = fileListLimit

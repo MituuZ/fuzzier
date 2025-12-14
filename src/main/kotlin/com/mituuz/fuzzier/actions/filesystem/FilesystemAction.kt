@@ -92,14 +92,15 @@ abstract class FilesystemAction : FuzzyAction() {
         stringEvaluator: StringEvaluator,
         searchString: String,
         fileListLimit: Int,
-        ignoredChars: String
+        ignoredChars: String,
+        prioritizeShorterDirPaths: Boolean,
     ): DefaultListModel<FuzzyContainer> {
         val ss = FuzzierUtil.cleanSearchString(searchString, ignoredChars)
         val processedFiles = ConcurrentHashMap.newKeySet<String>()
         val listLimit = fileListLimit
         val priorityQueue = PriorityQueue(
             listLimit + 1,
-            compareBy<FuzzyMatchContainer> { it.getScore() }
+            compareBy<FuzzyMatchContainer> { it.getScore(prioritizeShorterDirPaths) }
         )
 
         val queueLock = Any()
@@ -129,7 +130,8 @@ abstract class FilesystemAction : FuzzyAction() {
                                 minimumScore = priorityQueue.maybeAdd(
                                     minimumScore,
                                     fuzzyMatchContainer,
-                                    fileListLimit
+                                    fileListLimit,
+                                    globalState.prioritizeShorterDirPaths
                                 )
                             }
                         }
@@ -147,7 +149,7 @@ abstract class FilesystemAction : FuzzyAction() {
         val result = DefaultListModel<FuzzyContainer>()
         result.addAll(
             priorityQueue.sortedWith(
-                compareByDescending<FuzzyMatchContainer> { it.getScore() })
+                compareByDescending<FuzzyMatchContainer> { it.getScore(prioritizeShorterDirPaths) })
         )
         return result
     }
@@ -156,14 +158,15 @@ abstract class FilesystemAction : FuzzyAction() {
         minimumScore: Int?,
         fuzzyMatchContainer: FuzzyMatchContainer,
         fileListLimit: Int,
+        prioritizeShorterFilePaths: Boolean,
     ): Int? {
         var ret = minimumScore
 
-        if (minimumScore == null || fuzzyMatchContainer.getScore() > minimumScore) {
+        if (minimumScore == null || fuzzyMatchContainer.getScore(prioritizeShorterFilePaths) > minimumScore) {
             this.add(fuzzyMatchContainer)
             if (this.size > fileListLimit) {
                 this.remove()
-                ret = this.peek().getScore()
+                ret = this.peek().getScore(prioritizeShorterFilePaths)
             }
         }
 
@@ -196,6 +199,7 @@ abstract class FilesystemAction : FuzzyAction() {
                         searchString,
                         globalState.fileListLimit,
                         projectState.ignoredCharacters,
+                        globalState.prioritizeShorterDirPaths,
                     )
                 }
                 coroutineContext.ensureActive()

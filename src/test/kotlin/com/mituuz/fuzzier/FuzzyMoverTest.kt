@@ -189,7 +189,13 @@ class FuzzyMoverTest {
         val listModel = DefaultListModel<FuzzyContainer?>()
         if (virtualFile != null) {
             val container =
-                FuzzyMatchContainer(FuzzyMatchContainer.FuzzyScore(), virtualFile.path, virtualFile.name, "")
+                FuzzyMatchContainer(
+                    FuzzyMatchContainer.FuzzyScore(),
+                    virtualFile.path,
+                    virtualFile.name,
+                    "",
+                    FuzzyMatchContainer.FileType.FILE
+                )
             listModel.addElement(container)
         }
         return listModel

@@ -164,17 +164,20 @@ class TestBenchComponent : JPanel(), Disposable {
                     collectIterationFiles(project)
                 }
 
+                val prioritizeShorterDirPaths = liveSettingsComponent.prioritizeShortDirs.getCheckBox().isSelected
                 val listModel = withContext(Dispatchers.Default) {
                     processIterationEntries(
                         iterationEntries,
                         stringEvaluator,
                         searchString,
                         liveSettingsComponent.fileListLimit.getIntSpinner().value as Int,
+                        prioritizeShorterDirPaths,
                     )
                 }
 
                 val sortedList =
-                    listModel.elements().toList().sortedByDescending { (it as FuzzyMatchContainer).getScore() }
+                    listModel.elements().toList()
+                        .sortedByDescending { (it as FuzzyMatchContainer).getScore(prioritizeShorterDirPaths) }
                 val data: Array<Array<Any>> = sortedList.map {
                     arrayOf(
                         (it as FuzzyMatchContainer).filename as Any,
@@ -236,11 +239,13 @@ class TestBenchComponent : JPanel(), Disposable {
         stringEvaluator: StringEvaluator,
         searchString: String,
         fileListLimit: Int,
+        prioritizeShorterDirPaths: Boolean,
     ): DefaultListModel<FuzzyContainer> {
         val ss = FuzzierUtil.cleanSearchString(searchString, projectState.ignoredCharacters)
         val processedFiles = ConcurrentHashMap.newKeySet<String>()
         val priorityQueue = PriorityQueue(
-            fileListLimit + 1, compareBy<FuzzyMatchContainer> { it.getScore() })
+            fileListLimit + 1,
+            compareBy<FuzzyMatchContainer> { it.getScore(prioritizeShorterDirPaths) })
 
         val queueLock = Any()
         var minimumScore: Int? = null
@@ -267,7 +272,7 @@ class TestBenchComponent : JPanel(), Disposable {
                         container?.let { fuzzyMatchContainer ->
                             synchronized(queueLock) {
                                 minimumScore = priorityQueue.maybeAdd(
-                                    minimumScore, fuzzyMatchContainer, fileListLimit
+                                    minimumScore, fuzzyMatchContainer, fileListLimit, prioritizeShorterDirPaths
                                 )
                             }
                         }
@@ -283,21 +288,24 @@ class TestBenchComponent : JPanel(), Disposable {
         val result = DefaultListModel<FuzzyContainer>()
         result.addAll(
             priorityQueue.sortedWith(
-                compareByDescending<FuzzyMatchContainer> { it.getScore() })
+                compareByDescending<FuzzyMatchContainer> { it.getScore(prioritizeShorterDirPaths) })
         )
         return result
     }
 
     private fun PriorityQueue<FuzzyMatchContainer>.maybeAdd(
-        minimumScore: Int?, fuzzyMatchContainer: FuzzyMatchContainer, fileListLimit: Int
+        minimumScore: Int?,
+        fuzzyMatchContainer: FuzzyMatchContainer,
+        fileListLimit: Int,
+        prioritizeShorterDirPaths: Boolean,
     ): Int? {
         var ret = minimumScore
 
-        if (minimumScore == null || fuzzyMatchContainer.getScore() > minimumScore) {
+        if (minimumScore == null || fuzzyMatchContainer.getScore(prioritizeShorterDirPaths) > minimumScore) {
             this.add(fuzzyMatchContainer)
             if (this.size > fileListLimit) {
                 this.remove()
-                ret = this.peek().getScore()
+                ret = this.peek().getScore(prioritizeShorterDirPaths)
             }
         }
 

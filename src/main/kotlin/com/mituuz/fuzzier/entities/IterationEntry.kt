@@ -27,5 +27,6 @@ package com.mituuz.fuzzier.entities
 data class IterationEntry(
     val name: String,
     val path: String,
-    val module: String
+    val module: String,
+    val isDir: Boolean
 )

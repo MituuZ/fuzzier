@@ -23,6 +23,8 @@
  */
 package com.mituuz.fuzzier.entities
 
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FileType
+
 /**
  * Handles creating the content iterators used for string handling and excluding files
  * @param exclusionList exclusion list from settings
@@ -41,11 +43,12 @@ class StringEvaluator(
 
         val moduleBasePath = modules[moduleName] ?: return null
 
-        val dirPath = iteratorEntry.path.removePrefix(moduleBasePath)
-        if (isExcluded(dirPath)) return null
+        val filePath = iteratorEntry.path.removePrefix(moduleBasePath)
+        if (isExcluded(filePath)) return null
 
-        if (dirPath.isNotBlank()) {
-            return createFuzzyContainer(dirPath, moduleBasePath, scoreCalculator)
+        val fileType = if (iteratorEntry.isDir) FileType.DIR else FileType.FILE
+        if (filePath.isNotBlank()) {
+            return createFuzzyContainer(filePath, moduleBasePath, scoreCalculator, fileType)
         }
 
         return null
@@ -74,12 +77,13 @@ class StringEvaluator(
      */
     private fun createFuzzyContainer(
         filePath: String, moduleBasePath: String,
-        scoreCalculator: ScoreCalculator
+        scoreCalculator: ScoreCalculator,
+        fileType: FileType
     ): FuzzyMatchContainer? {
         val filename = filePath.substring(filePath.lastIndexOf("/") + 1)
         return when (val score = scoreCalculator.calculateScore(filePath)) {
             null -> null
-            else -> FuzzyMatchContainer(score, filePath, filename, moduleBasePath)
+            else -> FuzzyMatchContainer(score, filePath, filename, moduleBasePath, fileType)
         }
     }
 }
