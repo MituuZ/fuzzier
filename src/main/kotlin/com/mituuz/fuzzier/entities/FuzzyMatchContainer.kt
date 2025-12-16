@@ -1,26 +1,26 @@
 /*
-MIT License
-
-Copyright (c) 2025 Mitja Leino
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+ *  MIT License
+ *
+ *  Copyright (c) 2025 Mitja Leino
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
+ */
 package com.mituuz.fuzzier.entities
 
 import com.intellij.util.xmlb.Converter
@@ -28,19 +28,16 @@ import com.mituuz.fuzzier.settings.FuzzierConfiguration.END_STYLE_TAG
 import com.mituuz.fuzzier.settings.FuzzierConfiguration.startStyleTag
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.ObjectInputStream
-import java.io.ObjectOutputStream
-import java.io.Serializable
-import java.util.Base64
+import java.io.*
+import java.util.*
 import javax.swing.DefaultListModel
 
 class FuzzyMatchContainer(
     val score: FuzzyScore,
     filePath: String,
     filename: String,
-    moduleBasePath: String
+    moduleBasePath: String,
+    private val fileType: FileType = FileType.FILE
 ) : FuzzyContainer(filePath, moduleBasePath, filename) {
     override fun getDisplayString(state: FuzzierGlobalSettingsService.State): String {
         return when (state.filenameType) {
@@ -80,7 +77,7 @@ class FuzzyMatchContainer(
             }
 
             if (highlightIndex < source.length) {
-                if (i + 1 < hlIndexes.size  && hlIndexes[i + 1] == highlightIndex + 1) {
+                if (i + 1 < hlIndexes.size && hlIndexes[i + 1] == highlightIndex + 1) {
                     i++
                     continue
                 }
@@ -95,27 +92,15 @@ class FuzzyMatchContainer(
         return stringBuilder.toString()
     }
 
-    fun highlightLegacy(source: String): String {
-        val stringBuilder: StringBuilder = StringBuilder(source)
-        var offset = 0
-        val hlIndexes = score.highlightCharacters.sorted()
-        for (i in hlIndexes) {
-            if (i < source.length) {
-                stringBuilder.insert(i + offset, startStyleTag)
-                offset += startStyleTag.length
-                stringBuilder.insert(i + offset + 1, END_STYLE_TAG)
-                offset += END_STYLE_TAG.length
-            }
+    fun getScore(prioritizeShorterFilePaths: Boolean): Int {
+        if (prioritizeShorterFilePaths && fileType == FileType.DIR) {
+            return getScoreWithDirLength()
         }
-        return stringBuilder.toString()
-    }
-
-    fun getScore(): Int {
         return score.getTotalScore()
     }
 
     /**
-     * Gets score that is prioritizing shorter dir paths
+     * Gets a score prioritizing shorter dir paths
      */
     fun getScoreWithDirLength(): Int {
         return score.getTotalScore() + filePath.length * -5
@@ -134,7 +119,7 @@ class FuzzyMatchContainer(
     }
 
     override fun toString(): String {
-        return "FuzzyMatchContainer(basePath='$basePath', filePath='$filePath', score=${getScore()}, dirScore=${getScoreWithDirLength()})"
+        return "FuzzyMatchContainer(basePath='$basePath', filePath='$filePath', score=${getScore(false)}, dirScore=${getScoreWithDirLength()})"
     }
 
     /**
@@ -171,7 +156,7 @@ class FuzzyMatchContainer(
         }
 
         fun toFuzzyMatchContainer(): FuzzyMatchContainer {
-            return FuzzyMatchContainer(score!!, filePath!!, filename!!, moduleBasePath!!)
+            return FuzzyMatchContainer(score!!, filePath!!, filename!!, moduleBasePath!!, FileType.FILE)
         }
 
         var score: FuzzyScore? = null
@@ -193,7 +178,7 @@ class FuzzyMatchContainer(
      * @see FuzzierSettingsService
      */
     class SerializedMatchContainerConverter : Converter<DefaultListModel<SerializedMatchContainer>>() {
-        override fun fromString(value: String) : DefaultListModel<SerializedMatchContainer> {
+        override fun fromString(value: String): DefaultListModel<SerializedMatchContainer> {
             // Fallback to an empty list if deserialization fails
             try {
                 val data = Base64.getDecoder().decode(value)
@@ -206,10 +191,15 @@ class FuzzyMatchContainer(
             }
         }
 
-        override fun toString(value: DefaultListModel<SerializedMatchContainer>) : String {
+        override fun toString(value: DefaultListModel<SerializedMatchContainer>): String {
             val byteArrayOutputStream = ByteArrayOutputStream()
             ObjectOutputStream(byteArrayOutputStream).use { it.writeObject(value) }
             return Base64.getEncoder().encodeToString(byteArrayOutputStream.toByteArray())
         }
+    }
+
+    enum class FileType {
+        DIR,
+        FILE
     }
 }

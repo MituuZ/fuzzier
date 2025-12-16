@@ -33,19 +33,23 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.project.rootManager
 import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.table.JBTable
 import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
-import com.mituuz.fuzzier.entities.FuzzyContainer
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer
-import com.mituuz.fuzzier.entities.StringEvaluator
+import com.mituuz.fuzzier.entities.*
+import com.mituuz.fuzzier.intellij.iteration.IntelliJIterationFileCollector
+import com.mituuz.fuzzier.intellij.iteration.IterationFileCollector
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.util.FuzzierUtil
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import org.apache.commons.lang3.StringUtils
 import java.awt.Dimension
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Future
 import javax.swing.DefaultListModel
 import javax.swing.JPanel
@@ -63,6 +67,9 @@ class TestBenchComponent : JPanel(), Disposable {
     var currentTask: Future<*>? = null
     private lateinit var liveSettingsComponent: FuzzierGlobalSettingsComponent
     private lateinit var projectState: FuzzierSettingsService.State
+    private var currentUpdateListContentJob: Job? = null
+    private var actionScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private var collector: IterationFileCollector = IntelliJIterationFileCollector()
 
     fun fill(settingsComponent: FuzzierGlobalSettingsComponent) {
         val project = ProjectManager.getInstance().openProjects[0]
@@ -77,8 +84,7 @@ class TestBenchComponent : JPanel(), Disposable {
         scrollPane.setViewportView(table)
 
         add(
-            scrollPane,
-            GridConstraints(
+            scrollPane, GridConstraints(
                 0,
                 0,
                 1,
@@ -95,8 +101,7 @@ class TestBenchComponent : JPanel(), Disposable {
             )
         )
         add(
-            searchField,
-            GridConstraints(
+            searchField, GridConstraints(
                 1,
                 0,
                 1,
@@ -137,96 +142,59 @@ class TestBenchComponent : JPanel(), Disposable {
         }
 
         // Use live settings from the component (unsaved UI state) so changes are reflected immediately
-        val liveGlobalExclusions = liveSettingsComponent.globalExclusionTextArea.text
-            .lines()
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
-            .toSet()
+        val liveGlobalExclusions =
+            liveSettingsComponent.globalExclusionTextArea.text.lines().map { it.trim() }.filter { it.isNotEmpty() }
+                .toSet()
 
         val combinedExclusions = buildSet {
             addAll(projectState.exclusionSet)
             addAll(liveGlobalExclusions)
         }
 
-        val stringEvaluator = StringEvaluator(
-            combinedExclusions,
-            project.service<FuzzierSettingsService>().state.modules
-        )
-
-        currentTask?.takeIf { !it.isDone }?.cancel(true)
-
-        currentTask = ApplicationManager.getApplication().executeOnPooledThread {
+        currentUpdateListContentJob?.cancel()
+        currentUpdateListContentJob = actionScope.launch {
             table.setPaintBusy(true)
-            val listModel = DefaultListModel<FuzzyContainer>()
 
-            process(project, stringEvaluator, searchString, listModel)
-
-            val sortedList = listModel.elements().toList().sortedByDescending { (it as FuzzyMatchContainer).getScore() }
-            val data: Array<Array<Any>> = sortedList.map {
-                arrayOf(
-                    (it as FuzzyMatchContainer).filename as Any,
-                    it.filePath as Any,
-                    it.score.streakScore as Any,
-                    it.score.multiMatchScore as Any,
-                    it.score.partialPathScore as Any,
-                    it.score.filenameScore as Any,
-                    it.score.getTotalScore() as Any
+            try {
+                val stringEvaluator = StringEvaluator(
+                    combinedExclusions, project.service<FuzzierSettingsService>().state.modules
                 )
-            }.toTypedArray()
 
-            val tableModel = DefaultTableModel(data, columnNames)
-            table.model = tableModel
-            table.setPaintBusy(false)
-        }
-    }
+                val iterationEntries = withContext(Dispatchers.Default) {
+                    collectIterationFiles(project)
+                }
 
-    private fun process(
-        project: Project, stringEvaluator: StringEvaluator, searchString: String,
-        listModel: DefaultListModel<FuzzyContainer>
-    ) {
-        val moduleManager = ModuleManager.getInstance(project)
-        if (project.service<FuzzierSettingsService>().state.isProject) {
-            processProject(project, stringEvaluator, searchString, listModel)
-        } else {
-            processModules(moduleManager, stringEvaluator, searchString, listModel)
-        }
-    }
+                val prioritizeShorterDirPaths = liveSettingsComponent.prioritizeShortDirs.getCheckBox().isSelected
+                val listModel = withContext(Dispatchers.Default) {
+                    processIterationEntries(
+                        iterationEntries,
+                        stringEvaluator,
+                        searchString,
+                        liveSettingsComponent.fileListLimit.getIntSpinner().value as Int,
+                        prioritizeShorterDirPaths,
+                    )
+                }
 
-    private fun processProject(
-        project: Project, stringEvaluator: StringEvaluator,
-        searchString: String, listModel: DefaultListModel<FuzzyContainer>
-    ) {
-        val ss = FuzzierUtil.cleanSearchString(searchString, projectState.ignoredCharacters)
-        val contentIterator = stringEvaluator.getContentIterator(project.name, ss, listModel, null)
+                val sortedList =
+                    listModel.elements().toList()
+                        .sortedByDescending { (it as FuzzyMatchContainer).getScore(prioritizeShorterDirPaths) }
+                val data: Array<Array<Any>> = sortedList.map {
+                    arrayOf(
+                        (it as FuzzyMatchContainer).filename as Any,
+                        it.filePath as Any,
+                        it.score.streakScore as Any,
+                        it.score.multiMatchScore as Any,
+                        it.score.partialPathScore as Any,
+                        it.score.filenameScore as Any,
+                        it.score.getTotalScore() as Any
+                    )
+                }.toTypedArray()
 
-        val scoreCalculator = stringEvaluator.scoreCalculator
-        scoreCalculator.setMultiMatch(liveSettingsComponent.multiMatchActive.getCheckBox().isSelected)
-        scoreCalculator.setMatchWeightSingleChar(liveSettingsComponent.matchWeightSingleChar.getIntSpinner().value as Int)
-        scoreCalculator.setMatchWeightStreakModifier(liveSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int)
-        scoreCalculator.setMatchWeightPartialPath(liveSettingsComponent.matchWeightPartialPath.getIntSpinner().value as Int)
-        scoreCalculator.setFilenameMatchWeight(liveSettingsComponent.matchWeightFilename.getIntSpinner().value as Int)
-        scoreCalculator.setTolerance(liveSettingsComponent.tolerance.getIntSpinner().value as Int)
-        ProjectFileIndex.getInstance(project).iterateContent(contentIterator)
-    }
-
-    private fun processModules(
-        moduleManager: ModuleManager, stringEvaluator: StringEvaluator,
-        searchString: String, listModel: DefaultListModel<FuzzyContainer>
-    ) {
-        for (module in moduleManager.modules) {
-            val moduleFileIndex = module.rootManager.fileIndex
-            val ss = FuzzierUtil.cleanSearchString(searchString, projectState.ignoredCharacters)
-            val contentIterator = stringEvaluator.getContentIterator(module.name, ss, listModel, null)
-
-            val scoreCalculator = stringEvaluator.scoreCalculator
-            scoreCalculator.setMultiMatch(liveSettingsComponent.multiMatchActive.getCheckBox().isSelected)
-            scoreCalculator.setMatchWeightSingleChar(liveSettingsComponent.matchWeightSingleChar.getIntSpinner().value as Int)
-            scoreCalculator.setMatchWeightStreakModifier(liveSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int)
-            scoreCalculator.setMatchWeightPartialPath(liveSettingsComponent.matchWeightPartialPath.getIntSpinner().value as Int)
-            scoreCalculator.setFilenameMatchWeight(liveSettingsComponent.matchWeightFilename.getIntSpinner().value as Int)
-            scoreCalculator.setTolerance(liveSettingsComponent.tolerance.getIntSpinner().value as Int)
-
-            moduleFileIndex.iterateContent(contentIterator)
+                val tableModel = DefaultTableModel(data, columnNames)
+                table.model = tableModel
+            } finally {
+                table.setPaintBusy(false)
+            }
         }
     }
 
@@ -246,5 +214,101 @@ class TestBenchComponent : JPanel(), Disposable {
                 // Ignore this
             }
         }
+    }
+
+    suspend fun collectIterationFiles(project: Project): List<IterationEntry> {
+        val ctx = currentCoroutineContext()
+        val job = ctx.job
+
+        val indexTargets = if (projectState.isProject) {
+            listOf(ProjectFileIndex.getInstance(project) to project.name)
+        } else {
+            val moduleManager = ModuleManager.getInstance(project)
+            moduleManager.modules.map { it.rootManager.fileIndex to it.name }
+        }
+
+        return collector.collectFiles(
+            targets = indexTargets, shouldContinue = { job.isActive }, fileFilter = buildFileFilter()
+        )
+    }
+
+    private fun buildFileFilter(): (VirtualFile) -> Boolean = { vf -> !vf.isDirectory }
+
+    suspend fun processIterationEntries(
+        fileEntries: List<IterationEntry>,
+        stringEvaluator: StringEvaluator,
+        searchString: String,
+        fileListLimit: Int,
+        prioritizeShorterDirPaths: Boolean,
+    ): DefaultListModel<FuzzyContainer> {
+        val ss = FuzzierUtil.cleanSearchString(searchString, projectState.ignoredCharacters)
+        val processedFiles = ConcurrentHashMap.newKeySet<String>()
+        val priorityQueue = PriorityQueue(
+            fileListLimit + 1,
+            compareBy<FuzzyMatchContainer> { it.getScore(prioritizeShorterDirPaths) })
+
+        val queueLock = Any()
+        var minimumScore: Int? = null
+
+        val cores = Runtime.getRuntime().availableProcessors().coerceAtLeast(1)
+        val parallelism = (cores - 1).coerceIn(1, 8)
+
+        coroutineScope {
+            val ch = Channel<IterationEntry>(capacity = parallelism * 2)
+
+            repeat(parallelism) {
+                launch {
+                    for (iterationFile in ch) {
+                        val matchConfig = MatchConfig(
+                            liveSettingsComponent.tolerance.getIntSpinner().value as Int,
+                            liveSettingsComponent.multiMatchActive.getCheckBox().isSelected,
+                            liveSettingsComponent.matchWeightSingleChar.getIntSpinner().value as Int,
+                            liveSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int,
+                            liveSettingsComponent.matchWeightPartialPath.getIntSpinner().value as Int,
+                            liveSettingsComponent.matchWeightFilename.getIntSpinner().value as Int
+                        )
+
+                        val container = stringEvaluator.evaluateIteratorEntry(iterationFile, ss, matchConfig)
+                        container?.let { fuzzyMatchContainer ->
+                            synchronized(queueLock) {
+                                minimumScore = priorityQueue.maybeAdd(
+                                    minimumScore, fuzzyMatchContainer, fileListLimit, prioritizeShorterDirPaths
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            fileEntries.filter { processedFiles.add(it.path) }.forEach { ch.send(it) }
+            ch.close()
+        }
+
+
+        val result = DefaultListModel<FuzzyContainer>()
+        result.addAll(
+            priorityQueue.sortedWith(
+                compareByDescending<FuzzyMatchContainer> { it.getScore(prioritizeShorterDirPaths) })
+        )
+        return result
+    }
+
+    private fun PriorityQueue<FuzzyMatchContainer>.maybeAdd(
+        minimumScore: Int?,
+        fuzzyMatchContainer: FuzzyMatchContainer,
+        fileListLimit: Int,
+        prioritizeShorterDirPaths: Boolean,
+    ): Int? {
+        var ret = minimumScore
+
+        if (minimumScore == null || fuzzyMatchContainer.getScore(prioritizeShorterDirPaths) > minimumScore) {
+            this.add(fuzzyMatchContainer)
+            if (this.size > fileListLimit) {
+                this.remove()
+                ret = this.peek().getScore(prioritizeShorterDirPaths)
+            }
+        }
+
+        return ret
     }
 }

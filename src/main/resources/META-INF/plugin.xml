@@ -1,89 +1,115 @@
+<!--
+  ~  MIT License
+  ~
+  ~  Copyright (c) 2025 Mitja Leino
+  ~
+  ~  Permission is hereby granted, free of charge, to any person obtaining a copy
+  ~  of this software and associated documentation files (the "Software"), to deal
+  ~  in the Software without restriction, including without limitation the rights
+  ~  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ~  copies of the Software, and to permit persons to whom the Software is
+  ~  furnished to do so, subject to the following conditions:
+  ~
+  ~  The above copyright notice and this permission notice shall be included in all
+  ~  copies or substantial portions of the Software.
+  ~
+  ~  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  ~  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  ~  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  ~  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  ~  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  ~  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  ~  SOFTWARE.
+  -->
+
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-  <id>com.mituuz.fuzzier</id>
-  <name>Fuzzier</name>
-  <vendor email="mituuuuz@hotmail.com" url="https://www.mituuz.com">MituuZ</vendor>
+    <id>com.mituuz.fuzzier</id>
+    <name>Fuzzier</name>
+    <vendor email="mituuuuz@hotmail.com" url="https://www.mituuz.com">MituuZ</vendor>
 
-  <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
-       Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
-       Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
-  <description>A fuzzy file finder modeled after telescope for nvim. Designed to be completely usable through the keyboard (and ideavim).</description>
+    <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
+         Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
+    <description>A fuzzy file finder modeled after telescope for nvim. Designed to be completely usable through the
+        keyboard (and ideavim).
+    </description>
 
-  <!-- Product and plugin compatibility requirements.
-       Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
-  <depends>com.intellij.modules.platform</depends>
+    <!-- Product and plugin compatibility requirements.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
+    <depends>com.intellij.modules.platform</depends>
 
-  <!-- Extension points defined by the plugin.
-       Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
-  <extensions defaultExtensionNs="com.intellij">
-    <applicationService serviceImplementation="com.mituuz.fuzzier.settings.FuzzierSettingsService"/>
-    <projectConfigurable
-      parentId="tools"
-      instance="com.mituuz.fuzzier.settings.FuzzierSettingsConfigurable"
-      id="com.mituuz.fuzzier.settings.FuzzierSettingsConfigurable"
-      displayName="Fuzzier Project Settings"
-      nonDefaultProject="true"/>
-    <notificationGroup id="Fuzzier Notification Group"
-                       displayType="BALLOON"
-                       toolWindowId="Event Log"
-                       isLogByDefault="true"/>
+    <!-- Extension points defined by the plugin.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="com.mituuz.fuzzier.settings.FuzzierSettingsService"/>
+        <projectConfigurable
+                parentId="tools"
+                instance="com.mituuz.fuzzier.settings.FuzzierSettingsConfigurable"
+                id="com.mituuz.fuzzier.settings.FuzzierSettingsConfigurable"
+                displayName="Fuzzier Project Settings"
+                nonDefaultProject="true"/>
+        <notificationGroup id="Fuzzier Notification Group"
+                           displayType="BALLOON"
+                           toolWindowId="Event Log"
+                           isLogByDefault="true"/>
 
-    <applicationService serviceImplementation="com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService"/>
-    <applicationConfigurable
-      parentId="tools"
-      instance="com.mituuz.fuzzier.settings.FuzzierGlobalSettingsConfigurable"
-      id="com.mituuz.fuzzier.settings.FuzzierGlobalSettingsConfigurable"
-      displayName="Fuzzier Global Settings"
-    />
-  </extensions>
+        <applicationService serviceImplementation="com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService"/>
+        <applicationConfigurable
+                parentId="tools"
+                instance="com.mituuz.fuzzier.settings.FuzzierGlobalSettingsConfigurable"
+                id="com.mituuz.fuzzier.settings.FuzzierGlobalSettingsConfigurable"
+                displayName="Fuzzier Global Settings"
+        />
+    </extensions>
 
-  <actions>
-    <action
-            id="com.mituuz.fuzzier.FuzzyGrep"
-            class="com.mituuz.fuzzier.FuzzyGrep"
-            text="Fuzzy Grep"
-            description="Search text">
-      <override-text place="MainMenu" text="Fuzzy Grep"/>
-    </action>
-    <action
-            id="com.mituuz.fuzzier.FuzzyGrepCaseInsensitive"
-            class="com.mituuz.fuzzier.FuzzyGrepCaseInsensitive"
-            text="Fuzzy Grep (Case Insensitive)"
-            description="Search text with case insensitivity">
-      <override-text place="MainMenu" text="Fuzzy Grep (Case Insensitive)"/>
-    </action>
-    <action
-            id="com.mituuz.fuzzier.Fuzzier"
-            class="com.mituuz.fuzzier.Fuzzier"
-            text="Fuzzy File Search"
-            description="Search files using a basic fuzzy search">
-      <override-text place="MainMenu" text="Fuzzy File Search"/>
-    </action>
-    <action id="com.mituuz.fuzzier.FuzzierVCS"
-            class="com.mituuz.fuzzier.FuzzierVCS"
-            text="Fuzzy File Search (Only VCS Tracked Files)"
-            description="Search files using a basic fuzzy search on only VCS tracked files">
-      <override-text place="MainMenu" text="Fuzzy File Search (Only VCS Tracked Files)"/>
-      <add-to-group group-id="ToolsMenu" />
-    </action>
-    <action id="com.mituuz.fuzzier.FuzzyMover"
-            class="com.mituuz.fuzzier.FuzzyMover"
-            text="Fuzzy File Mover"
-            description="Move a file using a basic fuzzy search">
-      <override-text place="MainMenu" text="Fuzzy File Mover"/>
-      <add-to-group group-id="ToolsMenu"/>
-    </action>
-    <action id="com.mituuz.fuzzier.util.MoveDownAction"
-            class="com.mituuz.fuzzier.util.MoveDownAction"
-            text="Move Fuzzier List Selection Down"
-            description="Move the list selector down">
-      <keyboard-shortcut first-keystroke="ctrl j" keymap="$default"/>
-    </action>
-    <action id="com.mituuz.fuzzier.util.MoveUpAction"
-            class="com.mituuz.fuzzier.util.MoveUpAction"
-            text="Move Fuzzier List Selection Up"
-            description="Move the list selector up">
-      <keyboard-shortcut first-keystroke="ctrl k" keymap="$default"/>
-    </action>
-  </actions>
+    <actions>
+        <action
+                id="com.mituuz.fuzzier.FuzzyGrep"
+                class="com.mituuz.fuzzier.FuzzyGrep"
+                text="Fuzzy Grep"
+                description="Search text">
+            <override-text place="MainMenu" text="Fuzzy Grep"/>
+        </action>
+        <action
+                id="com.mituuz.fuzzier.FuzzyGrepCaseInsensitive"
+                class="com.mituuz.fuzzier.FuzzyGrepCaseInsensitive"
+                text="Fuzzy Grep (Case Insensitive)"
+                description="Search text with case insensitivity">
+            <override-text place="MainMenu" text="Fuzzy Grep (Case Insensitive)"/>
+        </action>
+        <action
+                id="com.mituuz.fuzzier.Fuzzier"
+                class="com.mituuz.fuzzier.Fuzzier"
+                text="Fuzzy File Search"
+                description="Search files using a basic fuzzy search">
+            <override-text place="MainMenu" text="Fuzzy File Search"/>
+        </action>
+        <action id="com.mituuz.fuzzier.FuzzierVCS"
+                class="com.mituuz.fuzzier.FuzzierVCS"
+                text="Fuzzy File Search (Only VCS Tracked Files)"
+                description="Search files using a basic fuzzy search on only VCS tracked files">
+            <override-text place="MainMenu" text="Fuzzy File Search (Only VCS Tracked Files)"/>
+            <add-to-group group-id="ToolsMenu"/>
+        </action>
+        <action id="com.mituuz.fuzzier.FuzzyMover"
+                class="com.mituuz.fuzzier.FuzzyMover"
+                text="Fuzzy File Mover"
+                description="Move a file using a basic fuzzy search">
+            <override-text place="MainMenu" text="Fuzzy File Mover"/>
+            <add-to-group group-id="ToolsMenu"/>
+        </action>
+        <action id="com.mituuz.fuzzier.util.MoveDownAction"
+                class="com.mituuz.fuzzier.util.MoveDownAction"
+                text="Move Fuzzier List Selection Down"
+                description="Move the list selector down">
+            <keyboard-shortcut first-keystroke="ctrl j" keymap="$default"/>
+        </action>
+        <action id="com.mituuz.fuzzier.util.MoveUpAction"
+                class="com.mituuz.fuzzier.util.MoveUpAction"
+                text="Move Fuzzier List Selection Up"
+                description="Move the list selector up">
+            <keyboard-shortcut first-keystroke="ctrl k" keymap="$default"/>
+        </action>
+    </actions>
 </idea-plugin>

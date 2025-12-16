@@ -39,29 +39,23 @@ import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.popup.JBPopup
-import com.intellij.openapi.ui.popup.JBPopupListener
-import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.mituuz.fuzzier.FuzzyGrep.Companion.MAX_NUMBER_OR_RESULTS
 import com.mituuz.fuzzier.FuzzyGrep.Companion.MAX_OUTPUT_SIZE
+import com.mituuz.fuzzier.actions.FuzzyAction
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.RowContainer
+import com.mituuz.fuzzier.ui.bindings.ActivationBindings
+import com.mituuz.fuzzier.ui.popup.PopupConfig
 import kotlinx.coroutines.*
 import org.apache.commons.lang3.StringUtils
-import java.awt.event.ActionEvent
-import java.awt.event.KeyEvent
-import java.awt.event.MouseAdapter
-import java.awt.event.MouseEvent
-import javax.swing.AbstractAction
 import javax.swing.DefaultListModel
-import javax.swing.JComponent
-import javax.swing.KeyStroke
+import javax.swing.ListModel
 
-open class FuzzyGrep() : FuzzyAction() {
+open class FuzzyGrep : FuzzyAction() {
     companion object {
         const val FUZZIER_NOTIFICATION_GROUP: String = "Fuzzier Notification Group"
 
@@ -72,23 +66,19 @@ open class FuzzyGrep() : FuzzyAction() {
         const val MAX_NUMBER_OR_RESULTS = 1000
     }
 
-    override var popupTitle: String = "Fuzzy Grep"
-    override var dimensionKey = "FuzzyGrepPopup"
     var useRg = true
     val isWindows = System.getProperty("os.name").lowercase().contains("win")
     private var currentLaunchJob: Job? = null
-    private var currentUpdateListContentJob: Job? = null
-    private var actionScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    protected open lateinit var popupTitle: String
 
     override fun runAction(
         project: Project,
         actionEvent: AnActionEvent
     ) {
         currentLaunchJob?.cancel()
-        setCustomHandlers()
 
         val projectBasePath = project.basePath.toString()
-        currentLaunchJob = actionScope.launch(Dispatchers.EDT) {
+        currentLaunchJob = actionScope?.launch(Dispatchers.EDT) {
             val currentJob = currentLaunchJob
 
             if (!isInstalled("rg", projectBasePath)) {
@@ -136,7 +126,23 @@ open class FuzzyGrep() : FuzzyAction() {
             defaultDoc = EditorFactory.getInstance().createDocument("")
             component = FuzzyFinderComponent(project, showSecondaryField = useRg)
             createListeners(project)
-            showPopup(project)
+            val maybePopup = getPopupProvider().show(
+                project = project,
+                content = component,
+                focus = component.searchField,
+                config = PopupConfig(
+                    title = popupTitle,
+                    preferredSizeProvider = component.preferredSize,
+                    dimensionKey = "FuzzyGrepPopup",
+                    resetWindow = { globalState.resetWindow },
+                    clearResetWindowFlag = { globalState.resetWindow = false }
+                ),
+                cleanupFunction = { cleanupPopup() },
+            )
+
+            if (maybePopup == null) return@launch
+            popup = maybePopup
+
             createSharedListeners(project)
 
             (component as FuzzyFinderComponent).splitPane.dividerLocation =
@@ -159,21 +165,12 @@ open class FuzzyGrep() : FuzzyAction() {
         Notifications.Bus.notify(grepNotification, project)
     }
 
-    override fun createPopup(screenDimensionKey: String): JBPopup {
-        val popup = getInitialPopup(screenDimensionKey)
+    override fun onPopupClosed() {
+        globalState.splitPosition =
+            (component as FuzzyFinderComponent).splitPane.dividerLocation
 
-        popup.addListener(object : JBPopupListener {
-            override fun onClosed(event: LightweightWindowEvent) {
-                globalState.splitPosition =
-                    (component as FuzzyFinderComponent).splitPane.dividerLocation
-                resetOriginalHandlers()
-                super.onClosed(event)
-                currentLaunchJob?.cancel()
-                currentUpdateListContentJob?.cancel()
-            }
-        })
-
-        return popup
+        currentLaunchJob?.cancel()
+        currentLaunchJob = null
     }
 
     /**
@@ -199,29 +196,17 @@ open class FuzzyGrep() : FuzzyAction() {
         }
 
         currentUpdateListContentJob?.cancel()
-        currentUpdateListContentJob = actionScope.launch(Dispatchers.EDT) {
-            val currentJob = currentUpdateListContentJob
-
-            if (currentJob?.isCancelled == true) return@launch
-
+        currentUpdateListContentJob = actionScope?.launch(Dispatchers.EDT) {
             component.fileList.setPaintBusy(true)
-            val listModel = DefaultListModel<FuzzyContainer>()
-
-            if (currentJob?.isCancelled == true) return@launch
-
-            val results = withContext(Dispatchers.IO) {
-                findInFiles(searchString, listModel, project.basePath.toString())
-                listModel
+            try {
+                val results = withContext(Dispatchers.IO) {
+                    findInFiles(searchString, project.basePath.toString())
+                }
+                coroutineContext.ensureActive()
+                component.refreshModel(results, getCellRenderer())
+            } finally {
+                component.fileList.setPaintBusy(false)
             }
-
-            if (currentJob?.isCancelled == true) return@launch
-
-            component.fileList.model = results
-            component.fileList.cellRenderer = getCellRenderer()
-            if (!results.isEmpty) {
-                component.fileList.selectedIndex = 0
-            }
-            component.fileList.setPaintBusy(false)
         }
     }
 
@@ -299,9 +284,10 @@ open class FuzzyGrep() : FuzzyAction() {
     }
 
     private suspend fun findInFiles(
-        searchString: String, listModel: DefaultListModel<FuzzyContainer>,
+        searchString: String,
         projectBasePath: String
-    ) {
+    ): ListModel<FuzzyContainer> {
+        val listModel = DefaultListModel<FuzzyContainer>()
         if (useRg) {
             val secondary = (component as FuzzyFinderComponent).getSecondaryText().trim()
             val commands = mutableListOf(
@@ -326,6 +312,8 @@ open class FuzzyGrep() : FuzzyAction() {
                 runCommand(listOf("grep", "--color=none", "-r", "-n", searchString, "."), listModel, projectBasePath)
             }
         }
+
+        return listModel
     }
 
     private fun createListeners(project: Project) {
@@ -333,7 +321,7 @@ open class FuzzyGrep() : FuzzyAction() {
         component.fileList.addListSelectionListener { event ->
             if (!event.valueIsAdjusting) {
                 if (component.fileList.isEmpty) {
-                    actionScope.launch(Dispatchers.EDT) {
+                    actionScope?.launch(Dispatchers.EDT) {
                         defaultDoc?.let { (component as FuzzyFinderComponent).previewPane.updateFile(it) }
                     }
                     return@addListSelectionListener
@@ -341,7 +329,7 @@ open class FuzzyGrep() : FuzzyAction() {
                 val selectedValue = component.fileList.selectedValue
                 val fileUrl = "file://${selectedValue?.getFileUri()}"
 
-                actionScope.launch(Dispatchers.Default) {
+                actionScope?.launch(Dispatchers.Default) {
                     val file = withContext(Dispatchers.IO) {
                         VirtualFileManager.getInstance().findFileByUrl(fileUrl)
                     }
@@ -356,36 +344,19 @@ open class FuzzyGrep() : FuzzyAction() {
             }
         }
 
-        // Add a mouse listener for double-click
-        component.fileList.addMouseListener(object : MouseAdapter() {
-            override fun mouseClicked(e: MouseEvent) {
-                if (e.clickCount == 2) {
-                    val selectedValue = component.fileList.selectedValue
-                    val virtualFile =
-                        VirtualFileManager.getInstance().findFileByUrl("file://${selectedValue?.getFileUri()}")
-                    // Open the file in the editor
-                    virtualFile?.let {
-                        openFile(project, selectedValue, it)
-                    }
-                }
-            }
-        })
+        ActivationBindings.install(
+            component,
+            onActivate = { handleInput(project) }
+        )
+    }
 
-        // Add a listener that opens the currently selected file when pressing enter (focus on the text box)
-        val enterKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)
-        val enterActionKey = "openFile"
-        val inputMap = component.searchField.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
-        inputMap.put(enterKeyStroke, enterActionKey)
-        component.searchField.actionMap.put(enterActionKey, object : AbstractAction() {
-            override fun actionPerformed(e: ActionEvent?) {
-                val selectedValue = component.fileList.selectedValue
-                val virtualFile =
-                    VirtualFileManager.getInstance().findFileByUrl("file://${selectedValue?.getFileUri()}")
-                virtualFile?.let {
-                    openFile(project, selectedValue, it)
-                }
-            }
-        })
+    private fun handleInput(project: Project) {
+        val selectedValue = component.fileList.selectedValue
+        val virtualFile =
+            VirtualFileManager.getInstance().findFileByUrl("file://${selectedValue?.getFileUri()}")
+        virtualFile?.let {
+            openFile(project, selectedValue, it)
+        }
     }
 
     private fun openFile(project: Project, fuzzyContainer: FuzzyContainer?, virtualFile: VirtualFile) {

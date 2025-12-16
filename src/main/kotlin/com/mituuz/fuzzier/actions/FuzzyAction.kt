@@ -21,7 +21,7 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
-package com.mituuz.fuzzier
+package com.mituuz.fuzzier.actions
 
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.*
@@ -39,29 +39,27 @@ import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.keymap.KeymapManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopup
-import com.intellij.openapi.ui.popup.JBPopupFactory
-import com.intellij.openapi.util.DimensionService
-import com.intellij.openapi.wm.WindowManager
 import com.mituuz.fuzzier.components.FuzzyComponent
+import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
+import com.mituuz.fuzzier.ui.popup.AutoSizePopupProvider
+import com.mituuz.fuzzier.ui.popup.DefaultPopupProvider
+import com.mituuz.fuzzier.ui.popup.PopupProvider
 import com.mituuz.fuzzier.util.FuzzierUtil
-import com.mituuz.fuzzier.util.FuzzierUtil.Companion.createDimensionKey
+import kotlinx.coroutines.*
 import java.awt.Component
 import java.awt.Font
 import java.awt.event.ActionEvent
 import java.util.*
 import java.util.Timer
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.Future
 import javax.swing.*
 import kotlin.concurrent.schedule
 
 abstract class FuzzyAction : AnAction() {
-    open lateinit var dimensionKey: String
-    open lateinit var popupTitle: String
     lateinit var component: FuzzyComponent
     lateinit var popup: JBPopup
     private lateinit var originalDownHandler: EditorActionHandler
@@ -72,53 +70,35 @@ abstract class FuzzyAction : AnAction() {
     protected var defaultDoc: Document? = null
     private val fileTypeManager = FileTypeManager.getInstance()
 
-    @Volatile
-    var currentTask: Future<*>? = null
     val fuzzierUtil = FuzzierUtil()
+    protected open var currentUpdateListContentJob: Job? = null
+    protected open var actionScope: CoroutineScope? = null
+
+    protected fun getPopupProvider(): PopupProvider {
+        return when (globalState.popupSizing) {
+            FuzzierGlobalSettingsService.PopupSizing.AUTO_SIZE -> {
+                val wf = (globalState.autoWidthPercent.coerceIn(10, 100)) / 100.0
+                val hf = (globalState.autoHeightPercent.coerceIn(10, 100)) / 100.0
+                AutoSizePopupProvider(wf, hf)
+            }
+
+            FuzzierGlobalSettingsService.PopupSizing.VANILLA -> DefaultPopupProvider()
+        }
+    }
 
     override fun actionPerformed(actionEvent: AnActionEvent) {
         val project = actionEvent.project
         if (project != null) {
             projectState = project.service<FuzzierSettingsService>().state
             fuzzierUtil.parseModules(project)
+            setCustomHandlers()
+            actionScope?.cancel()
+            actionScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
             runAction(project, actionEvent)
         }
     }
 
     abstract fun runAction(project: Project, actionEvent: AnActionEvent)
-
-    abstract fun createPopup(screenDimensionKey: String): JBPopup
-
-    fun getInitialPopup(screenDimensionKey: String): JBPopup {
-        return JBPopupFactory
-            .getInstance()
-            .createComponentPopupBuilder(component, component.searchField)
-            .setFocusable(true)
-            .setRequestFocus(true)
-            .setResizable(true)
-            .setDimensionServiceKey(null, screenDimensionKey, true)
-            .setTitle(popupTitle)
-            .setMovable(true)
-            .setShowBorder(true)
-            .createPopup()
-    }
-
-    fun showPopup(project: Project) {
-        val mainWindow = WindowManager.getInstance().getIdeFrame(project)?.component
-        mainWindow?.let {
-            val screenBounds = it.graphicsConfiguration.bounds
-            val screenDimensionKey = createDimensionKey(dimensionKey, screenBounds)
-
-            if (globalState.resetWindow) {
-                DimensionService.getInstance().setSize(screenDimensionKey, component.preferredSize, null)
-                DimensionService.getInstance().setLocation(screenDimensionKey, null, null)
-                globalState.resetWindow = false
-            }
-
-            popup = createPopup(screenDimensionKey)
-            popup.showInCenterOf(it)
-        }
-    }
 
     fun createSharedListeners(project: Project) {
         val inputMap = component.searchField.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
@@ -168,13 +148,26 @@ abstract class FuzzyAction : AnAction() {
 
         document.addDocumentListener(listener, popup)
         // Also listen to changes in the secondary search field (if present)
-        (component as? com.mituuz.fuzzier.components.FuzzyFinderComponent)?.addSecondaryDocumentListener(
+        (component as? FuzzyFinderComponent)?.addSecondaryDocumentListener(
             listener,
             popup
         )
     }
 
     abstract fun updateListContents(project: Project, searchString: String)
+
+    protected open fun onPopupClosed() = Unit
+
+    fun cleanupPopup() {
+        resetOriginalHandlers()
+
+        currentUpdateListContentJob?.cancel()
+        currentUpdateListContentJob = null
+
+        actionScope?.cancel()
+
+        onPopupClosed()
+    }
 
     fun setCustomHandlers() {
         val actionManager = EditorActionManager.getInstance()

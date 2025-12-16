@@ -22,25 +22,27 @@
  *  SOFTWARE.
  */
 
-package com.mituuz.fuzzier.components
+package com.mituuz.fuzzier.ui.popup
 
-import com.intellij.ui.EditorTextField
-import com.intellij.ui.components.JBList
-import com.mituuz.fuzzier.entities.FuzzyContainer
-import javax.swing.JPanel
-import javax.swing.ListCellRenderer
-import javax.swing.ListModel
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.popup.JBPopup
+import java.awt.Dimension
+import javax.swing.JComponent
 
-open class FuzzyComponent : JPanel() {
-    var fileList = JBList<FuzzyContainer>()
-    var searchField = EditorTextField()
-    var isDirSelector = false
+data class PopupConfig(
+    val title: String,
+    val dimensionKey: String,
+    val preferredSizeProvider: Dimension,
+    val resetWindow: () -> Boolean,
+    val clearResetWindowFlag: () -> Unit,
+)
 
-    fun refreshModel(listModel: ListModel<FuzzyContainer>, cellRenderer: ListCellRenderer<Any?>) {
-        fileList.model = listModel
-        fileList.cellRenderer = cellRenderer
-        if (!fileList.isEmpty) {
-            fileList.selectedIndex = 0
-        }
-    }
+interface PopupProvider {
+    fun show(
+        project: Project,
+        content: JComponent,
+        focus: JComponent,
+        config: PopupConfig,
+        cleanupFunction: () -> Unit
+    ): JBPopup?
 }

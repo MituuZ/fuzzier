@@ -45,6 +45,11 @@ class FuzzierGlobalSettingsService : PersistentStateComponent<FuzzierGlobalSetti
     class State {
         var searchPosition: SearchPosition = SearchPosition.LEFT
         var splitPosition: Int = DEFAULT_SPLIT_POSITION
+
+        // Popup sizing settings
+        var popupSizing: PopupSizing = PopupSizing.AUTO_SIZE
+        var autoWidthPercent: Int = 80
+        var autoHeightPercent: Int = 80
         var defaultPopupWidth: Int = 900
         var defaultPopupHeight: Int = 600
 
@@ -94,5 +99,10 @@ class FuzzierGlobalSettingsService : PersistentStateComponent<FuzzierGlobalSetti
         BOTTOM("Bottom"),
         LEFT("Left"),
         RIGHT("Right")
+    }
+
+    enum class PopupSizing(val text: String) {
+        AUTO_SIZE("Auto size"),
+        VANILLA("Vanilla")
     }
 }

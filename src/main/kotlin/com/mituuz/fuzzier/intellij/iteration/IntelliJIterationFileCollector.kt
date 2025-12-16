@@ -22,25 +22,29 @@
  *  SOFTWARE.
  */
 
-package com.mituuz.fuzzier.components
+package com.mituuz.fuzzier.intellij.iteration
 
-import com.intellij.ui.EditorTextField
-import com.intellij.ui.components.JBList
-import com.mituuz.fuzzier.entities.FuzzyContainer
-import javax.swing.JPanel
-import javax.swing.ListCellRenderer
-import javax.swing.ListModel
+import com.intellij.openapi.roots.FileIndex
+import com.intellij.openapi.vfs.VirtualFile
+import com.mituuz.fuzzier.entities.IterationEntry
 
-open class FuzzyComponent : JPanel() {
-    var fileList = JBList<FuzzyContainer>()
-    var searchField = EditorTextField()
-    var isDirSelector = false
+class IntelliJIterationFileCollector : IterationFileCollector {
+    override fun collectFiles(
+        targets: List<Pair<FileIndex, String>>,
+        shouldContinue: () -> Boolean,
+        fileFilter: (VirtualFile) -> Boolean
+    ): List<IterationEntry> = buildList {
+        for ((fileIndex, moduleName) in targets) {
+            fileIndex.iterateContent { vf ->
+                if (!shouldContinue()) return@iterateContent false
 
-    fun refreshModel(listModel: ListModel<FuzzyContainer>, cellRenderer: ListCellRenderer<Any?>) {
-        fileList.model = listModel
-        fileList.cellRenderer = cellRenderer
-        if (!fileList.isEmpty) {
-            fileList.selectedIndex = 0
+                if (fileFilter(vf)) {
+                    val iteratorEntry = IterationEntry(vf.name, vf.path, moduleName, vf.isDirectory)
+                    add(iteratorEntry)
+                }
+
+                true
+            }
         }
     }
 }

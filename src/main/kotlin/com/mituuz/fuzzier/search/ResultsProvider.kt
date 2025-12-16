@@ -22,25 +22,7 @@
  *  SOFTWARE.
  */
 
-package com.mituuz.fuzzier.components
+package com.mituuz.fuzzier.search
 
-import com.intellij.ui.EditorTextField
-import com.intellij.ui.components.JBList
-import com.mituuz.fuzzier.entities.FuzzyContainer
-import javax.swing.JPanel
-import javax.swing.ListCellRenderer
-import javax.swing.ListModel
-
-open class FuzzyComponent : JPanel() {
-    var fileList = JBList<FuzzyContainer>()
-    var searchField = EditorTextField()
-    var isDirSelector = false
-
-    fun refreshModel(listModel: ListModel<FuzzyContainer>, cellRenderer: ListCellRenderer<Any?>) {
-        fileList.model = listModel
-        fileList.cellRenderer = cellRenderer
-        if (!fileList.isEmpty) {
-            fileList.selectedIndex = 0
-        }
-    }
+interface ResultsProvider {
 }

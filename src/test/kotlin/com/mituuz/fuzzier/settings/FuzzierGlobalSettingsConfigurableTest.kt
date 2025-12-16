@@ -65,6 +65,71 @@ class FuzzierGlobalSettingsConfigurableTest {
     }
 
     @Test
+    fun popupSizing_isPopulatedFromState() {
+        state.popupSizing = FuzzierGlobalSettingsService.PopupSizing.AUTO_SIZE
+        settingsConfigurable.createComponent()
+        val selected = settingsConfigurable.component.popupSizingSelector
+            .getPopupSizingComboBox().selectedItem as FuzzierGlobalSettingsService.PopupSizing
+        assertEquals(FuzzierGlobalSettingsService.PopupSizing.AUTO_SIZE, selected)
+    }
+
+    @Test
+    fun popupSizing_isModifiedAndApply() {
+        settingsConfigurable.createComponent()
+        assertFalse(settingsConfigurable.isModified)
+
+        val newValue = if (state.popupSizing == FuzzierGlobalSettingsService.PopupSizing.AUTO_SIZE)
+            FuzzierGlobalSettingsService.PopupSizing.VANILLA else FuzzierGlobalSettingsService.PopupSizing.AUTO_SIZE
+        state.popupSizing = newValue
+        assertTrue(settingsConfigurable.isModified)
+
+        val uiSelected = settingsConfigurable.component.popupSizingSelector
+            .getPopupSizingComboBox().selectedItem as FuzzierGlobalSettingsService.PopupSizing
+        settingsConfigurable.apply()
+        assertEquals(uiSelected, state.popupSizing)
+        assertFalse(settingsConfigurable.isModified)
+    }
+
+    @Test
+    fun popupSizing_dimensionVisibilityToggles() {
+        state.popupSizing = FuzzierGlobalSettingsService.PopupSizing.AUTO_SIZE
+        settingsConfigurable.createComponent()
+        val defaultDim = settingsConfigurable.component.defaultDimension
+        assertFalse(defaultDim.label.isVisible)
+        assertFalse(defaultDim.component.isVisible)
+
+        val combo = settingsConfigurable.component.popupSizingSelector.getPopupSizingComboBox()
+        combo.selectedItem = FuzzierGlobalSettingsService.PopupSizing.VANILLA
+        settingsConfigurable.apply()
+        assertTrue(defaultDim.label.isVisible)
+        assertTrue(defaultDim.component.isVisible)
+    }
+
+    @Test
+    fun popupSizing_persistsAcrossRecreate() {
+        settingsConfigurable.createComponent()
+        val combo = settingsConfigurable.component.popupSizingSelector.getPopupSizingComboBox()
+        combo.selectedItem = FuzzierGlobalSettingsService.PopupSizing.VANILLA
+        settingsConfigurable.apply()
+
+        val recreated = FuzzierGlobalSettingsConfigurable()
+        recreated.createComponent()
+        val selected = recreated.component.popupSizingSelector.getPopupSizingComboBox().selectedItem
+                as FuzzierGlobalSettingsService.PopupSizing
+        assertEquals(FuzzierGlobalSettingsService.PopupSizing.VANILLA, selected)
+    }
+
+    @Test
+    fun settingsComponent_getPopupSizingComboBox_smoke() {
+        val configurable = FuzzierGlobalSettingsConfigurable()
+        configurable.createComponent()
+        val combo = configurable.component.popupSizingSelector.getPopupSizingComboBox()
+        assertNotNull(combo)
+        combo.selectedItem = FuzzierGlobalSettingsService.PopupSizing.AUTO_SIZE
+        assertEquals(FuzzierGlobalSettingsService.PopupSizing.AUTO_SIZE, combo.selectedItem)
+    }
+
+    @Test
     fun newTab() {
         pre()
         state.newTab = false
