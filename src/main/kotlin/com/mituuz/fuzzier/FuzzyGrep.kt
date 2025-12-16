@@ -63,22 +63,23 @@ open class FuzzyGrep : FuzzyAction() {
     private val backendResolver = BackendResolver(isWindows)
     private val commandRunner = DefaultCommandRunner()
     private var currentLaunchJob: Job? = null
-    protected open lateinit var popupTitle: String
     private var backend: BackendStrategy? = null
+    private lateinit var grepConfig: GrepConfig
 
-    open fun getCaseMode(): CaseMode {
-        return CaseMode.SENSITIVE
-    }
-
-    open fun getGrepTargets(project: Project): List<String> {
-        return listOf(".")
+    open fun getGrepConfig(project: Project): GrepConfig {
+        return GrepConfig(
+            targets = listOf("."),
+            caseMode = CaseMode.SENSITIVE,
+            popupTitle = "Fuzzy Grep (Case Insensitive)",
+        )
     }
 
     override fun runAction(
         project: Project, actionEvent: AnActionEvent
     ) {
         currentLaunchJob?.cancel()
-
+        grepConfig = getGrepConfig(project)
+        val popupTitle = grepConfig.popupTitle
 
         val projectBasePath = project.basePath.toString()
         currentLaunchJob = actionScope?.launch(Dispatchers.EDT) {
@@ -92,8 +93,6 @@ open class FuzzyGrep : FuzzyAction() {
                 return@launch
             }
             if (backend == null) return@launch
-
-            popupTitle = "Fuzzy Grep (${backend?.name}"
 
             yield()
             defaultDoc = EditorFactory.getInstance().createDocument("")
@@ -163,19 +162,13 @@ open class FuzzyGrep : FuzzyAction() {
 
     private suspend fun findInFiles(
         searchString: String,
-        project: Project
+        project: Project,
     ): ListModel<FuzzyContainer> {
         val listModel = DefaultListModel<FuzzyContainer>()
         val projectBasePath = project.basePath.toString()
 
         if (backend != null) {
-            val grepConfig = GrepConfig(
-                targets = getGrepTargets(project),
-                caseMode = getCaseMode(),
-                searchString = searchString
-            )
-
-            val commands = backend!!.buildCommand(grepConfig)
+            val commands = backend!!.buildCommand(grepConfig, searchString)
             commandRunner.runCommandPopulateListModel(commands, listModel, projectBasePath)
         }
 

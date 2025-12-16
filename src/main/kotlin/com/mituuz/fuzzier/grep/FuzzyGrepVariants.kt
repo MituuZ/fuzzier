@@ -28,37 +28,45 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.mituuz.fuzzier.FuzzyGrep
-import com.mituuz.fuzzier.FuzzyGrepCaseInsensitive
 import com.mituuz.fuzzier.entities.CaseMode
+import com.mituuz.fuzzier.entities.GrepConfig
 
 class FuzzyGrepOpenTabsCI : FuzzyGrep() {
-    override var popupTitle: String = "Fuzzy Grep Open Tabs (Case Insensitive)"
-
-    override fun getCaseMode(): CaseMode {
-        return CaseMode.INSENSITIVE
-    }
-
-    override fun getGrepTargets(project: Project): List<String> {
+    override fun getGrepConfig(project: Project): GrepConfig {
         val fileEditorManager = FileEditorManager.getInstance(project)
         val openFiles: Array<VirtualFile> = fileEditorManager.openFiles
+        val targets = openFiles.map { it.path }
 
-        return openFiles.map { it.path }
+        return GrepConfig(
+            targets = targets,
+            caseMode = CaseMode.INSENSITIVE,
+            popupTitle = "Fuzzy Grep Open Tabs (Case Insensitive)",
+        )
     }
 }
 
 class FuzzyGrepCurrentBufferCI : FuzzyGrep() {
-    override var popupTitle: String = "Fuzzy Grep Current Buffer (Case Insensitive)"
-
-    override fun getCaseMode(): CaseMode {
-        return CaseMode.INSENSITIVE
-    }
-
-    override fun getGrepTargets(project: Project): List<String> {
+    override fun getGrepConfig(project: Project): GrepConfig {
         val editor = FileEditorManager.getInstance(project).selectedTextEditor
         val virtualFile: VirtualFile? =
             editor?.let { FileEditorManager.getInstance(project).selectedFiles.firstOrNull() }
-        return virtualFile?.path?.let { listOf(it) } ?: emptyList()
+        val targets = virtualFile?.path?.let { listOf(it) } ?: emptyList()
+
+        return GrepConfig(
+            targets = targets,
+            caseMode = CaseMode.INSENSITIVE,
+            popupTitle = "Fuzzy Grep Current Buffer (Case Insensitive)",
+        )
     }
 }
 
-class FuzzyGrepCI : FuzzyGrepCaseInsensitive()
+// Temporarily marked as open for FuzzyGrepCaseInsensitive
+open class FuzzyGrepCI : FuzzyGrep() {
+    override fun getGrepConfig(project: Project): GrepConfig {
+        return GrepConfig(
+            targets = listOf("."),
+            caseMode = CaseMode.INSENSITIVE,
+            popupTitle = "Fuzzy Grep (Case Insensitive)",
+        )
+    }
+}

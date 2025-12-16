@@ -30,12 +30,12 @@ import com.mituuz.fuzzier.entities.GrepConfig
 sealed interface BackendStrategy {
     val name: String
 
-    fun buildCommand(grepConfig: GrepConfig): List<String>
+    fun buildCommand(grepConfig: GrepConfig, searchString: String): List<String>
 
     object Ripgrep : BackendStrategy {
         override val name = "ripgrep"
 
-        override fun buildCommand(grepConfig: GrepConfig): List<String> {
+        override fun buildCommand(grepConfig: GrepConfig, searchString: String): List<String> {
             val commands = mutableListOf("rg")
 
             if (grepConfig.caseMode == CaseMode.INSENSITIVE) {
@@ -56,7 +56,7 @@ sealed interface BackendStrategy {
                 val glob = "*.${ext}"
                 commands.addAll(listOf("-g", glob))
             }
-            commands.add(grepConfig.searchString)
+            commands.add(searchString)
             commands.addAll(grepConfig.targets)
             return commands
         }
@@ -65,7 +65,7 @@ sealed interface BackendStrategy {
     object Findstr : BackendStrategy {
         override val name = "findstr"
 
-        override fun buildCommand(grepConfig: GrepConfig): List<String> {
+        override fun buildCommand(grepConfig: GrepConfig, searchString: String): List<String> {
             val commands = mutableListOf("findstr")
 
             if (grepConfig.caseMode == CaseMode.INSENSITIVE) {
@@ -77,7 +77,7 @@ sealed interface BackendStrategy {
                     "/p",
                     "/s",
                     "/n",
-                    grepConfig.searchString
+                    searchString
                 )
             )
             commands.addAll(grepConfig.targets)
@@ -88,7 +88,7 @@ sealed interface BackendStrategy {
     object Grep : BackendStrategy {
         override val name = "com/mituuz/fuzzier/grep"
 
-        override fun buildCommand(grepConfig: GrepConfig): List<String> {
+        override fun buildCommand(grepConfig: GrepConfig, searchString: String): List<String> {
             val commands = mutableListOf("com/mituuz/fuzzier/grep")
 
             if (grepConfig.caseMode == CaseMode.INSENSITIVE) {
@@ -100,7 +100,7 @@ sealed interface BackendStrategy {
                     "--color=none",
                     "-r",
                     "-n",
-                    grepConfig.searchString
+                    searchString
                 )
             )
             commands.addAll(grepConfig.targets)

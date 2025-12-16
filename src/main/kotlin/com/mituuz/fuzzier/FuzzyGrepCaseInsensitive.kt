@@ -24,12 +24,6 @@
 
 package com.mituuz.fuzzier
 
-import com.mituuz.fuzzier.entities.CaseMode
+import com.mituuz.fuzzier.grep.FuzzyGrepCI
 
-// Marked as open to enable migration to new package
-open class FuzzyGrepCaseInsensitive : FuzzyGrep() {
-    override var popupTitle: String = "Fuzzy Grep (Case Insensitive)"
-    override fun getCaseMode(): CaseMode {
-        return CaseMode.INSENSITIVE
-    }
-}
+class FuzzyGrepCaseInsensitive : FuzzyGrepCI()
