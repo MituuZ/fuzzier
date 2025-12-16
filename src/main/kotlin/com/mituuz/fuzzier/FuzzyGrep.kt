@@ -35,7 +35,6 @@ import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.mituuz.fuzzier.actions.FuzzyAction
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
@@ -43,6 +42,7 @@ import com.mituuz.fuzzier.entities.CaseMode
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.GrepConfig
 import com.mituuz.fuzzier.entities.RowContainer
+import com.mituuz.fuzzier.intellij.files.FileOpeningUtil
 import com.mituuz.fuzzier.runner.DefaultCommandRunner
 import com.mituuz.fuzzier.search.BackendResolver
 import com.mituuz.fuzzier.search.BackendStrategy
@@ -204,36 +204,25 @@ open class FuzzyGrep : FuzzyAction() {
 
     private fun handleInput(project: Project) {
         val selectedValue = component.fileList.selectedValue
-        val virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://${selectedValue?.getFileUri()}")
+        val virtualFile =
+            VirtualFileManager.getInstance().findFileByUrl("file://${selectedValue?.getFileUri()}")
         virtualFile?.let {
-            openFile(project, selectedValue, it)
-        }
-    }
+            val fileEditorManager = FileEditorManager.getInstance(project)
 
-    private fun openFile(project: Project, fuzzyContainer: FuzzyContainer?, virtualFile: VirtualFile) {
-        val fileEditorManager = FileEditorManager.getInstance(project)
-        val currentEditor = fileEditorManager.selectedTextEditor
-        val previousFile = currentEditor?.virtualFile
-
-        if (fileEditorManager.isFileOpen(virtualFile)) {
-            fileEditorManager.openFile(virtualFile, true)
-        } else {
-            fileEditorManager.openFile(virtualFile, true)
-            if (currentEditor != null && !globalState.newTab) {
-                fileEditorManager.selectedEditor?.let {
-                    if (previousFile != null) {
-                        fileEditorManager.closeFile(previousFile)
-                    }
+            FileOpeningUtil.openFile(
+                fileEditorManager,
+                virtualFile,
+                globalState.newTab
+            ) {
+                popup.cancel()
+                ApplicationManager.getApplication().invokeLater {
+                    val rc = selectedValue as RowContainer
+                    val lp = LogicalPosition(rc.rowNumber, rc.columnNumber)
+                    val editor = fileEditorManager.selectedTextEditor
+                    editor?.scrollingModel?.scrollTo(lp, ScrollType.CENTER)
+                    editor?.caretModel?.moveToLogicalPosition(lp)
                 }
             }
-        }
-        popup.cancel()
-        ApplicationManager.getApplication().invokeLater {
-            val rc = fuzzyContainer as RowContainer
-            val lp = LogicalPosition(rc.rowNumber, rc.columnNumber)
-            val editor = fileEditorManager.selectedTextEditor
-            editor?.scrollingModel?.scrollTo(lp, ScrollType.CENTER)
-            editor?.caretModel?.moveToLogicalPosition(lp)
         }
     }
 }
