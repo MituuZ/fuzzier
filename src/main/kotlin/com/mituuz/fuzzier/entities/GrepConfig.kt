@@ -22,13 +22,17 @@
  *  SOFTWARE.
  */
 
-package com.mituuz.fuzzier
+package com.mituuz.fuzzier.entities
 
-import com.mituuz.fuzzier.entities.CaseMode
-
-class FuzzyGrepCaseInsensitive : FuzzyGrep() {
-    override var popupTitle: String = "Fuzzy Grep (Case Insensitive)"
-    override fun getCaseMode(): CaseMode {
-        return CaseMode.INSENSITIVE
-    }
+enum class CaseMode {
+    SENSITIVE,
+    INSENSITIVE,
+    SMART
 }
+
+class GrepConfig(
+    val targets: List<String>,
+    val caseMode: CaseMode,
+    val searchString: String,
+    val fileGlob: String = "",
+)

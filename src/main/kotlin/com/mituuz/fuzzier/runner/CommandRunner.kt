@@ -22,7 +22,20 @@
  *  SOFTWARE.
  */
 
-package com.mituuz.fuzzier.search
+package com.mituuz.fuzzier.runner
 
-interface ResultsProvider {
+import com.mituuz.fuzzier.entities.FuzzyContainer
+import javax.swing.DefaultListModel
+
+interface CommandRunner {
+    suspend fun runCommandForOutput(
+        commands: List<String>,
+        projectBasePath: String
+    ): String?
+
+    suspend fun runCommandPopulateListModel(
+        commands: List<String>,
+        listModel: DefaultListModel<FuzzyContainer>,
+        projectBasePath: String
+    )
 }

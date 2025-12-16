@@ -24,10 +24,6 @@
 
 package com.mituuz.fuzzier
 
-import com.intellij.execution.configurations.GeneralCommandLine
-import com.intellij.execution.process.OSProcessHandler
-import com.intellij.execution.process.ProcessEvent
-import com.intellij.execution.process.ProcessListener
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
@@ -39,15 +35,17 @@ import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
-import com.mituuz.fuzzier.FuzzyGrep.Companion.MAX_NUMBER_OR_RESULTS
-import com.mituuz.fuzzier.FuzzyGrep.Companion.MAX_OUTPUT_SIZE
 import com.mituuz.fuzzier.actions.FuzzyAction
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
+import com.mituuz.fuzzier.entities.CaseMode
 import com.mituuz.fuzzier.entities.FuzzyContainer
+import com.mituuz.fuzzier.entities.GrepConfig
 import com.mituuz.fuzzier.entities.RowContainer
+import com.mituuz.fuzzier.runner.DefaultCommandRunner
+import com.mituuz.fuzzier.search.BackendResolver
+import com.mituuz.fuzzier.search.BackendStrategy
 import com.mituuz.fuzzier.ui.bindings.ActivationBindings
 import com.mituuz.fuzzier.ui.popup.PopupConfig
 import kotlinx.coroutines.*
@@ -58,69 +56,36 @@ import javax.swing.ListModel
 open class FuzzyGrep : FuzzyAction() {
     companion object {
         const val FUZZIER_NOTIFICATION_GROUP: String = "Fuzzier Notification Group"
-
-        /**
-         * Limit command output size, this is only used to check installations
-         */
-        const val MAX_OUTPUT_SIZE = 10000
-        const val MAX_NUMBER_OR_RESULTS = 1000
     }
 
     var useRg = true
     val isWindows = System.getProperty("os.name").lowercase().contains("win")
+    private val backendResolver = BackendResolver(isWindows)
+    private val commandRunner = DefaultCommandRunner()
     private var currentLaunchJob: Job? = null
     protected open lateinit var popupTitle: String
+    private var backend: BackendStrategy? = null
 
     override fun runAction(
-        project: Project,
-        actionEvent: AnActionEvent
+        project: Project, actionEvent: AnActionEvent
     ) {
         currentLaunchJob?.cancel()
 
+
         val projectBasePath = project.basePath.toString()
         currentLaunchJob = actionScope?.launch(Dispatchers.EDT) {
-            val currentJob = currentLaunchJob
+            val backendResult: Result<BackendStrategy> = backendResolver.resolveBackend(commandRunner, projectBasePath)
+            backend = backendResult.getOrNull()
 
-            if (!isInstalled("rg", projectBasePath)) {
+            if (backendResult.isFailure) {
                 showNotification(
-                    "No `rg` command found",
-                    """
-                    No ripgrep found<br>
-                    Fallback to `grep` or `findstr`<br>
-                    This notification can be disabled
-                """.trimIndent(),
-                    project,
-                    NotificationType.WARNING
+                    "No search command found", "Fuzzy Grep failed: no suitable grep command found", project
                 )
-
-                if (isWindows) {
-                    if (!isInstalled("findstr", projectBasePath)) {
-                        showNotification(
-                            "No `findstr` command found",
-                            "Fuzzy Grep failed: no `findstr` found",
-                            project
-                        )
-                        return@launch
-                    }
-                    popupTitle = "Fuzzy Grep (findstr)"
-                } else {
-                    if (!isInstalled("grep", projectBasePath)) {
-                        showNotification(
-                            "No `grep` command found",
-                            "Fuzzy Grep failed: no `grep` found",
-                            project
-                        )
-                        return@launch
-                    }
-                    popupTitle = "Fuzzy Grep (grep)"
-                }
-                useRg = false
-            } else {
-                popupTitle = "Fuzzy Grep (ripgrep)"
-                useRg = true
+                return@launch
             }
+            if (backend == null) return@launch
 
-            if (currentJob?.isCancelled == true) return@launch
+            popupTitle = "Fuzzy Grep (${backend?.name}"
 
             yield()
             defaultDoc = EditorFactory.getInstance().createDocument("")
@@ -135,8 +100,7 @@ open class FuzzyGrep : FuzzyAction() {
                     preferredSizeProvider = component.preferredSize,
                     dimensionKey = "FuzzyGrepPopup",
                     resetWindow = { globalState.resetWindow },
-                    clearResetWindowFlag = { globalState.resetWindow = false }
-                ),
+                    clearResetWindowFlag = { globalState.resetWindow = false }),
                 cleanupFunction = { cleanupPopup() },
             )
 
@@ -145,48 +109,24 @@ open class FuzzyGrep : FuzzyAction() {
 
             createSharedListeners(project)
 
-            (component as FuzzyFinderComponent).splitPane.dividerLocation =
-                globalState.splitPosition
+            (component as FuzzyFinderComponent).splitPane.dividerLocation = globalState.splitPosition
         }
     }
 
     private fun showNotification(
-        title: String,
-        content: String,
-        project: Project,
-        type: NotificationType = NotificationType.ERROR
+        title: String, content: String, project: Project, type: NotificationType = NotificationType.ERROR
     ) {
         val grepNotification = Notification(
-            FUZZIER_NOTIFICATION_GROUP,
-            title,
-            content,
-            type
+            FUZZIER_NOTIFICATION_GROUP, title, content, type
         )
         Notifications.Bus.notify(grepNotification, project)
     }
 
     override fun onPopupClosed() {
-        globalState.splitPosition =
-            (component as FuzzyFinderComponent).splitPane.dividerLocation
+        globalState.splitPosition = (component as FuzzyFinderComponent).splitPane.dividerLocation
 
         currentLaunchJob?.cancel()
         currentLaunchJob = null
-    }
-
-    /**
-     * OS-specific to see if a specific executable is found
-     * @return true if the command was found (possibly not a general check/solution)
-     */
-    private suspend fun isInstalled(executable: String, projectBasePath: String): Boolean {
-        val command = if (isWindows) {
-            listOf("where", executable)
-        } else {
-            listOf("which", executable)
-        }
-
-        val result = runCommand(command, projectBasePath)
-
-        return !(result.isNullOrBlank() || result.contains("Could not find files"))
     }
 
     override fun updateListContents(project: Project, searchString: String) {
@@ -210,107 +150,22 @@ open class FuzzyGrep : FuzzyAction() {
         }
     }
 
-    /**
-     * Run the command and collect the output to a string variable with a limited size
-     * @see MAX_OUTPUT_SIZE
-     */
-    protected open suspend fun runCommand(commands: List<String>, projectBasePath: String): String? {
-        return try {
-            val commandLine = GeneralCommandLine(commands)
-                .withWorkDirectory(projectBasePath)
-                .withRedirectErrorStream(true)
-            val output = StringBuilder()
-            val processHandler = OSProcessHandler(commandLine)
-
-            processHandler.addProcessListener(object : ProcessListener {
-                override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
-                    if (output.length < MAX_OUTPUT_SIZE) {
-                        output.appendLine(event.text.replace("\n", ""))
-                    }
-                }
-            })
-
-            withContext(Dispatchers.IO) {
-                processHandler.startNotify()
-                processHandler.waitFor(2000)
-            }
-            output.toString()
-        } catch (_: InterruptedException) {
-            throw InterruptedException()
-        }
-    }
-
-    /**
-     * Run the command and stream a limited number of results to the list model
-     * @see MAX_NUMBER_OR_RESULTS
-     */
-    protected open suspend fun runCommand(
-        commands: List<String>,
-        listModel: DefaultListModel<FuzzyContainer>,
-        projectBasePath: String
-    ) {
-        try {
-            val commandLine = GeneralCommandLine(commands)
-                .withWorkDirectory(projectBasePath)
-                .withRedirectErrorStream(true)
-
-            val processHandler = OSProcessHandler(commandLine)
-            var count = 0
-
-            processHandler.addProcessListener(object : ProcessListener {
-                override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
-                    if (count >= MAX_NUMBER_OR_RESULTS) return
-
-                    event.text.lines().forEach { line ->
-                        if (count >= MAX_NUMBER_OR_RESULTS) return@forEach
-                        if (line.isNotBlank()) {
-                            val rowContainer = RowContainer.rowContainerFromString(line, projectBasePath, useRg)
-                            if (rowContainer != null) {
-                                listModel.addElement(rowContainer)
-                                count++
-                            }
-                        }
-                    }
-                }
-            })
-
-            withContext(Dispatchers.IO) {
-                processHandler.startNotify()
-                processHandler.waitFor(2000)
-            }
-        } catch (_: InterruptedException) {
-            throw InterruptedException()
-        }
+    open fun getCaseMode(): CaseMode {
+        return CaseMode.SENSITIVE
     }
 
     private suspend fun findInFiles(
-        searchString: String,
-        projectBasePath: String
+        searchString: String, projectBasePath: String
     ): ListModel<FuzzyContainer> {
         val listModel = DefaultListModel<FuzzyContainer>()
-        if (useRg) {
-            val secondary = (component as FuzzyFinderComponent).getSecondaryText().trim()
-            val commands = mutableListOf(
-                "rg",
-                "--no-heading",
-                "--color=never",
-                "-n",
-                "--with-filename",
-                "--column"
+
+        if (backend != null) {
+            val grepConfig = GrepConfig(
+                targets = listOf("."), caseMode = getCaseMode(), searchString = searchString
             )
-            if (secondary.isNotEmpty()) {
-                val ext = secondary.removePrefix(".")
-                val glob = "*.${ext}"
-                commands.addAll(listOf("-g", glob))
-            }
-            commands.addAll(listOf(searchString, "."))
-            runCommand(commands, listModel, projectBasePath)
-        } else {
-            if (isWindows) {
-                runCommand(listOf("findstr", "/p", "/s", "/n", searchString, "*"), listModel, projectBasePath)
-            } else {
-                runCommand(listOf("grep", "--color=none", "-r", "-n", searchString, "."), listModel, projectBasePath)
-            }
+
+            val commands = backend!!.buildCommand(grepConfig)
+            commandRunner.runCommandPopulateListModel(commands, listModel, projectBasePath)
         }
 
         return listModel
@@ -336,8 +191,7 @@ open class FuzzyGrep : FuzzyAction() {
 
                     file?.let {
                         (component as FuzzyFinderComponent).previewPane.coUpdateFile(
-                            file,
-                            (selectedValue as RowContainer).rowNumber
+                            file, (selectedValue as RowContainer).rowNumber
                         )
                     }
                 }
@@ -345,15 +199,12 @@ open class FuzzyGrep : FuzzyAction() {
         }
 
         ActivationBindings.install(
-            component,
-            onActivate = { handleInput(project) }
-        )
+            component, onActivate = { handleInput(project) })
     }
 
     private fun handleInput(project: Project) {
         val selectedValue = component.fileList.selectedValue
-        val virtualFile =
-            VirtualFileManager.getInstance().findFileByUrl("file://${selectedValue?.getFileUri()}")
+        val virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://${selectedValue?.getFileUri()}")
         virtualFile?.let {
             openFile(project, selectedValue, it)
         }
