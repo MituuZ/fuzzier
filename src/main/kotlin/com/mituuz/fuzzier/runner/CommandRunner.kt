@@ -25,6 +25,7 @@
 package com.mituuz.fuzzier.runner
 
 import com.mituuz.fuzzier.entities.FuzzyContainer
+import com.mituuz.fuzzier.search.BackendStrategy
 import javax.swing.DefaultListModel
 
 interface CommandRunner {
@@ -36,6 +37,7 @@ interface CommandRunner {
     suspend fun runCommandPopulateListModel(
         commands: List<String>,
         listModel: DefaultListModel<FuzzyContainer>,
-        projectBasePath: String
+        projectBasePath: String,
+        backend: BackendStrategy
     )
 }

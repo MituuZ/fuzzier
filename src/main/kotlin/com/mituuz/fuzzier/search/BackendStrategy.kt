@@ -26,11 +26,16 @@ package com.mituuz.fuzzier.search
 
 import com.mituuz.fuzzier.entities.CaseMode
 import com.mituuz.fuzzier.entities.GrepConfig
+import com.mituuz.fuzzier.entities.RowContainer
 
 sealed interface BackendStrategy {
     val name: String
-
     fun buildCommand(grepConfig: GrepConfig, searchString: String): List<String>
+    fun parseOutputLine(line: String, projectBasePath: String): RowContainer? {
+        return RowContainer.rowContainerFromString(line, projectBasePath, false)
+    }
+
+    fun supportsSecondaryField(): Boolean = false
 
     object Ripgrep : BackendStrategy {
         override val name = "ripgrep"
@@ -59,6 +64,14 @@ sealed interface BackendStrategy {
             commands.add(searchString)
             commands.addAll(grepConfig.targets)
             return commands
+        }
+
+        override fun parseOutputLine(line: String, projectBasePath: String): RowContainer? {
+            return RowContainer.rowContainerFromString(line, projectBasePath, true)
+        }
+
+        override fun supportsSecondaryField(): Boolean {
+            return true
         }
     }
 

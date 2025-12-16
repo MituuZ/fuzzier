@@ -30,7 +30,7 @@ import com.intellij.execution.process.ProcessEvent
 import com.intellij.execution.process.ProcessListener
 import com.intellij.openapi.util.Key
 import com.mituuz.fuzzier.entities.FuzzyContainer
-import com.mituuz.fuzzier.entities.RowContainer
+import com.mituuz.fuzzier.search.BackendStrategy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.swing.DefaultListModel
@@ -76,13 +76,13 @@ class DefaultCommandRunner : CommandRunner {
     override suspend fun runCommandPopulateListModel(
         commands: List<String>,
         listModel: DefaultListModel<FuzzyContainer>,
-        projectBasePath: String
+        projectBasePath: String,
+        backend: BackendStrategy
     ) {
         try {
             val commandLine = GeneralCommandLine(commands)
                 .withWorkDirectory(projectBasePath)
                 .withRedirectErrorStream(true)
-            val isRg = commands.firstOrNull() == "rg"
 
             val processHandler = OSProcessHandler(commandLine)
             var count = 0
@@ -94,7 +94,7 @@ class DefaultCommandRunner : CommandRunner {
                     event.text.lines().forEach { line ->
                         if (count >= MAX_NUMBER_OR_RESULTS) return@forEach
                         if (line.isNotBlank()) {
-                            val rowContainer = RowContainer.rowContainerFromString(line, projectBasePath, isRg)
+                            val rowContainer = backend.parseOutputLine(line, projectBasePath)
                             if (rowContainer != null) {
                                 listModel.addElement(rowContainer)
                                 count++

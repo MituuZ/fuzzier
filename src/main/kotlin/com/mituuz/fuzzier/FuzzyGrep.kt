@@ -58,7 +58,6 @@ open class FuzzyGrep : FuzzyAction() {
         const val FUZZIER_NOTIFICATION_GROUP: String = "Fuzzier Notification Group"
     }
 
-    var useRg = true
     val isWindows = System.getProperty("os.name").lowercase().contains("win")
     private val backendResolver = BackendResolver(isWindows)
     private val commandRunner = DefaultCommandRunner()
@@ -96,7 +95,10 @@ open class FuzzyGrep : FuzzyAction() {
 
             yield()
             defaultDoc = EditorFactory.getInstance().createDocument("")
-            component = FuzzyFinderComponent(project, showSecondaryField = useRg)
+            component = FuzzyFinderComponent(
+                project = project,
+                showSecondaryField = backend!!.supportsSecondaryField()
+            )
             createListeners(project)
             val maybePopup = getPopupProvider().show(
                 project = project,
@@ -169,7 +171,7 @@ open class FuzzyGrep : FuzzyAction() {
 
         if (backend != null) {
             val commands = backend!!.buildCommand(grepConfig, searchString)
-            commandRunner.runCommandPopulateListModel(commands, listModel, projectBasePath)
+            commandRunner.runCommandPopulateListModel(commands, listModel, projectBasePath, backend!!)
         }
 
         return listModel
