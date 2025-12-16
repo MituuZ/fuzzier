@@ -86,10 +86,10 @@ sealed interface BackendStrategy {
     }
 
     object Grep : BackendStrategy {
-        override val name = "grep"
+        override val name = "com/mituuz/fuzzier/grep"
 
         override fun buildCommand(grepConfig: GrepConfig): List<String> {
-            val commands = mutableListOf("grep")
+            val commands = mutableListOf("com/mituuz/fuzzier/grep")
 
             if (grepConfig.caseMode == CaseMode.INSENSITIVE) {
                 commands.add("-i")

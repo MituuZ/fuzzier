@@ -65,51 +65,63 @@
 
     <actions>
         <action
-                id="com.mituuz.fuzzier.FuzzyGrep"
-                class="com.mituuz.fuzzier.FuzzyGrep"
-                text="Fuzzy Grep"
-                description="Search text">
-            <override-text place="MainMenu" text="Fuzzy Grep"/>
-        </action>
-        <action
-                id="com.mituuz.fuzzier.FuzzyGrepCaseInsensitive"
-                class="com.mituuz.fuzzier.FuzzyGrepCaseInsensitive"
-                text="Fuzzy Grep (Case Insensitive)"
-                description="Search text with case insensitivity">
-            <override-text place="MainMenu" text="Fuzzy Grep (Case Insensitive)"/>
-        </action>
-        <action
                 id="com.mituuz.fuzzier.Fuzzier"
                 class="com.mituuz.fuzzier.Fuzzier"
                 text="Fuzzy File Search"
                 description="Search files using a basic fuzzy search">
-            <override-text place="MainMenu" text="Fuzzy File Search"/>
         </action>
+
         <action id="com.mituuz.fuzzier.FuzzierVCS"
                 class="com.mituuz.fuzzier.FuzzierVCS"
                 text="Fuzzy File Search (Only VCS Tracked Files)"
                 description="Search files using a basic fuzzy search on only VCS tracked files">
-            <override-text place="MainMenu" text="Fuzzy File Search (Only VCS Tracked Files)"/>
-            <add-to-group group-id="ToolsMenu"/>
         </action>
+
         <action id="com.mituuz.fuzzier.FuzzyMover"
                 class="com.mituuz.fuzzier.FuzzyMover"
                 text="Fuzzy File Mover"
                 description="Move a file using a basic fuzzy search">
-            <override-text place="MainMenu" text="Fuzzy File Mover"/>
-            <add-to-group group-id="ToolsMenu"/>
         </action>
+
         <action id="com.mituuz.fuzzier.util.MoveDownAction"
                 class="com.mituuz.fuzzier.util.MoveDownAction"
                 text="Move Fuzzier List Selection Down"
                 description="Move the list selector down">
             <keyboard-shortcut first-keystroke="ctrl j" keymap="$default"/>
         </action>
+
         <action id="com.mituuz.fuzzier.util.MoveUpAction"
                 class="com.mituuz.fuzzier.util.MoveUpAction"
                 text="Move Fuzzier List Selection Up"
                 description="Move the list selector up">
             <keyboard-shortcut first-keystroke="ctrl k" keymap="$default"/>
         </action>
+
+        <!-- Grep actions -->
+        <action id="com.mituuz.fuzzier.grep.FuzzyGrepOpenTabsCI"
+                class="com.mituuz.fuzzier.grep.FuzzyGrepOpenTabsCI"
+                text="Fuzzy Grep Open Tabs"
+                description="Search text from open tabs"/>
+
+        <action id="com.mituuz.fuzzier.grep.FuzzyGrepCurrentBufferCI"
+                class="com.mituuz.fuzzier.grep.FuzzyGrepCurrentBufferCI"
+                text="Fuzzy Grep Current Buffer"
+                description="Case insensitive text search from open tabs"/>
+
+        <!-- Temporary legacy matching, use grep package -->
+        <action id="com.mituuz.fuzzier.FuzzyGrep"
+                class="com.mituuz.fuzzier.FuzzyGrep"
+                text="Fuzzy Grep"
+                description="Case sensitive text search from project"/>
+
+        <!-- Temporary legacy matching, use grep package -->
+        <action id="com.mituuz.fuzzier.FuzzyGrepCI"
+                class="com.mituuz.fuzzier.grep.FuzzyGrepCI"
+                text="Fuzzy Grep (Case Insensitive)"
+                description="Case insensitive text search from project"/>
+        <action id="com.mituuz.fuzzier.FuzzyGrepCaseInsensitive"
+                class="com.mituuz.fuzzier.FuzzyGrepCaseInsensitive"
+                text="Fuzzy Grep (Case Insensitive)"
+                description="Case insensitive text search from project"/>
     </actions>
 </idea-plugin>

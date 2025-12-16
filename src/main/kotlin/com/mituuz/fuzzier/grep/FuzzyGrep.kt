@@ -22,14 +22,43 @@
  *  SOFTWARE.
  */
 
-package com.mituuz.fuzzier
+package com.mituuz.fuzzier.grep
 
+import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.VirtualFile
+import com.mituuz.fuzzier.FuzzyGrep
+import com.mituuz.fuzzier.FuzzyGrepCaseInsensitive
 import com.mituuz.fuzzier.entities.CaseMode
 
-// Marked as open to enable migration to new package
-open class FuzzyGrepCaseInsensitive : FuzzyGrep() {
-    override var popupTitle: String = "Fuzzy Grep (Case Insensitive)"
+class FuzzyGrepOpenTabsCI : FuzzyGrep() {
+    override var popupTitle: String = "Fuzzy Grep Open Tabs (Case Insensitive)"
+
     override fun getCaseMode(): CaseMode {
         return CaseMode.INSENSITIVE
     }
+
+    override fun getGrepTargets(project: Project): List<String> {
+        val fileEditorManager = FileEditorManager.getInstance(project)
+        val openFiles: Array<VirtualFile> = fileEditorManager.openFiles
+
+        return openFiles.map { it.path }
+    }
 }
+
+class FuzzyGrepCurrentBufferCI : FuzzyGrep() {
+    override var popupTitle: String = "Fuzzy Grep Current Buffer (Case Insensitive)"
+
+    override fun getCaseMode(): CaseMode {
+        return CaseMode.INSENSITIVE
+    }
+
+    override fun getGrepTargets(project: Project): List<String> {
+        val editor = FileEditorManager.getInstance(project).selectedTextEditor
+        val virtualFile: VirtualFile? =
+            editor?.let { FileEditorManager.getInstance(project).selectedFiles.firstOrNull() }
+        return virtualFile?.path?.let { listOf(it) } ?: emptyList()
+    }
+}
+
+class FuzzyGrepCI : FuzzyGrepCaseInsensitive()

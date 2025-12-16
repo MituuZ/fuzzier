@@ -89,14 +89,19 @@ class BackendResolverTest {
     fun `resolveBackend returns Grep when rg is not available on non-Windows`() = runBlocking {
         val resolver = BackendResolver(isWindows = false)
         coEvery { commandRunner.runCommandForOutput(listOf("which", "rg"), projectBasePath) } returns ""
-        coEvery { commandRunner.runCommandForOutput(listOf("which", "grep"), projectBasePath) } returns "/usr/bin/grep"
+        coEvery {
+            commandRunner.runCommandForOutput(
+                listOf("which", "com/mituuz/fuzzier/grep"),
+                projectBasePath
+            )
+        } returns "/usr/bin/grep"
 
         val result = resolver.resolveBackend(commandRunner, projectBasePath)
 
         assertTrue(result.isSuccess)
         assertEquals(BackendStrategy.Grep, result.getOrNull())
         coVerify { commandRunner.runCommandForOutput(listOf("which", "rg"), projectBasePath) }
-        coVerify { commandRunner.runCommandForOutput(listOf("which", "grep"), projectBasePath) }
+        coVerify { commandRunner.runCommandForOutput(listOf("which", "com/mituuz/fuzzier/grep"), projectBasePath) }
     }
 
     @Test
@@ -119,7 +124,12 @@ class BackendResolverTest {
     fun `resolveBackend returns failure when no backend is available on non-Windows`() = runBlocking {
         val resolver = BackendResolver(isWindows = false)
         coEvery { commandRunner.runCommandForOutput(listOf("which", "rg"), projectBasePath) } returns "   "
-        coEvery { commandRunner.runCommandForOutput(listOf("which", "grep"), projectBasePath) } returns ""
+        coEvery {
+            commandRunner.runCommandForOutput(
+                listOf("which", "com/mituuz/fuzzier/grep"),
+                projectBasePath
+            )
+        } returns ""
 
         val result = resolver.resolveBackend(commandRunner, projectBasePath)
 

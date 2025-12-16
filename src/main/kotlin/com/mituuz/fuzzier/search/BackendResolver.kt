@@ -36,7 +36,10 @@ class BackendResolver(val isWindows: Boolean) {
                 projectBasePath
             ) -> Result.success(BackendStrategy.Findstr)
 
-            !isWindows && isInstalled(commandRunner, "grep", projectBasePath) -> Result.success(BackendStrategy.Grep)
+            !isWindows && isInstalled(commandRunner, "com/mituuz/fuzzier/grep", projectBasePath) -> Result.success(
+                BackendStrategy.Grep
+            )
+
             else -> Result.failure(Exception("No suitable grep command found"))
         }
     }

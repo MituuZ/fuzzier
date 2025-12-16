@@ -66,6 +66,14 @@ open class FuzzyGrep : FuzzyAction() {
     protected open lateinit var popupTitle: String
     private var backend: BackendStrategy? = null
 
+    open fun getCaseMode(): CaseMode {
+        return CaseMode.SENSITIVE
+    }
+
+    open fun getGrepTargets(project: Project): List<String> {
+        return listOf(".")
+    }
+
     override fun runAction(
         project: Project, actionEvent: AnActionEvent
     ) {
@@ -140,7 +148,10 @@ open class FuzzyGrep : FuzzyAction() {
             component.fileList.setPaintBusy(true)
             try {
                 val results = withContext(Dispatchers.IO) {
-                    findInFiles(searchString, project.basePath.toString())
+                    findInFiles(
+                        searchString,
+                        project
+                    )
                 }
                 coroutineContext.ensureActive()
                 component.refreshModel(results, getCellRenderer())
@@ -150,18 +161,18 @@ open class FuzzyGrep : FuzzyAction() {
         }
     }
 
-    open fun getCaseMode(): CaseMode {
-        return CaseMode.SENSITIVE
-    }
-
     private suspend fun findInFiles(
-        searchString: String, projectBasePath: String
+        searchString: String,
+        project: Project
     ): ListModel<FuzzyContainer> {
         val listModel = DefaultListModel<FuzzyContainer>()
+        val projectBasePath = project.basePath.toString()
 
         if (backend != null) {
             val grepConfig = GrepConfig(
-                targets = listOf("."), caseMode = getCaseMode(), searchString = searchString
+                targets = getGrepTargets(project),
+                caseMode = getCaseMode(),
+                searchString = searchString
             )
 
             val commands = backend!!.buildCommand(grepConfig)
