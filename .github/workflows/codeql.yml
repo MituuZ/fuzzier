@@ -93,7 +93,7 @@ jobs:
           JAVA_TOOL_OPTIONS: >-
             -Xms256m -Xmx1536m -XX:MaxMetaspaceSize=512m
         run: |
-          ./gradlew --no-daemon --max-workers=2 clean build -x test
+          ./gradlew --no-daemon --max-workers=2 --stacktrace clean build -x test
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
