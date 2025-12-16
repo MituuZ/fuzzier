@@ -33,6 +33,6 @@ enum class CaseMode {
 class GrepConfig(
     val targets: List<String>,
     val caseMode: CaseMode,
-    val popupTitle: String,
+    val popupTitle: String = "",
     val fileGlob: String = "",
 )
