@@ -45,6 +45,20 @@ class FuzzyGrepOpenTabsCI : FuzzyGrep() {
     }
 }
 
+class FuzzyGrepOpenTabs : FuzzyGrep() {
+    override fun getGrepConfig(project: Project): GrepConfig {
+        val fileEditorManager = FileEditorManager.getInstance(project)
+        val openFiles: Array<VirtualFile> = fileEditorManager.openFiles
+        val targets = openFiles.map { it.path }
+
+        return GrepConfig(
+            targets = targets,
+            caseMode = CaseMode.SENSITIVE,
+            popupTitle = "Fuzzy Grep Open Tabs (Case Insensitive)",
+        )
+    }
+}
+
 class FuzzyGrepCurrentBufferCI : FuzzyGrep() {
     override fun getGrepConfig(project: Project): GrepConfig {
         val editor = FileEditorManager.getInstance(project).selectedTextEditor
@@ -55,6 +69,21 @@ class FuzzyGrepCurrentBufferCI : FuzzyGrep() {
         return GrepConfig(
             targets = targets,
             caseMode = CaseMode.INSENSITIVE,
+            popupTitle = "Fuzzy Grep Current Buffer (Case Insensitive)",
+        )
+    }
+}
+
+class FuzzyGrepCurrentBuffer : FuzzyGrep() {
+    override fun getGrepConfig(project: Project): GrepConfig {
+        val editor = FileEditorManager.getInstance(project).selectedTextEditor
+        val virtualFile: VirtualFile? =
+            editor?.let { FileEditorManager.getInstance(project).selectedFiles.firstOrNull() }
+        val targets = virtualFile?.path?.let { listOf(it) } ?: emptyList()
+
+        return GrepConfig(
+            targets = targets,
+            caseMode = CaseMode.SENSITIVE,
             popupTitle = "Fuzzy Grep Current Buffer (Case Insensitive)",
         )
     }

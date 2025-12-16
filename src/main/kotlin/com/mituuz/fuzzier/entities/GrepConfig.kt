@@ -27,7 +27,6 @@ package com.mituuz.fuzzier.entities
 enum class CaseMode {
     SENSITIVE,
     INSENSITIVE,
-    SMART
 }
 
 class GrepConfig(
