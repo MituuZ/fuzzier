@@ -36,6 +36,7 @@ import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFileManager
+import com.intellij.util.SingleAlarm
 import com.mituuz.fuzzier.actions.FuzzyAction
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.CaseMode
@@ -48,6 +49,8 @@ import com.mituuz.fuzzier.search.BackendResolver
 import com.mituuz.fuzzier.search.BackendStrategy
 import com.mituuz.fuzzier.ui.bindings.ActivationBindings
 import com.mituuz.fuzzier.ui.popup.PopupConfig
+import com.mituuz.fuzzier.ui.preview.CoroutinePreviewAlarmProvider
+import com.mituuz.fuzzier.ui.preview.PreviewAlarmProvider
 import kotlinx.coroutines.*
 import org.apache.commons.lang3.StringUtils
 import javax.swing.DefaultListModel
@@ -63,6 +66,8 @@ open class FuzzyGrep : FuzzyAction() {
     private val commandRunner = DefaultCommandRunner()
     private var currentLaunchJob: Job? = null
     private var backend: BackendStrategy? = null
+    private var previewAlarm: SingleAlarm? = null
+    private var previewAlarmProvider: PreviewAlarmProvider? = null
     private lateinit var grepConfig: GrepConfig
 
     open fun getGrepConfig(project: Project): GrepConfig {
@@ -99,6 +104,8 @@ open class FuzzyGrep : FuzzyAction() {
                 project = project,
                 showSecondaryField = backend!!.supportsSecondaryField()
             )
+            previewAlarmProvider = CoroutinePreviewAlarmProvider(actionScope)
+            previewAlarm = previewAlarmProvider?.getPreviewAlarm(component, defaultDoc)
             createListeners(project)
             val maybePopup = getPopupProvider().show(
                 project = project,
@@ -134,6 +141,7 @@ open class FuzzyGrep : FuzzyAction() {
     override fun onPopupClosed() {
         globalState.splitPosition = (component as FuzzyFinderComponent).splitPane.dividerLocation
 
+        previewAlarm?.dispose()
         currentLaunchJob?.cancel()
         currentLaunchJob = null
     }
@@ -180,27 +188,10 @@ open class FuzzyGrep : FuzzyAction() {
     private fun createListeners(project: Project) {
         // Add a listener that updates the contents of the preview pane
         component.fileList.addListSelectionListener { event ->
-            if (!event.valueIsAdjusting) {
-                if (component.fileList.isEmpty) {
-                    actionScope?.launch(Dispatchers.EDT) {
-                        defaultDoc?.let { (component as FuzzyFinderComponent).previewPane.updateFile(it) }
-                    }
-                    return@addListSelectionListener
-                }
-                val selectedValue = component.fileList.selectedValue
-                val fileUrl = "file://${selectedValue?.getFileUri()}"
-
-                actionScope?.launch(Dispatchers.Default) {
-                    val file = withContext(Dispatchers.IO) {
-                        VirtualFileManager.getInstance().findFileByUrl(fileUrl)
-                    }
-
-                    file?.let {
-                        (component as FuzzyFinderComponent).previewPane.coUpdateFile(
-                            file, (selectedValue as RowContainer).rowNumber
-                        )
-                    }
-                }
+            if (event.valueIsAdjusting) {
+                return@addListSelectionListener
+            } else {
+                previewAlarm?.cancelAndRequest()
             }
         }
 

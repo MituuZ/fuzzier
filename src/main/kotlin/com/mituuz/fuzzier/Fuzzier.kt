@@ -171,9 +171,6 @@ open class Fuzzier : FilesystemAction() {
         }
     }
 
-    private fun openFile(project: Project, fuzzyContainer: FuzzyContainer?, virtualFile: VirtualFile) {
-    }
-
     private fun getPreviewAlarm(): SingleAlarm {
         return SingleAlarm(
             {
