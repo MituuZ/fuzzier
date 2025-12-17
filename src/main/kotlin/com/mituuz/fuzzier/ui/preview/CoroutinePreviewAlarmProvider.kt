@@ -31,12 +31,10 @@ import com.intellij.util.SingleAlarm
 import com.mituuz.fuzzier.components.FuzzyComponent
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.RowContainer
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 
 class CoroutinePreviewAlarmProvider(val actionScope: CoroutineScope?) : PreviewAlarmProvider {
+    private var previewJob: Job? = null
     override fun getPreviewAlarm(component: FuzzyComponent, defaultDoc: Document?): SingleAlarm {
         return SingleAlarm(
             {
@@ -49,16 +47,19 @@ class CoroutinePreviewAlarmProvider(val actionScope: CoroutineScope?) : PreviewA
                 val selectedValue = component.fileList.selectedValue
                 val fileUrl = "file://${selectedValue?.getFileUri()}"
 
-                actionScope?.launch(Dispatchers.Default) {
+                previewJob?.cancel()
+                previewJob = actionScope?.launch(Dispatchers.Default) {
                     val file = withContext(Dispatchers.IO) {
                         VirtualFileManager.getInstance().findFileByUrl(fileUrl)
                     }
 
-                    file?.let {
-                        (component as FuzzyFinderComponent).previewPane.coUpdateFile(
-                            file, (selectedValue as RowContainer).rowNumber
-                        )
-                    }
+                    if (file == null) return@launch
+
+                    if (component.fileList.selectedValue != selectedValue) return@launch
+
+                    (component as FuzzyFinderComponent).previewPane.coUpdateFile(
+                        file, (selectedValue as RowContainer).rowNumber
+                    )
                 }
             },
             75,
