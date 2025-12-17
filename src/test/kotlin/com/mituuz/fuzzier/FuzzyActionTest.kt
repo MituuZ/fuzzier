@@ -63,11 +63,11 @@ class FuzzyActionTest {
         assertNotNull(action.component)
 
         val inputMap = action.component.searchField.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
-        val kShiftKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_K, InputEvent.CTRL_DOWN_MASK)
-        val jShiftKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_J, InputEvent.CTRL_DOWN_MASK)
+        val pShiftKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_DOWN_MASK)
+        val nShiftKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK)
 
-        val moveUpAction = inputMap.get(kShiftKeyStroke)
-        val moveDownAction = inputMap.get(jShiftKeyStroke)
+        val moveUpAction = inputMap.get(pShiftKeyStroke)
+        val moveDownAction = inputMap.get(nShiftKeyStroke)
 
         assertEquals("moveUp", moveUpAction)
         assertEquals("moveDown", moveDownAction)
