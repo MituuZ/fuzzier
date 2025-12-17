@@ -25,7 +25,6 @@ package com.mituuz.fuzzier.entities
 
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import java.io.File
-import java.nio.file.Paths
 
 class RowContainer(
     filePath: String,
@@ -46,7 +45,7 @@ class RowContainer(
             }
 
             val parts = row.split(":", limit = 3)
-            val filePath = getRelativePath(parts[0].removePrefix("."), basePath)
+            val filePath = getFilePath(parts[0])
             val filename = filePath.substringAfterLast(FILE_SEPARATOR)
             val rowNumber = parts[1].toInt() - 1
             val trimmedRow: String = parts[2].trim()
@@ -59,7 +58,7 @@ class RowContainer(
             }
 
             val parts = row.split(":", limit = 4)
-            val filePath = getRelativePath(parts[0], basePath)
+            val filePath = getFilePath(parts[0])
             val filename = filePath.substringAfterLast(FILE_SEPARATOR)
             val rowNumber = parts[1].toInt() - 1
             val columnNumber: Int = parts[2].toInt() - 1
@@ -68,12 +67,13 @@ class RowContainer(
             return RowContainer(filePath, basePath, filename, rowNumber, trimmedRow, columnNumber)
         }
 
-        private fun getRelativePath(stringPath: String, basePath: String): String {
-            val path = Paths.get(stringPath)
-            if (path.isAbsolute) {
-                return stringPath.removePrefix(basePath)
+        private fun getFilePath(filePath: String): String {
+            val filePath = filePath.removePrefix(".")
+            if (!filePath.startsWith(FILE_SEPARATOR)) {
+                return "$FILE_SEPARATOR$filePath"
             }
-            return stringPath.removePrefix(".")
+
+            return filePath
         }
     }
 

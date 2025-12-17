@@ -45,7 +45,7 @@ class RowContainerTest {
 
     @Test
     @EnabledOnOs(OS.LINUX, OS.MAC)
-    fun fromRGStringRel() {
+    fun fromRGString() {
         val input =
             "./src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt:205:33:            moduleFileIndex.iterateContent(contentIterator)"
         val basePath = "/home/user/IdeaProjects/fuzzier"
@@ -62,24 +62,7 @@ class RowContainerTest {
 
     @Test
     @EnabledOnOs(OS.LINUX, OS.MAC)
-    fun fromRGStringAbs() {
-        val input =
-            "/home/user/IdeaProjects/fuzzier/src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt:205:33:            moduleFileIndex.iterateContent(contentIterator)"
-        val basePath = "/home/user/IdeaProjects/fuzzier"
-        val rc = rgRowContainerFromString(input, basePath)
-
-        assertNotNull(rc, "Could not create row container from $input")
-        assertEquals("/src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt", rc.filePath)
-        assertEquals(basePath, rc.basePath)
-        assertEquals("TestBenchComponent.kt", rc.filename)
-        assertEquals(204, rc.rowNumber)
-        assertEquals(32, rc.columnNumber)
-        assertEquals("moduleFileIndex.iterateContent(contentIterator)", rc.trimmedRow)
-    }
-
-    @Test
-    @EnabledOnOs(OS.LINUX, OS.MAC)
-    fun fromGrepStringRel() {
+    fun fromGrepString() {
         val input =
             "./src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt:205:            moduleFileIndex.iterateContent(contentIterator)"
         val basePath = "/home/user/IdeaProjects/fuzzier"
@@ -95,25 +78,8 @@ class RowContainerTest {
     }
 
     @Test
-    @EnabledOnOs(OS.LINUX, OS.MAC)
-    fun fromGrepStringAbs() {
-        val input =
-            "/home/user/IdeaProjects/fuzzier/src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt:205:            moduleFileIndex.iterateContent(contentIterator)"
-        val basePath = "/home/user/IdeaProjects/fuzzier"
-        val rc = rowContainerFromString(input, basePath)
-
-        assertNotNull(rc, "Could not create row container from $input")
-        assertEquals("/src/main/kotlin/com/mituuz/fuzzier/components/TestBenchComponent.kt", rc.filePath)
-        assertEquals(basePath, rc.basePath)
-        assertEquals("TestBenchComponent.kt", rc.filename)
-        assertEquals(204, rc.rowNumber)
-        assertEquals(0, rc.columnNumber)
-        assertEquals("moduleFileIndex.iterateContent(contentIterator)", rc.trimmedRow)
-    }
-
-    @Test
     @EnabledOnOs(OS.WINDOWS)
-    fun fromRGStringRel_windows() {
+    fun fromRGString_windows() {
         val input =
             ".\\src\\main\\kotlin\\com\\mituuz\\fuzzier\\components\\TestBenchComponent.kt:205:33:            moduleFileIndex.iterateContent(contentIterator)"
         val basePath = "C:\\Users\\user\\IdeaProjects\\fuzzier"
@@ -130,43 +96,9 @@ class RowContainerTest {
 
     @Test
     @EnabledOnOs(OS.WINDOWS)
-    fun fromRGStringAbs_windows() {
-        val input =
-            "C:\\Users\\user\\IdeaProjects\\fuzzier\\src\\main\\kotlin\\com\\mituuz\\fuzzier\\components\\TestBenchComponent.kt:205:33:            moduleFileIndex.iterateContent(contentIterator)"
-        val basePath = "C:\\Users\\user\\IdeaProjects\\fuzzier"
-        val rc = rgRowContainerFromString(input, basePath)
-
-        assertNotNull(rc, "Could not create row container from $input")
-        assertEquals("\\src\\main\\kotlin\\com\\mituuz\\fuzzier\\components\\TestBenchComponent.kt", rc.filePath)
-        assertEquals(basePath, rc.basePath)
-        assertEquals("TestBenchComponent.kt", rc.filename)
-        assertEquals(204, rc.rowNumber)
-        assertEquals(32, rc.columnNumber)
-        assertEquals("moduleFileIndex.iterateContent(contentIterator)", rc.trimmedRow)
-    }
-
-    @Test
-    @EnabledOnOs(OS.WINDOWS)
-    fun fromFindstrStringRel_windows() {
+    fun fromFindstrString_windows() {
         val input =
             ".\\src\\main\\kotlin\\com\\mituuz\\fuzzier\\components\\TestBenchComponent.kt:205:            moduleFileIndex.iterateContent(contentIterator)"
-        val basePath = "C:\\Users\\user\\IdeaProjects\\fuzzier"
-        val rc = rowContainerFromString(input, basePath)
-
-        assertNotNull(rc, "Could not create row container from $input")
-        assertEquals("\\src\\main\\kotlin\\com\\mituuz\\fuzzier\\components\\TestBenchComponent.kt", rc.filePath)
-        assertEquals(basePath, rc.basePath)
-        assertEquals("TestBenchComponent.kt", rc.filename)
-        assertEquals(204, rc.rowNumber)
-        assertEquals(0, rc.columnNumber)
-        assertEquals("moduleFileIndex.iterateContent(contentIterator)", rc.trimmedRow)
-    }
-
-    @Test
-    @EnabledOnOs(OS.WINDOWS)
-    fun fromFindstrStringAbs_windows() {
-        val input =
-            "C:\\Users\\user\\IdeaProjects\\fuzzier\\src\\main\\kotlin\\com\\mituuz\\fuzzier\\components\\TestBenchComponent.kt:205:            moduleFileIndex.iterateContent(contentIterator)"
         val basePath = "C:\\Users\\user\\IdeaProjects\\fuzzier"
         val rc = rowContainerFromString(input, basePath)
 

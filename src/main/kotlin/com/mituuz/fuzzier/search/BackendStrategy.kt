@@ -32,6 +32,7 @@ sealed interface BackendStrategy {
     val name: String
     fun buildCommand(grepConfig: GrepConfig, searchString: String): List<String>
     fun parseOutputLine(line: String, projectBasePath: String): RowContainer? {
+        val line = line.replace(projectBasePath, ".")
         return RowContainer.rowContainerFromString(line, projectBasePath)
     }
 
@@ -67,6 +68,7 @@ sealed interface BackendStrategy {
         }
 
         override fun parseOutputLine(line: String, projectBasePath: String): RowContainer? {
+            val line = line.replace(projectBasePath, ".")
             return RowContainer.rgRowContainerFromString(line, projectBasePath)
         }
 
