@@ -47,7 +47,9 @@ intellijPlatform {
       <li>Add debouncing for fuzzy file preview using `SingleAlarm`</li>
       <li>Refactor everything</li>
       <li>Add auto sizing option for the popup (default)</li>
-    </ul>
+      <li>Add new actions FuzzyGrepOpenTabsCI, FuzzyGrepOpenTabs, FuzzyGrepCurrentBufferCI, FuzzyGrepCurrentBuffer</li>
+      <li>Rename an existing action from FuzzyGrepCaseInsensitive to FuzzyGrepCI (the old version will still work for now)</li>
+      <li>Update default list movement from j/k to n/p</li>
     """.trimIndent()
 
         ideaVersion {
