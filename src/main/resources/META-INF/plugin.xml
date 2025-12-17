@@ -87,14 +87,14 @@
                 class="com.mituuz.fuzzier.util.MoveDownAction"
                 text="Move Fuzzier List Selection Down"
                 description="Move the list selector down">
-            <keyboard-shortcut first-keystroke="ctrl j" keymap="$default"/>
+            <keyboard-shortcut first-keystroke="ctrl n" keymap="$default"/>
         </action>
 
         <action id="com.mituuz.fuzzier.util.MoveUpAction"
                 class="com.mituuz.fuzzier.util.MoveUpAction"
                 text="Move Fuzzier List Selection Up"
                 description="Move the list selector up">
-            <keyboard-shortcut first-keystroke="ctrl k" keymap="$default"/>
+            <keyboard-shortcut first-keystroke="ctrl p" keymap="$default"/>
         </action>
 
         <!-- Grep actions -->

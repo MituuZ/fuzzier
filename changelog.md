@@ -9,6 +9,7 @@
 - Add auto sizing option for the popup (default)
 - Add new actions FuzzyGrepOpenTabsCI, FuzzyGrepOpenTabs, FuzzyGrepCurrentBufferCI, FuzzyGrepCurrentBuffer
 - Rename an existing action from FuzzyGrepCaseInsensitive to FuzzyGrepCI (the old version will still work for now)
+- Update default list movement from j/k to n/p
 
 ## Version 1.14.0
 
