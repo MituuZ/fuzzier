@@ -104,7 +104,7 @@
                 description="Case sensitive text search from open tabs"/>
         <action id="com.mituuz.fuzzier.grep.FuzzyGrepOpenTabsCI"
                 class="com.mituuz.fuzzier.grep.FuzzyGrepOpenTabsCI"
-                text="Fuzzy Grep Open Tabs"
+                text="Fuzzy Grep Open Tabs (Case Insensitive)"
                 description="Case insensitive text search from open tabs"/>
 
         <action id="com.mituuz.fuzzier.grep.FuzzyGrepCurrentBuffer"
@@ -113,7 +113,7 @@
                 description="Case sensitive text search from current buffer"/>
         <action id="com.mituuz.fuzzier.grep.FuzzyGrepCurrentBufferCI"
                 class="com.mituuz.fuzzier.grep.FuzzyGrepCurrentBufferCI"
-                text="Fuzzy Grep Current Buffer"
+                text="Fuzzy Grep Current Buffer (Case Insensitive)"
                 description="Case insensitive text search from current buffer"/>
 
         <!-- Temporary legacy matching, use grep package -->
