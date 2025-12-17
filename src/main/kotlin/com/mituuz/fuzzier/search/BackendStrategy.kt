@@ -32,7 +32,7 @@ sealed interface BackendStrategy {
     val name: String
     fun buildCommand(grepConfig: GrepConfig, searchString: String): List<String>
     fun parseOutputLine(line: String, projectBasePath: String): RowContainer? {
-        return RowContainer.rowContainerFromString(line, projectBasePath, false)
+        return RowContainer.rowContainerFromString(line, projectBasePath)
     }
 
     fun supportsSecondaryField(): Boolean = false
@@ -67,7 +67,7 @@ sealed interface BackendStrategy {
         }
 
         override fun parseOutputLine(line: String, projectBasePath: String): RowContainer? {
-            return RowContainer.rowContainerFromString(line, projectBasePath, true)
+            return RowContainer.rgRowContainerFromString(line, projectBasePath)
         }
 
         override fun supportsSecondaryField(): Boolean {
