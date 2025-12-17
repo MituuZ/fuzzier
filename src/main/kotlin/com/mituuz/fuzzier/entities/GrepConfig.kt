@@ -32,6 +32,13 @@ enum class CaseMode {
 class GrepConfig(
     val targets: List<String>,
     val caseMode: CaseMode,
-    val popupTitle: String = "",
+    val title: String = "",
     val fileGlob: String = "",
-)
+) {
+    fun getPopupTitle(): String {
+        if (caseMode == CaseMode.INSENSITIVE) {
+            return "$title (Case Insensitive)"
+        }
+        return title
+    }
+}

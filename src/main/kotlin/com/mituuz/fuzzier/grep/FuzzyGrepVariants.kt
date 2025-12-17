@@ -40,7 +40,7 @@ class FuzzyGrepOpenTabsCI : FuzzyGrep() {
         return GrepConfig(
             targets = targets,
             caseMode = CaseMode.INSENSITIVE,
-            popupTitle = "Fuzzy Grep Open Tabs (Case Insensitive)",
+            title = "Fuzzy Grep Open Tabs",
         )
     }
 }
@@ -54,7 +54,7 @@ class FuzzyGrepOpenTabs : FuzzyGrep() {
         return GrepConfig(
             targets = targets,
             caseMode = CaseMode.SENSITIVE,
-            popupTitle = "Fuzzy Grep Open Tabs (Case Insensitive)",
+            title = "Fuzzy Grep Open Tabs",
         )
     }
 }
@@ -69,7 +69,7 @@ class FuzzyGrepCurrentBufferCI : FuzzyGrep() {
         return GrepConfig(
             targets = targets,
             caseMode = CaseMode.INSENSITIVE,
-            popupTitle = "Fuzzy Grep Current Buffer (Case Insensitive)",
+            title = "Fuzzy Grep Current Buffer",
         )
     }
 }
@@ -84,7 +84,7 @@ class FuzzyGrepCurrentBuffer : FuzzyGrep() {
         return GrepConfig(
             targets = targets,
             caseMode = CaseMode.SENSITIVE,
-            popupTitle = "Fuzzy Grep Current Buffer (Case Insensitive)",
+            title = "Fuzzy Grep Current Buffer",
         )
     }
 }
@@ -95,7 +95,7 @@ open class FuzzyGrepCI : FuzzyGrep() {
         return GrepConfig(
             targets = listOf("."),
             caseMode = CaseMode.INSENSITIVE,
-            popupTitle = "Fuzzy Grep (Case Insensitive)",
+            title = "Fuzzy Grep",
         )
     }
 }

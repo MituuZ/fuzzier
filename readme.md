@@ -43,10 +43,10 @@ List movement can be remapped from settings -> keymaps, but do not support chord
 ## Features
 
 - Fuzzy file finder
-    - Search all except excluded files
-    - Search only from VCS-tracked files
+  - Search all except excluded files
+  - Search only from VCS-tracked files
 - Text search leveraging [ripgrep](https://github.com/BurntSushi/ripgrep "Link to GitHub - ripgrep"), grep or findstr
-    - With file globbing support for ripgrep
+  - With file globbing support for ripgrep
 - File mover
 
 ## Documentation
@@ -63,11 +63,20 @@ The goal is to have a central place for all the documentation and to keep the RE
 Example of a .ideavimrc-row to add a vim keybinding for the plugin
 
 ```
+" File search
 map <Leader>pf <action>(com.mituuz.fuzzier.Fuzzier)
 map <Leader>gf <action>(com.mituuz.fuzzier.FuzzierVCS)
+
+" Mover
 map <Leader>mf <action>(com.mituuz.fuzzier.FuzzyMover)
+
+" Grepping
 map <Leader>ff <action>(com.mituuz.fuzzier.FuzzyGrep)
-map <Leader>ff <action>(com.mituuz.fuzzier.FuzzyGrepCaseInsensitive)
+map <Leader>ff <action>(com.mituuz.fuzzier.grep.FuzzyGrepCI)
+map <Leader>ff <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabsCI)
+map <Leader>ff <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabs)
+map <Leader>ff <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBufferCI)
+map <Leader>ff <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBuffer)
 ```
 
 ### Adding an editor shortcut
@@ -76,7 +85,8 @@ map <Leader>ff <action>(com.mituuz.fuzzier.FuzzyGrepCaseInsensitive)
 
 ## Installation
 
-The plugin can be installed from the [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/23451-fuzzier "Link to the JetBrains Marketplace - Fuzzier")
+The plugin can be installed from
+the [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/23451-fuzzier "Link to the JetBrains Marketplace - Fuzzier")
 
 ## Contact
 

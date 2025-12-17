@@ -69,7 +69,7 @@ open class FuzzyGrep : FuzzyAction() {
         return GrepConfig(
             targets = listOf("."),
             caseMode = CaseMode.SENSITIVE,
-            popupTitle = "Fuzzy Grep (Case Insensitive)",
+            title = "Fuzzy Grep",
         )
     }
 
@@ -78,7 +78,7 @@ open class FuzzyGrep : FuzzyAction() {
     ) {
         currentLaunchJob?.cancel()
         grepConfig = getGrepConfig(project)
-        val popupTitle = grepConfig.popupTitle
+        val popupTitle = grepConfig.getPopupTitle()
 
         val projectBasePath = project.basePath.toString()
         currentLaunchJob = actionScope?.launch(Dispatchers.EDT) {
