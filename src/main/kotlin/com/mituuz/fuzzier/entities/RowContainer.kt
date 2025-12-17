@@ -46,10 +46,6 @@ class RowContainer(
             }
 
             val parts = row.split(":", limit = 3)
-            if (parts.size != 3) {
-                return null
-            }
-
             val filePath = getRelativePath(parts[0].removePrefix("."), basePath)
             val filename = filePath.substringAfterLast(FILE_SEPARATOR)
             val rowNumber = parts[1].toInt() - 1
@@ -63,10 +59,6 @@ class RowContainer(
             }
 
             val parts = row.split(":", limit = 4)
-            if (parts.size != 4) {
-                return null
-            }
-
             val filePath = getRelativePath(parts[0], basePath)
             val filename = filePath.substringAfterLast(FILE_SEPARATOR)
             val rowNumber = parts[1].toInt() - 1

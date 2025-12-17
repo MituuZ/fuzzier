@@ -28,6 +28,7 @@ import com.mituuz.fuzzier.entities.RowContainer.Companion.rgRowContainerFromStri
 import com.mituuz.fuzzier.entities.RowContainer.Companion.rowContainerFromString
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNotNull
 import org.junit.jupiter.api.condition.EnabledOnOs
@@ -176,5 +177,41 @@ class RowContainerTest {
         assertEquals(204, rc.rowNumber)
         assertEquals(0, rc.columnNumber)
         assertEquals("moduleFileIndex.iterateContent(contentIterator)", rc.trimmedRow)
+    }
+
+    @Test
+    fun fromGrepStringInvalidPattern() {
+        val input = "invalid input without proper format"
+        val basePath = "/home/user/IdeaProjects/fuzzier"
+        val rc = rowContainerFromString(input, basePath)
+
+        assertNull(rc, "Expected null for input that doesn't match COMMON_PATTERN")
+    }
+
+    @Test
+    fun fromGrepStringInsufficientParts() {
+        val input = "file.kt:205"
+        val basePath = "/home/user/IdeaProjects/fuzzier"
+        val rc = rowContainerFromString(input, basePath)
+
+        assertNull(rc, "Expected null for input with insufficient parts")
+    }
+
+    @Test
+    fun fromRGStringInvalidPattern() {
+        val input = "./file.kt:205: content without column number"
+        val basePath = "/home/user/IdeaProjects/fuzzier"
+        val rc = rgRowContainerFromString(input, basePath)
+
+        assertNull(rc, "Expected null for input that doesn't match RG_PATTERN")
+    }
+
+    @Test
+    fun fromRGStringInsufficientParts() {
+        val input = "file.kt:205:33"
+        val basePath = "/home/user/IdeaProjects/fuzzier"
+        val rc = rgRowContainerFromString(input, basePath)
+
+        assertNull(rc, "Expected null for input with insufficient parts")
     }
 }
