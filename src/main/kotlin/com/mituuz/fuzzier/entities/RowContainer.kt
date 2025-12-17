@@ -46,7 +46,7 @@ class RowContainer(
 
             val parts = row.split(":", limit = 3)
             val filePath = getFilePath(parts[0])
-            val filename = filePath.substringAfterLast(FILE_SEPARATOR)
+            val filename = filePath.replace('\\', '/').substringAfterLast('/')
             val rowNumber = parts[1].toInt() - 1
             val trimmedRow: String = parts[2].trim()
             return RowContainer(filePath, basePath, filename, rowNumber, trimmedRow)
@@ -59,7 +59,7 @@ class RowContainer(
 
             val parts = row.split(":", limit = 4)
             val filePath = getFilePath(parts[0])
-            val filename = filePath.substringAfterLast(FILE_SEPARATOR)
+            val filename = filePath.replace('\\', '/').substringAfterLast('/')
             val rowNumber = parts[1].toInt() - 1
             val columnNumber: Int = parts[2].toInt() - 1
             val trimmedRow: String = parts[3].trim()
