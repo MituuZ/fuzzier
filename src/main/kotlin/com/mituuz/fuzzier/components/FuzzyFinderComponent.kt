@@ -54,7 +54,9 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
     var previewPane: PreviewEditor = PreviewEditor(project)
     var fuzzyPanel: JPanel = JPanel()
     var splitPane: JSplitPane = JSplitPane()
-    private val secondaryField = EditorTextField()
+    private val secondaryField = EditorTextField().apply {
+        setPlaceholder("file extension")
+    }
 
     init {
         val settingsState = service<FuzzierGlobalSettingsService>().state
