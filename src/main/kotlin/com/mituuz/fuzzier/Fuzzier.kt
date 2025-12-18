@@ -76,10 +76,6 @@ open class Fuzzier : FilesystemAction() {
 
             createSharedListeners(project)
 
-            (component as FuzzyFinderComponent).setDividerLocationPixels(
-                globalState.splitPosition
-            )
-
             if (globalState.recentFilesMode != FuzzierGlobalSettingsService.RecentFilesMode.NONE) {
                 createInitialView(project)
             }
@@ -87,8 +83,6 @@ open class Fuzzier : FilesystemAction() {
     }
 
     override fun onPopupClosed() {
-        globalState.splitPosition =
-            (component as FuzzyFinderComponent).getDividerLocationPixels()
         previewAlarm?.dispose()
         lastPreviewKey = null
     }

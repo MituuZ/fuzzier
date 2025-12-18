@@ -66,6 +66,7 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
         previewPane.fileType = PlainTextFileType.INSTANCE
         previewPane.isViewer = true
 
+        splitPane.setAndLoadSplitterProportionKey("Fuzzier.FuzzyFinder.Splitter")
         splitPane.preferredSize = Dimension(settingsState.defaultPopupWidth, settingsState.defaultPopupHeight)
 
         fuzzyPanel.layout = GridLayoutManager(1, 1, JBUI.emptyInsets(), -1, -1)
@@ -96,33 +97,6 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
             setupTabBetweenFields()
         }
         setupCtrlDUShortcuts()
-    }
-
-    fun setDividerLocationPixels(pixels: Int) {
-        val available = if (splitPane.orientation) {
-            // vertical: top/bottom
-            val h = if (height > 0) height else preferredSize?.height ?: 0
-            h - splitPane.dividerWidth
-        } else {
-            // horizontal: left/right
-            val w = if (width > 0) width else preferredSize?.width ?: 0
-            w - splitPane.dividerWidth
-        }
-        if (available > 0) {
-            val prop = (pixels.toFloat() / available).coerceIn(0f, 1f)
-            splitPane.proportion = prop
-        }
-    }
-
-    fun getDividerLocationPixels(): Int {
-        val available = if (splitPane.orientation) {
-            val h = if (height > 0) height else preferredSize?.height ?: 0
-            h - splitPane.dividerWidth
-        } else {
-            val w = if (width > 0) width else preferredSize?.width ?: 0
-            w - splitPane.dividerWidth
-        }
-        return if (available > 0) (available * splitPane.proportion).toInt() else 0
     }
 
     private fun setupCtrlDUShortcuts() {

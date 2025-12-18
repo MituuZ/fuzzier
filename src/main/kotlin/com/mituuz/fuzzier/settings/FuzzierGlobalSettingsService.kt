@@ -38,13 +38,10 @@ import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType.FILE_PATH_ONLY
 @Service(Service.Level.APP)
 class FuzzierGlobalSettingsService : PersistentStateComponent<FuzzierGlobalSettingsService.State> {
     companion object {
-        @JvmStatic
-        val DEFAULT_SPLIT_POSITION: Int = 350
     }
 
     class State {
         var searchPosition: SearchPosition = SearchPosition.LEFT
-        var splitPosition: Int = DEFAULT_SPLIT_POSITION
 
         // Popup sizing settings
         var popupSizing: PopupSizing = PopupSizing.AUTO_SIZE

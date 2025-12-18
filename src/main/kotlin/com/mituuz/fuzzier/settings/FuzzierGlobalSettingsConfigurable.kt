@@ -148,10 +148,7 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
             state.defaultPopupHeight != newPopupHeight ||
             state.defaultPopupWidth != newPopupWidth
         ) {
-
-            // Reset window size and split position to defaults
             state.resetWindow = true
-            state.splitPosition = FuzzierGlobalSettingsService.DEFAULT_SPLIT_POSITION
         }
         state.defaultPopupHeight = newPopupHeight
         state.defaultPopupWidth = newPopupWidth
