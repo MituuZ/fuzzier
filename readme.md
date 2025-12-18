@@ -68,7 +68,7 @@ nmap <Leader>fs <action>(com.mituuz.fuzzier.search.Fuzzier)
 nmap <Leader>fg <action>(com.mituuz.fuzzier.search.FuzzierVCS)
 
 " Mover
-nmap <Leader>fm <action>(com.mituuz.fuzzier.operations.FuzzyMover)
+nmap <Leader>fm <action>(com.mituuz.fuzzier.operation.FuzzyMover)
 
 " Grepping
 nmap <Leader>ff <action>(com.mituuz.fuzzier.grep.FuzzyGrepCI)
