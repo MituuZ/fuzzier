@@ -78,7 +78,7 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
 
         // Configure the secondary field to be roughly a single word wide
         run {
-            val width = JBUI.scale(90)
+            val width = JBUI.scale(110)
             secondaryField.preferredSize = Dimension(width, secondaryField.preferredSize.height)
         }
         searchField.text = ""
