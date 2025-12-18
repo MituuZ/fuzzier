@@ -26,10 +26,10 @@ problems in the future.
 Added some new grep variations
 
 ```
-map <Leader>ff <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabsCI)
-map <Leader>ff <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabs)
-map <Leader>ff <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBufferCI)
-map <Leader>ff <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBuffer)
+map <Leader>fT <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabsCI)
+map <Leader>ft <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabs)
+map <Leader>fB <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBufferCI)
+map <Leader>fb <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBuffer)
 ```
 
 ### New features

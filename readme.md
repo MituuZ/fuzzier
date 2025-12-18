@@ -71,12 +71,12 @@ map <Leader>fg <action>(com.mituuz.fuzzier.search.FuzzierVCS)
 map <Leader>fm <action>(com.mituuz.fuzzier.operations.FuzzyMover)
 
 " Grepping
-map <Leader>fF <action>(com.mituuz.fuzzier.grep.FuzzyGrep)
 map <Leader>ff <action>(com.mituuz.fuzzier.grep.FuzzyGrepCI)
-map <Leader>fT <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabsCI)
-map <Leader>ft <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabs)
-map <Leader>fB <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBufferCI)
-map <Leader>fb <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBuffer)
+map <Leader>fF <action>(com.mituuz.fuzzier.grep.FuzzyGrep)
+map <Leader>ft <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabsCI)
+map <Leader>fT <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabs)
+map <Leader>fb <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBufferCI)
+map <Leader>fB <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBuffer)
 ```
 
 ### Adding an editor shortcut
