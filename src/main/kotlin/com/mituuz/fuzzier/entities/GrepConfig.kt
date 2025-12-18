@@ -33,7 +33,6 @@ class GrepConfig(
     val targets: List<String>,
     val caseMode: CaseMode,
     val title: String = "",
-    val fileGlob: String = "",
     val supportsSecondaryField: Boolean = true,
 ) {
     fun getPopupTitle(): String {
