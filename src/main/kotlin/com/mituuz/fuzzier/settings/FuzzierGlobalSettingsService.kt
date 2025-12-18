@@ -37,9 +37,6 @@ import com.mituuz.fuzzier.entities.FuzzyContainer.FilenameType.FILE_PATH_ONLY
 )
 @Service(Service.Level.APP)
 class FuzzierGlobalSettingsService : PersistentStateComponent<FuzzierGlobalSettingsService.State> {
-    companion object {
-    }
-
     class State {
         var searchPosition: SearchPosition = SearchPosition.LEFT
 

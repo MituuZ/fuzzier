@@ -96,7 +96,6 @@ class FuzzyGrepCurrentBuffer : FuzzyGrep() {
     }
 }
 
-// Temporarily marked as open for FuzzyGrepCaseInsensitive
 class FuzzyGrepCI : FuzzyGrep() {
     override fun getGrepConfig(project: Project): GrepConfig {
         return GrepConfig(
