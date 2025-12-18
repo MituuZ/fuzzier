@@ -43,7 +43,7 @@ class BackendStrategyTest {
                 fileGlob = ""
             )
 
-            val result = BackendStrategy.Ripgrep.buildCommand(config, "test")
+            val result = BackendStrategy.Ripgrep.buildCommand(config, "test", null)
 
             assertEquals(
                 listOf(
@@ -68,7 +68,7 @@ class BackendStrategyTest {
                 fileGlob = ""
             )
 
-            val result = BackendStrategy.Ripgrep.buildCommand(config, "test")
+            val result = BackendStrategy.Ripgrep.buildCommand(config, "test", null)
 
             assertTrue(result.contains("--smart-case"))
             assertTrue(result.contains("-F"))
@@ -82,7 +82,7 @@ class BackendStrategyTest {
                 fileGlob = ""
             )
 
-            val result = BackendStrategy.Ripgrep.buildCommand(config, "test")
+            val result = BackendStrategy.Ripgrep.buildCommand(config, "test", null)
 
             assertTrue(!result.contains("--smart-case"))
             assertTrue(!result.contains("-F"))
@@ -96,7 +96,7 @@ class BackendStrategyTest {
                 fileGlob = ".kt"
             )
 
-            val result = BackendStrategy.Ripgrep.buildCommand(config, "test")
+            val result = BackendStrategy.Ripgrep.buildCommand(config, "test", null)
 
             val globIndex = result.indexOf("-g")
             assertTrue(globIndex >= 0)
@@ -111,7 +111,7 @@ class BackendStrategyTest {
                 fileGlob = "java"
             )
 
-            val result = BackendStrategy.Ripgrep.buildCommand(config, "test")
+            val result = BackendStrategy.Ripgrep.buildCommand(config, "test", null)
 
             val globIndex = result.indexOf("-g")
             assertTrue(globIndex >= 0)
@@ -126,7 +126,7 @@ class BackendStrategyTest {
                 fileGlob = ""
             )
 
-            val result = BackendStrategy.Ripgrep.buildCommand(config, "test")
+            val result = BackendStrategy.Ripgrep.buildCommand(config, "test", null)
 
             assertTrue(!result.contains("-g"))
         }
@@ -147,7 +147,7 @@ class BackendStrategyTest {
                 fileGlob = ""
             )
 
-            val result = BackendStrategy.Findstr.buildCommand(config, "test")
+            val result = BackendStrategy.Findstr.buildCommand(config, "test", null)
 
             assertTrue(result.contains("findstr"))
             assertTrue(result.contains("/p"))
@@ -165,7 +165,7 @@ class BackendStrategyTest {
                 fileGlob = ""
             )
 
-            val result = BackendStrategy.Findstr.buildCommand(config, "test")
+            val result = BackendStrategy.Findstr.buildCommand(config, "test", null)
 
             assertTrue(result.contains("/I"))
         }
@@ -178,7 +178,7 @@ class BackendStrategyTest {
                 fileGlob = ""
             )
 
-            val result = BackendStrategy.Findstr.buildCommand(config, "test")
+            val result = BackendStrategy.Findstr.buildCommand(config, "test", null)
 
             assertTrue(!result.contains("/I"))
         }
@@ -199,7 +199,7 @@ class BackendStrategyTest {
                 fileGlob = ""
             )
 
-            val result = BackendStrategy.Grep.buildCommand(config, "test")
+            val result = BackendStrategy.Grep.buildCommand(config, "test", null)
 
             assertTrue(result.contains("com/mituuz/fuzzier/grep"))
             assertTrue(result.contains("--color=none"))
@@ -217,7 +217,7 @@ class BackendStrategyTest {
                 fileGlob = ""
             )
 
-            val result = BackendStrategy.Grep.buildCommand(config, "test")
+            val result = BackendStrategy.Grep.buildCommand(config, "test", null)
 
             assertTrue(result.contains("-i"))
         }
@@ -230,7 +230,7 @@ class BackendStrategyTest {
                 fileGlob = ""
             )
 
-            val result = BackendStrategy.Grep.buildCommand(config, "test")
+            val result = BackendStrategy.Grep.buildCommand(config, "test", null)
 
             assertTrue(!result.contains("-i"))
         }
