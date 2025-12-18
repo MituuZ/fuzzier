@@ -55,7 +55,7 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
     var fuzzyPanel: JPanel = JPanel()
     var splitPane: OnePixelSplitter = OnePixelSplitter()
     private val secondaryField = EditorTextField().apply {
-        setPlaceholder("file extension")
+        setPlaceholder("File extension")
     }
 
     init {

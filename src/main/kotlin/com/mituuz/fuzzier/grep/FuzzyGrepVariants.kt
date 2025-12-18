@@ -31,6 +31,12 @@ import com.mituuz.fuzzier.FuzzyGrep
 import com.mituuz.fuzzier.entities.CaseMode
 import com.mituuz.fuzzier.entities.GrepConfig
 
+private object FuzzyGrepTitles {
+    const val OPEN_TABS = "Fuzzy Grep Open Tabs"
+    const val CURRENT_BUFFER = "Fuzzy Grep Current Buffer"
+    const val DEFAULT = "Fuzzy Grep"
+}
+
 class FuzzyGrepOpenTabsCI : FuzzyGrep() {
     override fun getGrepConfig(project: Project): GrepConfig {
         val fileEditorManager = FileEditorManager.getInstance(project)
@@ -40,7 +46,7 @@ class FuzzyGrepOpenTabsCI : FuzzyGrep() {
         return GrepConfig(
             targets = targets,
             caseMode = CaseMode.INSENSITIVE,
-            title = "Fuzzy Grep Open Tabs",
+            title = FuzzyGrepTitles.OPEN_TABS,
         )
     }
 }
@@ -54,7 +60,7 @@ class FuzzyGrepOpenTabs : FuzzyGrep() {
         return GrepConfig(
             targets = targets,
             caseMode = CaseMode.SENSITIVE,
-            title = "Fuzzy Grep Open Tabs",
+            title = FuzzyGrepTitles.OPEN_TABS,
         )
     }
 }
@@ -69,7 +75,8 @@ class FuzzyGrepCurrentBufferCI : FuzzyGrep() {
         return GrepConfig(
             targets = targets,
             caseMode = CaseMode.INSENSITIVE,
-            title = "Fuzzy Grep Current Buffer",
+            title = FuzzyGrepTitles.CURRENT_BUFFER,
+            supportsSecondaryField = false,
         )
     }
 }
@@ -84,7 +91,8 @@ class FuzzyGrepCurrentBuffer : FuzzyGrep() {
         return GrepConfig(
             targets = targets,
             caseMode = CaseMode.SENSITIVE,
-            title = "Fuzzy Grep Current Buffer",
+            title = FuzzyGrepTitles.CURRENT_BUFFER,
+            supportsSecondaryField = false,
         )
     }
 }
@@ -95,7 +103,7 @@ open class FuzzyGrepCI : FuzzyGrep() {
         return GrepConfig(
             targets = listOf("."),
             caseMode = CaseMode.INSENSITIVE,
-            title = "Fuzzy Grep",
+            title = FuzzyGrepTitles.DEFAULT,
         )
     }
 }

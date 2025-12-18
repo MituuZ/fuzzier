@@ -34,6 +34,7 @@ class GrepConfig(
     val caseMode: CaseMode,
     val title: String = "",
     val fileGlob: String = "",
+    val supportsSecondaryField: Boolean = true,
 ) {
     fun getPopupTitle(): String {
         if (caseMode == CaseMode.INSENSITIVE) {

@@ -100,9 +100,10 @@ open class FuzzyGrep : FuzzyAction() {
 
             yield()
             defaultDoc = EditorFactory.getInstance().createDocument("")
+            val showSecondaryField = backend!!.supportsSecondaryField() && grepConfig.supportsSecondaryField
             component = FuzzyFinderComponent(
                 project = project,
-                showSecondaryField = backend!!.supportsSecondaryField()
+                showSecondaryField = showSecondaryField
             )
             previewAlarmProvider = CoroutinePreviewAlarmProvider(actionScope)
             previewAlarm = previewAlarmProvider?.getPreviewAlarm(component, defaultDoc)
