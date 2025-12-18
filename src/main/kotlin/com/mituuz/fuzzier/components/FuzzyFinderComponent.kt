@@ -32,6 +32,7 @@ import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.fileTypes.PlainTextFileType
 import com.intellij.openapi.project.Project
 import com.intellij.ui.EditorTextField
+import com.intellij.ui.OnePixelSplitter
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.uiDesigner.core.GridConstraints
@@ -46,14 +47,13 @@ import java.awt.KeyboardFocusManager
 import java.awt.event.InputEvent
 import java.awt.event.KeyEvent
 import javax.swing.JPanel
-import javax.swing.JSplitPane
 import javax.swing.KeyStroke
 import javax.swing.SwingUtilities
 
 class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boolean = false) : FuzzyComponent() {
     var previewPane: PreviewEditor = PreviewEditor(project)
     var fuzzyPanel: JPanel = JPanel()
-    var splitPane: JSplitPane = JSplitPane()
+    var splitPane: OnePixelSplitter = OnePixelSplitter()
     private val secondaryField = EditorTextField().apply {
         setPlaceholder("file extension")
     }
@@ -84,7 +84,8 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
         fileList.selectionMode = 0
         fileListScrollPane.setViewportView(fileList)
 
-        splitPane.dividerSize = 10
+        // Use JetBrains native splitter divider width
+        splitPane.dividerWidth = 10
 
         when (val searchPosition = settingsState.searchPosition) {
             BOTTOM, TOP -> vertical(searchPosition, searchPanel, fileListScrollPane)
@@ -95,6 +96,33 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
             setupTabBetweenFields()
         }
         setupCtrlDUShortcuts()
+    }
+
+    fun setDividerLocationPixels(pixels: Int) {
+        val available = if (splitPane.orientation) {
+            // vertical: top/bottom
+            val h = if (height > 0) height else preferredSize?.height ?: 0
+            h - splitPane.dividerWidth
+        } else {
+            // horizontal: left/right
+            val w = if (width > 0) width else preferredSize?.width ?: 0
+            w - splitPane.dividerWidth
+        }
+        if (available > 0) {
+            val prop = (pixels.toFloat() / available).coerceIn(0f, 1f)
+            splitPane.proportion = prop
+        }
+    }
+
+    fun getDividerLocationPixels(): Int {
+        val available = if (splitPane.orientation) {
+            val h = if (height > 0) height else preferredSize?.height ?: 0
+            h - splitPane.dividerWidth
+        } else {
+            val w = if (width > 0) width else preferredSize?.width ?: 0
+            w - splitPane.dividerWidth
+        }
+        return if (available > 0) (available * splitPane.proportion).toInt() else 0
     }
 
     private fun setupCtrlDUShortcuts() {
@@ -172,20 +200,21 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
             getGridConstraints(0)
         )
 
-        splitPane.orientation = JSplitPane.VERTICAL_SPLIT
+        // Vertical orientation: first = top, second = bottom
+        splitPane.orientation = true
 
         var searchFieldGridRow: Int
         var fileListGridRow: Int
         if (searchPosition == TOP) {
             searchFieldGridRow = 0
             fileListGridRow = 1
-            splitPane.topComponent = searchPanel
-            splitPane.bottomComponent = previewPane
+            splitPane.firstComponent = searchPanel
+            splitPane.secondComponent = previewPane
         } else {
             searchFieldGridRow = 1
             fileListGridRow = 0
-            splitPane.topComponent = previewPane
-            splitPane.bottomComponent = searchPanel
+            splitPane.firstComponent = previewPane
+            splitPane.secondComponent = searchPanel
         }
 
         searchPanel.add(
@@ -230,12 +259,14 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
             getGridConstraints(0, 0, colSpan)
         )
 
+        // Horizontal orientation: first = left, second = right
+        splitPane.orientation = false
         if (searchPosition == LEFT) {
-            splitPane.leftComponent = searchPanel
-            splitPane.rightComponent = previewPane
+            splitPane.firstComponent = searchPanel
+            splitPane.secondComponent = previewPane
         } else {
-            splitPane.rightComponent = searchPanel
-            splitPane.leftComponent = previewPane
+            splitPane.secondComponent = searchPanel
+            splitPane.firstComponent = previewPane
         }
     }
 

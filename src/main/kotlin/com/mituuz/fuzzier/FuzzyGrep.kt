@@ -125,7 +125,7 @@ open class FuzzyGrep : FuzzyAction() {
 
             createSharedListeners(project)
 
-            (component as FuzzyFinderComponent).splitPane.dividerLocation = globalState.splitPosition
+            (component as FuzzyFinderComponent).setDividerLocationPixels(globalState.splitPosition)
         }
     }
 
@@ -139,7 +139,7 @@ open class FuzzyGrep : FuzzyAction() {
     }
 
     override fun onPopupClosed() {
-        globalState.splitPosition = (component as FuzzyFinderComponent).splitPane.dividerLocation
+        globalState.splitPosition = (component as FuzzyFinderComponent).getDividerLocationPixels()
 
         previewAlarm?.dispose()
         currentLaunchJob?.cancel()
