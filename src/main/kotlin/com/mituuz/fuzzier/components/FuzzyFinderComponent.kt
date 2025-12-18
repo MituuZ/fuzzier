@@ -68,11 +68,13 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
 
         splitPane.setAndLoadSplitterProportionKey("Fuzzier.FuzzyFinder.Splitter")
         splitPane.preferredSize = Dimension(settingsState.defaultPopupWidth, settingsState.defaultPopupHeight)
+        splitPane.dividerWidth = 3
 
         fuzzyPanel.layout = GridLayoutManager(1, 1, JBUI.emptyInsets(), -1, -1)
         val searchPanel = JPanel()
         val cols = if (showSecondaryField) 2 else 1
         searchPanel.layout = GridLayoutManager(3, cols, JBUI.emptyInsets(), -1, -1)
+        searchPanel.border = JBUI.Borders.empty(3, 0, 0, 3)
 
         // Configure the secondary field to be roughly a single word wide
         run {
@@ -84,9 +86,6 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
         fileList = JBList<FuzzyContainer>()
         fileList.selectionMode = 0
         fileListScrollPane.setViewportView(fileList)
-
-        // Use JetBrains native splitter divider width
-        splitPane.dividerWidth = 10
 
         when (val searchPosition = settingsState.searchPosition) {
             BOTTOM, TOP -> vertical(searchPosition, searchPanel, fileListScrollPane)
