@@ -44,12 +44,13 @@ intellijPlatform {
         <ul>
           <li>Handle list size limiting during processing instead of doing them separately</li>
         </ul>
-      <li>Add debouncing for fuzzy file preview using `SingleAlarm`</li>
+      <li>Add debouncing for file preview using `SingleAlarm`</li>
       <li>Refactor everything</li>
       <li>Add auto sizing option for the popup (default)</li>
       <li>Add new actions FuzzyGrepOpenTabsCI, FuzzyGrepOpenTabs, FuzzyGrepCurrentBufferCI, FuzzyGrepCurrentBuffer</li>
       <li>Rename an existing action from FuzzyGrepCaseInsensitive to FuzzyGrepCI (the old version will still work for now)</li>
       <li>Update default list movement from j/k to n/p</li>
+      <li>Remove manual handling of the divider location (use JBSplitter instead) and unify styling</li>
     """.trimIndent()
 
         ideaVersion {

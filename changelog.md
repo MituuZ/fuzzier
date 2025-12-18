@@ -4,12 +4,13 @@
 
 - Refactor file search to use coroutines
   - Handle list size limiting during processing instead of doing them separately
-- Add debouncing for fuzzy file preview using `SingleAlarm`
+- Add debouncing for file preview using `SingleAlarm`
 - Refactor everything
 - Add auto sizing option for the popup (default)
 - Add new actions FuzzyGrepOpenTabsCI, FuzzyGrepOpenTabs, FuzzyGrepCurrentBufferCI, FuzzyGrepCurrentBuffer
 - Rename an existing action from FuzzyGrepCaseInsensitive to FuzzyGrepCI (the old version will still work for now)
 - Update default list movement from j/k to n/p
+- Remove manual handling of the divider location (use JBSplitter instead) and unify styling
 
 ## Version 1.14.0
 
