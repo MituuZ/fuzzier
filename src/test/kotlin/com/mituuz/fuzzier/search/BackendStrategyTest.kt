@@ -26,6 +26,7 @@ package com.mituuz.fuzzier.search
 
 import com.mituuz.fuzzier.entities.CaseMode
 import com.mituuz.fuzzier.entities.GrepConfig
+import com.mituuz.fuzzier.grep.backend.BackendStrategy
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested

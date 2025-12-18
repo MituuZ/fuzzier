@@ -27,7 +27,6 @@ package com.mituuz.fuzzier.grep
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import com.mituuz.fuzzier.FuzzyGrep
 import com.mituuz.fuzzier.entities.CaseMode
 import com.mituuz.fuzzier.entities.GrepConfig
 
@@ -98,7 +97,7 @@ class FuzzyGrepCurrentBuffer : FuzzyGrep() {
 }
 
 // Temporarily marked as open for FuzzyGrepCaseInsensitive
-open class FuzzyGrepCI : FuzzyGrep() {
+class FuzzyGrepCI : FuzzyGrep() {
     override fun getGrepConfig(project: Project): GrepConfig {
         return GrepConfig(
             targets = listOf("."),

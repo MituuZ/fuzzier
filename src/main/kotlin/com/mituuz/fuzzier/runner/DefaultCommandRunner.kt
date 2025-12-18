@@ -30,7 +30,7 @@ import com.intellij.execution.process.ProcessEvent
 import com.intellij.execution.process.ProcessListener
 import com.intellij.openapi.util.Key
 import com.mituuz.fuzzier.entities.FuzzyContainer
-import com.mituuz.fuzzier.search.BackendStrategy
+import com.mituuz.fuzzier.grep.backend.BackendStrategy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.swing.DefaultListModel

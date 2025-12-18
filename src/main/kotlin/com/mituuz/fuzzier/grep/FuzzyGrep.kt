@@ -22,7 +22,7 @@
  *  SOFTWARE.
  */
 
-package com.mituuz.fuzzier
+package com.mituuz.fuzzier.grep
 
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
@@ -43,10 +43,10 @@ import com.mituuz.fuzzier.entities.CaseMode
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.GrepConfig
 import com.mituuz.fuzzier.entities.RowContainer
+import com.mituuz.fuzzier.grep.backend.BackendResolver
+import com.mituuz.fuzzier.grep.backend.BackendStrategy
 import com.mituuz.fuzzier.intellij.files.FileOpeningUtil
 import com.mituuz.fuzzier.runner.DefaultCommandRunner
-import com.mituuz.fuzzier.search.BackendResolver
-import com.mituuz.fuzzier.search.BackendStrategy
 import com.mituuz.fuzzier.ui.bindings.ActivationBindings
 import com.mituuz.fuzzier.ui.popup.PopupConfig
 import com.mituuz.fuzzier.ui.preview.CoroutinePreviewAlarmProvider

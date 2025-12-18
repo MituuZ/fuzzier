@@ -24,6 +24,7 @@
 package com.mituuz.fuzzier
 
 import com.intellij.testFramework.TestApplicationManager
+import com.mituuz.fuzzier.search.Fuzzier
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertFalse

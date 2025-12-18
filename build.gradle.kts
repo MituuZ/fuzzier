@@ -27,7 +27,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 // Use the same version and group for the jar and the plugin
-val currentVersion = "1.15.0"
+val currentVersion = "2.0.0-pre1"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -39,18 +39,47 @@ intellijPlatform {
 
         changeNotes = """
     <h2>Version $currentVersion</h2>
+    <p>This version contains larger refactors and multiple new actions enabled by them.</p>
+    <p>I'm updating the existing package structure to keep things nicer and not supporting the old actions to avoid possible problems in the future.</p>
+
+    <h3>Breaking changes</h3>
+    <p><strong>Rename existing actions</strong></p>
     <ul>
-      <li>Refactor file search to use coroutines</li>
-        <ul>
-          <li>Handle list size limiting during processing instead of doing them separately</li>
-        </ul>
-      <li>Add debouncing for file preview using `SingleAlarm`</li>
-      <li>Refactor everything</li>
-      <li>Add auto sizing option for the popup (default)</li>
-      <li>Add new actions FuzzyGrepOpenTabsCI, FuzzyGrepOpenTabs, FuzzyGrepCurrentBufferCI, FuzzyGrepCurrentBuffer</li>
-      <li>Rename an existing action from FuzzyGrepCaseInsensitive to FuzzyGrepCI (the old version will still work for now)</li>
-      <li>Update default list movement from j/k to n/p</li>
-      <li>Remove manual handling of the divider location (use JBSplitter instead) and unify styling</li>
+        <li><code>com.mituuz.fuzzier.FuzzyGrepCaseInsensitive</code> to <code>com.mituuz.fuzzier.grep.FuzzyGrepCI</code></li>
+        <li><code>com.mituuz.fuzzier.FuzzyGrep</code> to <code>com.mituuz.fuzzier.grep.FuzzyGrep</code></li>
+        <li><code>com.mituuz.fuzzier.Fuzzier</code> to <code>com.mituuz.fuzzier.search.Fuzzier</code></li>
+        <li><code>com.mituuz.fuzzier.FuzzierVCS</code> to <code>com.mituuz.fuzzier.search.FuzzierVCS</code></li>
+        <li><code>com.mituuz.fuzzier.FuzzyMover</code> to <code>com.mituuz.fuzzier.operation.FuzzyMover</code></li>
+    </ul>
+    <p><strong>Update default list movement keys</strong></p>
+    <ul>
+        <li>From <code>CTRL + j</code> and <code>CTRL + k</code> to <code>CTRL + n</code> and <code>CTRL + p</code></li>
+    </ul>
+
+    <h3>New actions</h3>
+    <p>Added some new grep variations</p>
+    <ul>
+        <li><code>com.mituuz.fuzzier.grep.FuzzyGrepOpenTabsCI</code></li>
+        <li><code>com.mituuz.fuzzier.grep.FuzzyGrepOpenTabs</code></li>
+        <li><code>com.mituuz.fuzzier.grep.FuzzyGrepCurrentBufferCI</code></li>
+        <li><code>com.mituuz.fuzzier.grep.FuzzyGrepCurrentBuffer</code></li>
+    </ul>
+
+    <h3>New features</h3>
+    <ul>
+        <li>Popup now defaults to auto-sized, which scales with the current window</li>
+        <li>You can revert this from the settings</li>
+    </ul>
+
+    <h3>Other changes</h3>
+    <ul>
+        <li>Refactor file search to use coroutines</li>
+        <li>Handle list size limiting during processing instead of doing them separately</li>
+        <li>Add debouncing for file preview using <code>SingleAlarm</code></li>
+        <li>Refactor everything</li>
+        <li>Remove manual handling of the divider location (use JBSplitter instead) and unify styling</li>
+    </ul>
+    
     """.trimIndent()
 
         ideaVersion {

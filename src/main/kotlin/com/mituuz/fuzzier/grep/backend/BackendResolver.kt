@@ -22,7 +22,7 @@
  *  SOFTWARE.
  */
 
-package com.mituuz.fuzzier.search
+package com.mituuz.fuzzier.grep.backend
 
 import com.mituuz.fuzzier.runner.CommandRunner
 

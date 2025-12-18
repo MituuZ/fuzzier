@@ -22,8 +22,20 @@
  *  SOFTWARE.
  */
 
-package com.mituuz.fuzzier
+package com.mituuz.fuzzier.search
 
-import com.mituuz.fuzzier.grep.FuzzyGrepCI
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.vcs.changes.ChangeListManager
+import com.intellij.openapi.vfs.VirtualFile
 
-class FuzzyGrepCaseInsensitive : FuzzyGrepCI()
+/**
+ * Search for only VCS tracked files
+ */
+class FuzzierVCS : Fuzzier() {
+    override var popupTitle: String = "Fuzzy Search (Only VCS Tracked Files)"
+
+    override fun buildFileFilter(project: Project): (VirtualFile) -> Boolean {
+        val clm = ChangeListManager.getInstance(project)
+        return { vf -> !vf.isDirectory && !clm.isIgnoredFile(vf) }
+    }
+}

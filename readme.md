@@ -60,23 +60,23 @@ The goal is to have a central place for all the documentation and to keep the RE
 
 ### Adding ideavim mapping for the plugin
 
-Example of a .ideavimrc-row to add a vim keybinding for the plugin
+Example `.ideavimrc` rows to add a vim keybindings for the plugin
 
 ```
 " File search
-map <Leader>pf <action>(com.mituuz.fuzzier.Fuzzier)
-map <Leader>gf <action>(com.mituuz.fuzzier.FuzzierVCS)
+map <Leader>fs <action>(com.mituuz.fuzzier.search.Fuzzier)
+map <Leader>fg <action>(com.mituuz.fuzzier.search.FuzzierVCS)
 
 " Mover
-map <Leader>mf <action>(com.mituuz.fuzzier.FuzzyMover)
+map <Leader>fm <action>(com.mituuz.fuzzier.operations.FuzzyMover)
 
 " Grepping
-map <Leader>ff <action>(com.mituuz.fuzzier.FuzzyGrep)
+map <Leader>fF <action>(com.mituuz.fuzzier.grep.FuzzyGrep)
 map <Leader>ff <action>(com.mituuz.fuzzier.grep.FuzzyGrepCI)
-map <Leader>ff <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabsCI)
-map <Leader>ff <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabs)
-map <Leader>ff <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBufferCI)
-map <Leader>ff <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBuffer)
+map <Leader>fT <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabsCI)
+map <Leader>ft <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabs)
+map <Leader>fB <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBufferCI)
+map <Leader>fb <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBuffer)
 ```
 
 ### Adding an editor shortcut

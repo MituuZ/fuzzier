@@ -22,7 +22,7 @@
  *  SOFTWARE.
  */
 
-package com.mituuz.fuzzier
+package com.mituuz.fuzzier.operation
 
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType

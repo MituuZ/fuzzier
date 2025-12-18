@@ -24,6 +24,8 @@
 
 package com.mituuz.fuzzier.search
 
+import com.mituuz.fuzzier.grep.backend.BackendResolver
+import com.mituuz.fuzzier.grep.backend.BackendStrategy
 import com.mituuz.fuzzier.runner.CommandRunner
 import io.mockk.coEvery
 import io.mockk.coVerify

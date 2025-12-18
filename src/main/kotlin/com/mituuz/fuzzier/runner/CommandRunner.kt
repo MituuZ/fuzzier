@@ -25,7 +25,7 @@
 package com.mituuz.fuzzier.runner
 
 import com.mituuz.fuzzier.entities.FuzzyContainer
-import com.mituuz.fuzzier.search.BackendStrategy
+import com.mituuz.fuzzier.grep.backend.BackendStrategy
 import javax.swing.DefaultListModel
 
 interface CommandRunner {
