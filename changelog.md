@@ -1,12 +1,68 @@
 # Changelog
 
-## Version 1.15.0
+## Version 2.0.0
+
+This version contains larger refactors and multiple new actions enabled by them.
+
+I'm updating the existing package structure to keep things nicer and not supporting the old actions to avoid possible
+problems in the future.
+
+### Breaking changes
+
+**Rename existing actions**
+
+- `com.mituuz.fuzzier.FuzzyGrepCaseInsensitive` to `com.mituuz.fuzzier.grep.FuzzyGrepCI`
+- `com.mituuz.fuzzier.FuzzyGrep` to `com.mituuz.fuzzier.grep.FuzzyGrep`
+- `com.mituuz.fuzzier.Fuzzier` to `com.mituuz.fuzzier.search.Fuzzier`
+- `com.mituuz.fuzzier.FuzzierVCS` to `com.mituuz.fuzzier.search.FuzzierVCS`
+- `com.mituuz.fuzzier.FuzzyMover` to `com.mituuz.fuzzier.operation.FuzzyMover`
+
+**Update default list movement keys**
+
+- From `CTRL + j` and `CTRL + k` to `CTRL + n` and `CTRL + p`
+
+### New actions
+
+Added some new grep variations
+
+```
+com.mituuz.fuzzier.grep.FuzzyGrepOpenTabsCI
+com.mituuz.fuzzier.grep.FuzzyGrepOpenTabs
+com.mituuz.fuzzier.grep.FuzzyGrepCurrentBufferCI
+com.mituuz.fuzzier.grep.FuzzyGrepCurrentBuffer
+```
+
+### Example mappings
+
+```
+" File search
+nmap <Leader>sf <action>(com.mituuz.fuzzier.search.Fuzzier)
+nmap <Leader>sg <action>(com.mituuz.fuzzier.search.FuzzierVCS)
+
+" Mover
+nmap <Leader>fm <action>(com.mituuz.fuzzier.operation.FuzzyMover)
+
+" Grepping
+nmap <Leader>ss <action>(com.mituuz.fuzzier.grep.FuzzyGrepCI)
+nmap <Leader>sS <action>(com.mituuz.fuzzier.grep.FuzzyGrep)
+nmap <Leader>st <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabsCI)
+nmap <Leader>sT <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabs)
+nmap <Leader>sb <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBufferCI)
+nmap <Leader>sB <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBuffer)
+```
+
+### New features
+
+- Popup now defaults to auto-sized, which scales with the current window
+- You can revert this from the settings
+
+### Other changes
 
 - Refactor file search to use coroutines
   - Handle list size limiting during processing instead of doing them separately
-- Add debouncing for fuzzy file preview using `SingleAlarm`
+- Add debouncing for file preview using `SingleAlarm`
 - Refactor everything
-- Add auto sizing option for the popup (default)
+- Remove manual handling of the divider location (use JBSplitter instead) and unify styling
 
 ## Version 1.14.0
 

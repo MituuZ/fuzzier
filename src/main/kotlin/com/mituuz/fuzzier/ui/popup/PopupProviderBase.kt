@@ -49,6 +49,8 @@ abstract class PopupProviderBase(
             .setTitle(title)
             .setMovable(true)
             .setShowBorder(true)
+            .setCancelOnClickOutside(true)
+            .setCancelOnWindowDeactivation(true)
 
     internal fun createCleanupListener(cleanupFunction: () -> Unit): JBPopupListener = object : JBPopupListener {
         override fun onClosed(event: LightweightWindowEvent) {

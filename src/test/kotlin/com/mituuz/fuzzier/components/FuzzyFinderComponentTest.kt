@@ -41,7 +41,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.concurrent.atomic.AtomicInteger
-import javax.swing.JSplitPane
 
 class FuzzyFinderComponentTest {
     companion object {
@@ -84,10 +83,11 @@ class FuzzyFinderComponentTest {
         state.searchPosition = LEFT
         runInEdtAndWait {
             val component = FuzzyFinderComponent(fixture.project, showSecondaryField = false)
-            assertEquals(JSplitPane.HORIZONTAL_SPLIT, component.splitPane.orientation)
-            assertSame(component.previewPane, component.splitPane.rightComponent)
-            assertNotNull(component.splitPane.leftComponent)
-            assertNotSame(component.previewPane, component.splitPane.leftComponent)
+            // Horizontal split -> orientation=false, preview on right -> second component
+            assertFalse(component.splitPane.orientation)
+            assertSame(component.previewPane, component.splitPane.secondComponent)
+            assertNotNull(component.splitPane.firstComponent)
+            assertNotSame(component.previewPane, component.splitPane.firstComponent)
         }
     }
 
@@ -97,10 +97,11 @@ class FuzzyFinderComponentTest {
         state.searchPosition = RIGHT
         runInEdtAndWait {
             val component = FuzzyFinderComponent(fixture.project, showSecondaryField = false)
-            assertEquals(JSplitPane.HORIZONTAL_SPLIT, component.splitPane.orientation)
-            assertSame(component.previewPane, component.splitPane.leftComponent)
-            assertNotNull(component.splitPane.rightComponent)
-            assertNotSame(component.previewPane, component.splitPane.rightComponent)
+            // Horizontal split -> orientation=false, preview on left -> first component
+            assertFalse(component.splitPane.orientation)
+            assertSame(component.previewPane, component.splitPane.firstComponent)
+            assertNotNull(component.splitPane.secondComponent)
+            assertNotSame(component.previewPane, component.splitPane.secondComponent)
         }
     }
 
@@ -110,9 +111,10 @@ class FuzzyFinderComponentTest {
         state.searchPosition = TOP
         runInEdtAndWait {
             val component = FuzzyFinderComponent(fixture.project, showSecondaryField = false)
-            assertEquals(JSplitPane.VERTICAL_SPLIT, component.splitPane.orientation)
-            assertSame(component.previewPane, component.splitPane.bottomComponent)
-            assertNotSame(component.previewPane, component.splitPane.topComponent)
+            // Vertical split -> orientation=true, preview at bottom -> second component
+            assertTrue(component.splitPane.orientation)
+            assertSame(component.previewPane, component.splitPane.secondComponent)
+            assertNotSame(component.previewPane, component.splitPane.firstComponent)
         }
     }
 
@@ -122,9 +124,10 @@ class FuzzyFinderComponentTest {
         state.searchPosition = BOTTOM
         runInEdtAndWait {
             val component = FuzzyFinderComponent(fixture.project, showSecondaryField = false)
-            assertEquals(JSplitPane.VERTICAL_SPLIT, component.splitPane.orientation)
-            assertSame(component.previewPane, component.splitPane.topComponent)
-            assertNotSame(component.previewPane, component.splitPane.bottomComponent)
+            // Vertical split -> orientation=true, preview at top -> first component
+            assertTrue(component.splitPane.orientation)
+            assertSame(component.previewPane, component.splitPane.firstComponent)
+            assertNotSame(component.previewPane, component.splitPane.secondComponent)
         }
     }
 

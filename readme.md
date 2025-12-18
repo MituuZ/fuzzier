@@ -42,11 +42,12 @@ List movement can be remapped from settings -> keymaps, but do not support chord
 
 ## Features
 
-- Fuzzy file finder
-    - Search all except excluded files
-    - Search only from VCS-tracked files
+- Fuzzy file search
+  - Search all except excluded files
+  - Search only from VCS-tracked files
 - Text search leveraging [ripgrep](https://github.com/BurntSushi/ripgrep "Link to GitHub - ripgrep"), grep or findstr
-    - With file globbing support for ripgrep
+  - Support for searching from the whole project, within open tabs or the current buffer
+  - With file extension support for ripgrep in the secondary search field
 - File mover
 
 ## Documentation
@@ -60,14 +61,23 @@ The goal is to have a central place for all the documentation and to keep the RE
 
 ### Adding ideavim mapping for the plugin
 
-Example of a .ideavimrc-row to add a vim keybinding for the plugin
+Example `.ideavimrc` rows to add a vim keybindings for the plugin
 
 ```
-map <Leader>pf <action>(com.mituuz.fuzzier.Fuzzier)
-map <Leader>gf <action>(com.mituuz.fuzzier.FuzzierVCS)
-map <Leader>mf <action>(com.mituuz.fuzzier.FuzzyMover)
-map <Leader>ff <action>(com.mituuz.fuzzier.FuzzyGrep)
-map <Leader>ff <action>(com.mituuz.fuzzier.FuzzyGrepCaseInsensitive)
+" File search
+nmap <Leader>sf <action>(com.mituuz.fuzzier.search.Fuzzier)
+nmap <Leader>sg <action>(com.mituuz.fuzzier.search.FuzzierVCS)
+
+" Mover
+nmap <Leader>fm <action>(com.mituuz.fuzzier.operation.FuzzyMover)
+
+" Grepping
+nmap <Leader>ss <action>(com.mituuz.fuzzier.grep.FuzzyGrepCI)
+nmap <Leader>sS <action>(com.mituuz.fuzzier.grep.FuzzyGrep)
+nmap <Leader>st <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabsCI)
+nmap <Leader>sT <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabs)
+nmap <Leader>sb <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBufferCI)
+nmap <Leader>sB <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBuffer)
 ```
 
 ### Adding an editor shortcut
@@ -76,7 +86,8 @@ map <Leader>ff <action>(com.mituuz.fuzzier.FuzzyGrepCaseInsensitive)
 
 ## Installation
 
-The plugin can be installed from the [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/23451-fuzzier "Link to the JetBrains Marketplace - Fuzzier")
+The plugin can be installed from
+the [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/23451-fuzzier "Link to the JetBrains Marketplace - Fuzzier")
 
 ## Contact
 

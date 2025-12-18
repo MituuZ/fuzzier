@@ -26,13 +26,13 @@
 <idea-plugin>
     <id>com.mituuz.fuzzier</id>
     <name>Fuzzier</name>
-    <vendor email="mituuuuz@hotmail.com" url="https://www.mituuz.com">MituuZ</vendor>
+    <vendor email="mitja@mituuz.com" url="https://www.mituuz.com">MituuZ</vendor>
 
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
-    <description>A fuzzy file finder modeled after telescope for nvim. Designed to be completely usable through the
-        keyboard (and ideavim).
+    <description>A fuzzy file finder and grepper modeled after telescope for nvim.
+        Designed to be completely usable through the keyboard (and ideavim).
     </description>
 
     <!-- Product and plugin compatibility requirements.
@@ -64,52 +64,71 @@
     </extensions>
 
     <actions>
-        <action
-                id="com.mituuz.fuzzier.FuzzyGrep"
-                class="com.mituuz.fuzzier.FuzzyGrep"
-                text="Fuzzy Grep"
-                description="Search text">
-            <override-text place="MainMenu" text="Fuzzy Grep"/>
-        </action>
-        <action
-                id="com.mituuz.fuzzier.FuzzyGrepCaseInsensitive"
-                class="com.mituuz.fuzzier.FuzzyGrepCaseInsensitive"
-                text="Fuzzy Grep (Case Insensitive)"
-                description="Search text with case insensitivity">
-            <override-text place="MainMenu" text="Fuzzy Grep (Case Insensitive)"/>
-        </action>
-        <action
-                id="com.mituuz.fuzzier.Fuzzier"
-                class="com.mituuz.fuzzier.Fuzzier"
-                text="Fuzzy File Search"
-                description="Search files using a basic fuzzy search">
-            <override-text place="MainMenu" text="Fuzzy File Search"/>
-        </action>
-        <action id="com.mituuz.fuzzier.FuzzierVCS"
-                class="com.mituuz.fuzzier.FuzzierVCS"
-                text="Fuzzy File Search (Only VCS Tracked Files)"
-                description="Search files using a basic fuzzy search on only VCS tracked files">
-            <override-text place="MainMenu" text="Fuzzy File Search (Only VCS Tracked Files)"/>
-            <add-to-group group-id="ToolsMenu"/>
-        </action>
-        <action id="com.mituuz.fuzzier.FuzzyMover"
-                class="com.mituuz.fuzzier.FuzzyMover"
-                text="Fuzzy File Mover"
-                description="Move a file using a basic fuzzy search">
-            <override-text place="MainMenu" text="Fuzzy File Mover"/>
-            <add-to-group group-id="ToolsMenu"/>
-        </action>
+        <!-- Movement actions -->
         <action id="com.mituuz.fuzzier.util.MoveDownAction"
                 class="com.mituuz.fuzzier.util.MoveDownAction"
                 text="Move Fuzzier List Selection Down"
                 description="Move the list selector down">
-            <keyboard-shortcut first-keystroke="ctrl j" keymap="$default"/>
+            <keyboard-shortcut first-keystroke="ctrl n" keymap="$default"/>
         </action>
+
         <action id="com.mituuz.fuzzier.util.MoveUpAction"
                 class="com.mituuz.fuzzier.util.MoveUpAction"
                 text="Move Fuzzier List Selection Up"
                 description="Move the list selector up">
-            <keyboard-shortcut first-keystroke="ctrl k" keymap="$default"/>
+            <keyboard-shortcut first-keystroke="ctrl p" keymap="$default"/>
         </action>
+
+        <!-- Search actions -->
+        <action id="com.mituuz.fuzzier.search.FuzzierVCS"
+                class="com.mituuz.fuzzier.search.FuzzierVCS"
+                text="Fuzzy File Search (Only VCS Tracked Files)"
+                description="Search files using a fuzzy search on only VCS tracked files">
+        </action>
+
+        <action
+                id="com.mituuz.fuzzier.search.Fuzzier"
+                class="com.mituuz.fuzzier.search.Fuzzier"
+                text="Fuzzy File Search"
+                description="Search files using a fuzzy search">
+        </action>
+
+        <!-- Operation actions -->
+        <action id="com.mituuz.fuzzier.operation.FuzzyMover"
+                class="com.mituuz.fuzzier.operation.FuzzyMover"
+                text="Fuzzy File Mover"
+                description="Move a file using a fuzzy search">
+        </action>
+
+        <!-- Grep actions -->
+        <!-- Basic grep -->
+        <action id="com.mituuz.fuzzier.grep.FuzzyGrep"
+                class="com.mituuz.fuzzier.grep.FuzzyGrep"
+                text="Fuzzy Grep"
+                description="Case sensitive text search from project"/>
+        <action id="com.mituuz.fuzzier.grep.FuzzyGrepCI"
+                class="com.mituuz.fuzzier.grep.FuzzyGrepCI"
+                text="Fuzzy Grep (Case Insensitive)"
+                description="Case insensitive text search from project"/>
+
+        <!-- Tab grep -->
+        <action id="com.mituuz.fuzzier.grep.FuzzyGrepOpenTabs"
+                class="com.mituuz.fuzzier.grep.FuzzyGrepOpenTabs"
+                text="Fuzzy Grep Open Tabs"
+                description="Case sensitive text search from open tabs"/>
+        <action id="com.mituuz.fuzzier.grep.FuzzyGrepOpenTabsCI"
+                class="com.mituuz.fuzzier.grep.FuzzyGrepOpenTabsCI"
+                text="Fuzzy Grep Open Tabs (Case Insensitive)"
+                description="Case insensitive text search from open tabs"/>
+
+        <!-- Current buffer grep -->
+        <action id="com.mituuz.fuzzier.grep.FuzzyGrepCurrentBuffer"
+                class="com.mituuz.fuzzier.grep.FuzzyGrepCurrentBuffer"
+                text="Fuzzy Grep Current Buffer"
+                description="Case sensitive text search from current buffer"/>
+        <action id="com.mituuz.fuzzier.grep.FuzzyGrepCurrentBufferCI"
+                class="com.mituuz.fuzzier.grep.FuzzyGrepCurrentBufferCI"
+                text="Fuzzy Grep Current Buffer (Case Insensitive)"
+                description="Case insensitive text search from current buffer"/>
     </actions>
 </idea-plugin>

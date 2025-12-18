@@ -32,6 +32,7 @@ import com.intellij.openapi.editor.event.DocumentListener
 import com.intellij.openapi.fileTypes.PlainTextFileType
 import com.intellij.openapi.project.Project
 import com.intellij.ui.EditorTextField
+import com.intellij.ui.OnePixelSplitter
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.uiDesigner.core.GridConstraints
@@ -46,15 +47,16 @@ import java.awt.KeyboardFocusManager
 import java.awt.event.InputEvent
 import java.awt.event.KeyEvent
 import javax.swing.JPanel
-import javax.swing.JSplitPane
 import javax.swing.KeyStroke
 import javax.swing.SwingUtilities
 
 class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boolean = false) : FuzzyComponent() {
     var previewPane: PreviewEditor = PreviewEditor(project)
     var fuzzyPanel: JPanel = JPanel()
-    var splitPane: JSplitPane = JSplitPane()
-    private val secondaryField = EditorTextField()
+    var splitPane: OnePixelSplitter = OnePixelSplitter()
+    private val secondaryField = EditorTextField().apply {
+        setPlaceholder("File extension")
+    }
 
     init {
         val settingsState = service<FuzzierGlobalSettingsService>().state
@@ -64,16 +66,19 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
         previewPane.fileType = PlainTextFileType.INSTANCE
         previewPane.isViewer = true
 
+        splitPane.setAndLoadSplitterProportionKey("Fuzzier.FuzzyFinder.Splitter")
         splitPane.preferredSize = Dimension(settingsState.defaultPopupWidth, settingsState.defaultPopupHeight)
+        splitPane.dividerWidth = 3
 
         fuzzyPanel.layout = GridLayoutManager(1, 1, JBUI.emptyInsets(), -1, -1)
         val searchPanel = JPanel()
         val cols = if (showSecondaryField) 2 else 1
         searchPanel.layout = GridLayoutManager(3, cols, JBUI.emptyInsets(), -1, -1)
+        searchPanel.border = JBUI.Borders.empty(3, 0, 0, 3)
 
         // Configure the secondary field to be roughly a single word wide
         run {
-            val width = JBUI.scale(90)
+            val width = JBUI.scale(110)
             secondaryField.preferredSize = Dimension(width, secondaryField.preferredSize.height)
         }
         searchField.text = ""
@@ -81,8 +86,6 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
         fileList = JBList<FuzzyContainer>()
         fileList.selectionMode = 0
         fileListScrollPane.setViewportView(fileList)
-
-        splitPane.dividerSize = 10
 
         when (val searchPosition = settingsState.searchPosition) {
             BOTTOM, TOP -> vertical(searchPosition, searchPanel, fileListScrollPane)
@@ -170,20 +173,21 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
             getGridConstraints(0)
         )
 
-        splitPane.orientation = JSplitPane.VERTICAL_SPLIT
+        // Vertical orientation: first = top, second = bottom
+        splitPane.orientation = true
 
         var searchFieldGridRow: Int
         var fileListGridRow: Int
         if (searchPosition == TOP) {
             searchFieldGridRow = 0
             fileListGridRow = 1
-            splitPane.topComponent = searchPanel
-            splitPane.bottomComponent = previewPane
+            splitPane.firstComponent = searchPanel
+            splitPane.secondComponent = previewPane
         } else {
             searchFieldGridRow = 1
             fileListGridRow = 0
-            splitPane.topComponent = previewPane
-            splitPane.bottomComponent = searchPanel
+            splitPane.firstComponent = previewPane
+            splitPane.secondComponent = searchPanel
         }
 
         searchPanel.add(
@@ -228,12 +232,14 @@ class FuzzyFinderComponent(project: Project, private val showSecondaryField: Boo
             getGridConstraints(0, 0, colSpan)
         )
 
+        // Horizontal orientation: first = left, second = right
+        splitPane.orientation = false
         if (searchPosition == LEFT) {
-            splitPane.leftComponent = searchPanel
-            splitPane.rightComponent = previewPane
+            splitPane.firstComponent = searchPanel
+            splitPane.secondComponent = previewPane
         } else {
-            splitPane.rightComponent = searchPanel
-            splitPane.leftComponent = previewPane
+            splitPane.secondComponent = searchPanel
+            splitPane.firstComponent = previewPane
         }
     }
 

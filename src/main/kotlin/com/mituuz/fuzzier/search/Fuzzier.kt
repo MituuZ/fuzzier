@@ -22,7 +22,7 @@
  *  SOFTWARE.
  */
 
-package com.mituuz.fuzzier
+package com.mituuz.fuzzier.search
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
@@ -36,6 +36,7 @@ import com.intellij.util.SingleAlarm
 import com.mituuz.fuzzier.actions.filesystem.FilesystemAction
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
+import com.mituuz.fuzzier.intellij.files.FileOpeningUtil
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.ui.bindings.ActivationBindings
 import com.mituuz.fuzzier.ui.popup.PopupConfig
@@ -75,9 +76,6 @@ open class Fuzzier : FilesystemAction() {
 
             createSharedListeners(project)
 
-            (component as FuzzyFinderComponent).splitPane.dividerLocation =
-                globalState.splitPosition
-
             if (globalState.recentFilesMode != FuzzierGlobalSettingsService.RecentFilesMode.NONE) {
                 createInitialView(project)
             }
@@ -85,8 +83,6 @@ open class Fuzzier : FilesystemAction() {
     }
 
     override fun onPopupClosed() {
-        globalState.splitPosition =
-            (component as FuzzyFinderComponent).splitPane.dividerLocation
         previewAlarm?.dispose()
         lastPreviewKey = null
     }
@@ -123,7 +119,18 @@ open class Fuzzier : FilesystemAction() {
         val virtualFile =
             VirtualFileManager.getInstance().findFileByUrl("file://${selectedValue?.getFileUri()}")
         virtualFile?.let {
-            openFile(project, selectedValue, it)
+            val fileEditorManager = FileEditorManager.getInstance(project)
+
+            FileOpeningUtil.openFile(
+                fileEditorManager,
+                virtualFile,
+                globalState.newTab
+            ) {
+                if (selectedValue != null) {
+                    InitialViewHandler.addFileToRecentlySearchedFiles(selectedValue, projectState, globalState)
+                }
+                popup.cancel()
+            }
         }
     }
 
@@ -157,29 +164,6 @@ open class Fuzzier : FilesystemAction() {
                 component.fileList.setPaintBusy(false)
             }
         }
-    }
-
-    private fun openFile(project: Project, fuzzyContainer: FuzzyContainer?, virtualFile: VirtualFile) {
-        val fileEditorManager = FileEditorManager.getInstance(project)
-        val currentEditor = fileEditorManager.selectedTextEditor
-        val previousFile = currentEditor?.virtualFile
-
-        if (fileEditorManager.isFileOpen(virtualFile)) {
-            fileEditorManager.openFile(virtualFile, true)
-        } else {
-            fileEditorManager.openFile(virtualFile, true)
-            if (currentEditor != null && !globalState.newTab) {
-                fileEditorManager.selectedEditor?.let {
-                    if (previousFile != null) {
-                        fileEditorManager.closeFile(previousFile)
-                    }
-                }
-            }
-        }
-        if (fuzzyContainer != null) {
-            InitialViewHandler.addFileToRecentlySearchedFiles(fuzzyContainer, projectState, globalState)
-        }
-        popup.cancel()
     }
 
     private fun getPreviewAlarm(): SingleAlarm {
