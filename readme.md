@@ -46,7 +46,7 @@ List movement can be remapped from settings -> keymaps, but do not support chord
   - Search all except excluded files
   - Search only from VCS-tracked files
 - Text search leveraging [ripgrep](https://github.com/BurntSushi/ripgrep "Link to GitHub - ripgrep"), grep or findstr
-  - With file globbing support for ripgrep
+  - With file extension support for ripgrep in the secondary search field
 - File mover
 
 ## Documentation
