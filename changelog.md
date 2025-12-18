@@ -26,10 +26,29 @@ problems in the future.
 Added some new grep variations
 
 ```
-map <Leader>fT <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabsCI)
-map <Leader>ft <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabs)
-map <Leader>fB <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBufferCI)
-map <Leader>fb <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBuffer)
+com.mituuz.fuzzier.grep.FuzzyGrepOpenTabsCI
+com.mituuz.fuzzier.grep.FuzzyGrepOpenTabs
+com.mituuz.fuzzier.grep.FuzzyGrepCurrentBufferCI
+com.mituuz.fuzzier.grep.FuzzyGrepCurrentBuffer
+```
+
+### Example mappings
+
+```
+" File search
+nmap <Leader>sf <action>(com.mituuz.fuzzier.search.Fuzzier)
+nmap <Leader>sg <action>(com.mituuz.fuzzier.search.FuzzierVCS)
+
+" Mover
+nmap <Leader>fm <action>(com.mituuz.fuzzier.operation.FuzzyMover)
+
+" Grepping
+nmap <Leader>ss <action>(com.mituuz.fuzzier.grep.FuzzyGrepCI)
+nmap <Leader>sS <action>(com.mituuz.fuzzier.grep.FuzzyGrep)
+nmap <Leader>st <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabsCI)
+nmap <Leader>sT <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabs)
+nmap <Leader>sb <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBufferCI)
+nmap <Leader>sB <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBuffer)
 ```
 
 ### New features

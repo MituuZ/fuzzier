@@ -64,19 +64,19 @@ Example `.ideavimrc` rows to add a vim keybindings for the plugin
 
 ```
 " File search
-nmap <Leader>fs <action>(com.mituuz.fuzzier.search.Fuzzier)
-nmap <Leader>fg <action>(com.mituuz.fuzzier.search.FuzzierVCS)
+nmap <Leader>sf <action>(com.mituuz.fuzzier.search.Fuzzier)
+nmap <Leader>sg <action>(com.mituuz.fuzzier.search.FuzzierVCS)
 
 " Mover
 nmap <Leader>fm <action>(com.mituuz.fuzzier.operation.FuzzyMover)
 
 " Grepping
-nmap <Leader>ff <action>(com.mituuz.fuzzier.grep.FuzzyGrepCI)
-nmap <Leader>fF <action>(com.mituuz.fuzzier.grep.FuzzyGrep)
-nmap <Leader>ft <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabsCI)
-nmap <Leader>fT <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabs)
-nmap <Leader>fb <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBufferCI)
-nmap <Leader>fB <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBuffer)
+nmap <Leader>ss <action>(com.mituuz.fuzzier.grep.FuzzyGrepCI)
+nmap <Leader>sS <action>(com.mituuz.fuzzier.grep.FuzzyGrep)
+nmap <Leader>st <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabsCI)
+nmap <Leader>sT <action>(com.mituuz.fuzzier.grep.FuzzyGrepOpenTabs)
+nmap <Leader>sb <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBufferCI)
+nmap <Leader>sB <action>(com.mituuz.fuzzier.grep.FuzzyGrepCurrentBuffer)
 ```
 
 ### Adding an editor shortcut
