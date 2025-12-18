@@ -42,10 +42,11 @@ List movement can be remapped from settings -> keymaps, but do not support chord
 
 ## Features
 
-- Fuzzy file finder
+- Fuzzy file search
   - Search all except excluded files
   - Search only from VCS-tracked files
 - Text search leveraging [ripgrep](https://github.com/BurntSushi/ripgrep "Link to GitHub - ripgrep"), grep or findstr
+  - Support for searching from the whole project, within open tabs or the current buffer
   - With file extension support for ripgrep in the secondary search field
 - File mover
 
