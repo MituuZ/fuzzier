@@ -93,7 +93,7 @@ class BackendResolverTest {
         coEvery { commandRunner.runCommandForOutput(listOf("which", "rg"), projectBasePath) } returns ""
         coEvery {
             commandRunner.runCommandForOutput(
-                listOf("which", "com/mituuz/fuzzier/grep"),
+                listOf("which", "grep"),
                 projectBasePath
             )
         } returns "/usr/bin/grep"
@@ -103,7 +103,7 @@ class BackendResolverTest {
         assertTrue(result.isSuccess)
         assertEquals(BackendStrategy.Grep, result.getOrNull())
         coVerify { commandRunner.runCommandForOutput(listOf("which", "rg"), projectBasePath) }
-        coVerify { commandRunner.runCommandForOutput(listOf("which", "com/mituuz/fuzzier/grep"), projectBasePath) }
+        coVerify { commandRunner.runCommandForOutput(listOf("which", "grep"), projectBasePath) }
     }
 
     @Test
@@ -128,7 +128,7 @@ class BackendResolverTest {
         coEvery { commandRunner.runCommandForOutput(listOf("which", "rg"), projectBasePath) } returns "   "
         coEvery {
             commandRunner.runCommandForOutput(
-                listOf("which", "com/mituuz/fuzzier/grep"),
+                listOf("which", "grep"),
                 projectBasePath
             )
         } returns ""
