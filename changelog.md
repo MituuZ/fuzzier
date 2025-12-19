@@ -1,5 +1,17 @@
 # Changelog
 
+## Version 2.0.1
+
+- Fix incorrect `grep` command
+- Partially fix `findstr` command
+- Re-add the backend name to the popup title
+
+**Known issues**
+
+- `findstr` does not work with currently open tabs
+  - To reduce the maintenance burden, I may remove support later
+  - Performance is poor enough that I thought that the command wasn't returning any results
+
 ## Version 2.0.0
 
 This version contains larger refactors and multiple new actions enabled by them.

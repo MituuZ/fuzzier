@@ -159,7 +159,7 @@ class BackendStrategyTest {
             assertTrue(result.contains("/p"))
             assertTrue(result.contains("/s"))
             assertTrue(result.contains("/n"))
-            assertTrue(result.contains("test"))
+            assertTrue(result.contains("/C:test"))
             assertTrue(result.contains("C:\\path\\to\\search"))
         }
 
@@ -204,7 +204,7 @@ class BackendStrategyTest {
 
             val result = BackendStrategy.Grep.buildCommand(config, "test", null)
 
-            assertTrue(result.contains("com/mituuz/fuzzier/grep"))
+            assertTrue(result.contains("grep"))
             assertTrue(result.contains("--color=none"))
             assertTrue(result.contains("-r"))
             assertTrue(result.contains("-n"))
@@ -238,7 +238,7 @@ class BackendStrategyTest {
 
         @Test
         fun `name should return grep`() {
-            assertEquals("com/mituuz/fuzzier/grep", BackendStrategy.Grep.name)
+            assertEquals("grep", BackendStrategy.Grep.name)
         }
     }
 }
