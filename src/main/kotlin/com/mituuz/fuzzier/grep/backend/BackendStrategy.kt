@@ -100,10 +100,10 @@ sealed interface BackendStrategy {
                     "/p",
                     "/s",
                     "/n",
-                    searchString
+                    "/C:$searchString"
                 )
             )
-            commands.addAll(grepConfig.targets)
+            commands.addAll(grepConfig.targets.map { if (it == ".") "*" else it })
             return commands
         }
     }

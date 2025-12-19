@@ -40,8 +40,18 @@ intellijPlatform {
         changeNotes = """
     <h2>Version $currentVersion</h2>
         <ul>
-            <li>Fix incorrect grep command</li>
+            <li>Fix incorrect <code>grep</code> command</li>
+            <li>Partially fix <code>findstr</code> command</li>
             <li>Re-add the backend name to the popup title</li>
+        </ul>
+        <h3>Known issues</h3>
+        <ul>
+            <li><code>findstr</code> does not work with currently open tabs
+                <ul>
+                    <li>To reduce the maintenance burden, I may remove support later</li>
+                    <li>Performance is poor enough that I thought that the command wasn't returning any results</li>
+                </ul>
+            </li>
         </ul>
     <h2>Version 2.0.0</h2>
         <p>This version contains larger refactors and multiple new actions enabled by them.</p>
