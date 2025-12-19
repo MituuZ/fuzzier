@@ -83,12 +83,12 @@ open class FuzzyGrep : FuzzyAction() {
     ) {
         currentLaunchJob?.cancel()
         grepConfig = getGrepConfig(project)
-        val popupTitle = grepConfig.getPopupTitle()
 
         val projectBasePath = project.basePath.toString()
         currentLaunchJob = actionScope?.launch(Dispatchers.EDT) {
             val backendResult: Result<BackendStrategy> = backendResolver.resolveBackend(commandRunner, projectBasePath)
             backend = backendResult.getOrNull()
+            val popupTitle = grepConfig.getPopupTitle(backend!!.name)
 
             if (backendResult.isFailure) {
                 showNotification(

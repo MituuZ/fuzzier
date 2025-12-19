@@ -35,10 +35,10 @@ class GrepConfig(
     val title: String = "",
     val supportsSecondaryField: Boolean = true,
 ) {
-    fun getPopupTitle(): String {
+    fun getPopupTitle(backendName: String): String {
         if (caseMode == CaseMode.INSENSITIVE) {
-            return "$title (Case Insensitive)"
+            return "$title (case-insensitive $backendName)"
         }
-        return title
+        return "$title ($backendName)"
     }
 }

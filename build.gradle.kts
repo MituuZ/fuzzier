@@ -27,7 +27,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 // Use the same version and group for the jar and the plugin
-val currentVersion = "2.0.0"
+val currentVersion = "2.0.1"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup

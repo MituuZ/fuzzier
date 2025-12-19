@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 2.0.1
+
+- Fix incorrect grep and findstr commands
+- Re-add the backend name to the popup title
+
 ## Version 2.0.0
 
 This version contains larger refactors and multiple new actions enabled by them.
