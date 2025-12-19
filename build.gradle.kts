@@ -39,6 +39,11 @@ intellijPlatform {
 
         changeNotes = """
     <h2>Version $currentVersion</h2>
+        <ul>
+            <li>Fix incorrect grep command</li>
+            <li>Re-add the backend name to the popup title</li>
+        </ul>
+    <h2>Version 2.0.0</h2>
         <p>This version contains larger refactors and multiple new actions enabled by them.</p>
         <p>I&#39;m updating the existing package structure to keep things nicer and not supporting the old actions to avoid possible problems in the future.</p>
     

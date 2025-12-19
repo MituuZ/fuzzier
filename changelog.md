@@ -2,7 +2,7 @@
 
 ## Version 2.0.1
 
-- Fix incorrect grep and findstr commands
+- Fix incorrect grep command
 - Re-add the backend name to the popup title
 
 ## Version 2.0.0
