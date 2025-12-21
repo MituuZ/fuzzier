@@ -25,8 +25,11 @@
 package com.mituuz.fuzzier.grep.backend
 
 import com.mituuz.fuzzier.entities.CaseMode
+import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.GrepConfig
 import com.mituuz.fuzzier.entities.RowContainer
+import com.mituuz.fuzzier.runner.CommandRunner
+import javax.swing.DefaultListModel
 
 sealed interface BackendStrategy {
     val name: String
@@ -34,6 +37,18 @@ sealed interface BackendStrategy {
     fun parseOutputLine(line: String, projectBasePath: String): RowContainer? {
         val line = line.replace(projectBasePath, ".")
         return RowContainer.rowContainerFromString(line, projectBasePath)
+    }
+
+    suspend fun handleSearch(
+        grepConfig: GrepConfig,
+        searchString: String,
+        secondarySearchString: String?,
+        commandRunner: CommandRunner,
+        listModel: DefaultListModel<FuzzyContainer>,
+        projectBasePath: String,
+    ) {
+        val commands = buildCommand(grepConfig, searchString, secondarySearchString)
+        commandRunner.runCommandPopulateListModel(commands, listModel, projectBasePath, this)
     }
 
     fun supportsSecondaryField(): Boolean = false
@@ -133,6 +148,29 @@ sealed interface BackendStrategy {
             )
             commands.addAll(grepConfig.targets)
             return commands
+        }
+    }
+
+    object Fuzzier : BackendStrategy {
+        override val name = "fuzzier"
+
+        override fun buildCommand(
+            grepConfig: GrepConfig,
+            searchString: String,
+            secondarySearchString: String?
+        ): List<String> {
+            TODO("Not yet implemented")
+        }
+
+        override suspend fun handleSearch(
+            grepConfig: GrepConfig,
+            searchString: String,
+            secondarySearchString: String?,
+            commandRunner: CommandRunner,
+            listModel: DefaultListModel<FuzzyContainer>,
+            projectBasePath: String
+        ) {
+            TODO("Not yet implemented")
         }
     }
 }
