@@ -158,9 +158,7 @@ sealed interface BackendStrategy {
             grepConfig: GrepConfig,
             searchString: String,
             secondarySearchString: String?
-        ): List<String> {
-            TODO("Not yet implemented")
-        }
+        ): List<String> = emptyList()
 
         override suspend fun handleSearch(
             grepConfig: GrepConfig,
