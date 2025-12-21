@@ -176,8 +176,14 @@ open class FuzzyGrep : FuzzyAction() {
 
         if (backend != null && projectBasePath != null) {
             val secondaryFieldText = (component as FuzzyFinderComponent).getSecondaryText()
-            val commands = backend!!.buildCommand(grepConfig, searchString, secondaryFieldText)
-            commandRunner.runCommandPopulateListModel(commands, listModel, projectBasePath, backend!!)
+            backend!!.handleSearch(
+                grepConfig,
+                searchString,
+                secondaryFieldText,
+                commandRunner,
+                listModel,
+                projectBasePath,
+            )
         }
 
         return listModel
