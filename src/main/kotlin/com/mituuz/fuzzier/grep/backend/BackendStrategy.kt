@@ -24,6 +24,8 @@
 
 package com.mituuz.fuzzier.grep.backend
 
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.VirtualFile
 import com.mituuz.fuzzier.entities.CaseMode
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.GrepConfig
@@ -46,6 +48,8 @@ sealed interface BackendStrategy {
         commandRunner: CommandRunner,
         listModel: DefaultListModel<FuzzyContainer>,
         projectBasePath: String,
+        project: Project? = null,
+        fileFilter: (VirtualFile) -> Boolean = { true }
     ) {
         val commands = buildCommand(grepConfig, searchString, secondarySearchString)
         commandRunner.runCommandPopulateListModel(commands, listModel, projectBasePath, this)
@@ -166,7 +170,9 @@ sealed interface BackendStrategy {
             secondarySearchString: String?,
             commandRunner: CommandRunner,
             listModel: DefaultListModel<FuzzyContainer>,
-            projectBasePath: String
+            projectBasePath: String,
+            project: Project?,
+            fileFilter: (VirtualFile) -> Boolean
         ) {
             TODO("Not yet implemented")
         }
