@@ -35,6 +35,8 @@ import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vcs.changes.ChangeListManager
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.util.SingleAlarm
 import com.mituuz.fuzzier.actions.FuzzyAction
@@ -183,10 +185,16 @@ open class FuzzyGrep : FuzzyAction() {
                 commandRunner,
                 listModel,
                 projectBasePath,
-            )
+                project
+            ) { vf -> validVf(vf, project) }
         }
 
         return listModel
+    }
+
+    private fun validVf(virtualFile: VirtualFile, project: Project): Boolean {
+        val clm = ChangeListManager.getInstance(project)
+        return !clm.isIgnoredFile(virtualFile)
     }
 
     private fun createListeners(project: Project) {

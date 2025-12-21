@@ -155,27 +155,5 @@ sealed interface BackendStrategy {
         }
     }
 
-    object Fuzzier : BackendStrategy {
-        override val name = "fuzzier"
-
-        override fun buildCommand(
-            grepConfig: GrepConfig,
-            searchString: String,
-            secondarySearchString: String?
-        ): List<String> = emptyList()
-
-        override suspend fun handleSearch(
-            grepConfig: GrepConfig,
-            searchString: String,
-            secondarySearchString: String?,
-            commandRunner: CommandRunner,
-            listModel: DefaultListModel<FuzzyContainer>,
-            projectBasePath: String,
-            project: Project?,
-            fileFilter: (VirtualFile) -> Boolean
-        ) {
-            TODO("Not yet implemented")
-        }
-    }
 }
 

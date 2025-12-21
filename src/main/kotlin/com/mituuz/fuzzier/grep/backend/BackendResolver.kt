@@ -29,6 +29,7 @@ import com.mituuz.fuzzier.runner.CommandRunner
 class BackendResolver(val isWindows: Boolean) {
     suspend fun resolveBackend(commandRunner: CommandRunner, projectBasePath: String): Result<BackendStrategy> {
         return when {
+            true -> Result.success(FuzzierGrep)
             isInstalled(commandRunner, "rg", projectBasePath) -> Result.success(BackendStrategy.Ripgrep)
             isWindows && isInstalled(
                 commandRunner,
