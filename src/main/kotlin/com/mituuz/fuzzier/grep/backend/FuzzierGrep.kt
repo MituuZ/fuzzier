@@ -65,6 +65,9 @@ object FuzzierGrep : BackendStrategy {
         if (project == null) return
 
         val files = collectFiles(searchString, fileFilter, project, grepConfig)
+
+        println("Searching from ${files.size} files with ${grepConfig.caseMode} case mode and $searchString")
+
         var count = 0
         val batchSize = 20
         val currentBatch = mutableListOf<FuzzyContainer>()
@@ -136,7 +139,34 @@ object FuzzierGrep : BackendStrategy {
     ): Set<VirtualFile> {
         val files = mutableSetOf<VirtualFile>()
 
-        if (searchString.length < 3) {
+        if (searchString.length > 3 && searchString.contains(" ")) {
+            // Case B: Long String (Length >= 3) - PsiSearchHelper
+            val words = searchString.trim().split(Regex("\\s+"))
+            val completeWordsSearch = if (words.size > 1) {
+                words.dropLast(1).joinToString(" ")
+            } else {
+                ""
+            }
+
+            if (completeWordsSearch.isNotEmpty()) {
+                ReadAction.run<Throwable> {
+                    val helper = PsiSearchHelper.getInstance(project)
+                    helper.processAllFilesWithWord(
+                        completeWordsSearch,
+                        GlobalSearchScope.projectScope(project),
+                        Processor { psiFile ->
+                            psiFile.virtualFile?.let { vf ->
+                                if (fileFilter(vf)) {
+                                    files.add(vf)
+                                }
+                            }
+                            true
+                        },
+                        grepConfig.caseMode == CaseMode.SENSITIVE
+                    )
+                }
+            }
+        } else {
             // Case A: Short String (Length < 3) - Linear iteration
             ReadAction.run<Throwable> {
                 ProjectFileIndex.getInstance(project).iterateContent { vf ->
@@ -145,24 +175,6 @@ object FuzzierGrep : BackendStrategy {
                     }
                     true
                 }
-            }
-        } else {
-            // Case B: Long String (Length >= 3) - PsiSearchHelper
-            ReadAction.run<Throwable> {
-                val helper = PsiSearchHelper.getInstance(project)
-                helper.processAllFilesWithWord(
-                    searchString,
-                    GlobalSearchScope.projectScope(project),
-                    Processor { psiFile ->
-                        psiFile.virtualFile?.let { vf ->
-                            if (fileFilter(vf)) {
-                                files.add(vf)
-                            }
-                        }
-                        true
-                    },
-                    grepConfig.caseMode == CaseMode.SENSITIVE
-                )
             }
         }
 
