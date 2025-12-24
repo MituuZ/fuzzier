@@ -25,8 +25,12 @@
 package com.mituuz.fuzzier.grep.backend
 
 import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.rootManager
+import com.intellij.openapi.roots.FileIndex
 import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.search.GlobalSearchScope
@@ -37,10 +41,7 @@ import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.GrepConfig
 import com.mituuz.fuzzier.entities.RowContainer
 import com.mituuz.fuzzier.runner.CommandRunner
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import javax.swing.DefaultListModel
 
 object FuzzierGrep : BackendStrategy {
@@ -131,33 +132,29 @@ object FuzzierGrep : BackendStrategy {
         }
     }
 
-    private fun collectFiles(
+    private suspend fun collectFiles(
         searchString: String,
         fileFilter: (VirtualFile) -> Boolean,
         project: Project,
         grepConfig: GrepConfig
-    ): Set<VirtualFile> {
-        val files = mutableSetOf<VirtualFile>()
+    ): List<VirtualFile> {
+        var files = listOf<VirtualFile>()
+        val trimmedSearch = searchString.trim()
 
-        if (searchString.length > 3 && searchString.contains(" ")) {
+        if (false) {// (trimmedSearch.contains(" ")) {
             // Case B: Long String (Length >= 3) - PsiSearchHelper
-            val words = searchString.trim().split(Regex("\\s+"))
-            val completeWordsSearch = if (words.size > 1) {
-                words.dropLast(1).joinToString(" ")
-            } else {
-                ""
-            }
+            val searchString = trimmedSearch.substringBeforeLast(" ")
 
-            if (completeWordsSearch.isNotEmpty()) {
+            if (searchString.isNotEmpty()) {
                 ReadAction.run<Throwable> {
                     val helper = PsiSearchHelper.getInstance(project)
                     helper.processAllFilesWithWord(
-                        completeWordsSearch,
+                        searchString,
                         GlobalSearchScope.projectScope(project),
                         Processor { psiFile ->
                             psiFile.virtualFile?.let { vf ->
                                 if (fileFilter(vf)) {
-                                    files.add(vf)
+                                    // files.add(vf)
                                 }
                             }
                             true
@@ -168,16 +165,50 @@ object FuzzierGrep : BackendStrategy {
             }
         } else {
             // Case A: Short String (Length < 3) - Linear iteration
-            ReadAction.run<Throwable> {
-                ProjectFileIndex.getInstance(project).iterateContent { vf ->
-                    if (!vf.isDirectory && fileFilter(vf)) {
-                        files.add(vf)
-                    }
-                    true
-                }
-            }
+            files = collectIterationFiles(project)
         }
 
         return files
+    }
+
+    suspend fun collectIterationFiles(project: Project): List<VirtualFile> {
+        val ctx = currentCoroutineContext()
+        val job = ctx.job
+
+        val indexTargets = if (false) { // (projectState.isProject) {
+            listOf(ProjectFileIndex.getInstance(project) to project.name)
+        } else {
+            val moduleManager = ModuleManager.getInstance(project)
+            moduleManager.modules.map { it.rootManager.fileIndex to it.name }
+        }
+
+        return collectFiles(
+            targets = indexTargets,
+            shouldContinue = { job.isActive },
+            fileFilter = buildFileFilter(project)
+        )
+    }
+
+    private fun buildFileFilter(project: Project): (VirtualFile) -> Boolean {
+        val clm = ChangeListManager.getInstance(project)
+        return { vf -> !vf.isDirectory && !clm.isIgnoredFile(vf) }
+    }
+
+    private fun collectFiles(
+        targets: List<Pair<FileIndex, String>>,
+        shouldContinue: () -> Boolean,
+        fileFilter: (VirtualFile) -> Boolean
+    ): List<VirtualFile> = buildList {
+        for ((fileIndex, _) in targets) {
+            fileIndex.iterateContent { vf ->
+                if (!shouldContinue()) return@iterateContent false
+
+                if (fileFilter(vf)) {
+                    add(vf)
+                }
+
+                true
+            }
+        }
     }
 }
