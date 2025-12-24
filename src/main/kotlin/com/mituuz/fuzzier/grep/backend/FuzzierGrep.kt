@@ -25,6 +25,7 @@
 package com.mituuz.fuzzier.grep.backend
 
 import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.components.service
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.rootManager
@@ -41,11 +42,14 @@ import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.GrepConfig
 import com.mituuz.fuzzier.entities.RowContainer
 import com.mituuz.fuzzier.runner.CommandRunner
+import com.mituuz.fuzzier.settings.FuzzierSettingsService
+import com.mituuz.fuzzier.util.FuzzierUtil
 import kotlinx.coroutines.*
 import javax.swing.DefaultListModel
 
 object FuzzierGrep : BackendStrategy {
     override val name = "fuzzier"
+    private val fuzzierUtil = FuzzierUtil()
 
     override fun buildCommand(
         grepConfig: GrepConfig,
@@ -99,13 +103,15 @@ object FuzzierGrep : BackendStrategy {
                     }
 
                     if (found) {
+                        val (filePath, basePath) = fuzzierUtil.extractModulePath(file.path, project)
                         fileMatches.add(
                             RowContainer(
-                                file.path,
-                                projectBasePath,
+                                filePath,
+                                basePath,
                                 file.name,
                                 index,
-                                line.trim()
+                                line.trim(),
+                                virtualFile = file
                             )
                         )
                     }
@@ -151,10 +157,10 @@ object FuzzierGrep : BackendStrategy {
         project: Project,
         grepConfig: GrepConfig
     ): List<VirtualFile> {
-        var files = listOf<VirtualFile>()
+        val files = mutableListOf<VirtualFile>()
         val trimmedSearch = searchString.trim()
 
-        if (false) {// (trimmedSearch.contains(" ")) {
+        if (trimmedSearch.contains(" ")) {
             // Case B: Long String (Length >= 3) - PsiSearchHelper
             val searchString = trimmedSearch.substringBeforeLast(" ")
 
@@ -167,7 +173,7 @@ object FuzzierGrep : BackendStrategy {
                         Processor { psiFile ->
                             psiFile.virtualFile?.let { vf ->
                                 if (fileFilter(vf)) {
-                                    // files.add(vf)
+                                    files.add(vf)
                                 }
                             }
                             true
@@ -178,7 +184,7 @@ object FuzzierGrep : BackendStrategy {
             }
         } else {
             // Case A: Short String (Length < 3) - Linear iteration
-            files = collectIterationFiles(project)
+            files.addAll(collectIterationFiles(project))
         }
 
         return files
@@ -187,8 +193,9 @@ object FuzzierGrep : BackendStrategy {
     suspend fun collectIterationFiles(project: Project): List<VirtualFile> {
         val ctx = currentCoroutineContext()
         val job = ctx.job
+        val projectState = project.service<FuzzierSettingsService>().state
 
-        val indexTargets = if (false) { // (projectState.isProject) {
+        val indexTargets = if (projectState.isProject) {
             listOf(ProjectFileIndex.getInstance(project) to project.name)
         } else {
             val moduleManager = ModuleManager.getInstance(project)

@@ -23,6 +23,7 @@
  */
 package com.mituuz.fuzzier.entities
 
+import com.intellij.openapi.vfs.VirtualFile
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import java.io.File
 
@@ -32,8 +33,9 @@ class RowContainer(
     filename: String,
     val rowNumber: Int,
     val trimmedRow: String,
-    val columnNumber: Int = 0
-) : FuzzyContainer(filePath, basePath, filename) {
+    val columnNumber: Int = 0,
+    virtualFile: VirtualFile? = null
+) : FuzzyContainer(filePath, basePath, filename, virtualFile) {
     companion object {
         private val FILE_SEPARATOR: String = File.separator
         private val RG_PATTERN: Regex = Regex("""^.+:\d+:\d+:\s*.+$""")
