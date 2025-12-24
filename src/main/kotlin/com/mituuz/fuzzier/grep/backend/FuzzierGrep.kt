@@ -121,7 +121,7 @@ object FuzzierGrep : BackendStrategy {
 
                 if (currentBatch.size >= batchSize) {
                     val toAdd = currentBatch.toList()
-                    // currentBatch.clear()
+                    currentBatch.clear()
                     withContext(Dispatchers.Main) {
                         listModel.addAll(toAdd)
                     }

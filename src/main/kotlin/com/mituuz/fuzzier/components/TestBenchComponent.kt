@@ -54,14 +54,13 @@ import java.util.concurrent.Future
 import javax.swing.DefaultListModel
 import javax.swing.JPanel
 import javax.swing.table.DefaultTableModel
-import kotlin.concurrent.schedule
 
 class TestBenchComponent : JPanel(), Disposable {
     private val columnNames =
         arrayOf("Filename", "Filepath", "Streak", "MultiMatch", "PartialPath", "Filename", "Total")
     private val table = JBTable()
     private var searchField = EditorTextField()
-    private var debounceTimer: TimerTask? = null
+    private var debounceJob: Job? = null
 
     @Volatile
     var currentTask: Future<*>? = null
@@ -122,9 +121,10 @@ class TestBenchComponent : JPanel(), Disposable {
         val document = searchField.document
         val listener: DocumentListener = object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
-                debounceTimer?.cancel()
+                debounceJob?.cancel()
                 val debouncePeriod = liveSettingsComponent.debounceTimerValue.getIntSpinner().value as Int
-                debounceTimer = Timer().schedule(debouncePeriod.toLong()) {
+                debounceJob = actionScope.launch {
+                    delay(debouncePeriod.toLong())
                     updateListContents(project, searchField.text)
                 }
             }
@@ -199,13 +199,15 @@ class TestBenchComponent : JPanel(), Disposable {
     }
 
     override fun dispose() {
-        debounceTimer?.cancel()
-        debounceTimer = null
+        debounceJob?.cancel()
+        debounceJob = null
 
         currentTask?.let { task ->
             if (!task.isDone) task.cancel(true)
         }
         currentTask = null
+
+        actionScope.cancel()
 
         ApplicationManager.getApplication().invokeLater {
             try {
