@@ -49,9 +49,11 @@ class CoroutinePreviewAlarmProvider(val actionScope: CoroutineScope?) : PreviewA
 
                 previewJob?.cancel()
                 previewJob = actionScope?.launch(Dispatchers.Default) {
-                    val file = withContext(Dispatchers.IO) {
-                        VirtualFileManager.getInstance().findFileByUrl(fileUrl)
-                    }
+                    val file =
+                        selectedValue.virtualFile
+                            ?: withContext(Dispatchers.IO) {
+                                VirtualFileManager.getInstance().findFileByUrl(fileUrl)
+                            }
 
                     if (file == null) return@launch
 
