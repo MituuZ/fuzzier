@@ -74,7 +74,7 @@ open class FuzzyGrep : FuzzyAction() {
 
     open fun getGrepConfig(project: Project): GrepConfig {
         return GrepConfig(
-            targets = listOf("."),
+            targets = null,
             caseMode = CaseMode.SENSITIVE,
             title = "Fuzzy Grep",
         )
@@ -194,7 +194,7 @@ open class FuzzyGrep : FuzzyAction() {
 
     private fun validVf(virtualFile: VirtualFile, project: Project): Boolean {
         val clm = ChangeListManager.getInstance(project)
-        return !clm.isIgnoredFile(virtualFile)
+        return !virtualFile.isDirectory && !clm.isIgnoredFile(virtualFile) && !virtualFile.fileType.isBinary
     }
 
     private fun createListeners(project: Project) {
