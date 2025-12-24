@@ -104,8 +104,7 @@ open class FuzzyGrep : FuzzyAction() {
             defaultDoc = EditorFactory.getInstance().createDocument("")
             val showSecondaryField = backend!!.supportsSecondaryField() && grepConfig.supportsSecondaryField
             component = FuzzyFinderComponent(
-                project = project,
-                showSecondaryField = showSecondaryField
+                project = project, showSecondaryField = showSecondaryField
             )
             previewAlarmProvider = CoroutinePreviewAlarmProvider(actionScope)
             previewAlarm = previewAlarmProvider?.getPreviewAlarm(component, defaultDoc)
@@ -157,8 +156,7 @@ open class FuzzyGrep : FuzzyAction() {
             try {
                 val results = withContext(Dispatchers.IO) {
                     findInFiles(
-                        searchString,
-                        project
+                        searchString, project
                     )
                 }
                 coroutineContext.ensureActive()
@@ -179,24 +177,19 @@ open class FuzzyGrep : FuzzyAction() {
         if (backend != null && projectBasePath != null) {
             val secondaryFieldText = (component as FuzzyFinderComponent).getSecondaryText()
             backend!!.handleSearch(
-                grepConfig,
-                searchString,
-                secondaryFieldText,
-                commandRunner,
-                listModel,
-                projectBasePath,
-                project
-            ) { vf -> validVf(vf, project, secondaryFieldText) }
+                grepConfig, searchString, secondaryFieldText, commandRunner, listModel, projectBasePath, project
+            ) { vf -> validVf(vf, secondaryFieldText, ChangeListManager.getInstance(project)) }
         }
 
         return listModel
     }
 
-    private fun validVf(virtualFile: VirtualFile, project: Project, secondaryFieldText: String? = null): Boolean {
+    private fun validVf(
+        virtualFile: VirtualFile, secondaryFieldText: String? = null, clm: ChangeListManager
+    ): Boolean {
         if (virtualFile.isDirectory) return false
         if (virtualFile.fileType.isBinary) return false
 
-        val clm = ChangeListManager.getInstance(project)
         if (clm.isIgnoredFile(virtualFile)) return false
 
         if (secondaryFieldText.isNullOrBlank()) {
@@ -224,15 +217,12 @@ open class FuzzyGrep : FuzzyAction() {
 
     private fun handleInput(project: Project) {
         val selectedValue = component.fileList.selectedValue
-        val virtualFile =
-            VirtualFileManager.getInstance().findFileByUrl("file://${selectedValue?.getFileUri()}")
+        val virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://${selectedValue?.getFileUri()}")
         virtualFile?.let {
             val fileEditorManager = FileEditorManager.getInstance(project)
 
             FileOpeningUtil.openFile(
-                fileEditorManager,
-                virtualFile,
-                globalState.newTab
+                fileEditorManager, virtualFile, globalState.newTab
             ) {
                 popup.cancel()
                 ApplicationManager.getApplication().invokeLater {
