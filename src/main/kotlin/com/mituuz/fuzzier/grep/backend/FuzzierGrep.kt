@@ -191,7 +191,7 @@ object FuzzierGrep : BackendStrategy {
 
     private fun buildFileFilter(project: Project): (VirtualFile) -> Boolean {
         val clm = ChangeListManager.getInstance(project)
-        return { vf -> !vf.isDirectory && !clm.isIgnoredFile(vf) }
+        return { vf -> !vf.isDirectory && !clm.isIgnoredFile(vf) && !vf.fileType.isBinary }
     }
 
     private fun collectFiles(
