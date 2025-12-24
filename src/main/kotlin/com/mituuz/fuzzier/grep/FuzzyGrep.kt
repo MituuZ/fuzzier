@@ -186,15 +186,26 @@ open class FuzzyGrep : FuzzyAction() {
                 listModel,
                 projectBasePath,
                 project
-            ) { vf -> validVf(vf, project) }
+            ) { vf -> validVf(vf, project, secondaryFieldText) }
         }
 
         return listModel
     }
 
-    private fun validVf(virtualFile: VirtualFile, project: Project): Boolean {
+    private fun validVf(virtualFile: VirtualFile, project: Project, secondaryFieldText: String? = null): Boolean {
+        if (virtualFile.isDirectory) return false
+        if (virtualFile.fileType.isBinary) return false
+
         val clm = ChangeListManager.getInstance(project)
-        return !virtualFile.isDirectory && !clm.isIgnoredFile(virtualFile) && !virtualFile.fileType.isBinary
+        if (clm.isIgnoredFile(virtualFile)) return false
+
+        if (secondaryFieldText.isNullOrBlank()) {
+            return true
+        } else if (virtualFile.extension.equals(secondaryFieldText, ignoreCase = true)) {
+            return true
+        }
+
+        return false
     }
 
     private fun createListeners(project: Project) {
