@@ -53,18 +53,15 @@ import kotlinx.coroutines.*
 import java.awt.Component
 import java.awt.Font
 import java.awt.event.ActionEvent
-import java.util.*
-import java.util.Timer
 import java.util.concurrent.ConcurrentHashMap
 import javax.swing.*
-import kotlin.concurrent.schedule
 
 abstract class FuzzyAction : AnAction() {
     lateinit var component: FuzzyComponent
     lateinit var popup: JBPopup
-    private lateinit var originalDownHandler: EditorActionHandler
-    private lateinit var originalUpHandler: EditorActionHandler
-    private var debounceTimer: TimerTask? = null
+    private var originalDownHandler: EditorActionHandler? = null
+    private var originalUpHandler: EditorActionHandler? = null
+    private var debounceJob: Job? = null
     protected lateinit var projectState: FuzzierSettingsService.State
     protected val globalState = service<FuzzierGlobalSettingsService>().state
     protected var defaultDoc: Document? = null
@@ -138,9 +135,10 @@ abstract class FuzzyAction : AnAction() {
         val document = component.searchField.document
         val listener: DocumentListener = object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
-                debounceTimer?.cancel()
+                debounceJob?.cancel()
                 val debouncePeriod = globalState.debouncePeriod
-                debounceTimer = Timer().schedule(debouncePeriod.toLong()) {
+                debounceJob = actionScope?.launch {
+                    delay(debouncePeriod.toLong())
                     updateListContents(project, component.searchField.text)
                 }
             }
@@ -161,6 +159,9 @@ abstract class FuzzyAction : AnAction() {
     fun cleanupPopup() {
         resetOriginalHandlers()
 
+        debounceJob?.cancel()
+        debounceJob = null
+
         currentUpdateListContentJob?.cancel()
         currentUpdateListContentJob = null
 
@@ -180,8 +181,12 @@ abstract class FuzzyAction : AnAction() {
 
     fun resetOriginalHandlers() {
         val actionManager = EditorActionManager.getInstance()
-        actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN, originalDownHandler)
-        actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_UP, originalUpHandler)
+        originalDownHandler?.let {
+            actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_DOWN, it)
+        }
+        originalUpHandler?.let {
+            actionManager.setActionHandler(IdeActions.ACTION_EDITOR_MOVE_CARET_UP, it)
+        }
     }
 
     class FuzzyListActionHandler(private val fuzzyAction: FuzzyAction, private val isUp: Boolean) :

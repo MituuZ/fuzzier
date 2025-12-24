@@ -60,9 +60,15 @@ class DefaultCommandRunner : CommandRunner {
                 }
             })
 
-            withContext(Dispatchers.IO) {
-                processHandler.startNotify()
-                processHandler.waitFor(2000)
+            try {
+                withContext(Dispatchers.IO) {
+                    processHandler.startNotify()
+                    processHandler.waitFor(2000)
+                }
+            } finally {
+                if (!processHandler.isProcessTerminated) {
+                    processHandler.destroyProcess()
+                }
             }
             output.toString()
         } catch (_: InterruptedException) {
@@ -104,9 +110,15 @@ class DefaultCommandRunner : CommandRunner {
                 }
             })
 
-            withContext(Dispatchers.IO) {
-                processHandler.startNotify()
-                processHandler.waitFor(2000)
+            try {
+                withContext(Dispatchers.IO) {
+                    processHandler.startNotify()
+                    processHandler.waitFor(2000)
+                }
+            } finally {
+                if (!processHandler.isProcessTerminated) {
+                    processHandler.destroyProcess()
+                }
             }
         } catch (_: InterruptedException) {
             throw InterruptedException()
