@@ -31,7 +31,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.rootManager
 import com.intellij.openapi.roots.FileIndex
 import com.intellij.openapi.roots.ProjectFileIndex
-import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.search.GlobalSearchScope
@@ -71,7 +70,7 @@ object FuzzierGrep : BackendStrategy {
 
         val fileCollectionStart = System.nanoTime()
 
-        val files = collectFiles(searchString, fileFilter, project, grepConfig)
+        val files = grepConfig.targets ?: collectFiles(searchString, fileFilter, project, grepConfig)
 
         val fileCollectionEnd = System.nanoTime()
         val fileCollectionDuration = (fileCollectionEnd - fileCollectionStart) / 1_000_000.0
@@ -183,35 +182,25 @@ object FuzzierGrep : BackendStrategy {
                 }
             }
         } else {
-            // Case A: Short String (Length < 3) - Linear iteration
-            files.addAll(collectIterationFiles(project))
+            val ctx = currentCoroutineContext()
+            val job = ctx.job
+            val projectState = project.service<FuzzierSettingsService>().state
+
+            val indexTargets = if (projectState.isProject) {
+                listOf(ProjectFileIndex.getInstance(project) to project.name)
+            } else {
+                val moduleManager = ModuleManager.getInstance(project)
+                moduleManager.modules.map { it.rootManager.fileIndex to it.name }
+            }
+
+            return collectFiles(
+                targets = indexTargets,
+                shouldContinue = { job.isActive },
+                fileFilter = fileFilter
+            )
         }
 
         return files
-    }
-
-    suspend fun collectIterationFiles(project: Project): List<VirtualFile> {
-        val ctx = currentCoroutineContext()
-        val job = ctx.job
-        val projectState = project.service<FuzzierSettingsService>().state
-
-        val indexTargets = if (projectState.isProject) {
-            listOf(ProjectFileIndex.getInstance(project) to project.name)
-        } else {
-            val moduleManager = ModuleManager.getInstance(project)
-            moduleManager.modules.map { it.rootManager.fileIndex to it.name }
-        }
-
-        return collectFiles(
-            targets = indexTargets,
-            shouldContinue = { job.isActive },
-            fileFilter = buildFileFilter(project)
-        )
-    }
-
-    private fun buildFileFilter(project: Project): (VirtualFile) -> Boolean {
-        val clm = ChangeListManager.getInstance(project)
-        return { vf -> !vf.isDirectory && !clm.isIgnoredFile(vf) && !vf.fileType.isBinary }
     }
 
     private fun collectFiles(

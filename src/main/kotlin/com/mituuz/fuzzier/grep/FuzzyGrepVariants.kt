@@ -40,7 +40,7 @@ class FuzzyGrepOpenTabsCI : FuzzyGrep() {
     override fun getGrepConfig(project: Project): GrepConfig {
         val fileEditorManager = FileEditorManager.getInstance(project)
         val openFiles: Array<VirtualFile> = fileEditorManager.openFiles
-        val targets = openFiles.map { it.path }
+        val targets = openFiles.toSet()
 
         return GrepConfig(
             targets = targets,
@@ -54,7 +54,7 @@ class FuzzyGrepOpenTabs : FuzzyGrep() {
     override fun getGrepConfig(project: Project): GrepConfig {
         val fileEditorManager = FileEditorManager.getInstance(project)
         val openFiles: Array<VirtualFile> = fileEditorManager.openFiles
-        val targets = openFiles.map { it.path }
+        val targets = openFiles.toSet()
 
         return GrepConfig(
             targets = targets,
@@ -69,7 +69,7 @@ class FuzzyGrepCurrentBufferCI : FuzzyGrep() {
         val editor = FileEditorManager.getInstance(project).selectedTextEditor
         val virtualFile: VirtualFile? =
             editor?.let { FileEditorManager.getInstance(project).selectedFiles.firstOrNull() }
-        val targets = virtualFile?.path?.let { listOf(it) } ?: emptyList()
+        val targets = virtualFile?.let { setOf(it) } ?: emptySet()
 
         return GrepConfig(
             targets = targets,
@@ -85,7 +85,7 @@ class FuzzyGrepCurrentBuffer : FuzzyGrep() {
         val editor = FileEditorManager.getInstance(project).selectedTextEditor
         val virtualFile: VirtualFile? =
             editor?.let { FileEditorManager.getInstance(project).selectedFiles.firstOrNull() }
-        val targets = virtualFile?.path?.let { listOf(it) } ?: emptyList()
+        val targets = virtualFile?.let { setOf(it) } ?: emptySet()
 
         return GrepConfig(
             targets = targets,
@@ -99,7 +99,7 @@ class FuzzyGrepCurrentBuffer : FuzzyGrep() {
 class FuzzyGrepCI : FuzzyGrep() {
     override fun getGrepConfig(project: Project): GrepConfig {
         return GrepConfig(
-            targets = listOf("."),
+            targets = null,
             caseMode = CaseMode.INSENSITIVE,
             title = FuzzyGrepTitles.DEFAULT,
         )
