@@ -29,16 +29,17 @@ import com.mituuz.fuzzier.runner.CommandRunner
 class BackendResolver(val isWindows: Boolean) {
     suspend fun resolveBackend(commandRunner: CommandRunner, projectBasePath: String): Result<BackendStrategy> {
         return when {
-            isInstalled(commandRunner, "rg", projectBasePath) -> Result.success(BackendStrategy.Ripgrep)
-            isWindows && isInstalled(
-                commandRunner,
-                "findstr",
-                projectBasePath
-            ) -> Result.success(BackendStrategy.Findstr)
-
-            !isWindows && isInstalled(commandRunner, "grep", projectBasePath) -> Result.success(
-                BackendStrategy.Grep
-            )
+            true -> Result.success(FuzzierGrep)
+//            isInstalled(commandRunner, "rg", projectBasePath) -> Result.success(BackendStrategy.Ripgrep)
+//            isWindows && isInstalled(
+//                commandRunner,
+//                "findstr",
+//                projectBasePath
+//            ) -> Result.success(BackendStrategy.Findstr)
+//
+//            !isWindows && isInstalled(commandRunner, "grep", projectBasePath) -> Result.success(
+//                BackendStrategy.Grep
+//            )
 
             else -> Result.failure(Exception("No suitable grep command found"))
         }
