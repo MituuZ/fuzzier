@@ -162,15 +162,16 @@ object FuzzierGrep : BackendStrategy {
         val files = mutableListOf<VirtualFile>()
         val trimmedSearch = searchString.trim()
 
-        if (trimmedSearch.contains(" ")) {
-            // Case B: Long String (Length >= 3) - PsiSearchHelper
-            val searchString = trimmedSearch.substringBeforeLast(" ")
+        if (trimmedSearch.count { it == ' ' } >= 2) {
+            // Extract the first complete word - the only one we can be sure is a full word
+            val words = trimmedSearch.split(" ")
+            val firstCompleteWord = words[1]
 
-            if (searchString.isNotEmpty()) {
+            if (firstCompleteWord.isNotEmpty()) {
                 ReadAction.run<Throwable> {
                     val helper = PsiSearchHelper.getInstance(project)
                     helper.processAllFilesWithWord(
-                        searchString,
+                        firstCompleteWord,
                         GlobalSearchScope.projectScope(project),
                         Processor { psiFile ->
                             psiFile.virtualFile?.let { vf ->
