@@ -104,6 +104,11 @@ class SettingsComponent {
         return component as ComboBox<PopupSizing>
     }
 
+    fun getGrepBackendComboBox(): ComboBox<FuzzierGlobalSettingsService.GrepBackend> {
+        @Suppress("UNCHECKED_CAST")
+        return component as ComboBox<FuzzierGlobalSettingsService.GrepBackend>
+    }
+
     fun getIntSpinner(index: Int): JBIntSpinner {
         return (component as JPanel).getComponent(index) as JBIntSpinner
     }

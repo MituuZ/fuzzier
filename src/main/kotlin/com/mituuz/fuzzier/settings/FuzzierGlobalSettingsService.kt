@@ -70,6 +70,8 @@ class FuzzierGlobalSettingsService : PersistentStateComponent<FuzzierGlobalSetti
         var matchWeightSingleChar = 5
         var matchWeightStreakModifier = 10
         var matchWeightFilename = 10
+
+        var grepBackend: GrepBackend = GrepBackend.DYNAMIC
     }
 
     private var state = State()
@@ -98,5 +100,10 @@ class FuzzierGlobalSettingsService : PersistentStateComponent<FuzzierGlobalSetti
     enum class PopupSizing(val text: String) {
         AUTO_SIZE("Auto size"),
         VANILLA("Vanilla")
+    }
+
+    enum class GrepBackend(val text: String) {
+        FUZZIER("Fuzzier"),
+        DYNAMIC("Dynamic")
     }
 }

@@ -271,6 +271,46 @@ class FuzzierGlobalSettingsConfigurableTest {
     }
 
     @Test
+    fun grepBackend_isPopulatedFromState() {
+        state.grepBackend = FuzzierGlobalSettingsService.GrepBackend.FUZZIER
+        settingsConfigurable.createComponent()
+        val selected = settingsConfigurable.component.grepBackendSelector
+            .getGrepBackendComboBox().selectedItem as FuzzierGlobalSettingsService.GrepBackend
+        assertEquals(FuzzierGlobalSettingsService.GrepBackend.FUZZIER, selected)
+    }
+
+    @Test
+    fun grepBackend_isModifiedAndApply() {
+        settingsConfigurable.createComponent()
+        assertFalse(settingsConfigurable.isModified)
+
+        val newValue = if (state.grepBackend == FuzzierGlobalSettingsService.GrepBackend.DYNAMIC)
+            FuzzierGlobalSettingsService.GrepBackend.FUZZIER else FuzzierGlobalSettingsService.GrepBackend.DYNAMIC
+        state.grepBackend = newValue
+        assertTrue(settingsConfigurable.isModified)
+
+        val uiSelected = settingsConfigurable.component.grepBackendSelector
+            .getGrepBackendComboBox().selectedItem as FuzzierGlobalSettingsService.GrepBackend
+        settingsConfigurable.apply()
+        assertEquals(uiSelected, state.grepBackend)
+        assertFalse(settingsConfigurable.isModified)
+    }
+
+    @Test
+    fun grepBackend_persistsAcrossRecreate() {
+        settingsConfigurable.createComponent()
+        val combo = settingsConfigurable.component.grepBackendSelector.getGrepBackendComboBox()
+        combo.selectedItem = FuzzierGlobalSettingsService.GrepBackend.FUZZIER
+        settingsConfigurable.apply()
+
+        val recreated = FuzzierGlobalSettingsConfigurable()
+        recreated.createComponent()
+        val selected = recreated.component.grepBackendSelector.getGrepBackendComboBox().selectedItem
+                as FuzzierGlobalSettingsService.GrepBackend
+        assertEquals(FuzzierGlobalSettingsService.GrepBackend.FUZZIER, selected)
+    }
+
+    @Test
     fun globalExclusionSet_textIsPopulatedFromState() {
         state.globalExclusionSet = setOf("/foo", "/bar")
         pre()

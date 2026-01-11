@@ -39,11 +39,11 @@ class BackendStrategyTest {
         @Test
         fun `buildCommand should include basic ripgrep flags`() {
             val config = GrepConfig(
-                targets = listOf("/path/to/search"),
+                targets = null,
                 caseMode = CaseMode.SENSITIVE,
             )
 
-            val result = BackendStrategy.Ripgrep.buildCommand(config, "test", null)
+            val result = com.mituuz.fuzzier.grep.backend.Ripgrep.buildCommand(config, "test", null)
 
             assertEquals(
                 listOf(
@@ -54,7 +54,7 @@ class BackendStrategyTest {
                     "--with-filename",
                     "--column",
                     "test",
-                    "/path/to/search"
+                    "."
                 ),
                 result
             )
@@ -63,11 +63,11 @@ class BackendStrategyTest {
         @Test
         fun `buildCommand should include file extension glob flag without dot`() {
             val config = GrepConfig(
-                targets = listOf("/path/to/search"),
+                targets = null,
                 caseMode = CaseMode.SENSITIVE,
             )
 
-            val result = BackendStrategy.Ripgrep.buildCommand(config, "test", "java")
+            val result = com.mituuz.fuzzier.grep.backend.Ripgrep.buildCommand(config, "test", "java")
 
             assertEquals(
                 listOf(
@@ -80,7 +80,7 @@ class BackendStrategyTest {
                     "-g",
                     "*.java",
                     "test",
-                    "/path/to/search"
+                    "."
                 ),
                 result
             )
@@ -89,11 +89,11 @@ class BackendStrategyTest {
         @Test
         fun `buildCommand should include file extension glob flag with dot`() {
             val config = GrepConfig(
-                targets = listOf("/path/to/search"),
+                targets = null,
                 caseMode = CaseMode.SENSITIVE,
             )
 
-            val result = BackendStrategy.Ripgrep.buildCommand(config, "test", ".java")
+            val result = com.mituuz.fuzzier.grep.backend.Ripgrep.buildCommand(config, "test", ".java")
 
             assertEquals(
                 listOf(
@@ -106,7 +106,7 @@ class BackendStrategyTest {
                     "-g",
                     "*.java",
                     "test",
-                    "/path/to/search"
+                    "."
                 ),
                 result
             )
@@ -115,11 +115,11 @@ class BackendStrategyTest {
         @Test
         fun `buildCommand should add smart-case and -F for insensitive mode`() {
             val config = GrepConfig(
-                targets = listOf("/path"),
+                targets = null,
                 caseMode = CaseMode.INSENSITIVE,
             )
 
-            val result = BackendStrategy.Ripgrep.buildCommand(config, "test", null)
+            val result = com.mituuz.fuzzier.grep.backend.Ripgrep.buildCommand(config, "test", null)
 
             assertTrue(result.contains("--smart-case"))
             assertTrue(result.contains("-F"))
@@ -128,11 +128,11 @@ class BackendStrategyTest {
         @Test
         fun `buildCommand should not add smart-case for sensitive mode`() {
             val config = GrepConfig(
-                targets = listOf("/path"),
+                targets = null,
                 caseMode = CaseMode.SENSITIVE,
             )
 
-            val result = BackendStrategy.Ripgrep.buildCommand(config, "test", null)
+            val result = com.mituuz.fuzzier.grep.backend.Ripgrep.buildCommand(config, "test", null)
 
             assertTrue(!result.contains("--smart-case"))
             assertTrue(!result.contains("-F"))
@@ -140,105 +140,7 @@ class BackendStrategyTest {
 
         @Test
         fun `name should return ripgrep`() {
-            assertEquals("ripgrep", BackendStrategy.Ripgrep.name)
-        }
-    }
-
-    @Nested
-    inner class FindstrTest {
-        @Test
-        fun `buildCommand should include basic findstr flags`() {
-            val config = GrepConfig(
-                targets = listOf("C:\\path\\to\\search"),
-                caseMode = CaseMode.SENSITIVE,
-            )
-
-            val result = BackendStrategy.Findstr.buildCommand(config, "test", null)
-
-            assertTrue(result.contains("findstr"))
-            assertTrue(result.contains("/p"))
-            assertTrue(result.contains("/s"))
-            assertTrue(result.contains("/n"))
-            assertTrue(result.contains("/C:test"))
-            assertTrue(result.contains("C:\\path\\to\\search"))
-        }
-
-        @Test
-        fun `buildCommand should add case insensitive flag when needed`() {
-            val config = GrepConfig(
-                targets = listOf("C:\\path"),
-                caseMode = CaseMode.INSENSITIVE,
-            )
-
-            val result = BackendStrategy.Findstr.buildCommand(config, "test", null)
-
-            assertTrue(result.contains("/I"))
-        }
-
-        @Test
-        fun `buildCommand should not add case insensitive flag for sensitive mode`() {
-            val config = GrepConfig(
-                targets = listOf("C:\\path"),
-                caseMode = CaseMode.SENSITIVE,
-            )
-
-            val result = BackendStrategy.Findstr.buildCommand(config, "test", null)
-
-            assertTrue(!result.contains("/I"))
-        }
-
-        @Test
-        fun `name should return findstr`() {
-            assertEquals("findstr", BackendStrategy.Findstr.name)
-        }
-    }
-
-    @Nested
-    inner class GrepTest {
-        @Test
-        fun `buildCommand should include basic grep flags`() {
-            val config = GrepConfig(
-                targets = listOf("/path/to/search"),
-                caseMode = CaseMode.SENSITIVE,
-            )
-
-            val result = BackendStrategy.Grep.buildCommand(config, "test", null)
-
-            assertTrue(result.contains("grep"))
-            assertTrue(result.contains("--color=none"))
-            assertTrue(result.contains("-r"))
-            assertTrue(result.contains("-n"))
-            assertTrue(result.contains("test"))
-            assertTrue(result.contains("/path/to/search"))
-        }
-
-        @Test
-        fun `buildCommand should add case insensitive flag when needed`() {
-            val config = GrepConfig(
-                targets = listOf("/path"),
-                caseMode = CaseMode.INSENSITIVE,
-            )
-
-            val result = BackendStrategy.Grep.buildCommand(config, "test", null)
-
-            assertTrue(result.contains("-i"))
-        }
-
-        @Test
-        fun `buildCommand should not add case insensitive flag for sensitive mode`() {
-            val config = GrepConfig(
-                targets = listOf("/path"),
-                caseMode = CaseMode.SENSITIVE,
-            )
-
-            val result = BackendStrategy.Grep.buildCommand(config, "test", null)
-
-            assertTrue(!result.contains("-i"))
-        }
-
-        @Test
-        fun `name should return grep`() {
-            assertEquals("grep", BackendStrategy.Grep.name)
+            assertEquals("ripgrep", com.mituuz.fuzzier.grep.backend.Ripgrep.name)
         }
     }
 }

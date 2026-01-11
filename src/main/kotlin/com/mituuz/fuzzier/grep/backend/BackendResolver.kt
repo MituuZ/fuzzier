@@ -24,24 +24,21 @@
 
 package com.mituuz.fuzzier.grep.backend
 
+import com.intellij.openapi.components.service
 import com.mituuz.fuzzier.runner.CommandRunner
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.GrepBackend
 
 class BackendResolver(val isWindows: Boolean) {
     suspend fun resolveBackend(commandRunner: CommandRunner, projectBasePath: String): Result<BackendStrategy> {
-        return when {
-            true -> Result.success(FuzzierGrep)
-//            isInstalled(commandRunner, "rg", projectBasePath) -> Result.success(BackendStrategy.Ripgrep)
-//            isWindows && isInstalled(
-//                commandRunner,
-//                "findstr",
-//                projectBasePath
-//            ) -> Result.success(BackendStrategy.Findstr)
-//
-//            !isWindows && isInstalled(commandRunner, "grep", projectBasePath) -> Result.success(
-//                BackendStrategy.Grep
-//            )
+        val grepBackendSetting = service<FuzzierGlobalSettingsService>().state.grepBackend
 
-            else -> Result.failure(Exception("No suitable grep command found"))
+        return when (grepBackendSetting) {
+            GrepBackend.FUZZIER -> Result.success(FuzzierGrep)
+            GrepBackend.DYNAMIC -> when {
+                isInstalled(commandRunner, "rg", projectBasePath) -> Result.success(Ripgrep)
+                else -> Result.success(FuzzierGrep)
+            }
         }
     }
 

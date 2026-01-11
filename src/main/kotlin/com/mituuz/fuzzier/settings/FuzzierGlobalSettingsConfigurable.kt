@@ -68,6 +68,7 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
         component.previewFontSize.getIntSpinner().value = state.previewFontSize
         component.fileListSpacing.getIntSpinner().value = state.fileListSpacing
         component.fuzzyGrepShowFullFile.getCheckBox().isSelected = state.fuzzyGrepShowFullFile
+        component.grepBackendSelector.getGrepBackendComboBox().selectedIndex = state.grepBackend.ordinal
 
         // Hide dimension settings when Auto size is selected
         updateDimensionVisibility(state.popupSizing)
@@ -129,6 +130,7 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
                 || state.matchWeightStreakModifier != component.matchWeightStreakModifier.getIntSpinner().value
                 || state.matchWeightFilename != component.matchWeightFilename.getIntSpinner().value
                 || state.globalExclusionSet != newGlobalSet
+                || state.grepBackend != component.grepBackendSelector.getGrepBackendComboBox().selectedItem
     }
 
     override fun apply() {
@@ -181,6 +183,9 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
             .filter { it.isNotEmpty() }
             .toSet()
         state.globalExclusionSet = newGlobalSet
+
+        state.grepBackend =
+            FuzzierGlobalSettingsService.GrepBackend.entries.toTypedArray()[component.grepBackendSelector.getGrepBackendComboBox().selectedIndex]
     }
 
     override fun disposeUIResources() {
