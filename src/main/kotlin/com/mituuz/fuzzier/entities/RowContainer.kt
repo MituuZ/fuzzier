@@ -44,8 +44,9 @@ class RowContainer(
                 return null
             }
 
-            val parts = row.split(":", limit = 3)
-            val filePath = getFilePath(parts[0])
+            val (driveLetter, adjustedRow) = extractWindowsDriveLetter(row)
+            val parts = adjustedRow.split(":", limit = 3)
+            val filePath = getFilePath(driveLetter + parts[0])
             val filename = filePath.replace('\\', '/').substringAfterLast('/')
             val rowNumber = parts[1].toInt() - 1
             val trimmedRow: String = parts[2].trim()
@@ -57,8 +58,9 @@ class RowContainer(
                 return null
             }
 
-            val parts = row.split(":", limit = 4)
-            val filePath = getFilePath(parts[0])
+            val (driveLetter, adjustedRow) = extractWindowsDriveLetter(row)
+            val parts = adjustedRow.split(":", limit = 4)
+            val filePath = getFilePath(driveLetter + parts[0])
             val filename = filePath.replace('\\', '/').substringAfterLast('/')
             val rowNumber = parts[1].toInt() - 1
             val columnNumber: Int = parts[2].toInt() - 1
@@ -67,9 +69,16 @@ class RowContainer(
             return RowContainer(filePath, basePath, filename, rowNumber, trimmedRow, columnNumber)
         }
 
+        private fun extractWindowsDriveLetter(row: String): Pair<String, String> {
+            if (row.length >= 2 && row[0].isLetter() && row[1] == ':') {
+                return Pair(row.substring(0, 2), row.substring(2))
+            }
+            return Pair("", row)
+        }
+
         private fun getFilePath(filePath: String): String {
             val filePath = filePath.removePrefix(".")
-            if (!filePath.startsWith(FILE_SEPARATOR)) {
+            if (!filePath.startsWith(FILE_SEPARATOR) && !filePath.matches(Regex("^[A-Za-z]:.*"))) {
                 return "$FILE_SEPARATOR$filePath"
             }
 
