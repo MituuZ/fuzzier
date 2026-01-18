@@ -40,7 +40,12 @@ intellijPlatform {
         changeNotes = """
     <h2>Version $currentVersion</h2>
         <ul>
-            <li>Add built-in Fuzzier grep backend
+            <li>Add a fallback solution for file path handling on Windows
+                <ul>
+                    <li>Thanks to <a href="https://github.com/s0ders">s0ders</a>!</li>
+                </ul>
+            </li>
+            <li>Add a built-in Fuzzier grep backend
                 <ul>
                     <li>Replaces <code>grep</code> and <code>findstr</code> fallback implementations</li>
                     <li>Add setting to choose between Dynamic (uses <code>rg</code> if available, otherwise Fuzzier) and Fuzzier backends</li>
