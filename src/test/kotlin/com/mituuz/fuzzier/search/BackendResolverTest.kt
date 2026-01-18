@@ -25,6 +25,7 @@
 package com.mituuz.fuzzier.search
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.mituuz.fuzzier.grep.backend.BackendResolver
 import com.mituuz.fuzzier.grep.backend.FuzzierGrep
@@ -41,12 +42,14 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class BackendResolverTest {
+    @Suppress("unused")
+    private val testApplicationManager: TestApplicationManager = TestApplicationManager.getInstance()
     private lateinit var commandRunner: CommandRunner
     private val projectBasePath = "/test/project"
 
     @BeforeEach
     fun setUp() {
-        commandRunner = mockk()
+        commandRunner = mockk(relaxed = true)
     }
 
     @Test

@@ -24,20 +24,104 @@
 
 package com.mituuz.fuzzier.runner
 
+import com.intellij.execution.configurations.GeneralCommandLine
+import com.intellij.execution.process.OSProcessHandler
+import com.intellij.execution.process.ProcessEvent
+import com.intellij.execution.process.ProcessListener
+import com.intellij.openapi.util.Key
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.RowContainer
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.swing.DefaultListModel
 
-interface CommandRunner {
+class CommandRunner {
+    companion object {
+        const val MAX_OUTPUT_SIZE = 10000
+        const val MAX_NUMBER_OR_RESULTS = 1000
+    }
+
     suspend fun runCommandForOutput(
         commands: List<String>,
         projectBasePath: String
-    ): String?
+    ): String? {
+        return try {
+            val commandLine = GeneralCommandLine(commands)
+                .withWorkDirectory(projectBasePath)
+                .withRedirectErrorStream(true)
+            val output = StringBuilder()
+            val processHandler = OSProcessHandler(commandLine)
 
+            processHandler.addProcessListener(object : ProcessListener {
+                override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
+                    if (output.length < MAX_OUTPUT_SIZE) {
+                        output.appendLine(event.text.replace("\n", ""))
+                    }
+                }
+            })
+
+            try {
+                withContext(Dispatchers.IO) {
+                    processHandler.startNotify()
+                    processHandler.waitFor(2000)
+                }
+            } finally {
+                if (!processHandler.isProcessTerminated) {
+                    processHandler.destroyProcess()
+                }
+            }
+            output.toString()
+        } catch (_: InterruptedException) {
+            throw InterruptedException()
+        }
+    }
+
+    /**
+     * Run the command and stream a limited number of results to the list model
+     */
     suspend fun runCommandPopulateListModel(
         commands: List<String>,
         listModel: DefaultListModel<FuzzyContainer>,
         projectBasePath: String,
         parseOutputLine: (String, String) -> RowContainer?
-    )
+    ) {
+        try {
+            val commandLine = GeneralCommandLine(commands)
+                .withWorkDirectory(projectBasePath)
+                .withRedirectErrorStream(true)
+
+            val processHandler = OSProcessHandler(commandLine)
+            var count = 0
+
+            processHandler.addProcessListener(object : ProcessListener {
+                override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
+                    if (count >= MAX_NUMBER_OR_RESULTS) return
+
+                    event.text.lines().forEach { line ->
+                        if (count >= MAX_NUMBER_OR_RESULTS) return@forEach
+                        if (line.isNotBlank()) {
+                            val rowContainer = parseOutputLine(line, projectBasePath)
+                            if (rowContainer != null) {
+                                listModel.addElement(rowContainer)
+                                count++
+                            }
+                        }
+                    }
+                }
+            })
+
+            try {
+                withContext(Dispatchers.IO) {
+                    processHandler.startNotify()
+                    processHandler.waitFor(2000)
+                }
+            } finally {
+                if (!processHandler.isProcessTerminated) {
+                    processHandler.destroyProcess()
+                }
+            }
+        } catch (_: InterruptedException) {
+            throw InterruptedException()
+        }
+    }
 }

@@ -48,7 +48,7 @@ import com.mituuz.fuzzier.entities.RowContainer
 import com.mituuz.fuzzier.grep.backend.BackendResolver
 import com.mituuz.fuzzier.grep.backend.BackendStrategy
 import com.mituuz.fuzzier.intellij.files.FileOpeningUtil
-import com.mituuz.fuzzier.runner.DefaultCommandRunner
+import com.mituuz.fuzzier.runner.CommandRunner
 import com.mituuz.fuzzier.ui.bindings.ActivationBindings
 import com.mituuz.fuzzier.ui.popup.PopupConfig
 import com.mituuz.fuzzier.ui.preview.CoroutinePreviewAlarmProvider
@@ -65,7 +65,7 @@ open class FuzzyGrep : FuzzyAction() {
 
     val isWindows = System.getProperty("os.name").lowercase().contains("win")
     private val backendResolver = BackendResolver(isWindows)
-    private val commandRunner = DefaultCommandRunner()
+    private val commandRunner = CommandRunner()
     private var currentLaunchJob: Job? = null
     private var backend: BackendStrategy? = null
     private var previewAlarm: SingleAlarm? = null
