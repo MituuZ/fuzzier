@@ -102,7 +102,7 @@ open class FuzzyGrep : FuzzyAction() {
 
             yield()
             defaultDoc = EditorFactory.getInstance().createDocument("")
-            val showSecondaryField = backend!!.supportsSecondaryField() && grepConfig.supportsSecondaryField
+            val showSecondaryField = grepConfig.supportsSecondaryField
             component = FuzzyFinderComponent(
                 project = project, showSecondaryField = showSecondaryField
             )

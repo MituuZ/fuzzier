@@ -44,6 +44,4 @@ sealed interface BackendStrategy {
         project: Project,
         fileFilter: (VirtualFile) -> Boolean = { true }
     )
-
-    fun supportsSecondaryField(): Boolean = true
 }
