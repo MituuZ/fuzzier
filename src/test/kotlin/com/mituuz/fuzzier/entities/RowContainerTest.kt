@@ -146,4 +146,36 @@ class RowContainerTest {
 
         assertNull(rc, "Expected null for input with insufficient parts")
     }
+
+    @Test
+    @EnabledOnOs(OS.WINDOWS)
+    fun fromRGString_windowsAbsolutePath() {
+        val input = "C:/Users/user/.ideavimrc:10:5: some matched text"
+        val basePath = "C:\\Users\\user\\IdeaProjects\\fuzzier"
+        val rc = rgRowContainerFromString(input, basePath)
+
+        assertNotNull(rc, "Could not create row container from $input")
+        assertEquals("C:/Users/user/.ideavimrc", rc.filePath)
+        assertEquals(basePath, rc.basePath)
+        assertEquals(".ideavimrc", rc.filename)
+        assertEquals(9, rc.rowNumber)
+        assertEquals(4, rc.columnNumber)
+        assertEquals("some matched text", rc.trimmedRow)
+    }
+
+    @Test
+    @EnabledOnOs(OS.WINDOWS)
+    fun fromGrepString_windowsAbsolutePath() {
+        val input = "C:/Users/user/.ideavimrc:10: some matched text"
+        val basePath = "C:\\Users\\user\\IdeaProjects\\fuzzier"
+        val rc = rowContainerFromString(input, basePath)
+
+        assertNotNull(rc, "Could not create row container from $input")
+        assertEquals("C:/Users/user/.ideavimrc", rc.filePath)
+        assertEquals(basePath, rc.basePath)
+        assertEquals(".ideavimrc", rc.filename)
+        assertEquals(9, rc.rowNumber)
+        assertEquals(0, rc.columnNumber)
+        assertEquals("some matched text", rc.trimmedRow)
+    }
 }
