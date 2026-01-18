@@ -217,7 +217,8 @@ open class FuzzyGrep : FuzzyAction() {
 
     private fun handleInput(project: Project) {
         val selectedValue = component.fileList.selectedValue
-        val virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://${selectedValue?.getFileUri()}")
+        val virtualFile = selectedValue?.virtualFile
+            ?: VirtualFileManager.getInstance().findFileByUrl("file://${selectedValue?.getFileUri()}")
         virtualFile?.let {
             val fileEditorManager = FileEditorManager.getInstance(project)
 
