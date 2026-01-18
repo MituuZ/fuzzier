@@ -71,21 +71,11 @@ object FuzzierGrep : BackendStrategy {
     ) {
         if (project == null) return
 
-        val fileCollectionStart = System.nanoTime()
-
         val files = grepConfig.targets ?: collectFiles(searchString, fileFilter, project, grepConfig)
-
-        val fileCollectionEnd = System.nanoTime()
-        val fileCollectionDuration = (fileCollectionEnd - fileCollectionStart) / 1_000_000.0
-        println("File collection took $fileCollectionDuration ms")
-
-        println("Searching from ${files.size} files with ${grepConfig.caseMode} case mode and $searchString")
 
         var count = 0
         val batchSize = 20
         val currentBatch = mutableListOf<FuzzyContainer>()
-
-        val fileProcessingStart = System.nanoTime()
 
         for (file in files) {
             currentCoroutineContext().ensureActive()
@@ -140,11 +130,6 @@ object FuzzierGrep : BackendStrategy {
 
             if (count >= 1000) break
         }
-
-        val fileProcessingEnd = System.nanoTime()
-
-        val fileProcessingDuration = (fileProcessingEnd - fileProcessingStart) / 1_000_000.0
-        println("File processing took $fileProcessingDuration ms")
 
         if (currentBatch.isNotEmpty()) {
             withContext(Dispatchers.Main) {
