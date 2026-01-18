@@ -48,7 +48,7 @@ sealed interface BackendStrategy {
         commandRunner: CommandRunner,
         listModel: DefaultListModel<FuzzyContainer>,
         projectBasePath: String,
-        project: Project? = null,
+        project: Project,
         fileFilter: (VirtualFile) -> Boolean = { true }
     ) {
         val commands = buildCommand(grepConfig, searchString, secondarySearchString)

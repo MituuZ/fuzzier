@@ -68,11 +68,9 @@ object FuzzierGrep : BackendStrategy {
         commandRunner: CommandRunner,
         listModel: DefaultListModel<FuzzyContainer>,
         projectBasePath: String,
-        project: Project?,
+        project: Project,
         fileFilter: (VirtualFile) -> Boolean
     ) {
-        if (project == null) return
-
         val files = grepConfig.targets ?: collectFiles(searchString, fileFilter, project, grepConfig)
 
         var count = 0
