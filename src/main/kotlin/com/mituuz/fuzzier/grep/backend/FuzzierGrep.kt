@@ -35,12 +35,14 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.PsiSearchHelper
+import com.intellij.openapi.components.service
 import com.intellij.util.Processor
 import com.mituuz.fuzzier.entities.CaseMode
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.GrepConfig
 import com.mituuz.fuzzier.entities.RowContainer
 import com.mituuz.fuzzier.runner.CommandRunner
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.util.FuzzierUtil
 import kotlinx.coroutines.*
@@ -76,6 +78,7 @@ object FuzzierGrep : BackendStrategy {
         var count = 0
         val batchSize = 20
         val currentBatch = mutableListOf<FuzzyContainer>()
+        val maxResults = service<FuzzierGlobalSettingsService>().state.fileListLimit
 
         for (file in files) {
             currentCoroutineContext().ensureActive()
@@ -125,10 +128,10 @@ object FuzzierGrep : BackendStrategy {
                     }
                 }
 
-                if (count >= 1000) break
+                if (count >= maxResults) break
             }
 
-            if (count >= 1000) break
+            if (count >= maxResults) break
         }
 
         if (currentBatch.isNotEmpty()) {
@@ -146,29 +149,27 @@ object FuzzierGrep : BackendStrategy {
     ): List<VirtualFile> {
         val files = mutableListOf<VirtualFile>()
         val trimmedSearch = searchString.trim()
+        val words = trimmedSearch.split(" ")
 
-        if (trimmedSearch.count { it == ' ' } >= 2) {
+        if (words.size > 1 && words[1].isNotEmpty() && trimmedSearch.count { it == ' ' } >= 2) {
             // Extract the first complete word - the only one we can be sure is a full word
-            val words = trimmedSearch.split(" ")
             val firstCompleteWord = words[1]
 
-            if (firstCompleteWord.isNotEmpty()) {
-                ReadAction.run<Throwable> {
-                    val helper = PsiSearchHelper.getInstance(project)
-                    helper.processAllFilesWithWord(
-                        firstCompleteWord,
-                        GlobalSearchScope.projectScope(project),
-                        Processor { psiFile ->
-                            psiFile.virtualFile?.let { vf ->
-                                if (fileFilter(vf)) {
-                                    files.add(vf)
-                                }
+            ReadAction.run<Throwable> {
+                val helper = PsiSearchHelper.getInstance(project)
+                helper.processAllFilesWithWord(
+                    firstCompleteWord,
+                    GlobalSearchScope.projectScope(project),
+                    Processor { psiFile ->
+                        psiFile.virtualFile?.let { vf ->
+                            if (fileFilter(vf)) {
+                                files.add(vf)
                             }
-                            true
-                        },
-                        grepConfig.caseMode == CaseMode.SENSITIVE
-                    )
-                }
+                        }
+                        true
+                    },
+                    grepConfig.caseMode == CaseMode.SENSITIVE
+                )
             }
         } else {
             val ctx = currentCoroutineContext()
