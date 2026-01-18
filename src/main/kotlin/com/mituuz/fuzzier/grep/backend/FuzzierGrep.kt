@@ -51,6 +51,7 @@ import javax.swing.DefaultListModel
 object FuzzierGrep : BackendStrategy {
     override val name = "fuzzier"
     private val fuzzierUtil = FuzzierUtil()
+    private val searchMatcher = SearchMatcher()
 
     override suspend fun handleSearch(
         grepConfig: GrepConfig,
@@ -64,10 +65,8 @@ object FuzzierGrep : BackendStrategy {
     ) {
         val files = grepConfig.targets ?: collectFiles(searchString, fileFilter, project, grepConfig)
 
-        var count = 0
-        val batchSize = 20
-        val currentBatch = mutableListOf<FuzzyContainer>()
         val maxResults = service<FuzzierGlobalSettingsService>().state.fileListLimit
+        val batcher = ResultBatcher<FuzzyContainer>()
 
         for (file in files) {
             currentCoroutineContext().ensureActive()
@@ -81,11 +80,7 @@ object FuzzierGrep : BackendStrategy {
                     for ((index, line) in lines.withIndex()) {
                         currentCoroutineContext().ensureActive()
 
-                        val found = if (grepConfig.caseMode == CaseMode.INSENSITIVE) {
-                            line.contains(searchString, ignoreCase = true)
-                        } else {
-                            line.contains(searchString)
-                        }
+                        val found = searchMatcher.matchesLine(line, searchString, grepConfig.caseMode)
 
                         if (found) {
                             val (filePath, basePath) = fuzzierUtil.extractModulePath(file.path, project)
@@ -111,26 +106,22 @@ object FuzzierGrep : BackendStrategy {
             for (match in matches) {
                 currentCoroutineContext().ensureActive()
 
-                currentBatch.add(match)
-                count++
-
-                if (currentBatch.size >= batchSize) {
-                    val toAdd = currentBatch.toList()
-                    currentBatch.clear()
+                val batch = batcher.add(match)
+                if (batch != null) {
                     withContext(Dispatchers.Main) {
-                        listModel.addAll(toAdd)
+                        listModel.addAll(batch)
                     }
                 }
 
-                if (count >= maxResults) break
+                if (batcher.getCount() >= maxResults) break
             }
 
-            if (count >= maxResults) break
+            if (batcher.getCount() >= maxResults) break
         }
 
-        if (currentBatch.isNotEmpty()) {
+        if (batcher.hasRemaining()) {
             withContext(Dispatchers.Main) {
-                listModel.addAll(currentBatch)
+                listModel.addAll(batcher.getRemaining())
             }
         }
     }
@@ -142,13 +133,9 @@ object FuzzierGrep : BackendStrategy {
         grepConfig: GrepConfig
     ): List<VirtualFile> {
         val files = mutableListOf<VirtualFile>()
-        val trimmedSearch = searchString.trim()
-        val words = trimmedSearch.split(" ")
+        val firstCompleteWord = searchMatcher.extractFirstCompleteWord(searchString)
 
-        if (words.size > 1 && words[1].isNotEmpty() && trimmedSearch.count { it == ' ' } >= 2) {
-            // Extract the first complete word - the only one we can be sure is a full word
-            val firstCompleteWord = words[1]
-
+        if (firstCompleteWord != null) {
             ReadAction.run<Throwable> {
                 val helper = PsiSearchHelper.getInstance(project)
                 helper.processAllFilesWithWord(
