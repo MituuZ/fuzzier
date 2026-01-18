@@ -30,7 +30,7 @@ import com.intellij.execution.process.ProcessEvent
 import com.intellij.execution.process.ProcessListener
 import com.intellij.openapi.util.Key
 import com.mituuz.fuzzier.entities.FuzzyContainer
-import com.mituuz.fuzzier.grep.backend.BackendStrategy
+import com.mituuz.fuzzier.entities.RowContainer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.swing.DefaultListModel
@@ -83,7 +83,7 @@ class DefaultCommandRunner : CommandRunner {
         commands: List<String>,
         listModel: DefaultListModel<FuzzyContainer>,
         projectBasePath: String,
-        backend: BackendStrategy
+        parseOutputLine: (String, String) -> RowContainer?
     ) {
         try {
             val commandLine = GeneralCommandLine(commands)
@@ -100,7 +100,7 @@ class DefaultCommandRunner : CommandRunner {
                     event.text.lines().forEach { line ->
                         if (count >= MAX_NUMBER_OR_RESULTS) return@forEach
                         if (line.isNotBlank()) {
-                            val rowContainer = backend.parseOutputLine(line, projectBasePath)
+                            val rowContainer = parseOutputLine(line, projectBasePath)
                             if (rowContainer != null) {
                                 listModel.addElement(rowContainer)
                                 count++

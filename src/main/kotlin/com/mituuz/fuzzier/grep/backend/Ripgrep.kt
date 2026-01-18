@@ -24,14 +24,19 @@
 
 package com.mituuz.fuzzier.grep.backend
 
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.VirtualFile
 import com.mituuz.fuzzier.entities.CaseMode
+import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.GrepConfig
 import com.mituuz.fuzzier.entities.RowContainer
+import com.mituuz.fuzzier.runner.CommandRunner
+import javax.swing.DefaultListModel
 
 object Ripgrep : BackendStrategy {
     override val name = "ripgrep"
 
-    override fun buildCommand(
+    private fun buildCommand(
         grepConfig: GrepConfig,
         searchString: String,
         secondarySearchString: String?
@@ -64,12 +69,22 @@ object Ripgrep : BackendStrategy {
         return commands
     }
 
-    override fun parseOutputLine(line: String, projectBasePath: String): RowContainer? {
+    private fun parseOutputLine(line: String, projectBasePath: String): RowContainer? {
         val line = line.replace(projectBasePath, ".")
         return RowContainer.rgRowContainerFromString(line, projectBasePath)
     }
 
-    override fun supportsSecondaryField(): Boolean {
-        return true
+    override suspend fun handleSearch(
+        grepConfig: GrepConfig,
+        searchString: String,
+        secondarySearchString: String?,
+        commandRunner: CommandRunner,
+        listModel: DefaultListModel<FuzzyContainer>,
+        projectBasePath: String,
+        project: Project,
+        fileFilter: (VirtualFile) -> Boolean
+    ) {
+        val commands = buildCommand(grepConfig, searchString, secondarySearchString)
+        commandRunner.runCommandPopulateListModel(commands, listModel, projectBasePath, this::parseOutputLine)
     }
 }

@@ -25,7 +25,7 @@
 package com.mituuz.fuzzier.runner
 
 import com.mituuz.fuzzier.entities.FuzzyContainer
-import com.mituuz.fuzzier.grep.backend.BackendStrategy
+import com.mituuz.fuzzier.entities.RowContainer
 import javax.swing.DefaultListModel
 
 interface CommandRunner {
@@ -38,6 +38,6 @@ interface CommandRunner {
         commands: List<String>,
         listModel: DefaultListModel<FuzzyContainer>,
         projectBasePath: String,
-        backend: BackendStrategy
+        parseOutputLine: (String, String) -> RowContainer?
     )
 }

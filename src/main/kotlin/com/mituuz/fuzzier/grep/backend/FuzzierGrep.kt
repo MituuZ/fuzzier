@@ -51,15 +51,6 @@ import javax.swing.DefaultListModel
 object FuzzierGrep : BackendStrategy {
     override val name = "fuzzier"
     private val fuzzierUtil = FuzzierUtil()
-    override fun supportsSecondaryField(): Boolean {
-        return true
-    }
-
-    override fun buildCommand(
-        grepConfig: GrepConfig,
-        searchString: String,
-        secondarySearchString: String?
-    ): List<String> = emptyList()
 
     override suspend fun handleSearch(
         grepConfig: GrepConfig,

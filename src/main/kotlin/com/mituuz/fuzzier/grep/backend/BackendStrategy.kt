@@ -28,17 +28,11 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.GrepConfig
-import com.mituuz.fuzzier.entities.RowContainer
 import com.mituuz.fuzzier.runner.CommandRunner
 import javax.swing.DefaultListModel
 
 sealed interface BackendStrategy {
     val name: String
-    fun buildCommand(grepConfig: GrepConfig, searchString: String, secondarySearchString: String?): List<String>
-    fun parseOutputLine(line: String, projectBasePath: String): RowContainer? {
-        val line = line.replace(projectBasePath, ".")
-        return RowContainer.rowContainerFromString(line, projectBasePath)
-    }
 
     suspend fun handleSearch(
         grepConfig: GrepConfig,
@@ -49,10 +43,7 @@ sealed interface BackendStrategy {
         projectBasePath: String,
         project: Project,
         fileFilter: (VirtualFile) -> Boolean = { true }
-    ) {
-        val commands = buildCommand(grepConfig, searchString, secondarySearchString)
-        commandRunner.runCommandPopulateListModel(commands, listModel, projectBasePath, this)
-    }
+    )
 
-    fun supportsSecondaryField(): Boolean = false
+    fun supportsSecondaryField(): Boolean = true
 }
