@@ -24,35 +24,52 @@
 
 package com.mituuz.fuzzier.grep.backend
 
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.vfs.VirtualFile
-import com.mituuz.fuzzier.entities.FuzzyContainer
+import com.mituuz.fuzzier.entities.CaseMode
 import com.mituuz.fuzzier.entities.GrepConfig
 import com.mituuz.fuzzier.entities.RowContainer
-import com.mituuz.fuzzier.runner.CommandRunner
-import javax.swing.DefaultListModel
 
-sealed interface BackendStrategy {
-    val name: String
-    fun buildCommand(grepConfig: GrepConfig, searchString: String, secondarySearchString: String?): List<String>
-    fun parseOutputLine(line: String, projectBasePath: String): RowContainer? {
-        val line = line.replace(projectBasePath, ".")
-        return RowContainer.rowContainerFromString(line, projectBasePath)
-    }
+object Ripgrep : BackendStrategy {
+    override val name = "ripgrep"
 
-    suspend fun handleSearch(
+    override fun buildCommand(
         grepConfig: GrepConfig,
         searchString: String,
-        secondarySearchString: String?,
-        commandRunner: CommandRunner,
-        listModel: DefaultListModel<FuzzyContainer>,
-        projectBasePath: String,
-        project: Project,
-        fileFilter: (VirtualFile) -> Boolean = { true }
-    ) {
-        val commands = buildCommand(grepConfig, searchString, secondarySearchString)
-        commandRunner.runCommandPopulateListModel(commands, listModel, projectBasePath, this)
+        secondarySearchString: String?
+    ): List<String> {
+        val commands = mutableListOf("rg")
+
+        if (grepConfig.caseMode == CaseMode.INSENSITIVE) {
+            commands.add("--smart-case")
+            commands.add("-F")
+        }
+
+        commands.addAll(
+            mutableListOf(
+                "--no-heading",
+                "--color=never",
+                "-n",
+                "--with-filename",
+                "--column"
+            )
+        )
+        secondarySearchString?.removePrefix(".").takeIf { it?.isNotEmpty() == true }?.let { ext ->
+            val glob = "*.${ext}"
+            commands.addAll(listOf("-g", glob))
+        }
+        commands.add(searchString)
+
+        // Convert VirtualFiles to paths, or use "." if targets is null
+        val targetPaths = grepConfig.targets?.map { it.path } ?: listOf(".")
+        commands.addAll(targetPaths)
+        return commands
     }
 
-    fun supportsSecondaryField(): Boolean = false
+    override fun parseOutputLine(line: String, projectBasePath: String): RowContainer? {
+        val line = line.replace(projectBasePath, ".")
+        return RowContainer.rgRowContainerFromString(line, projectBasePath)
+    }
+
+    override fun supportsSecondaryField(): Boolean {
+        return true
+    }
 }
