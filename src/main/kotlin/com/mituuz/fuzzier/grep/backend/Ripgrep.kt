@@ -36,7 +36,7 @@ import javax.swing.DefaultListModel
 object Ripgrep : BackendStrategy {
     override val name = "ripgrep"
 
-    private fun buildCommand(
+    internal fun buildCommand(
         grepConfig: GrepConfig,
         searchString: String,
         secondarySearchString: String?
