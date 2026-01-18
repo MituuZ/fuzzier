@@ -84,34 +84,39 @@ object FuzzierGrep : BackendStrategy {
             currentCoroutineContext().ensureActive()
 
             val matches = withContext(Dispatchers.IO) {
-                val content = VfsUtil.loadText(file)
-                val lines = content.lines()
-                val fileMatches = mutableListOf<RowContainer>()
+                try {
+                    val content = VfsUtil.loadText(file)
+                    val lines = content.lines()
+                    val fileMatches = mutableListOf<RowContainer>()
 
-                for ((index, line) in lines.withIndex()) {
-                    currentCoroutineContext().ensureActive()
+                    for ((index, line) in lines.withIndex()) {
+                        currentCoroutineContext().ensureActive()
 
-                    val found = if (grepConfig.caseMode == CaseMode.INSENSITIVE) {
-                        line.contains(searchString, ignoreCase = true)
-                    } else {
-                        line.contains(searchString)
-                    }
+                        val found = if (grepConfig.caseMode == CaseMode.INSENSITIVE) {
+                            line.contains(searchString, ignoreCase = true)
+                        } else {
+                            line.contains(searchString)
+                        }
 
-                    if (found) {
-                        val (filePath, basePath) = fuzzierUtil.extractModulePath(file.path, project)
-                        fileMatches.add(
-                            RowContainer(
-                                filePath,
-                                basePath,
-                                file.name,
-                                index,
-                                line.trim(),
-                                virtualFile = file
+                        if (found) {
+                            val (filePath, basePath) = fuzzierUtil.extractModulePath(file.path, project)
+                            fileMatches.add(
+                                RowContainer(
+                                    filePath,
+                                    basePath,
+                                    file.name,
+                                    index,
+                                    line.trim(),
+                                    virtualFile = file
+                                )
                             )
-                        )
+                        }
                     }
+                    fileMatches
+                } catch (_: Exception) {
+                    // Skip files that cannot be read (permissions, encoding issues, etc.)
+                    emptyList()
                 }
-                fileMatches
             }
 
             for (match in matches) {
