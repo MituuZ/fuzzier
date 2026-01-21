@@ -50,15 +50,6 @@ List movement can be remapped from settings -> keymaps, but do not support chord
   - With file extension support for ripgrep in the secondary search field
 - File mover
 
-## Documentation
-
-For a more thorough documentation of the plugin, please refer to
-the [Fuzzier Wiki](https://github.com/MituuZ/fuzzier/wiki).
-
-The goal is to have a central place for all the documentation and to keep the README as a quick reference.
-
-## Shortcuts
-
 ### Available Actions
 
 - **Fuzzier** (`com.mituuz.fuzzier.search.Fuzzier`) - Search files using a fuzzy search
@@ -70,6 +61,15 @@ The goal is to have a central place for all the documentation and to keep the RE
 - **FuzzyGrepOpenTabsCI** (`com.mituuz.fuzzier.grep.FuzzyGrepOpenTabsCI`) - Case insensitive text search from open tabs
 - **FuzzyGrepCurrentBuffer** (`com.mituuz.fuzzier.grep.FuzzyGrepCurrentBuffer`) - Case sensitive text search from current buffer
 - **FuzzyGrepCurrentBufferCI** (`com.mituuz.fuzzier.grep.FuzzyGrepCurrentBufferCI`) - Case insensitive text search from current buffer
+
+## Documentation
+
+For a more thorough documentation of the plugin, please refer to
+the [Fuzzier Wiki](https://github.com/MituuZ/fuzzier/wiki).
+
+The goal is to have a central place for all the documentation and to keep the README as a quick reference.
+
+## Shortcuts
 
 ### Adding ideavim mapping for the plugin
 
