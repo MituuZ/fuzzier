@@ -59,6 +59,18 @@ The goal is to have a central place for all the documentation and to keep the RE
 
 ## Shortcuts
 
+### Available Actions
+
+- **Fuzzier** (`com.mituuz.fuzzier.search.Fuzzier`) - Search files using a fuzzy search
+- **FuzzierVCS** (`com.mituuz.fuzzier.search.FuzzierVCS`) - Search files using a fuzzy search on only VCS tracked files
+- **FuzzyMover** (`com.mituuz.fuzzier.operation.FuzzyMover`) - Move a file using a fuzzy search
+- **FuzzyGrep** (`com.mituuz.fuzzier.grep.FuzzyGrep`) - Case sensitive text search from project
+- **FuzzyGrepCI** (`com.mituuz.fuzzier.grep.FuzzyGrepCI`) - Case insensitive text search from project
+- **FuzzyGrepOpenTabs** (`com.mituuz.fuzzier.grep.FuzzyGrepOpenTabs`) - Case sensitive text search from open tabs
+- **FuzzyGrepOpenTabsCI** (`com.mituuz.fuzzier.grep.FuzzyGrepOpenTabsCI`) - Case insensitive text search from open tabs
+- **FuzzyGrepCurrentBuffer** (`com.mituuz.fuzzier.grep.FuzzyGrepCurrentBuffer`) - Case sensitive text search from current buffer
+- **FuzzyGrepCurrentBufferCI** (`com.mituuz.fuzzier.grep.FuzzyGrepCurrentBufferCI`) - Case insensitive text search from current buffer
+
 ### Adding ideavim mapping for the plugin
 
 Example `.ideavimrc` rows to add a vim keybindings for the plugin
