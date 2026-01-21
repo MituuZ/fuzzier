@@ -21,48 +21,32 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
-package com.mituuz.fuzzier.entities
 
-import com.intellij.openapi.vfs.VirtualFile
-import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
+package com.mituuz.fuzzier.grep.backend
 
-abstract class FuzzyContainer(
-    val filePath: String,
-    val basePath: String,
-    val filename: String,
-    val virtualFile: VirtualFile? = null,
-) {
-    /**
-     * Get display string for the popup
-     */
-    abstract fun getDisplayString(state: FuzzierGlobalSettingsService.State): String
+import com.mituuz.fuzzier.entities.CaseMode
 
-    /**
-     * Get the complete URI for the file
-     */
-    fun getFileUri(): String {
-        return "$basePath$filePath"
+class SearchMatcher {
+    fun matchesLine(line: String, searchString: String, caseMode: CaseMode): Boolean {
+        return if (caseMode == CaseMode.INSENSITIVE) {
+            line.contains(searchString, ignoreCase = true)
+        } else {
+            line.contains(searchString)
+        }
     }
 
-    /**
-     * Directories always return full path
-     */
-    fun getDirDisplayString(): String {
-        return filePath
+    fun parseSearchWords(searchString: String): List<String> {
+        return searchString.trim().split(" ")
     }
 
-    /**
-     * Display string options
-     */
-    enum class FilenameType(val text: String) {
-        FILE_PATH_ONLY("File path only"),
-        FILENAME_ONLY("Filename only"),
-        FILENAME_WITH_PATH("Filename with (path)"),
-        FILENAME_WITH_PATH_STYLED("Filename with (path) styled"),
-        DEBUG("Debug information")
-    }
+    fun extractFirstCompleteWord(searchString: String): String? {
+        val trimmedSearch = searchString.trim()
+        val words = parseSearchWords(trimmedSearch)
 
-    override fun toString(): String {
-        return "FuzzyContainer(filePath='$filePath', basePath='$basePath', filename='$filename')"
+        if (words.size > 1 && words[1].isNotEmpty() && trimmedSearch.count { it == ' ' } >= 2) {
+            return words[1]
+        }
+
+        return null
     }
 }

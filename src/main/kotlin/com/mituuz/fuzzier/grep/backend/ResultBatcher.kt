@@ -21,48 +21,35 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
-package com.mituuz.fuzzier.entities
 
-import com.intellij.openapi.vfs.VirtualFile
-import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
+package com.mituuz.fuzzier.grep.backend
 
-abstract class FuzzyContainer(
-    val filePath: String,
-    val basePath: String,
-    val filename: String,
-    val virtualFile: VirtualFile? = null,
+class ResultBatcher<T>(
+    private val batchSize: Int = 20
 ) {
-    /**
-     * Get display string for the popup
-     */
-    abstract fun getDisplayString(state: FuzzierGlobalSettingsService.State): String
+    private val currentBatch = mutableListOf<T>()
+    private var count = 0
 
-    /**
-     * Get the complete URI for the file
-     */
-    fun getFileUri(): String {
-        return "$basePath$filePath"
+    fun add(item: T): List<T>? {
+        currentBatch.add(item)
+        count++
+
+        if (currentBatch.size >= batchSize) {
+            val batch = currentBatch.toList()
+            currentBatch.clear()
+            return batch
+        }
+
+        return null
     }
 
-    /**
-     * Directories always return full path
-     */
-    fun getDirDisplayString(): String {
-        return filePath
+    fun getRemaining(): List<T> {
+        val batch = currentBatch.toList()
+        currentBatch.clear()
+        return batch
     }
 
-    /**
-     * Display string options
-     */
-    enum class FilenameType(val text: String) {
-        FILE_PATH_ONLY("File path only"),
-        FILENAME_ONLY("Filename only"),
-        FILENAME_WITH_PATH("Filename with (path)"),
-        FILENAME_WITH_PATH_STYLED("Filename with (path) styled"),
-        DEBUG("Debug information")
-    }
+    fun getCount(): Int = count
 
-    override fun toString(): String {
-        return "FuzzyContainer(filePath='$filePath', basePath='$basePath', filename='$filename')"
-    }
+    fun hasRemaining(): Boolean = currentBatch.isNotEmpty()
 }

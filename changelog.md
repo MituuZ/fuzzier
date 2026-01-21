@@ -1,5 +1,14 @@
 # Changelog
 
+## Version 2.1.0
+
+- Add a fallback solution for file path handling on Windows
+  - Thanks to [s0ders](https://github.com/s0ders)!
+- Add a built-in Fuzzier grep backend
+  - Replaces `grep` and `findstr` fallback implementations
+  - Add setting to choose between Dynamic (uses `rg` if available, otherwise Fuzzier) and Fuzzier backends
+- Migrate from `Timer` to coroutines for debouncing
+
 ## Version 2.0.1
 
 - Fix incorrect `grep` command

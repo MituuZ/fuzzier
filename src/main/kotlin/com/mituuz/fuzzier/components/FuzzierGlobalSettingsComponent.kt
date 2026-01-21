@@ -85,12 +85,22 @@ class FuzzierGlobalSettingsComponent(
         JBCheckBox(), "Fuzzy Grep: Preview entire file",
         """
             Toggles showing the full file in the preview.<br><br>
-            
+
             If set, preview will use full syntax highlighting.<br>
             Otherwise, preview will only use limited syntax highlighting and show a slice around the match.<br><br>
-            
-            Disabling this option may improve performance on very large files, 
+
+            Disabling this option may improve performance on very large files,
             for small-to-medium files the performance impact is negligible.
+        """.trimIndent(),
+        false
+    )
+
+    val grepBackendSelector = SettingsComponent(
+        ComboBox<GrepBackend>(), "Grep backend",
+        """
+            Select which backend to use for Fuzzy Grep.<br><br>
+            <strong>Dynamic</strong>: Uses ripgrep (rg) if available, otherwise falls back to Fuzzier.<br>
+            <strong>Fuzzier</strong>: Uses the built-in Fuzzier backend.
         """.trimIndent(),
         false
     )
@@ -328,6 +338,7 @@ class FuzzierGlobalSettingsComponent(
             .addComponent(debounceTimerValue)
             .addComponent(fileListLimit)
             .addComponent(fuzzyGrepShowFullFile)
+            .addComponent(grepBackendSelector)
             .addComponent(globalExclusionSet)
 
             .addSeparator()
@@ -428,6 +439,25 @@ class FuzzierGlobalSettingsComponent(
         }
         for (s in PopupSizing.entries) {
             popupSizingSelector.getPopupSizingComboBox().addItem(s)
+        }
+
+        grepBackendSelector.getGrepBackendComboBox().renderer = object : DefaultListCellRenderer() {
+            override fun getListCellRendererComponent(
+                list: JList<*>?,
+                value: Any?,
+                index: Int,
+                isSelected: Boolean,
+                cellHasFocus: Boolean
+            ): Component {
+                val renderer =
+                    super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) as JLabel
+                val backend = value as GrepBackend
+                renderer.text = backend.text
+                return renderer
+            }
+        }
+        for (backend in GrepBackend.entries) {
+            grepBackendSelector.getGrepBackendComboBox().addItem(backend)
         }
 
         filenameTypeSelector.getFilenameTypeComboBox().renderer = object : DefaultListCellRenderer() {

@@ -24,13 +24,15 @@
 
 package com.mituuz.fuzzier.entities
 
+import com.intellij.openapi.vfs.VirtualFile
+
 enum class CaseMode {
     SENSITIVE,
     INSENSITIVE,
 }
 
 class GrepConfig(
-    val targets: List<String>,
+    val targets: Set<VirtualFile>?,
     val caseMode: CaseMode,
     val title: String = "",
     val supportsSecondaryField: Boolean = true,
