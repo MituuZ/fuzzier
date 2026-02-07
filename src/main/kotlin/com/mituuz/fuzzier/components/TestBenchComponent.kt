@@ -38,7 +38,6 @@ import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
 import com.mituuz.fuzzier.entities.*
 import com.mituuz.fuzzier.intellij.iteration.IntelliJIterationFileCollector
-import com.mituuz.fuzzier.intellij.iteration.IterationFileCollector
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.util.FuzzierUtil
 import kotlinx.coroutines.*
@@ -65,7 +64,6 @@ class TestBenchComponent : JPanel(), Disposable {
     private lateinit var projectState: FuzzierSettingsService.State
     private var currentUpdateListContentJob: Job? = null
     private var actionScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private var collector: IterationFileCollector = IntelliJIterationFileCollector(projectState)
 
     fun fill(settingsComponent: FuzzierGlobalSettingsComponent) {
         val project = ProjectManager.getInstance().openProjects[0]
@@ -219,6 +217,7 @@ class TestBenchComponent : JPanel(), Disposable {
         val ctx = currentCoroutineContext()
         val job = ctx.job
 
+        val collector = IntelliJIterationFileCollector(projectState)
         return collector.collectFiles(
             project = project, shouldContinue = { job.isActive }, fileFilter = buildFileFilter()
         )
