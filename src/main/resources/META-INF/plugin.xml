@@ -93,6 +93,13 @@
                 description="Search files using a fuzzy search">
         </action>
 
+        <action
+                id="com.mituuz.fuzzier.search.FuzzierOpenTabs"
+                class="com.mituuz.fuzzier.search.FuzzierOpenTabs"
+                text="Fuzzy File Search (Open Tabs)"
+                description="Search files using a fuzzy search on currently open tabs">
+        </action>
+
         <!-- Operation actions -->
         <action id="com.mituuz.fuzzier.operation.FuzzyMover"
                 class="com.mituuz.fuzzier.operation.FuzzyMover"

@@ -26,14 +26,10 @@ package com.mituuz.fuzzier.actions.filesystem
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.EDT
-import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.rootManager
-import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vfs.VirtualFile
 import com.mituuz.fuzzier.actions.FuzzyAction
 import com.mituuz.fuzzier.entities.*
-import com.mituuz.fuzzier.intellij.iteration.IntelliJIterationFileCollector
 import com.mituuz.fuzzier.intellij.iteration.IterationFileCollector
 import com.mituuz.fuzzier.util.FuzzierUtil
 import kotlinx.coroutines.*
@@ -43,11 +39,10 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.swing.DefaultListModel
 
 abstract class FilesystemAction : FuzzyAction() {
-    private var collector: IterationFileCollector = IntelliJIterationFileCollector()
+    abstract fun createCollector(): IterationFileCollector
 
     abstract override fun runAction(
-        project: Project,
-        actionEvent: AnActionEvent
+        project: Project, actionEvent: AnActionEvent
     )
 
     abstract fun buildFileFilter(project: Project): (VirtualFile) -> Boolean
@@ -58,17 +53,9 @@ abstract class FilesystemAction : FuzzyAction() {
         val ctx = currentCoroutineContext()
         val job = ctx.job
 
-        val indexTargets = if (projectState.isProject) {
-            listOf(ProjectFileIndex.getInstance(project) to project.name)
-        } else {
-            val moduleManager = ModuleManager.getInstance(project)
-            moduleManager.modules.map { it.rootManager.fileIndex to it.name }
-        }
-
-        return collector.collectFiles(
-            targets = indexTargets,
-            shouldContinue = { job.isActive },
-            fileFilter = buildFileFilter(project)
+        val c: IterationFileCollector = createCollector()
+        return c.collectFiles(
+            project = project, shouldContinue = { job.isActive }, fileFilter = buildFileFilter(project)
         )
     }
 
@@ -99,9 +86,7 @@ abstract class FilesystemAction : FuzzyAction() {
         val processedFiles = ConcurrentHashMap.newKeySet<String>()
         val listLimit = fileListLimit
         val priorityQueue = PriorityQueue(
-            listLimit + 1,
-            compareBy<FuzzyMatchContainer> { it.getScore(prioritizeShorterDirPaths) }
-        )
+            listLimit + 1, compareBy<FuzzyMatchContainer> { it.getScore(prioritizeShorterDirPaths) })
 
         val queueLock = Any()
         var minimumScore: Int? = null
@@ -139,9 +124,7 @@ abstract class FilesystemAction : FuzzyAction() {
                 }
             }
 
-            fileEntries
-                .filter { processedFiles.add(it.path) }
-                .forEach { ch.send(it) }
+            fileEntries.filter { processedFiles.add(it.path) }.forEach { ch.send(it) }
             ch.close()
         }
 

@@ -24,6 +24,9 @@
 package com.mituuz.fuzzier.actions
 
 import com.intellij.icons.AllIcons
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationType
+import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Caret
@@ -57,6 +60,10 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.swing.*
 
 abstract class FuzzyAction : AnAction() {
+    companion object {
+        const val FUZZIER_NOTIFICATION_GROUP: String = "Fuzzier Notification Group"
+    }
+
     lateinit var component: FuzzyComponent
     lateinit var popup: JBPopup
     private var originalDownHandler: EditorActionHandler? = null
@@ -70,6 +77,16 @@ abstract class FuzzyAction : AnAction() {
     val fuzzierUtil = FuzzierUtil()
     protected open var currentUpdateListContentJob: Job? = null
     protected open var actionScope: CoroutineScope? = null
+
+    protected fun showNotification(
+        title: String, content: String, project: Project, type: NotificationType = NotificationType.ERROR
+    ) {
+        val grepNotification = Notification(
+            FUZZIER_NOTIFICATION_GROUP, title, content, type
+        )
+        Notifications.Bus.notify(grepNotification, project)
+    }
+
 
     protected fun getPopupProvider(): PopupProvider {
         return when (globalState.popupSizing) {

@@ -39,6 +39,8 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.mituuz.fuzzier.actions.filesystem.FilesystemAction
 import com.mituuz.fuzzier.components.SimpleFinderComponent
+import com.mituuz.fuzzier.intellij.iteration.IntelliJIterationFileCollector
+import com.mituuz.fuzzier.intellij.iteration.IterationFileCollector
 import com.mituuz.fuzzier.ui.bindings.ActivationBindings
 import com.mituuz.fuzzier.ui.popup.PopupConfig
 import javax.swing.DefaultListModel
@@ -46,6 +48,10 @@ import javax.swing.DefaultListModel
 class FuzzyMover : FilesystemAction() {
     lateinit var movableFile: PsiFile
     lateinit var currentFile: VirtualFile
+
+    override fun createCollector(): IterationFileCollector {
+        return IntelliJIterationFileCollector(projectState)
+    }
 
     override fun buildFileFilter(project: Project): (VirtualFile) -> Boolean {
         return { vf -> if (component.isDirSelector) vf.isDirectory else !vf.isDirectory }

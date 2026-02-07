@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 2.2.0
+
+- Implement Fuzzy File Search (Open Tabs) action
+  - `com.mituuz.fuzzier.search.FuzzierOpenTabs`
+
 ## Version 2.1.0
 
 - Add a fallback solution for file path handling on Windows
