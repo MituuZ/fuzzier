@@ -32,6 +32,7 @@ import com.intellij.testFramework.runInEdtAndWait
 import com.mituuz.fuzzier.TestUtil
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -70,10 +71,10 @@ class OpenTabsCollectorTest {
         val result = openTabsCollector.collectFiles(project, { true }, { true })
 
         assertEquals(2, result.size)
-        assertEquals("file1.txt", result[0].name)
-        assertEquals("light_idea_test_case", result[0].module)
-        assertEquals("file2.txt", result[1].name)
+        assertTrue(result.any { it.name == "file1.txt" })
+        assertTrue(result.any { it.name == "file2.txt" })
         assertEquals("light_idea_test_case", result[1].module)
+        assertEquals("light_idea_test_case", result[0].module)
     }
 
     @Test

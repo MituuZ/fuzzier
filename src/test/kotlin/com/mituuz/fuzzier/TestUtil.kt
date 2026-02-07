@@ -108,7 +108,7 @@ class TestUtil {
 
             val modulePath = myFixture.findFileInTempDir(moduleFiles[0])
             val module = WriteAction.computeAndWait<Module, RuntimeException> {
-                ModuleManager.getInstance(project).newModule(modulePath.path, "Empty")
+                ModuleManager.getInstance(project).newModule(modulePath.path, moduleFiles[0])
             }
             PsiTestUtil.addSourceRoot(module, modulePath)
         }
@@ -139,6 +139,11 @@ class TestUtil {
 
     private fun addFiles(files: List<String>, myFixture: CodeInsightTestFixture) {
         for (file in files) {
+            val parts = file.split("/")
+            if (parts.size > 1) {
+                val dir = parts.dropLast(1).joinToString("/")
+                myFixture.tempDirFixture.findOrCreateDir(dir)
+            }
             myFixture.addFileToProject(file, "")
         }
     }
