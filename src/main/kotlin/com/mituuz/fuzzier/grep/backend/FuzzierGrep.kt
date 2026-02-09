@@ -35,7 +35,6 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.PsiSearchHelper
-import com.intellij.openapi.components.service
 import com.intellij.util.Processor
 import com.mituuz.fuzzier.entities.CaseMode
 import com.mituuz.fuzzier.entities.FuzzyContainer
@@ -50,7 +49,6 @@ import javax.swing.DefaultListModel
 
 object FuzzierGrep : BackendStrategy {
     override val name = "fuzzier"
-    private val fuzzierUtil = FuzzierUtil()
     private val searchMatcher = SearchMatcher()
 
     override suspend fun handleSearch(
@@ -83,7 +81,8 @@ object FuzzierGrep : BackendStrategy {
                         val found = searchMatcher.matchesLine(line, searchString, grepConfig.caseMode)
 
                         if (found) {
-                            val (filePath, basePath) = fuzzierUtil.extractModulePath(file.path, project)
+                            val (filePath, basePath) =
+                                FuzzierUtil.extractModulePath(file.path, project)
                             fileMatches.add(
                                 RowContainer(
                                     filePath,

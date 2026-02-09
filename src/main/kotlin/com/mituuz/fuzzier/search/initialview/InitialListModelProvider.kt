@@ -22,21 +22,12 @@
  *  SOFTWARE.
  */
 
-package com.mituuz.fuzzier.search
+package com.mituuz.fuzzier.search.initialview
 
-import com.mituuz.fuzzier.intellij.iteration.IterationFileCollector
-import com.mituuz.fuzzier.intellij.iteration.OpenTabsCollector
-import com.mituuz.fuzzier.search.initialview.InitialListModelProvider
-import com.mituuz.fuzzier.search.initialview.OpenTabsInitialListModelProvider
+import com.intellij.openapi.project.Project
+import com.mituuz.fuzzier.entities.FuzzyContainer
+import javax.swing.DefaultListModel
 
-class FuzzierOpenTabs : Fuzzier() {
-    override var popupTitle: String = "Fuzzy Search (Open Tabs)"
-
-    override fun getInitialViewProvider(): InitialListModelProvider {
-        return OpenTabsInitialListModelProvider()
-    }
-
-    override fun createCollector(): IterationFileCollector {
-        return OpenTabsCollector()
-    }
+interface InitialListModelProvider {
+    fun buildInitialView(project: Project): DefaultListModel<FuzzyContainer>
 }

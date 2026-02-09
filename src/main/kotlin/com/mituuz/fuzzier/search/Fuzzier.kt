@@ -28,21 +28,20 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.fileEditor.FileEditorManager
-import com.intellij.openapi.fileEditor.impl.EditorHistoryManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.util.SingleAlarm
 import com.mituuz.fuzzier.actions.filesystem.FilesystemAction
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
-import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.intellij.files.FileOpeningUtil
 import com.mituuz.fuzzier.intellij.iteration.IntelliJIterationFileCollector
 import com.mituuz.fuzzier.intellij.iteration.IterationFileCollector
+import com.mituuz.fuzzier.search.initialview.DefaultInitialListModelProvider
+import com.mituuz.fuzzier.search.initialview.InitialListModelProvider
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.ui.bindings.ActivationBindings
 import com.mituuz.fuzzier.ui.popup.PopupConfig
-import com.mituuz.fuzzier.util.InitialViewHandler
 import javax.swing.DefaultListModel
 
 open class Fuzzier : FilesystemAction() {
@@ -52,6 +51,13 @@ open class Fuzzier : FilesystemAction() {
 
     override fun createCollector(): IterationFileCollector {
         return IntelliJIterationFileCollector(projectState)
+    }
+
+    protected open fun getInitialViewProvider(): InitialListModelProvider {
+        return DefaultInitialListModelProvider(
+            globalState,
+            projectState,
+        )
     }
 
     override fun buildFileFilter(project: Project): (VirtualFile) -> Boolean =
@@ -133,7 +139,11 @@ open class Fuzzier : FilesystemAction() {
                 globalState.newTab
             ) {
                 if (selectedValue != null) {
-                    InitialViewHandler.addFileToRecentlySearchedFiles(selectedValue, projectState, globalState)
+                    DefaultInitialListModelProvider.addFileToRecentlySearchedFiles(
+                        selectedValue,
+                        projectState,
+                        globalState
+                    )
                 }
                 popup.cancel()
             }
@@ -144,27 +154,9 @@ open class Fuzzier : FilesystemAction() {
         component.fileList.setPaintBusy(true)
         ApplicationManager.getApplication().executeOnPooledThread {
             try {
-                val editorHistoryManager = EditorHistoryManager.getInstance(project)
-
-                val listModel = when (globalState.recentFilesMode) {
-                    FuzzierGlobalSettingsService.RecentFilesMode.RECENT_PROJECT_FILES -> InitialViewHandler.getRecentProjectFiles(
-                        globalState,
-                        fuzzierUtil,
-                        editorHistoryManager,
-                        project
-                    )
-
-                    FuzzierGlobalSettingsService.RecentFilesMode.RECENTLY_SEARCHED_FILES -> InitialViewHandler.Companion.getRecentlySearchedFiles(
-                        projectState
-                    )
-
-                    else -> {
-                        DefaultListModel<FuzzyContainer>()
-                    }
-                }
-
+                val initialListModel = getInitialViewProvider().buildInitialView(project)
                 ApplicationManager.getApplication().invokeLater {
-                    component.refreshModel(listModel, getCellRenderer())
+                    component.refreshModel(initialListModel, getCellRenderer())
                 }
             } finally {
                 component.fileList.setPaintBusy(false)
