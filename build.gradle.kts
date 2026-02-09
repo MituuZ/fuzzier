@@ -27,7 +27,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 // Use the same version and group for the jar and the plugin
-val currentVersion = "2.1.0"
+val currentVersion = "2.2.0"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -40,18 +40,12 @@ intellijPlatform {
         changeNotes = """
     <h2>Version $currentVersion</h2>
         <ul>
-            <li>Add a fallback solution for file path handling on Windows
+            <li>
+                Implement Fuzzy File Search (Open Tabs) action
                 <ul>
-                    <li>Thanks to <a href="https://github.com/s0ders">s0ders</a>!</li>
+                    <li><code>com.mituuz.fuzzier.search.FuzzierOpenTabs</code></li>
                 </ul>
             </li>
-            <li>Add a built-in Fuzzier grep backend
-                <ul>
-                    <li>Replaces <code>grep</code> and <code>findstr</code> fallback implementations</li>
-                    <li>Add setting to choose between Dynamic (uses <code>rg</code> if available, otherwise Fuzzier) and Fuzzier backends</li>
-                </ul>
-            </li>
-            <li>Migrate from <code>Timer</code> to coroutines for debouncing</li>
         </ul>
     """.trimIndent()
 

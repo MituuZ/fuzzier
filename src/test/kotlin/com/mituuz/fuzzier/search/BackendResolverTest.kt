@@ -26,7 +26,6 @@ package com.mituuz.fuzzier.search
 
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.testFramework.TestApplicationManager
-import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.mituuz.fuzzier.grep.backend.BackendResolver
 import com.mituuz.fuzzier.grep.backend.FuzzierGrep
 import com.mituuz.fuzzier.grep.backend.Ripgrep

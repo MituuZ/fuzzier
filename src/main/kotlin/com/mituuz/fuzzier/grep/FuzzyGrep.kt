@@ -24,9 +24,6 @@
 
 package com.mituuz.fuzzier.grep
 
-import com.intellij.notification.Notification
-import com.intellij.notification.NotificationType
-import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.EDT
@@ -59,10 +56,6 @@ import javax.swing.DefaultListModel
 import javax.swing.ListModel
 
 open class FuzzyGrep : FuzzyAction() {
-    companion object {
-        const val FUZZIER_NOTIFICATION_GROUP: String = "Fuzzier Notification Group"
-    }
-
     val isWindows = System.getProperty("os.name").lowercase().contains("win")
     private val backendResolver = BackendResolver(isWindows)
     private val commandRunner = CommandRunner()
@@ -127,15 +120,6 @@ open class FuzzyGrep : FuzzyAction() {
 
             createSharedListeners(project)
         }
-    }
-
-    private fun showNotification(
-        title: String, content: String, project: Project, type: NotificationType = NotificationType.ERROR
-    ) {
-        val grepNotification = Notification(
-            FUZZIER_NOTIFICATION_GROUP, title, content, type
-        )
-        Notifications.Bus.notify(grepNotification, project)
     }
 
     override fun onPopupClosed() {

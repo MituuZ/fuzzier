@@ -28,11 +28,8 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
-import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
-import com.intellij.openapi.project.rootManager
-import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.components.JBScrollPane
@@ -41,7 +38,6 @@ import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
 import com.mituuz.fuzzier.entities.*
 import com.mituuz.fuzzier.intellij.iteration.IntelliJIterationFileCollector
-import com.mituuz.fuzzier.intellij.iteration.IterationFileCollector
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.util.FuzzierUtil
 import kotlinx.coroutines.*
@@ -68,7 +64,6 @@ class TestBenchComponent : JPanel(), Disposable {
     private lateinit var projectState: FuzzierSettingsService.State
     private var currentUpdateListContentJob: Job? = null
     private var actionScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private var collector: IterationFileCollector = IntelliJIterationFileCollector()
 
     fun fill(settingsComponent: FuzzierGlobalSettingsComponent) {
         val project = ProjectManager.getInstance().openProjects[0]
@@ -222,15 +217,9 @@ class TestBenchComponent : JPanel(), Disposable {
         val ctx = currentCoroutineContext()
         val job = ctx.job
 
-        val indexTargets = if (projectState.isProject) {
-            listOf(ProjectFileIndex.getInstance(project) to project.name)
-        } else {
-            val moduleManager = ModuleManager.getInstance(project)
-            moduleManager.modules.map { it.rootManager.fileIndex to it.name }
-        }
-
+        val collector = IntelliJIterationFileCollector(projectState)
         return collector.collectFiles(
-            targets = indexTargets, shouldContinue = { job.isActive }, fileFilter = buildFileFilter()
+            project = project, shouldContinue = { job.isActive }, fileFilter = buildFileFilter()
         )
     }
 

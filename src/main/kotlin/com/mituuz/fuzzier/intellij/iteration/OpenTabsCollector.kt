@@ -24,14 +24,32 @@
 
 package com.mituuz.fuzzier.intellij.iteration
 
+import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vfs.VirtualFile
 import com.mituuz.fuzzier.entities.IterationEntry
 
-interface IterationFileCollector {
-    fun collectFiles(
+class OpenTabsCollector : IterationFileCollector {
+    override fun collectFiles(
         project: Project,
         shouldContinue: () -> Boolean,
-        fileFilter: (VirtualFile) -> Boolean,
-    ): List<IterationEntry>
+        fileFilter: (VirtualFile) -> Boolean
+    ): List<IterationEntry> = buildList {
+        val fileEditorManager = FileEditorManager.getInstance(project)
+        val projectFileIndex = ProjectFileIndex.getInstance(project)
+
+        ReadAction.run<Throwable> {
+            for (vf in fileEditorManager.openFiles) {
+                if (!shouldContinue()) return@run
+                if (fileFilter(vf)) {
+                    val module = projectFileIndex.getModuleForFile(vf)
+                    val moduleName = module?.name ?: ""
+                    val iteratorEntry = IterationEntry(vf.name, vf.path, moduleName, vf.isDirectory)
+                    add(iteratorEntry)
+                }
+            }
+        }
+    }
 }

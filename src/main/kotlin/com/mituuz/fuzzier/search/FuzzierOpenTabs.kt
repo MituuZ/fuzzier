@@ -22,16 +22,15 @@
  *  SOFTWARE.
  */
 
-package com.mituuz.fuzzier.intellij.iteration
+package com.mituuz.fuzzier.search
 
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.vfs.VirtualFile
-import com.mituuz.fuzzier.entities.IterationEntry
+import com.mituuz.fuzzier.intellij.iteration.IterationFileCollector
+import com.mituuz.fuzzier.intellij.iteration.OpenTabsCollector
 
-interface IterationFileCollector {
-    fun collectFiles(
-        project: Project,
-        shouldContinue: () -> Boolean,
-        fileFilter: (VirtualFile) -> Boolean,
-    ): List<IterationEntry>
+class FuzzierOpenTabs : Fuzzier() {
+    override var popupTitle: String = "Fuzzy Search (Open Tabs)"
+
+    override fun createCollector(): IterationFileCollector {
+        return OpenTabsCollector()
+    }
 }

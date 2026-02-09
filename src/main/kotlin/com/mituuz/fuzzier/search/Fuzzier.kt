@@ -37,6 +37,8 @@ import com.mituuz.fuzzier.actions.filesystem.FilesystemAction
 import com.mituuz.fuzzier.components.FuzzyFinderComponent
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.intellij.files.FileOpeningUtil
+import com.mituuz.fuzzier.intellij.iteration.IntelliJIterationFileCollector
+import com.mituuz.fuzzier.intellij.iteration.IterationFileCollector
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.ui.bindings.ActivationBindings
 import com.mituuz.fuzzier.ui.popup.PopupConfig
@@ -47,6 +49,10 @@ open class Fuzzier : FilesystemAction() {
     private var previewAlarm: SingleAlarm? = null
     private var lastPreviewKey: String? = null
     protected open var popupTitle = "Fuzzy Search"
+
+    override fun createCollector(): IterationFileCollector {
+        return IntelliJIterationFileCollector(projectState)
+    }
 
     override fun buildFileFilter(project: Project): (VirtualFile) -> Boolean =
         { vf -> !vf.isDirectory }
@@ -141,7 +147,7 @@ open class Fuzzier : FilesystemAction() {
                 val editorHistoryManager = EditorHistoryManager.getInstance(project)
 
                 val listModel = when (globalState.recentFilesMode) {
-                    FuzzierGlobalSettingsService.RecentFilesMode.RECENT_PROJECT_FILES -> InitialViewHandler.Companion.getRecentProjectFiles(
+                    FuzzierGlobalSettingsService.RecentFilesMode.RECENT_PROJECT_FILES -> InitialViewHandler.getRecentProjectFiles(
                         globalState,
                         fuzzierUtil,
                         editorHistoryManager,

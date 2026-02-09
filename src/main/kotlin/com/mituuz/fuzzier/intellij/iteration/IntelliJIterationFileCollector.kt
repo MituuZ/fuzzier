@@ -24,17 +24,24 @@
 
 package com.mituuz.fuzzier.intellij.iteration
 
+import com.intellij.openapi.module.ModuleManager
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.rootManager
 import com.intellij.openapi.roots.FileIndex
+import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vfs.VirtualFile
 import com.mituuz.fuzzier.entities.IterationEntry
+import com.mituuz.fuzzier.settings.FuzzierSettingsService
 
-class IntelliJIterationFileCollector : IterationFileCollector {
+class IntelliJIterationFileCollector(val projectState: FuzzierSettingsService.State) : IterationFileCollector {
     override fun collectFiles(
-        targets: List<Pair<FileIndex, String>>,
+        project: Project,
         shouldContinue: () -> Boolean,
         fileFilter: (VirtualFile) -> Boolean
     ): List<IterationEntry> = buildList {
-        for ((fileIndex, moduleName) in targets) {
+        val targetIndexes = getTargetIndexes(project)
+
+        for ((fileIndex, moduleName) in targetIndexes) {
             fileIndex.iterateContent { vf ->
                 if (!shouldContinue()) return@iterateContent false
 
@@ -45,6 +52,15 @@ class IntelliJIterationFileCollector : IterationFileCollector {
 
                 true
             }
+        }
+    }
+
+    private fun getTargetIndexes(project: Project): List<Pair<FileIndex, String>> {
+        return if (projectState.isProject) {
+            listOf(ProjectFileIndex.getInstance(project) to project.name)
+        } else {
+            val moduleManager = ModuleManager.getInstance(project)
+            moduleManager.modules.map { it.rootManager.fileIndex to it.name }
         }
     }
 }
