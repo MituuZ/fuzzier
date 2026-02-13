@@ -140,7 +140,7 @@ open class Fuzzier : FilesystemAction() {
                 globalState.newTab
             ) {
                 if (selectedValue != null) {
-                    DefaultInitialListModelProvider.addFileToRecentlySearchedFiles(
+                    InitialListModelProvider.addFileToRecentlySearchedFiles(
                         selectedValue,
                         projectState,
                         globalState

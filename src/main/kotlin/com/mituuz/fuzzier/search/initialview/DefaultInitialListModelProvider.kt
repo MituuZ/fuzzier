@@ -27,7 +27,6 @@ package com.mituuz.fuzzier.search.initialview
 import com.intellij.openapi.fileEditor.impl.EditorHistoryManager
 import com.intellij.openapi.project.Project
 import com.mituuz.fuzzier.entities.FuzzyContainer
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.OrderedContainer
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
@@ -95,36 +94,4 @@ class DefaultInitialListModelProvider(
             }
         return result
     }
-
-    companion object {
-        fun addFileToRecentlySearchedFiles(
-            fuzzyContainer: FuzzyContainer,
-            projectState: FuzzierSettingsService.State,
-            globalState: FuzzierGlobalSettingsService.State
-        ) {
-            val listModel: DefaultListModel<FuzzyMatchContainer> =
-                projectState.getRecentlySearchedFilesAsFuzzyMatchContainer()
-
-            var i = 0
-            while (i < listModel.size) {
-                if (listModel[i].filePath == fuzzyContainer.filePath) {
-                    listModel.remove(i)
-                } else {
-                    i++
-                }
-            }
-
-            while (listModel.size > globalState.fileListLimit - 1) {
-                listModel.remove(listModel.size - 1)
-            }
-
-            if (fuzzyContainer is FuzzyMatchContainer) {
-                listModel.addElement(fuzzyContainer)
-                projectState.recentlySearchedFiles =
-                    FuzzyMatchContainer.SerializedMatchContainer.fromListModel(listModel)
-            }
-
-        }
-    }
-
 }
