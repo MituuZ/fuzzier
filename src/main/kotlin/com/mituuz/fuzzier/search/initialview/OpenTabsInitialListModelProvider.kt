@@ -30,7 +30,6 @@ import com.intellij.openapi.project.Project
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.OrderedContainer
 import com.mituuz.fuzzier.util.FuzzierUtil
-import kotlinx.html.InputType
 import javax.swing.DefaultListModel
 
 class OpenTabsInitialListModelProvider(
@@ -48,7 +47,7 @@ class OpenTabsInitialListModelProvider(
                         continue
                     }
                     val orderedContainer = OrderedContainer(
-                        filePathAndModule.first, filePathAndModule.second, InputType.file.name
+                        filePathAndModule.first, filePathAndModule.second, vf.name
                     )
                     listModel.add(0, orderedContainer)
                 }
