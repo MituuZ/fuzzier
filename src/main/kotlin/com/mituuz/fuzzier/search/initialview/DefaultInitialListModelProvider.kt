@@ -38,7 +38,7 @@ class DefaultInitialListModelProvider(
     val globalState: FuzzierGlobalSettingsService.State,
     val projectState: FuzzierSettingsService.State,
 ) : InitialListModelProvider {
-    override fun buildInitialView(): DefaultListModel<FuzzyContainer> {
+    override fun invoke(): DefaultListModel<FuzzyContainer> {
         return when (globalState.recentFilesMode) {
             FuzzierGlobalSettingsService.RecentFilesMode.RECENT_PROJECT_FILES -> {
                 getRecentProjectFiles(project)

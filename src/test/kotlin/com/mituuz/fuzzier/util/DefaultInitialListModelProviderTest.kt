@@ -31,6 +31,7 @@ import com.intellij.testFramework.TestApplicationManager
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FileType.FILE
 import com.mituuz.fuzzier.search.initialview.DefaultInitialListModelProvider
+import com.mituuz.fuzzier.search.initialview.addFileToRecentlySearchedFiles
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.State
@@ -182,7 +183,7 @@ class DefaultInitialListModelProviderTest {
         val container = FuzzyMatchContainer(score, "", "", "", FILE)
 
         fuzzierSettingsServiceInstance.state.recentlySearchedFiles = null
-        DefaultInitialListModelProvider.addFileToRecentlySearchedFiles(
+        addFileToRecentlySearchedFiles(
             container,
             fuzzierSettingsServiceInstance.state,
             fgss
@@ -208,7 +209,7 @@ class DefaultInitialListModelProviderTest {
 
         fuzzierSettingsServiceInstance.state.recentlySearchedFiles =
             FuzzyMatchContainer.SerializedMatchContainer.fromListModel(largeList)
-        DefaultInitialListModelProvider.addFileToRecentlySearchedFiles(
+        addFileToRecentlySearchedFiles(
             container,
             fuzzierSettingsServiceInstance.state,
             fgss
@@ -236,7 +237,7 @@ class DefaultInitialListModelProviderTest {
 
         fuzzierSettingsServiceInstance.state.recentlySearchedFiles =
             FuzzyMatchContainer.SerializedMatchContainer.fromListModel(largeList)
-        DefaultInitialListModelProvider.addFileToRecentlySearchedFiles(
+        addFileToRecentlySearchedFiles(
             container,
             fuzzierSettingsServiceInstance.state,
             fgss

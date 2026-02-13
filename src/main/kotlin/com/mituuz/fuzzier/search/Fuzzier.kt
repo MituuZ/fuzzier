@@ -39,6 +39,7 @@ import com.mituuz.fuzzier.intellij.iteration.IntelliJIterationFileCollector
 import com.mituuz.fuzzier.intellij.iteration.IterationFileCollector
 import com.mituuz.fuzzier.search.initialview.DefaultInitialListModelProvider
 import com.mituuz.fuzzier.search.initialview.InitialListModelProvider
+import com.mituuz.fuzzier.search.initialview.addFileToRecentlySearchedFiles
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.ui.bindings.ActivationBindings
 import com.mituuz.fuzzier.ui.popup.PopupConfig
@@ -140,7 +141,7 @@ open class Fuzzier : FilesystemAction() {
                 globalState.newTab
             ) {
                 if (selectedValue != null) {
-                    InitialListModelProvider.addFileToRecentlySearchedFiles(
+                    addFileToRecentlySearchedFiles(
                         selectedValue,
                         projectState,
                         globalState
@@ -155,7 +156,7 @@ open class Fuzzier : FilesystemAction() {
         component.fileList.setPaintBusy(true)
         ApplicationManager.getApplication().executeOnPooledThread {
             try {
-                val initialListModel = getInitialViewProvider(project).buildInitialView()
+                val initialListModel = getInitialViewProvider(project).invoke()
                 ApplicationManager.getApplication().invokeLater {
                     component.refreshModel(initialListModel, getCellRenderer())
                 }

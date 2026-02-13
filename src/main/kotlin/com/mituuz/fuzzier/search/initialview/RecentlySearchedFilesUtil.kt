@@ -24,33 +24,36 @@
 
 package com.mituuz.fuzzier.search.initialview
 
-import com.intellij.openapi.vfs.VirtualFile
 import com.mituuz.fuzzier.entities.FuzzyContainer
-import com.mituuz.fuzzier.entities.OrderedContainer
-import com.mituuz.fuzzier.util.FuzzierUtil
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
+import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import javax.swing.DefaultListModel
 
-class OpenTabsInitialListModelProvider(
-    private val modules: Map<String, String>,
-    private val openFiles: Array<VirtualFile>
-) : InitialListModelProvider {
-    override fun invoke(): DefaultListModel<FuzzyContainer> {
-        val listModel = DefaultListModel<FuzzyContainer>()
+fun addFileToRecentlySearchedFiles(
+    fuzzyContainer: FuzzyContainer,
+    projectState: FuzzierSettingsService.State,
+    globalState: FuzzierGlobalSettingsService.State
+) {
+    val listModel: DefaultListModel<FuzzyMatchContainer> =
+        projectState.getRecentlySearchedFilesAsFuzzyMatchContainer()
 
-        for (vf in openFiles) {
-            if (!vf.isDirectory) {
-                val filePathAndModule = FuzzierUtil.extractModulePath(vf.path, modules)
-                // Don't add files that do not have a module path in the project
-                if (filePathAndModule.second == "") {
-                    continue
-                }
-                val orderedContainer = OrderedContainer(
-                    filePathAndModule.first, filePathAndModule.second, vf.name
-                )
-                listModel.add(0, orderedContainer)
-            }
+    var i = 0
+    while (i < listModel.size) {
+        if (listModel[i].filePath == fuzzyContainer.filePath) {
+            listModel.remove(i)
+        } else {
+            i++
         }
+    }
 
-        return listModel
+    while (listModel.size > globalState.fileListLimit - 1) {
+        listModel.remove(listModel.size - 1)
+    }
+
+    if (fuzzyContainer is FuzzyMatchContainer) {
+        listModel.addElement(fuzzyContainer)
+        projectState.recentlySearchedFiles =
+            FuzzyMatchContainer.SerializedMatchContainer.fromListModel(listModel)
     }
 }

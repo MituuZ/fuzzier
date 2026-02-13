@@ -24,29 +24,15 @@
 
 package com.mituuz.fuzzier.search.initialview
 
-import com.intellij.openapi.application.ReadAction
-import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.util.ThrowableRunnable
-import io.mockk.*
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.unmockkAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class OpenTabsInitialListModelProviderTest {
-    private lateinit var project: Project
-
-    @BeforeEach
-    fun setUp() {
-        project = mockk()
-        mockkStatic(ReadAction::class)
-        val captor = slot<ThrowableRunnable<Throwable>>()
-        every { ReadAction.run(capture(captor)) } answers {
-            captor.captured.run()
-        }
-    }
-
     @AfterEach
     fun tearDown() {
         unmockkAll()
@@ -55,7 +41,7 @@ class OpenTabsInitialListModelProviderTest {
     @Test
     fun `buildInitialView with no open files`() {
         val provider = OpenTabsInitialListModelProvider(emptyMap(), emptyArray())
-        val model = provider.buildInitialView()
+        val model = provider.invoke()
         assertEquals(0, model.size())
     }
 
@@ -75,7 +61,7 @@ class OpenTabsInitialListModelProviderTest {
         val modules = mapOf("project" to "/project/")
         val provider = OpenTabsInitialListModelProvider(modules, arrayOf(file1, file2))
 
-        val model = provider.buildInitialView()
+        val model = provider.invoke()
 
         assertEquals(2, model.size())
         // Should be in reverse order of openFiles
@@ -101,7 +87,7 @@ class OpenTabsInitialListModelProviderTest {
         val modules = mapOf("project" to "/project/")
         val provider = OpenTabsInitialListModelProvider(modules, arrayOf(file1, dir1))
 
-        val model = provider.buildInitialView()
+        val model = provider.invoke()
 
         assertEquals(1, model.size())
         assertEquals("File1.kt", model.get(0).filename)
@@ -123,7 +109,7 @@ class OpenTabsInitialListModelProviderTest {
         val modules = mapOf("project" to "/project/")
         val provider = OpenTabsInitialListModelProvider(modules, arrayOf(file1, fileOutside))
 
-        val model = provider.buildInitialView()
+        val model = provider.invoke()
 
         assertEquals(1, model.size())
         assertEquals("File1.kt", model.get(0).filename)
