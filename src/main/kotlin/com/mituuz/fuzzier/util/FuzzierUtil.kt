@@ -49,84 +49,83 @@ class FuzzierUtil {
 
             return ret
         }
-    }
 
-    /**
-     * For each module in the project, check if the file path contains the module path.
-     * @return a pair of the file path (with the module path removed) and the module path
-     */
-    fun extractModulePath(filePath: String, project: Project): Pair<String, String> {
-        val modules = project.service<FuzzierSettingsService>().state.modules
-        for (modulePath in modules.values) {
-            if (filePath.contains(modulePath)) {
-                val file = filePath.removePrefix(modulePath)
-                return Pair(file, modulePath)
-            }
-        }
-        return Pair(filePath, "")
-    }
-
-    /**
-     * Parse all modules in the project and find the shortest base path for each of them.
-     * Combines similar module paths to the shortest possible form.
-     *
-     * Populates `FuzzierSettings.state.modules`-field
-     */
-    fun parseModules(project: Project) {
-        val moduleManager = ModuleManager.getInstance(project)
-
-        // Gather all modules and paths into a list
-        val moduleList: MutableList<ModuleContainer> = ArrayList()
-        for (module in moduleManager.modules) {
-            val modulePath = getModulePath(module) ?: continue
-            moduleList.add(ModuleContainer(module.name, modulePath))
-        }
-
-        var prevModule: ModuleContainer? = null
-        for (currentModule in moduleList.sortedBy { it.basePath }) {
-            if (prevModule != null && (currentModule.basePath.startsWith(prevModule.basePath)
-                        || prevModule.basePath.startsWith(currentModule.basePath))
-            ) {
-                if (currentModule.basePath.length > prevModule.basePath.length) {
-                    currentModule.basePath = prevModule.basePath
-                } else {
-                    prevModule.basePath = currentModule.basePath
+        /**
+         * For each module in the project, check if the file path contains the module path.
+         * @return a pair of the file path (with the module path removed) and the module path
+         */
+        fun extractModulePath(filePath: String, modules: Map<String, String>): Pair<String, String> {
+            for (modulePath in modules.values) {
+                if (filePath.contains(modulePath)) {
+                    val file = filePath.removePrefix(modulePath)
+                    return Pair(file, modulePath)
                 }
             }
-
-            prevModule = currentModule
+            return Pair(filePath, "")
         }
 
-        if (moduleList.map { it.basePath }.distinct().size > 1) {
-            shortenModulePaths(moduleList)
+        /**
+         * Parse all modules in the project and find the shortest base path for each of them.
+         * Combines similar module paths to the shortest possible form.
+         *
+         * Populates `FuzzierSettings.state.modules`-field
+         */
+        fun parseModules(project: Project) {
+            val moduleManager = ModuleManager.getInstance(project)
+
+            // Gather all modules and paths into a list
+            val moduleList: MutableList<ModuleContainer> = ArrayList()
+            for (module in moduleManager.modules) {
+                val modulePath = getModulePath(module) ?: continue
+                moduleList.add(ModuleContainer(module.name, modulePath))
+            }
+
+            var prevModule: ModuleContainer? = null
+            for (currentModule in moduleList.sortedBy { it.basePath }) {
+                if (prevModule != null && (currentModule.basePath.startsWith(prevModule.basePath)
+                            || prevModule.basePath.startsWith(currentModule.basePath))
+                ) {
+                    if (currentModule.basePath.length > prevModule.basePath.length) {
+                        currentModule.basePath = prevModule.basePath
+                    } else {
+                        prevModule.basePath = currentModule.basePath
+                    }
+                }
+
+                prevModule = currentModule
+            }
+
+            if (moduleList.map { it.basePath }.distinct().size > 1) {
+                shortenModulePaths(moduleList)
+            }
+
+            if (moduleList.isEmpty() && project.basePath != null) {
+                moduleList.add(ModuleContainer(project.name, project.basePath!!))
+                project.service<FuzzierSettingsService>().state.isProject = true
+            }
+
+            val moduleMap = listToMap(moduleList)
+            project.service<FuzzierSettingsService>().state.modules = moduleMap
         }
 
-        if (moduleList.isEmpty() && project.basePath != null) {
-            moduleList.add(ModuleContainer(project.name, project.basePath!!))
-            project.service<FuzzierSettingsService>().state.isProject = true
+        private fun shortenModulePaths(modules: List<ModuleContainer>) {
+            for (module in modules) {
+                module.basePath = module.basePath.substringBeforeLast("/")
+            }
         }
 
-        val moduleMap = listToMap(moduleList)
-        project.service<FuzzierSettingsService>().state.modules = moduleMap
-    }
-
-    private fun shortenModulePaths(modules: List<ModuleContainer>) {
-        for (module in modules) {
-            module.basePath = module.basePath.substringBeforeLast("/")
+        private fun getModulePath(module: Module): String? {
+            val contentRoots = module.rootManager.contentRoots
+            if (contentRoots.isEmpty()) {
+                return null
+            }
+            return contentRoots.firstOrNull()?.path
         }
-    }
 
-    private fun getModulePath(module: Module): String? {
-        val contentRoots = module.rootManager.contentRoots
-        if (contentRoots.isEmpty()) {
-            return null
+        private fun listToMap(modules: List<ModuleContainer>): Map<String, String> {
+            return modules.associateBy({ it.name }, { it.basePath })
         }
-        return contentRoots.firstOrNull()?.path
     }
 
     data class ModuleContainer(val name: String, var basePath: String)
-
-    private fun listToMap(modules: List<ModuleContainer>): Map<String, String> {
-        return modules.associateBy({ it.name }, { it.basePath })
-    }
 }

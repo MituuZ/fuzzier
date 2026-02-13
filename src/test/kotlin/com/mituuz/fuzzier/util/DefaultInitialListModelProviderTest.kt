@@ -23,30 +23,31 @@
  */
 package com.mituuz.fuzzier.util
 
-import com.intellij.openapi.components.service
 import com.intellij.openapi.fileEditor.impl.EditorHistoryManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.testFramework.TestApplicationManager
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
-import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FileType.FILE
+import com.mituuz.fuzzier.search.initialview.DefaultInitialListModelProvider
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService.State
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import javax.swing.DefaultListModel
 
-class InitialViewHandlerTest {
+class DefaultInitialListModelProviderTest {
     private lateinit var project: Project
     private lateinit var fuzzierSettingsService: FuzzierSettingsService
     private lateinit var fuzzierGlobalSettingsService: FuzzierGlobalSettingsService
     private lateinit var fuzzierUtil: FuzzierUtil
-    private lateinit var initialViewHandler: InitialViewHandler
+    private lateinit var defaultInitialListModelProvider: DefaultInitialListModelProvider
     private lateinit var state: State
     private lateinit var editorHistoryManager: EditorHistoryManager
 
@@ -59,10 +60,16 @@ class InitialViewHandlerTest {
         fuzzierSettingsService = mockk()
         fuzzierGlobalSettingsService = mockk()
         state = mockk()
-        fuzzierUtil = mockk()
-        initialViewHandler = InitialViewHandler()
+        val globalState = FuzzierGlobalSettingsService.State()
+        globalState.recentFilesMode = FuzzierGlobalSettingsService.RecentFilesMode.RECENT_PROJECT_FILES
+        defaultInitialListModelProvider = DefaultInitialListModelProvider(project, globalState, state)
         editorHistoryManager = mockk()
         every { fuzzierSettingsService.state } returns state
+    }
+
+    @AfterEach
+    fun tearDown() {
+        unmockkAll()
     }
 
     @Test
@@ -73,15 +80,22 @@ class InitialViewHandlerTest {
             virtualFile1,
             virtualFile2
         )
-        val fgss = service<FuzzierGlobalSettingsService>().state
+        mockkStatic(EditorHistoryManager::class)
+        every { EditorHistoryManager.getInstance(project) } returns editorHistoryManager
         every { editorHistoryManager.fileList } returns fileList
+        val fgss = defaultInitialListModelProvider.globalState
         fgss.fileListLimit = 1
-        every { virtualFile1.path } returns "path"
+        every { virtualFile1.path } returns "/project/path/file1"
         every { virtualFile1.name } returns "filename1"
-        every { virtualFile2.path } returns "path"
+        every { virtualFile2.path } returns "/project/path/file2"
         every { virtualFile2.name } returns "filename2"
-        every { fuzzierUtil.extractModulePath(any(), project) } returns Pair("path", "module")
-        val result = InitialViewHandler.getRecentProjectFiles(fgss, fuzzierUtil, editorHistoryManager, project)
+
+        val settingsState = FuzzierSettingsService.State()
+        settingsState.modules = mapOf("module" to "/project/path/")
+        defaultInitialListModelProvider = DefaultInitialListModelProvider(project, fgss, settingsState)
+
+        val result =
+            defaultInitialListModelProvider.getRecentProjectFiles(project)
 
         assertEquals(1, result.size())
     }
@@ -94,26 +108,36 @@ class InitialViewHandlerTest {
             virtualFile1,
             virtualFile2
         )
-        val fgss = service<FuzzierGlobalSettingsService>().state
+        mockkStatic(EditorHistoryManager::class)
+        every { EditorHistoryManager.getInstance(project) } returns editorHistoryManager
         every { editorHistoryManager.fileList } returns fileList
+        val fgss = defaultInitialListModelProvider.globalState
         fgss.fileListLimit = 2
-        every { virtualFile1.path } returns "path"
+        every { virtualFile1.path } returns "/project/path/file1"
         every { virtualFile1.name } returns "filename1"
-        every { virtualFile2.path } returns "path"
+        every { virtualFile2.path } returns "/other/path/file2"
         every { virtualFile2.name } returns "filename2"
-        every { fuzzierUtil.extractModulePath(any(), project) } returns Pair("path", "module") andThen Pair("", "")
-        val result = InitialViewHandler.getRecentProjectFiles(fgss, fuzzierUtil, editorHistoryManager, project)
+
+        val settingsState = FuzzierSettingsService.State()
+        settingsState.modules = mapOf("module" to "/project/path/")
+        defaultInitialListModelProvider = DefaultInitialListModelProvider(project, fgss, settingsState)
+
+        val result =
+            defaultInitialListModelProvider.getRecentProjectFiles(project)
 
         assertEquals(1, result.size())
     }
 
     @Test
     fun `Recent project files - Empty list when no history`() {
-        val fgss = service<FuzzierGlobalSettingsService>().state
+        mockkStatic(EditorHistoryManager::class)
+        every { EditorHistoryManager.getInstance(project) } returns editorHistoryManager
+        val fgss = defaultInitialListModelProvider.globalState
         every { editorHistoryManager.fileList } returns emptyList()
         fgss.fileListLimit = 2
 
-        val result = InitialViewHandler.getRecentProjectFiles(fgss, fuzzierUtil, editorHistoryManager, project)
+        val result =
+            defaultInitialListModelProvider.getRecentProjectFiles(project)
 
         assertEquals(0, result.size())
     }
@@ -125,9 +149,9 @@ class InitialViewHandlerTest {
         val listModel = DefaultListModel<FuzzyMatchContainer>()
         listModel.addElement(fuzzyMatchContainer1)
         listModel.addElement(fuzzyMatchContainer2)
-        every { fuzzierSettingsService.state.getRecentlySearchedFilesAsFuzzyMatchContainer() } returns listModel
+        every { state.getRecentlySearchedFilesAsFuzzyMatchContainer() } returns listModel
 
-        val result = InitialViewHandler.getRecentlySearchedFiles(fuzzierSettingsService.state)
+        val result = defaultInitialListModelProvider.getRecentlySearchedFiles()
 
         assertEquals(fuzzyMatchContainer2, result[0])
         assertEquals(fuzzyMatchContainer1, result[1])
@@ -140,68 +164,10 @@ class InitialViewHandlerTest {
         listModel.addElement(fuzzyMatchContainer)
         listModel.addElement(null)
         listModel.addElement(null)
-        every { fuzzierSettingsService.state.getRecentlySearchedFilesAsFuzzyMatchContainer() } returns listModel
+        every { state.getRecentlySearchedFilesAsFuzzyMatchContainer() } returns listModel
 
-        val result = InitialViewHandler.getRecentlySearchedFiles(fuzzierSettingsService.state)
+        val result = defaultInitialListModelProvider.getRecentlySearchedFiles()
 
         assertEquals(1, result.size)
-    }
-
-    @Test
-    fun `Add file to recently used files - Null list should default to empty`() {
-        val fuzzierSettingsServiceInstance: FuzzierSettingsService = service<FuzzierSettingsService>()
-        val fgss = service<FuzzierGlobalSettingsService>().state
-        val score = FuzzyMatchContainer.FuzzyScore()
-        val container = FuzzyMatchContainer(score, "", "", "", FILE)
-
-        fuzzierSettingsServiceInstance.state.recentlySearchedFiles = null
-        InitialViewHandler.addFileToRecentlySearchedFiles(container, fuzzierSettingsServiceInstance.state, fgss)
-        assertNotNull(fuzzierSettingsServiceInstance.state.getRecentlySearchedFilesAsFuzzyMatchContainer())
-        assertEquals(1, fuzzierSettingsServiceInstance.state.getRecentlySearchedFilesAsFuzzyMatchContainer().size)
-    }
-
-    @Test
-    fun `Add file to recently used files - Too large list is truncated`() {
-        val fuzzierSettingsServiceInstance: FuzzierSettingsService = service<FuzzierSettingsService>()
-        val fgss = service<FuzzierGlobalSettingsService>().state
-        val fileListLimit = 2
-        val score = FuzzyMatchContainer.FuzzyScore()
-        val container = FuzzyMatchContainer(score, "", "", "", FILE)
-
-        val largeList: DefaultListModel<FuzzyMatchContainer> = DefaultListModel()
-        for (i in 0..25) {
-            largeList.addElement(FuzzyMatchContainer(score, "" + i, "" + i, "", FILE))
-        }
-
-        fgss.fileListLimit = fileListLimit
-
-        fuzzierSettingsServiceInstance.state.recentlySearchedFiles =
-            FuzzyMatchContainer.SerializedMatchContainer.fromListModel(largeList)
-        InitialViewHandler.addFileToRecentlySearchedFiles(container, fuzzierSettingsServiceInstance.state, fgss)
-        assertEquals(
-            fileListLimit,
-            fuzzierSettingsServiceInstance.state.getRecentlySearchedFilesAsFuzzyMatchContainer().size
-        )
-    }
-
-    @Test
-    fun `Add file to recently used files - Duplicate filenames are removed`() {
-        val fuzzierSettingsServiceInstance: FuzzierSettingsService = service<FuzzierSettingsService>()
-        val fgss = service<FuzzierGlobalSettingsService>().state
-        val fileListLimit = 20
-        val score = FuzzyMatchContainer.FuzzyScore()
-        val container = FuzzyMatchContainer(score, "", "", "", FILE)
-
-        val largeList: DefaultListModel<FuzzyMatchContainer> = DefaultListModel()
-        repeat(26) {
-            largeList.addElement(FuzzyMatchContainer(score, "", "", "", FILE))
-        }
-
-        fgss.fileListLimit = fileListLimit
-
-        fuzzierSettingsServiceInstance.state.recentlySearchedFiles =
-            FuzzyMatchContainer.SerializedMatchContainer.fromListModel(largeList)
-        InitialViewHandler.addFileToRecentlySearchedFiles(container, fuzzierSettingsServiceInstance.state, fgss)
-        assertEquals(1, fuzzierSettingsServiceInstance.state.getRecentlySearchedFilesAsFuzzyMatchContainer().size)
     }
 }

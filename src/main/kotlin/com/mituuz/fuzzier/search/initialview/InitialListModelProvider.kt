@@ -22,25 +22,9 @@
  *  SOFTWARE.
  */
 
-package com.mituuz.fuzzier.search
+package com.mituuz.fuzzier.search.initialview
 
-import com.intellij.openapi.fileEditor.FileEditorManager
-import com.intellij.openapi.project.Project
-import com.mituuz.fuzzier.intellij.iteration.IterationFileCollector
-import com.mituuz.fuzzier.intellij.iteration.OpenTabsCollector
-import com.mituuz.fuzzier.search.initialview.InitialListModelProvider
-import com.mituuz.fuzzier.search.initialview.OpenTabsInitialListModelProvider
+import com.mituuz.fuzzier.entities.FuzzyContainer
+import javax.swing.DefaultListModel
 
-class FuzzierOpenTabs : Fuzzier() {
-    override var popupTitle: String = "Fuzzy Search (Open Tabs)"
-
-    override fun getInitialViewProvider(project: Project): InitialListModelProvider {
-        val modules = projectState.modules
-        val openFiles = FileEditorManager.getInstance(project).openFiles
-        return OpenTabsInitialListModelProvider(modules, openFiles)
-    }
-
-    override fun createCollector(): IterationFileCollector {
-        return OpenTabsCollector()
-    }
-}
+typealias InitialListModelProvider = () -> DefaultListModel<FuzzyContainer>

@@ -22,25 +22,38 @@
  *  SOFTWARE.
  */
 
-package com.mituuz.fuzzier.search
+package com.mituuz.fuzzier.search.initialview
 
-import com.intellij.openapi.fileEditor.FileEditorManager
-import com.intellij.openapi.project.Project
-import com.mituuz.fuzzier.intellij.iteration.IterationFileCollector
-import com.mituuz.fuzzier.intellij.iteration.OpenTabsCollector
-import com.mituuz.fuzzier.search.initialview.InitialListModelProvider
-import com.mituuz.fuzzier.search.initialview.OpenTabsInitialListModelProvider
+import com.mituuz.fuzzier.entities.FuzzyContainer
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer
+import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
+import com.mituuz.fuzzier.settings.FuzzierSettingsService
+import javax.swing.DefaultListModel
 
-class FuzzierOpenTabs : Fuzzier() {
-    override var popupTitle: String = "Fuzzy Search (Open Tabs)"
+fun addFileToRecentlySearchedFiles(
+    fuzzyContainer: FuzzyContainer,
+    projectState: FuzzierSettingsService.State,
+    globalState: FuzzierGlobalSettingsService.State
+) {
+    val listModel: DefaultListModel<FuzzyMatchContainer> =
+        projectState.getRecentlySearchedFilesAsFuzzyMatchContainer()
 
-    override fun getInitialViewProvider(project: Project): InitialListModelProvider {
-        val modules = projectState.modules
-        val openFiles = FileEditorManager.getInstance(project).openFiles
-        return OpenTabsInitialListModelProvider(modules, openFiles)
+    var i = 0
+    while (i < listModel.size) {
+        if (listModel[i].filePath == fuzzyContainer.filePath) {
+            listModel.remove(i)
+        } else {
+            i++
+        }
     }
 
-    override fun createCollector(): IterationFileCollector {
-        return OpenTabsCollector()
+    while (listModel.size > globalState.fileListLimit - 1) {
+        listModel.remove(listModel.size - 1)
+    }
+
+    if (fuzzyContainer is FuzzyMatchContainer) {
+        listModel.addElement(fuzzyContainer)
+        projectState.recentlySearchedFiles =
+            FuzzyMatchContainer.SerializedMatchContainer.fromListModel(listModel)
     }
 }

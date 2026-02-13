@@ -73,8 +73,6 @@ abstract class FuzzyAction : AnAction() {
     protected val globalState = service<FuzzierGlobalSettingsService>().state
     protected var defaultDoc: Document? = null
     private val fileTypeManager = FileTypeManager.getInstance()
-
-    val fuzzierUtil = FuzzierUtil()
     protected open var currentUpdateListContentJob: Job? = null
     protected open var actionScope: CoroutineScope? = null
 
@@ -104,7 +102,7 @@ abstract class FuzzyAction : AnAction() {
         val project = actionEvent.project
         if (project != null) {
             projectState = project.service<FuzzierSettingsService>().state
-            fuzzierUtil.parseModules(project)
+            FuzzierUtil.parseModules(project)
             setCustomHandlers()
             actionScope?.cancel()
             actionScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
