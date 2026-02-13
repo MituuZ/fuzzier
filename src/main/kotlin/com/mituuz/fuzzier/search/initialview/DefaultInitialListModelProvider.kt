@@ -83,27 +83,15 @@ class DefaultInitialListModelProvider(
     }
 
     fun getRecentlySearchedFiles(): DefaultListModel<FuzzyContainer> {
-        val listModel = projectState.getRecentlySearchedFilesAsFuzzyMatchContainer()
-
-        var i = 0
-        while (i < listModel.size) {
-            if (listModel[i] == null) {
-                listModel.remove(i)
-            } else {
-                i++
-            }
-        }
-
-        // Reverse the list to show the most recent searches first
         val result = DefaultListModel<FuzzyContainer>()
-
-        var j = 0
-        while (j < listModel.size) {
-            val index = listModel.size - j - 1
-            result.addElement(listModel[index])
-            j++
-        }
-
+        projectState.getRecentlySearchedFilesAsFuzzyMatchContainer()
+            .elements()
+            .toList()
+            .filterNotNull()
+            .reversed()
+            .let {
+                result.addAll(it)
+            }
         return result
     }
 
