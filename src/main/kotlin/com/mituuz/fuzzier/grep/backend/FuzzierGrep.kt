@@ -65,6 +65,7 @@ object FuzzierGrep : BackendStrategy {
 
         val maxResults = service<FuzzierGlobalSettingsService>().state.fileListLimit
         val batcher = ResultBatcher<FuzzyContainer>()
+        val modules = project.service<FuzzierSettingsService>().state.modules
 
         for (file in files) {
             currentCoroutineContext().ensureActive()
@@ -82,7 +83,7 @@ object FuzzierGrep : BackendStrategy {
 
                         if (found) {
                             val (filePath, basePath) =
-                                FuzzierUtil.extractModulePath(file.path, project)
+                                FuzzierUtil.extractModulePath(file.path, modules)
                             fileMatches.add(
                                 RowContainer(
                                     filePath,

@@ -66,7 +66,7 @@ class DefaultInitialListModelProvider(
         var i = editorHistory.size - 1
         while (i >= 0 && listModel.size() < limit) {
             val file = editorHistory[i]
-            val filePathAndModule = FuzzierUtil.extractModulePath(file.path, project)
+            val filePathAndModule = FuzzierUtil.extractModulePath(file.path, projectState.modules)
             // Don't add files that do not have a module path in the project
             if (filePathAndModule.second == "") {
                 i--

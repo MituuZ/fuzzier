@@ -95,9 +95,7 @@ class DefaultInitialListModelProviderTest {
 
         val settingsState = FuzzierSettingsService.State()
         settingsState.modules = mapOf("module" to "/project/path/")
-        mockkStatic("com.intellij.openapi.components.ServiceKt")
-        every { project.getService(FuzzierSettingsService::class.java) } returns fuzzierSettingsService
-        every { fuzzierSettingsService.state } returns settingsState
+        defaultInitialListModelProvider = DefaultInitialListModelProvider(fgss, settingsState)
 
         val result =
             defaultInitialListModelProvider.getRecentProjectFiles(project)
@@ -125,9 +123,7 @@ class DefaultInitialListModelProviderTest {
 
         val settingsState = FuzzierSettingsService.State()
         settingsState.modules = mapOf("module" to "/project/path/")
-        mockkStatic("com.intellij.openapi.components.ServiceKt")
-        every { project.getService(FuzzierSettingsService::class.java) } returns fuzzierSettingsService
-        every { fuzzierSettingsService.state } returns settingsState
+        defaultInitialListModelProvider = DefaultInitialListModelProvider(fgss, settingsState)
 
         val result =
             defaultInitialListModelProvider.getRecentProjectFiles(project)

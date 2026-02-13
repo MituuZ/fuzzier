@@ -25,10 +25,12 @@
 package com.mituuz.fuzzier.search.initialview
 
 import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.components.service
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.OrderedContainer
+import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.util.FuzzierUtil
 import javax.swing.DefaultListModel
 
@@ -37,11 +39,12 @@ class OpenTabsInitialListModelProvider(
     override fun buildInitialView(project: Project): DefaultListModel<FuzzyContainer> {
         val fileEditorManager = FileEditorManager.getInstance(project)
         val listModel = DefaultListModel<FuzzyContainer>()
+        val modules = project.service<FuzzierSettingsService>().state.modules
 
         ReadAction.run<Throwable> {
             for (vf in fileEditorManager.openFiles) {
                 if (!vf.isDirectory) {
-                    val filePathAndModule = FuzzierUtil.extractModulePath(vf.path, project)
+                    val filePathAndModule = FuzzierUtil.extractModulePath(vf.path, modules)
                     // Don't add files that do not have a module path in the project
                     if (filePathAndModule.second == "") {
                         continue
