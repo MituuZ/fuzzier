@@ -24,10 +24,9 @@
 
 package com.mituuz.fuzzier.search.initialview
 
-import com.intellij.openapi.project.Project
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import javax.swing.DefaultListModel
 
 interface InitialListModelProvider {
-    fun buildInitialView(project: Project): DefaultListModel<FuzzyContainer>
+    fun buildInitialView(): DefaultListModel<FuzzyContainer>
 }

@@ -53,8 +53,9 @@ open class Fuzzier : FilesystemAction() {
         return IntelliJIterationFileCollector(projectState)
     }
 
-    protected open fun getInitialViewProvider(): InitialListModelProvider {
+    protected open fun getInitialViewProvider(project: Project): InitialListModelProvider {
         return DefaultInitialListModelProvider(
+            project,
             globalState,
             projectState,
         )
@@ -154,7 +155,7 @@ open class Fuzzier : FilesystemAction() {
         component.fileList.setPaintBusy(true)
         ApplicationManager.getApplication().executeOnPooledThread {
             try {
-                val initialListModel = getInitialViewProvider().buildInitialView(project)
+                val initialListModel = getInitialViewProvider(project).buildInitialView()
                 ApplicationManager.getApplication().invokeLater {
                     component.refreshModel(initialListModel, getCellRenderer())
                 }

@@ -65,7 +65,7 @@ class DefaultInitialListModelProviderTest {
         state = mockk()
         val globalState = FuzzierGlobalSettingsService.State()
         globalState.recentFilesMode = FuzzierGlobalSettingsService.RecentFilesMode.RECENT_PROJECT_FILES
-        defaultInitialListModelProvider = DefaultInitialListModelProvider(globalState, state)
+        defaultInitialListModelProvider = DefaultInitialListModelProvider(project, globalState, state)
         editorHistoryManager = mockk()
         every { fuzzierSettingsService.state } returns state
     }
@@ -95,7 +95,7 @@ class DefaultInitialListModelProviderTest {
 
         val settingsState = FuzzierSettingsService.State()
         settingsState.modules = mapOf("module" to "/project/path/")
-        defaultInitialListModelProvider = DefaultInitialListModelProvider(fgss, settingsState)
+        defaultInitialListModelProvider = DefaultInitialListModelProvider(project, fgss, settingsState)
 
         val result =
             defaultInitialListModelProvider.getRecentProjectFiles(project)
@@ -123,7 +123,7 @@ class DefaultInitialListModelProviderTest {
 
         val settingsState = FuzzierSettingsService.State()
         settingsState.modules = mapOf("module" to "/project/path/")
-        defaultInitialListModelProvider = DefaultInitialListModelProvider(fgss, settingsState)
+        defaultInitialListModelProvider = DefaultInitialListModelProvider(project, fgss, settingsState)
 
         val result =
             defaultInitialListModelProvider.getRecentProjectFiles(project)

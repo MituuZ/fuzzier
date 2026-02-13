@@ -35,10 +35,11 @@ import com.mituuz.fuzzier.util.FuzzierUtil
 import javax.swing.DefaultListModel
 
 class DefaultInitialListModelProvider(
+    val project: Project,
     val globalState: FuzzierGlobalSettingsService.State,
     val projectState: FuzzierSettingsService.State,
 ) : InitialListModelProvider {
-    override fun buildInitialView(project: Project): DefaultListModel<FuzzyContainer> {
+    override fun buildInitialView(): DefaultListModel<FuzzyContainer> {
         return when (globalState.recentFilesMode) {
             FuzzierGlobalSettingsService.RecentFilesMode.RECENT_PROJECT_FILES -> {
                 getRecentProjectFiles(project)
