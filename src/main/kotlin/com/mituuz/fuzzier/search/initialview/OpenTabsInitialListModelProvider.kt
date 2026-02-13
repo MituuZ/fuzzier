@@ -24,7 +24,6 @@
 
 package com.mituuz.fuzzier.search.initialview
 
-import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.vfs.VirtualFile
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.OrderedContainer
@@ -38,19 +37,17 @@ class OpenTabsInitialListModelProvider(
     override fun buildInitialView(): DefaultListModel<FuzzyContainer> {
         val listModel = DefaultListModel<FuzzyContainer>()
 
-        ReadAction.run<Throwable> {
-            for (vf in openFiles) {
-                if (!vf.isDirectory) {
-                    val filePathAndModule = FuzzierUtil.extractModulePath(vf.path, modules)
-                    // Don't add files that do not have a module path in the project
-                    if (filePathAndModule.second == "") {
-                        continue
-                    }
-                    val orderedContainer = OrderedContainer(
-                        filePathAndModule.first, filePathAndModule.second, vf.name
-                    )
-                    listModel.add(0, orderedContainer)
+        for (vf in openFiles) {
+            if (!vf.isDirectory) {
+                val filePathAndModule = FuzzierUtil.extractModulePath(vf.path, modules)
+                // Don't add files that do not have a module path in the project
+                if (filePathAndModule.second == "") {
+                    continue
                 }
+                val orderedContainer = OrderedContainer(
+                    filePathAndModule.first, filePathAndModule.second, vf.name
+                )
+                listModel.add(0, orderedContainer)
             }
         }
 
