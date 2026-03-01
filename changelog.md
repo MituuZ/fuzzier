@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 2.2.1
+
+- Update dependencies
+
 ## Version 2.2.0
 
 - Implement Fuzzy File Search (Open Tabs) action
