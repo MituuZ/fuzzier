@@ -24,7 +24,7 @@
 
 package com.mituuz.fuzzier.grep.backend
 
-import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.application.readAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
@@ -136,7 +136,7 @@ object FuzzierGrep : BackendStrategy {
         val firstCompleteWord = searchMatcher.extractFirstCompleteWord(searchString)
 
         if (firstCompleteWord != null) {
-            ReadAction.run<Throwable> {
+            readAction {
                 val helper = PsiSearchHelper.getInstance(project)
                 helper.processAllFilesWithWord(
                     firstCompleteWord,
