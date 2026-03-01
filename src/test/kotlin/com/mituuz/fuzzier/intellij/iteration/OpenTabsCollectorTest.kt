@@ -24,6 +24,7 @@
 
 package com.mituuz.fuzzier.intellij.iteration
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.testFramework.TestApplicationManager
@@ -62,7 +63,7 @@ class OpenTabsCollectorTest {
         val file2 = fixture.findFileInTempDir("src/file2.txt")
 
         runInEdtAndWait {
-            runReadAction {
+            ApplicationManager.getApplication().runReadAction {
                 fileEditorManager.openFile(file1, true)
                 fileEditorManager.openFile(file2, true)
             }
@@ -85,7 +86,7 @@ class OpenTabsCollectorTest {
         val file2 = fixture.findFileInTempDir("src/file2.txt")
 
         runInEdtAndWait {
-            runReadAction {
+            ApplicationManager.getApplication().runReadAction {
                 fileEditorManager.openFile(file1, true)
                 fileEditorManager.openFile(file2, true)
             }
@@ -105,7 +106,7 @@ class OpenTabsCollectorTest {
         val file2 = fixture.findFileInTempDir("src/file2.txt")
 
         runInEdtAndWait {
-            runReadAction {
+            ApplicationManager.getApplication().runReadAction {
                 fileEditorManager.openFile(file1, true)
                 fileEditorManager.openFile(file2, true)
             }

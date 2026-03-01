@@ -24,7 +24,7 @@
 
 package com.mituuz.fuzzier.intellij.iteration
 
-import com.intellij.openapi.application.runReadAction
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
@@ -40,7 +40,7 @@ class OpenTabsCollector : IterationFileCollector {
         val fileEditorManager = FileEditorManager.getInstance(project)
         val projectFileIndex = ProjectFileIndex.getInstance(project)
 
-        runReadAction {
+        ApplicationManager.getApplication().runReadAction {
             for (vf in fileEditorManager.openFiles) {
                 if (!shouldContinue()) return@runReadAction
                 if (fileFilter(vf)) {
