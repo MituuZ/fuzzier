@@ -27,7 +27,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 // Use the same version and group for the jar and the plugin
-val currentVersion = "2.2.1"
+val currentVersion = "2.2.2"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -39,6 +39,12 @@ intellijPlatform {
 
         changeNotes = """
     <h2>Version $currentVersion</h2>
+        <ul>
+            <li>
+                Update dependencies
+            </li>
+        </ul>
+    <h2>Version 2.2.1</h2>
         <ul>
             <li>
                 Update dependencies
