@@ -3,6 +3,7 @@
 ## Version 2.2.2
 
 - Update dependencies
+- Fix ETD errors
 
 ## Version 2.2.1
 

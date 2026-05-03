@@ -81,17 +81,19 @@ open class FuzzyGrep : FuzzyAction() {
 
         val projectBasePath = project.basePath.toString()
         currentLaunchJob = actionScope?.launch(Dispatchers.EDT) {
-            val backendResult: Result<BackendStrategy> = backendResolver.resolveBackend(commandRunner, projectBasePath)
-            backend = backendResult.getOrNull()
-            val popupTitle = grepConfig.getPopupTitle(backend!!.name)
-
+            val backendResult: Result<BackendStrategy> = withContext(Dispatchers.IO) {
+                backendResolver.resolveBackend(commandRunner, projectBasePath)
+            }
             if (backendResult.isFailure) {
                 showNotification(
                     "No search command found", "Fuzzy Grep failed: no suitable grep command found", project
                 )
                 return@launch
             }
-            if (backend == null) return@launch
+
+            val resolvedBackend = backendResult.getOrNull() ?: return@launch
+            backend = resolvedBackend
+            val popupTitle = grepConfig.getPopupTitle(resolvedBackend.name)
 
             yield()
             defaultDoc = EditorFactory.getInstance().createDocument("")

@@ -28,6 +28,7 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.execution.process.ProcessEvent
 import com.intellij.execution.process.ProcessListener
+import com.intellij.openapi.application.EDT
 import com.intellij.openapi.util.Key
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.RowContainer
@@ -46,28 +47,28 @@ class CommandRunner {
         projectBasePath: String
     ): String? {
         return try {
-            val commandLine = GeneralCommandLine(commands)
-                .withWorkDirectory(projectBasePath)
-                .withRedirectErrorStream(true)
             val output = StringBuilder()
-            val processHandler = OSProcessHandler(commandLine)
+            withContext(Dispatchers.IO) {
+                val commandLine = GeneralCommandLine(commands)
+                    .withWorkDirectory(projectBasePath)
+                    .withRedirectErrorStream(true)
+                val processHandler = OSProcessHandler(commandLine)
 
-            processHandler.addProcessListener(object : ProcessListener {
-                override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
-                    if (output.length < MAX_OUTPUT_SIZE) {
-                        output.appendLine(event.text.replace("\n", ""))
+                processHandler.addProcessListener(object : ProcessListener {
+                    override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
+                        if (output.length < MAX_OUTPUT_SIZE) {
+                            output.appendLine(event.text.replace("\n", ""))
+                        }
                     }
-                }
-            })
+                })
 
-            try {
-                withContext(Dispatchers.IO) {
+                try {
                     processHandler.startNotify()
                     processHandler.waitFor(2000)
-                }
-            } finally {
-                if (!processHandler.isProcessTerminated) {
-                    processHandler.destroyProcess()
+                } finally {
+                    if (!processHandler.isProcessTerminated) {
+                        processHandler.destroyProcess()
+                    }
                 }
             }
             output.toString()
@@ -86,39 +87,45 @@ class CommandRunner {
         parseOutputLine: (String, String) -> RowContainer?
     ) {
         try {
-            val commandLine = GeneralCommandLine(commands)
-                .withWorkDirectory(projectBasePath)
-                .withRedirectErrorStream(true)
-
-            val processHandler = OSProcessHandler(commandLine)
+            val results = mutableListOf<RowContainer>()
             var count = 0
 
-            processHandler.addProcessListener(object : ProcessListener {
-                override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
-                    if (count >= MAX_NUMBER_OR_RESULTS) return
+            withContext(Dispatchers.IO) {
+                val commandLine = GeneralCommandLine(commands)
+                    .withWorkDirectory(projectBasePath)
+                    .withRedirectErrorStream(true)
 
-                    event.text.lines().forEach { line ->
-                        if (count >= MAX_NUMBER_OR_RESULTS) return@forEach
-                        if (line.isNotBlank()) {
-                            val rowContainer = parseOutputLine(line, projectBasePath)
-                            if (rowContainer != null) {
-                                listModel.addElement(rowContainer)
-                                count++
+                val processHandler = OSProcessHandler(commandLine)
+
+                processHandler.addProcessListener(object : ProcessListener {
+                    override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
+                        if (count >= MAX_NUMBER_OR_RESULTS) return
+
+                        event.text.lines().forEach { line ->
+                            if (count >= MAX_NUMBER_OR_RESULTS) return@forEach
+                            if (line.isNotBlank()) {
+                                val rowContainer = parseOutputLine(line, projectBasePath)
+                                if (rowContainer != null) {
+                                    results.add(rowContainer)
+                                    count++
+                                }
                             }
                         }
                     }
-                }
-            })
+                })
 
-            try {
-                withContext(Dispatchers.IO) {
+                try {
                     processHandler.startNotify()
                     processHandler.waitFor(2000)
+                } finally {
+                    if (!processHandler.isProcessTerminated) {
+                        processHandler.destroyProcess()
+                    }
                 }
-            } finally {
-                if (!processHandler.isProcessTerminated) {
-                    processHandler.destroyProcess()
-                }
+            }
+
+            withContext(Dispatchers.EDT) {
+                results.forEach { listModel.addElement(it) }
             }
         } catch (_: InterruptedException) {
             throw InterruptedException()

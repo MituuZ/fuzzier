@@ -43,6 +43,9 @@ intellijPlatform {
             <li>
                 Update dependencies
             </li>
+            <li>
+                Fix ETD errors
+            </li>
         </ul>
     <h2>Version 2.2.1</h2>
         <ul>
