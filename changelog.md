@@ -1,9 +1,10 @@
 # Changelog
 
-## Version 2.2.2
+## Version 2.3.0
 
 - Update dependencies
 - Fix ETD errors
+- Update minimum version to 2026.1
 
 ## Version 2.2.1
 
