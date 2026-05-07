@@ -51,7 +51,7 @@ class FuzzierUtilTest {
             listOf("src2", "/src2/file2"),
             listOf("src3", "/src3/file3")
         )
-        FuzzierUtil.parseModules(myFixture.project)
+        FuzzierUtil.parseModules(myFixture.project, myFixture.project.service<FuzzierSettingsService>().state)
 
         val modules = myFixture.project.service<FuzzierSettingsService>().state.modules
         assertEquals(3, modules.size)
@@ -68,7 +68,7 @@ class FuzzierUtilTest {
             listOf("to/src2", "/to/src2/file2"),
             listOf("module/src3", "/module/src3/file3")
         )
-        FuzzierUtil.parseModules(myFixture.project)
+        FuzzierUtil.parseModules(myFixture.project, myFixture.project.service<FuzzierSettingsService>().state)
 
         val modules = myFixture.project.service<FuzzierSettingsService>().state.modules
         assertEquals(3, modules.size)
@@ -86,7 +86,7 @@ class FuzzierUtilTest {
             listOf("src1/module1", "/src1/module1/file1"),
             listOf("src1/module2", "/src1/module2/file1")
         )
-        FuzzierUtil.parseModules(myFixture.project)
+        FuzzierUtil.parseModules(myFixture.project, myFixture.project.service<FuzzierSettingsService>().state)
 
         val modules = myFixture.project.service<FuzzierSettingsService>().state.modules
 
@@ -103,7 +103,7 @@ class FuzzierUtilTest {
             listOf("src1/module1", "/src1/module1/file1"), listOf("src2", "/src2/file1")
         )
         val project = myFixture.project
-        FuzzierUtil.parseModules(project)
+        FuzzierUtil.parseModules(project, project.service<FuzzierSettingsService>().state)
 
         val modules = myFixture.project.service<FuzzierSettingsService>().state.modules
         assertEquals(3, modules.size)
@@ -132,7 +132,7 @@ class FuzzierUtilTest {
             listOf("module/src3", "/module/src3/file3")
         )
         val project = myFixture.project
-        FuzzierUtil.parseModules(project)
+        FuzzierUtil.parseModules(project, project.service<FuzzierSettingsService>().state)
 
         val modules = myFixture.project.service<FuzzierSettingsService>().state.modules
         assertEquals(3, modules.size)
@@ -156,7 +156,7 @@ class FuzzierUtilTest {
     @Test
     fun `Remove module paths, point only to project root`() {
         val myFixture = testUtil.setUpMultiModuleProject(listOf("path/src1", "/path/src1/file1"))
-        FuzzierUtil.parseModules(myFixture.project)
+        FuzzierUtil.parseModules(myFixture.project, myFixture.project.service<FuzzierSettingsService>().state)
 
         val modules = myFixture.project.service<FuzzierSettingsService>().state.modules
         assertEquals(1, modules.size)
@@ -168,7 +168,7 @@ class FuzzierUtilTest {
     @Test
     fun `Remove module paths, file not included`() {
         val myFixture = testUtil.setUpMultiModuleProject(listOf("path/src1", "/path/src1/file1"))
-        FuzzierUtil.parseModules(myFixture.project)
+        FuzzierUtil.parseModules(myFixture.project, myFixture.project.service<FuzzierSettingsService>().state)
 
         val modules = myFixture.project.service<FuzzierSettingsService>().state.modules
         assertEquals(1, modules.size)
@@ -179,7 +179,7 @@ class FuzzierUtilTest {
     @Test
     fun parseModulesSingleModule() {
         val myFixture = testUtil.setUpMultiModuleProject(listOf("src1", "/src1/file1"))
-        FuzzierUtil.parseModules(myFixture.project)
+        FuzzierUtil.parseModules(myFixture.project, myFixture.project.service<FuzzierSettingsService>().state)
 
         val modules = myFixture.project.service<FuzzierSettingsService>().state.modules
         assertEquals(1, modules.size)

@@ -63,8 +63,11 @@ class FuzzyMover : FilesystemAction() {
             createListeners(project)
             val currentEditor = FileEditorManager.getInstance(project).selectedTextEditor
             if (currentEditor != null) {
-                currentFile = currentEditor.virtualFile
-                component.fileList.setEmptyText("Press enter to use current file: ${currentFile.path}")
+                val editorFile = currentEditor.virtualFile
+                if (editorFile != null) {
+                    currentFile = editorFile
+                    component.fileList.setEmptyText("Press enter to use current file: ${currentFile.path}")
+                }
             }
 
             val maybePopup = getPopupProvider().show(

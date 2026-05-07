@@ -23,7 +23,6 @@
  */
 package com.mituuz.fuzzier.util
 
-import com.intellij.openapi.components.service
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
@@ -70,7 +69,7 @@ class FuzzierUtil {
          *
          * Populates `FuzzierSettings.state.modules`-field
          */
-        fun parseModules(project: Project) {
+        fun parseModules(project: Project, state: FuzzierSettingsService.State) {
             val moduleManager = ModuleManager.getInstance(project)
 
             // Gather all modules and paths into a list
@@ -101,11 +100,11 @@ class FuzzierUtil {
 
             if (moduleList.isEmpty() && project.basePath != null) {
                 moduleList.add(ModuleContainer(project.name, project.basePath!!))
-                project.service<FuzzierSettingsService>().state.isProject = true
+                state.isProject = true
             }
 
             val moduleMap = listToMap(moduleList)
-            project.service<FuzzierSettingsService>().state.modules = moduleMap
+            state.modules = moduleMap
         }
 
         private fun shortenModulePaths(modules: List<ModuleContainer>) {

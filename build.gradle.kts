@@ -27,7 +27,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 // Use the same version and group for the jar and the plugin
-val currentVersion = "2.2.2"
+val currentVersion = "2.3.0"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -43,26 +43,17 @@ intellijPlatform {
             <li>
                 Update dependencies
             </li>
-        </ul>
-    <h2>Version 2.2.1</h2>
-        <ul>
             <li>
-                Update dependencies
+                Fix ETD errors
             </li>
-        </ul>
-    <h2>Version 2.2.0</h2>
-        <ul>
             <li>
-                Implement Fuzzy File Search (Open Tabs) action
-                <ul>
-                    <li><code>com.mituuz.fuzzier.search.FuzzierOpenTabs</code></li>
-                </ul>
+                Update minimum version to 2026.1
             </li>
         </ul>
     """.trimIndent()
 
         ideaVersion {
-            sinceBuild = "251"
+            sinceBuild = "261"
             untilBuild = provider { null }
         }
     }
@@ -94,8 +85,7 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        // TODO: Update minimum version to 2025.3 and replace this deprecated config
-        intellijIdeaCommunity(libs.versions.communityVersion.get())
+        intellijIdea("2026.1.1")
         pluginVerifier()
         zipSigner()
         testFramework(TestFrameworkType.Platform)

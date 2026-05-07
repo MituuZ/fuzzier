@@ -28,6 +28,7 @@ import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.actionSystem.*
+import com.intellij.openapi.application.EDT
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Document
@@ -99,14 +100,20 @@ abstract class FuzzyAction : AnAction() {
     }
 
     override fun actionPerformed(actionEvent: AnActionEvent) {
-        val project = actionEvent.project
-        if (project != null) {
-            projectState = project.service<FuzzierSettingsService>().state
-            FuzzierUtil.parseModules(project)
-            setCustomHandlers()
-            actionScope?.cancel()
-            actionScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-            runAction(project, actionEvent)
+        val project = actionEvent.project ?: return
+
+        actionScope?.cancel()
+        actionScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+        actionScope?.launch {
+            val state = project.service<FuzzierSettingsService>().state
+            FuzzierUtil.parseModules(project, state)
+
+            withContext(Dispatchers.EDT) {
+                projectState = state
+                setCustomHandlers()
+                runAction(project, actionEvent)
+            }
         }
     }
 

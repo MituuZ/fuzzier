@@ -69,7 +69,7 @@ class TestBenchComponent : JPanel(), Disposable {
         val project = ProjectManager.getInstance().openProjects[0]
         projectState = project.service<FuzzierSettingsService>().state
 
-        FuzzierUtil.parseModules(project)
+        FuzzierUtil.parseModules(project, projectState)
 
         liveSettingsComponent = settingsComponent
         layout = GridLayoutManager(2, 1)
