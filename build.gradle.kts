@@ -65,7 +65,7 @@ intellijPlatform {
     """.trimIndent()
 
         ideaVersion {
-            sinceBuild = "251"
+            sinceBuild = "261"
             untilBuild = provider { null }
         }
     }
@@ -97,8 +97,7 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        // TODO: Update minimum version to 2025.3 and replace this deprecated config
-        intellijIdeaCommunity(libs.versions.communityVersion.get())
+        intellijIdea("2026.1.1")
         pluginVerifier()
         zipSigner()
         testFramework(TestFrameworkType.Platform)
