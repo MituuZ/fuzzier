@@ -45,6 +45,11 @@ import org.junit.jupiter.api.Test
 class FuzzyGrepTest {
     private lateinit var fGrep: FuzzyGrep
 
+    private data class ValidVfContext(
+        val file: VirtualFile,
+        val clm: ChangeListManager
+    )
+
     @BeforeEach
     fun setUp() {
         TestApplicationManager.getInstance()
@@ -56,12 +61,28 @@ class FuzzyGrepTest {
         unmockkAll()
     }
 
-    @Test
-    fun `Directories should not be valid`() {
-        val file1 = mockk<VirtualFile>()
+    private fun createValidVfContext(
+        isDirectory: Boolean = false,
+        isBinary: Boolean = false,
+        isIgnored: Boolean = false,
+        extension: String? = null
+    ): ValidVfContext {
+        val file = mockk<VirtualFile>()
         val clm = mockk<ChangeListManager>()
 
-        every { file1.isDirectory } returns true
+        every { file.isDirectory } returns isDirectory
+        every { file.fileType.isBinary } returns isBinary
+        every { clm.isIgnoredFile(file) } returns isIgnored
+        if (extension != null) {
+            every { file.extension } returns extension
+        }
+
+        return ValidVfContext(file, clm)
+    }
+
+    @Test
+    fun `Directories should not be valid`() {
+        val (file1, clm) = createValidVfContext(isDirectory = true)
 
         val res = fGrep.validVf(file1, null, clm)
         assert(!res)
@@ -69,11 +90,7 @@ class FuzzyGrepTest {
 
     @Test
     fun `Binary files should not be valid`() {
-        val file1 = mockk<VirtualFile>()
-        val clm = mockk<ChangeListManager>()
-
-        every { file1.isDirectory } returns false
-        every { file1.fileType.isBinary } returns true
+        val (file1, clm) = createValidVfContext(isBinary = true)
 
         val res = fGrep.validVf(file1, null, clm)
         assert(!res)
@@ -81,12 +98,7 @@ class FuzzyGrepTest {
 
     @Test
     fun `Ignored files should not be valid`() {
-        val file1 = mockk<VirtualFile>()
-        val clm = mockk<ChangeListManager>()
-
-        every { file1.isDirectory } returns false
-        every { file1.fileType.isBinary } returns false
-        every { clm.isIgnoredFile(file1) } returns true
+        val (file1, clm) = createValidVfContext(isIgnored = true)
 
         val res = fGrep.validVf(file1, null, clm)
         assert(!res)
@@ -94,12 +106,7 @@ class FuzzyGrepTest {
 
     @Test
     fun `null secondary field should be valid`() {
-        val file1 = mockk<VirtualFile>()
-        val clm = mockk<ChangeListManager>()
-
-        every { file1.isDirectory } returns false
-        every { file1.fileType.isBinary } returns false
-        every { clm.isIgnoredFile(file1) } returns false
+        val (file1, clm) = createValidVfContext()
 
         val res = fGrep.validVf(file1, null, clm)
         assert(res)
@@ -107,14 +114,7 @@ class FuzzyGrepTest {
 
     @Test
     fun `Matching secondary field should be valid`() {
-        val file1 = mockk<VirtualFile>()
-        val clm = mockk<ChangeListManager>()
-
-        every { file1.isDirectory } returns false
-        every { file1.fileType.isBinary } returns false
-        every { clm.isIgnoredFile(file1) } returns false
-
-        every { file1.extension } returns "kt"
+        val (file1, clm) = createValidVfContext(extension = "kt")
 
         val res = fGrep.validVf(file1, "kt", clm)
         assert(res)
@@ -122,14 +122,7 @@ class FuzzyGrepTest {
 
     @Test
     fun `Non-matching secondary field should not be valid`() {
-        val file1 = mockk<VirtualFile>()
-        val clm = mockk<ChangeListManager>()
-
-        every { file1.isDirectory } returns false
-        every { file1.fileType.isBinary } returns false
-        every { clm.isIgnoredFile(file1) } returns false
-
-        every { file1.extension } returns "java"
+        val (file1, clm) = createValidVfContext(extension = "java")
 
         val res = fGrep.validVf(file1, "kt", clm)
         assert(!res)
