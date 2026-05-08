@@ -34,8 +34,8 @@ import com.mituuz.fuzzier.entities.GrepConfig
 import com.mituuz.fuzzier.grep.backend.BackendStrategy
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import io.mockk.unmockkAll
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -47,6 +47,13 @@ class FuzzyGrepTest {
 
     private data class ValidVfContext(
         val file: VirtualFile,
+        val clm: ChangeListManager
+    )
+
+    private data class FindInFilesContext(
+        val project: Project,
+        val component: FuzzyFinderComponent,
+        val backend: BackendStrategy,
         val clm: ChangeListManager
     )
 
@@ -78,6 +85,27 @@ class FuzzyGrepTest {
         }
 
         return ValidVfContext(file, clm)
+    }
+
+    private fun createFindInFilesContext(
+        projectBasePath: String? = "/tmp/project",
+        secondaryText: String = "kt"
+    ): FindInFilesContext {
+        val project = mockk<Project>()
+        val component = mockk<FuzzyFinderComponent>()
+        val backend = mockk<BackendStrategy>()
+        val clm = mockk<ChangeListManager>()
+
+        every { project.basePath } returns projectBasePath
+        every { component.getSecondaryText() } returns secondaryText
+
+        fGrep.component = component
+        fGrep.updateBackend(backend)
+        fGrep.updateGrepConfig(
+            GrepConfig(targets = null, caseMode = CaseMode.SENSITIVE, title = "Fuzzy Grep")
+        )
+
+        return FindInFilesContext(project, component, backend, clm)
     }
 
     @Test
@@ -129,23 +157,22 @@ class FuzzyGrepTest {
     }
 
     @Test
-    fun `findInFiles test frame should setup required mocks`() {
-        val project = mockk<Project>()
-        val component = mockk<FuzzyFinderComponent>()
-        val backend = mockk<BackendStrategy>()
-        val changelistManager = mockk<ChangeListManager>()
+    fun `findInFiles should skip backend when backend is null`() = runBlocking {
+        val (project, _, _, clm) = createFindInFilesContext()
 
-        mockkStatic(ChangeListManager::class)
-        every { project.basePath } returns "/tmp/project"
-        every { component.getSecondaryText() } returns "kt"
-        every { ChangeListManager.getInstance(project) } returns changelistManager
+        val model = fGrep.findInFiles("needle", project, clm, null)
 
-        fGrep.component = component
-        fGrep.updateBackend(backend)
-        fGrep.updateGrepConfig(GrepConfig(targets = null, caseMode = CaseMode.SENSITIVE, title = "Fuzzy Grep"))
+        assertNotNull(model)
+        assertEquals(0, model.size)
+    }
 
-        assertEquals("/tmp/project", project.basePath)
-        assertEquals("kt", component.getSecondaryText())
-        assertNotNull(ChangeListManager.getInstance(project))
+    @Test
+    fun `findInFiles should skip backend when project base path is null`() = runBlocking {
+        val (project, _, backend, clm) = createFindInFilesContext(projectBasePath = null)
+
+        val model = fGrep.findInFiles("needle", project, clm, backend)
+
+        assertNotNull(model)
+        assertEquals(0, model.size)
     }
 }
