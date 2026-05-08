@@ -132,25 +132,32 @@ open class FuzzyGrep : FuzzyAction() {
 
     override fun updateListContents(project: Project, searchString: String) {
         if (StringUtils.isBlank(searchString)) {
+            currentUpdateListContentJob?.cancel()
+            currentUpdateListContentJob = null
             component.fileList.model = DefaultListModel()
+            component.fileList.setPaintBusy(false)
             return
         }
 
         currentUpdateListContentJob?.cancel()
-        currentUpdateListContentJob = actionScope?.launch(Dispatchers.EDT) {
+        val updateJob = actionScope?.launch(Dispatchers.EDT, start = CoroutineStart.LAZY) {
             component.fileList.setPaintBusy(true)
+
             try {
-                val results = withContext(Dispatchers.IO) {
-                    findInFiles(
-                        searchString, project
-                    )
-                }
+                val results = findInFiles(searchString, project)
                 coroutineContext.ensureActive()
+
                 component.refreshModel(results, getCellRenderer())
             } finally {
-                component.fileList.setPaintBusy(false)
+                if (currentUpdateListContentJob == coroutineContext.job) {
+                    component.fileList.setPaintBusy(false)
+                    currentUpdateListContentJob = null
+                }
             }
         }
+
+        currentUpdateListContentJob = updateJob
+        updateJob?.start()
     }
 
     private suspend fun findInFiles(
@@ -159,12 +166,16 @@ open class FuzzyGrep : FuzzyAction() {
     ): ListModel<FuzzyContainer> {
         val listModel = DefaultListModel<FuzzyContainer>()
         val projectBasePath = project.basePath
+        val resolvedBackend = backend
 
-        if (backend != null && projectBasePath != null) {
+        if (resolvedBackend != null && projectBasePath != null) {
             val secondaryFieldText = (component as FuzzyFinderComponent).getSecondaryText()
-            backend!!.handleSearch(
+            val changelistManager = ChangeListManager.getInstance(project)
+            resolvedBackend.handleSearch(
                 grepConfig, searchString, secondaryFieldText, commandRunner, listModel, projectBasePath, project
-            ) { vf -> validVf(vf, secondaryFieldText, ChangeListManager.getInstance(project)) }
+            ) { vf ->
+                validVf(vf, secondaryFieldText, changelistManager)
+            }
         }
 
         return listModel
