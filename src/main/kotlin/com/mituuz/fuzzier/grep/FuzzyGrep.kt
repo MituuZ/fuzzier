@@ -181,7 +181,7 @@ open class FuzzyGrep : FuzzyAction() {
         return listModel
     }
 
-    private fun validVf(
+    fun validVf(
         virtualFile: VirtualFile, secondaryFieldText: String? = null, clm: ChangeListManager
     ): Boolean {
         if (virtualFile.isDirectory) return false
