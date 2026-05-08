@@ -24,13 +24,21 @@
 
 package com.mituuz.fuzzier.grep
 
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.vcs.changes.ChangeListManager
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.testFramework.TestApplicationManager
+import com.mituuz.fuzzier.components.FuzzyFinderComponent
+import com.mituuz.fuzzier.entities.CaseMode
+import com.mituuz.fuzzier.entities.GrepConfig
+import com.mituuz.fuzzier.grep.backend.BackendStrategy
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -125,5 +133,26 @@ class FuzzyGrepTest {
 
         val res = fGrep.validVf(file1, "kt", clm)
         assert(!res)
+    }
+
+    @Test
+    fun `findInFiles test frame should setup required mocks`() {
+        val project = mockk<Project>()
+        val component = mockk<FuzzyFinderComponent>()
+        val backend = mockk<BackendStrategy>()
+        val changelistManager = mockk<ChangeListManager>()
+
+        mockkStatic(ChangeListManager::class)
+        every { project.basePath } returns "/tmp/project"
+        every { component.getSecondaryText() } returns "kt"
+        every { ChangeListManager.getInstance(project) } returns changelistManager
+
+        fGrep.component = component
+        fGrep.updateBackend(backend)
+        fGrep.updateGrepConfig(GrepConfig(targets = null, caseMode = CaseMode.SENSITIVE, title = "Fuzzy Grep"))
+
+        assertEquals("/tmp/project", project.basePath)
+        assertEquals("kt", component.getSecondaryText())
+        assertNotNull(ChangeListManager.getInstance(project))
     }
 }

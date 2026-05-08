@@ -92,7 +92,7 @@ open class FuzzyGrep : FuzzyAction() {
             }
 
             val resolvedBackend = backendResult.getOrNull() ?: return@launch
-            backend = resolvedBackend
+            updateBackend(resolvedBackend)
             val popupTitle = grepConfig.getPopupTitle(resolvedBackend.name)
 
             yield()
@@ -238,5 +238,13 @@ open class FuzzyGrep : FuzzyAction() {
                 }
             }
         }
+    }
+
+    fun updateBackend(resolvedBackend: BackendStrategy?) {
+        backend = resolvedBackend
+    }
+
+    fun updateGrepConfig(config: GrepConfig) {
+        grepConfig = config
     }
 }
