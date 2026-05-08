@@ -49,6 +49,9 @@ intellijPlatform {
             <li>
                 Update minimum version to 2026.1
             </li>
+            <li>
+                Add fallback for finding rg with wsl2
+            </li>
         </ul>
     """.trimIndent()
 
