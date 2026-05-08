@@ -5,6 +5,7 @@
 - Update dependencies
 - Fix ETD errors
 - Update minimum version to 2026.1
+- Add fallback for finding rg with wsl2
 
 ## Version 2.2.1
 

@@ -24,6 +24,7 @@
 
 package com.mituuz.fuzzier.grep.backend
 
+import com.intellij.execution.process.ProcessNotCreatedException
 import com.intellij.openapi.components.service
 import com.mituuz.fuzzier.runner.CommandRunner
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
@@ -47,13 +48,16 @@ class BackendResolver(val isWindows: Boolean) {
         executable: String,
         projectBasePath: String
     ): Boolean {
-        val command = if (isWindows) {
-            listOf("where", executable)
+        val result = if (isWindows) {
+            try {
+                commandRunner.runCommandForOutput(listOf("where", executable), projectBasePath)
+            } catch (_: ProcessNotCreatedException) {
+                // Fallback for WSL2
+                commandRunner.runCommandForOutput(listOf("which", executable), projectBasePath)
+            }
         } else {
-            listOf("which", executable)
+            commandRunner.runCommandForOutput(listOf("which", executable), projectBasePath)
         }
-
-        val result = commandRunner.runCommandForOutput(command, projectBasePath)
 
         return !(result.isNullOrBlank() || result.contains("Could not find files"))
     }
