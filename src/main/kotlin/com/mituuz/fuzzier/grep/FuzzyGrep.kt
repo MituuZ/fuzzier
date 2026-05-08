@@ -92,7 +92,7 @@ open class FuzzyGrep : FuzzyAction() {
             }
 
             val resolvedBackend = backendResult.getOrNull() ?: return@launch
-            backend = resolvedBackend
+            updateBackend(resolvedBackend)
             val popupTitle = grepConfig.getPopupTitle(resolvedBackend.name)
 
             yield()
@@ -132,45 +132,62 @@ open class FuzzyGrep : FuzzyAction() {
 
     override fun updateListContents(project: Project, searchString: String) {
         if (StringUtils.isBlank(searchString)) {
+            currentUpdateListContentJob?.cancel()
+            currentUpdateListContentJob = null
             component.fileList.model = DefaultListModel()
+            component.fileList.setPaintBusy(false)
             return
         }
 
         currentUpdateListContentJob?.cancel()
-        currentUpdateListContentJob = actionScope?.launch(Dispatchers.EDT) {
+        val updateJob = actionScope?.launch(Dispatchers.EDT, start = CoroutineStart.LAZY) {
             component.fileList.setPaintBusy(true)
+
             try {
-                val results = withContext(Dispatchers.IO) {
-                    findInFiles(
-                        searchString, project
-                    )
-                }
+                val changelistManager = ChangeListManager.getInstance(project)
+                val results = findInFiles(
+                    searchString,
+                    project,
+                    changelistManager,
+                    backend
+                )
                 coroutineContext.ensureActive()
+
                 component.refreshModel(results, getCellRenderer())
             } finally {
-                component.fileList.setPaintBusy(false)
+                if (currentUpdateListContentJob == coroutineContext.job) {
+                    component.fileList.setPaintBusy(false)
+                    currentUpdateListContentJob = null
+                }
             }
         }
+
+        currentUpdateListContentJob = updateJob
+        updateJob?.start()
     }
 
-    private suspend fun findInFiles(
+    suspend fun findInFiles(
         searchString: String,
         project: Project,
+        clm: ChangeListManager,
+        resolvedBackend: BackendStrategy?
     ): ListModel<FuzzyContainer> {
         val listModel = DefaultListModel<FuzzyContainer>()
         val projectBasePath = project.basePath
 
-        if (backend != null && projectBasePath != null) {
+        if (resolvedBackend != null && projectBasePath != null) {
             val secondaryFieldText = (component as FuzzyFinderComponent).getSecondaryText()
-            backend!!.handleSearch(
+            resolvedBackend.handleSearch(
                 grepConfig, searchString, secondaryFieldText, commandRunner, listModel, projectBasePath, project
-            ) { vf -> validVf(vf, secondaryFieldText, ChangeListManager.getInstance(project)) }
+            ) { vf ->
+                validVf(vf, secondaryFieldText, clm)
+            }
         }
 
         return listModel
     }
 
-    private fun validVf(
+    fun validVf(
         virtualFile: VirtualFile, secondaryFieldText: String? = null, clm: ChangeListManager
     ): Boolean {
         if (virtualFile.isDirectory) return false
@@ -221,5 +238,13 @@ open class FuzzyGrep : FuzzyAction() {
                 }
             }
         }
+    }
+
+    fun updateBackend(resolvedBackend: BackendStrategy?) {
+        backend = resolvedBackend
+    }
+
+    fun updateGrepConfig(config: GrepConfig) {
+        grepConfig = config
     }
 }
