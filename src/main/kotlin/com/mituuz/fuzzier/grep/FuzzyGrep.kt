@@ -144,7 +144,13 @@ open class FuzzyGrep : FuzzyAction() {
             component.fileList.setPaintBusy(true)
 
             try {
-                val results = findInFiles(searchString, project)
+                val changelistManager = ChangeListManager.getInstance(project)
+                val results = findInFiles(
+                    searchString,
+                    project,
+                    changelistManager,
+                    backend
+                )
                 coroutineContext.ensureActive()
 
                 component.refreshModel(results, getCellRenderer())
@@ -160,21 +166,21 @@ open class FuzzyGrep : FuzzyAction() {
         updateJob?.start()
     }
 
-    private suspend fun findInFiles(
+    suspend fun findInFiles(
         searchString: String,
         project: Project,
+        clm: ChangeListManager,
+        resolvedBackend: BackendStrategy?
     ): ListModel<FuzzyContainer> {
         val listModel = DefaultListModel<FuzzyContainer>()
         val projectBasePath = project.basePath
-        val resolvedBackend = backend
 
         if (resolvedBackend != null && projectBasePath != null) {
             val secondaryFieldText = (component as FuzzyFinderComponent).getSecondaryText()
-            val changelistManager = ChangeListManager.getInstance(project)
             resolvedBackend.handleSearch(
                 grepConfig, searchString, secondaryFieldText, commandRunner, listModel, projectBasePath, project
             ) { vf ->
-                validVf(vf, secondaryFieldText, changelistManager)
+                validVf(vf, secondaryFieldText, clm)
             }
         }
 
