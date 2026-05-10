@@ -29,19 +29,22 @@ import com.intellij.openapi.components.service
 import com.mituuz.fuzzier.runner.CommandRunner
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService.GrepBackend
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class BackendResolver(val isWindows: Boolean) {
-    suspend fun resolveBackend(commandRunner: CommandRunner, projectBasePath: String): Result<BackendStrategy> {
-        val grepBackendSetting = service<FuzzierGlobalSettingsService>().state.grepBackend
+    suspend fun resolveBackend(commandRunner: CommandRunner, projectBasePath: String): Result<BackendStrategy> =
+        withContext(Dispatchers.IO) {
+            val grepBackendSetting = service<FuzzierGlobalSettingsService>().state.grepBackend
 
-        return when (grepBackendSetting) {
-            GrepBackend.FUZZIER -> Result.success(FuzzierGrep)
-            GrepBackend.DYNAMIC -> when {
-                isInstalled(commandRunner, "rg", projectBasePath) -> Result.success(Ripgrep)
-                else -> Result.success(FuzzierGrep)
+            when (grepBackendSetting) {
+                GrepBackend.FUZZIER -> Result.success(FuzzierGrep)
+                GrepBackend.DYNAMIC -> when {
+                    isInstalled(commandRunner, "rg", projectBasePath) -> Result.success(Ripgrep)
+                    else -> Result.success(FuzzierGrep)
+                }
             }
         }
-    }
 
     private suspend fun isInstalled(
         commandRunner: CommandRunner,
