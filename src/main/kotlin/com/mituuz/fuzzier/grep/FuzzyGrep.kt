@@ -149,7 +149,8 @@ open class FuzzyGrep : FuzzyAction() {
                     searchString,
                     project,
                     changelistManager,
-                    backend
+                    backend,
+                    (component as FuzzyFinderComponent),
                 )
                 coroutineContext.ensureActive()
 
@@ -170,13 +171,14 @@ open class FuzzyGrep : FuzzyAction() {
         searchString: String,
         project: Project,
         clm: ChangeListManager,
-        resolvedBackend: BackendStrategy?
+        resolvedBackend: BackendStrategy?,
+        fuzzyFinderComponent: FuzzyFinderComponent,
     ): ListModel<FuzzyContainer> {
         val listModel = DefaultListModel<FuzzyContainer>()
         val projectBasePath = project.basePath
 
         if (resolvedBackend != null && projectBasePath != null) {
-            val secondaryFieldText = (component as FuzzyFinderComponent).getSecondaryText()
+            val secondaryFieldText = fuzzyFinderComponent.getSecondaryText()
             resolvedBackend.handleSearch(
                 grepConfig, searchString, secondaryFieldText, commandRunner, listModel, projectBasePath, project
             ) { vf ->

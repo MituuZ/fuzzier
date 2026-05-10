@@ -46,8 +46,7 @@ class FuzzyGrepTest {
     private lateinit var fGrep: FuzzyGrep
 
     private data class ValidVfContext(
-        val file: VirtualFile,
-        val clm: ChangeListManager
+        val file: VirtualFile, val clm: ChangeListManager
     )
 
     private data class FindInFilesContext(
@@ -69,10 +68,7 @@ class FuzzyGrepTest {
     }
 
     private fun createValidVfContext(
-        isDirectory: Boolean = false,
-        isBinary: Boolean = false,
-        isIgnored: Boolean = false,
-        extension: String? = null
+        isDirectory: Boolean = false, isBinary: Boolean = false, isIgnored: Boolean = false, extension: String? = null
     ): ValidVfContext {
         val file = mockk<VirtualFile>()
         val clm = mockk<ChangeListManager>()
@@ -88,8 +84,7 @@ class FuzzyGrepTest {
     }
 
     private fun createFindInFilesContext(
-        projectBasePath: String? = "/tmp/project",
-        secondaryText: String = "kt"
+        projectBasePath: String? = "/tmp/project", secondaryText: String = "kt"
     ): FindInFilesContext {
         val project = mockk<Project>()
         val component = mockk<FuzzyFinderComponent>()
@@ -158,9 +153,9 @@ class FuzzyGrepTest {
 
     @Test
     fun `findInFiles should skip backend when backend is null`() = runBlocking {
-        val (project, _, _, clm) = createFindInFilesContext()
+        val (project, component, _, clm) = createFindInFilesContext()
 
-        val model = fGrep.findInFiles("needle", project, clm, null)
+        val model = fGrep.findInFiles("needle", project, clm, null, component)
 
         assertNotNull(model)
         assertEquals(0, model.size)
@@ -168,9 +163,9 @@ class FuzzyGrepTest {
 
     @Test
     fun `findInFiles should skip backend when project base path is null`() = runBlocking {
-        val (project, _, backend, clm) = createFindInFilesContext(projectBasePath = null)
+        val (project, component, backend, clm) = createFindInFilesContext(projectBasePath = null)
 
-        val model = fGrep.findInFiles("needle", project, clm, backend)
+        val model = fGrep.findInFiles("needle", project, clm, backend, component)
 
         assertNotNull(model)
         assertEquals(0, model.size)
