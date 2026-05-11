@@ -31,7 +31,7 @@ import com.mituuz.fuzzier.entities.GrepConfig
 import com.mituuz.fuzzier.runner.CommandRunner
 import javax.swing.DefaultListModel
 
-sealed interface BackendStrategy {
+interface BackendStrategy {
     val name: String
 
     suspend fun handleSearch(

@@ -81,9 +81,7 @@ open class FuzzyGrep : FuzzyAction() {
 
         val projectBasePath = project.basePath.toString()
         currentLaunchJob = actionScope?.launch(Dispatchers.EDT) {
-            val backendResult: Result<BackendStrategy> = withContext(Dispatchers.IO) {
-                backendResolver.resolveBackend(commandRunner, projectBasePath)
-            }
+            val backendResult: Result<BackendStrategy> = backendResolver.resolveBackend(commandRunner, projectBasePath)
             if (backendResult.isFailure) {
                 showNotification(
                     "No search command found", "Fuzzy Grep failed: no suitable grep command found", project
@@ -92,7 +90,7 @@ open class FuzzyGrep : FuzzyAction() {
             }
 
             val resolvedBackend = backendResult.getOrNull() ?: return@launch
-            updateBackend(resolvedBackend)
+            backend = resolvedBackend
             val popupTitle = grepConfig.getPopupTitle(resolvedBackend.name)
 
             yield()
@@ -149,7 +147,8 @@ open class FuzzyGrep : FuzzyAction() {
                     searchString,
                     project,
                     changelistManager,
-                    backend
+                    backend,
+                    (component as FuzzyFinderComponent),
                 )
                 coroutineContext.ensureActive()
 
@@ -170,13 +169,14 @@ open class FuzzyGrep : FuzzyAction() {
         searchString: String,
         project: Project,
         clm: ChangeListManager,
-        resolvedBackend: BackendStrategy?
+        resolvedBackend: BackendStrategy?,
+        fuzzyFinderComponent: FuzzyFinderComponent,
     ): ListModel<FuzzyContainer> {
         val listModel = DefaultListModel<FuzzyContainer>()
         val projectBasePath = project.basePath
 
         if (resolvedBackend != null && projectBasePath != null) {
-            val secondaryFieldText = (component as FuzzyFinderComponent).getSecondaryText()
+            val secondaryFieldText = fuzzyFinderComponent.getSecondaryText()
             resolvedBackend.handleSearch(
                 grepConfig, searchString, secondaryFieldText, commandRunner, listModel, projectBasePath, project
             ) { vf ->
@@ -238,10 +238,6 @@ open class FuzzyGrep : FuzzyAction() {
                 }
             }
         }
-    }
-
-    fun updateBackend(resolvedBackend: BackendStrategy?) {
-        backend = resolvedBackend
     }
 
     fun updateGrepConfig(config: GrepConfig) {
