@@ -24,24 +24,29 @@
 
 package com.mituuz.fuzzier.search.initialview
 
+import com.mituuz.fuzzier.entities.FileAccessMetadata
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.SerializedMatchContainer.Companion.fromFuzzyMatchContainer
-import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 
 /**
- * Adds a file to the list of recently searched files, maintaining the limit set by global settings.
- * If the file already exists in the list, it is removed and re-added to ensure it appears as the most recent.
+ * Adds a file to the list of recently searched files while ensuring that the list does not exceed
+ * the specified limit, maintains uniqueness, and updates the file metadata cache.
  *
- * @param incomingContainer The container holding information about the file being added to the list.
- * @param projectState The state of the current project, containing the project's recently searched files.
- * @param globalState The global settings state, including configuration like the file list limit.
+ * @param incomingContainer The container representing the file to be added to the recently
+ * searched files list.
+ * @param projectState The current state of the project, which holds the recently searched
+ * files and related metadata.
+ * @param fileListLimit The maximum number of files that can be maintained in the list of
+ * recently searched files.
+ * @param fileMetadataCacheSize The maximum size allowed for the file metadata cache.
  */
 fun addFileToRecentlySearchedFiles(
     incomingContainer: FuzzyContainer,
     projectState: FuzzierSettingsService.State,
-    globalState: FuzzierGlobalSettingsService.State
+    fileListLimit: Int,
+    fileMetadataCacheSize: Int,
 ) {
     val recentFiles: MutableList<FuzzyMatchContainer> =
         projectState.recentlySearchedFiles?.mapNotNull { it.toFuzzyMatchContainer() }?.toMutableList()
@@ -56,13 +61,38 @@ fun addFileToRecentlySearchedFiles(
         }
     }
 
-    while (recentFiles.size > globalState.fileListLimit - 1) {
+    while (recentFiles.size > fileListLimit - 1) {
         recentFiles.removeAt(recentFiles.size - 1)
     }
 
     if (incomingContainer is FuzzyMatchContainer) {
         recentFiles.add(incomingContainer)
+        projectState.recentFiles = addFileToLRUCache(
+            incomingContainer, projectState.recentFiles, fileMetadataCacheSize
+        )
 
         projectState.recentlySearchedFiles = recentFiles.map { fromFuzzyMatchContainer(it) }
     }
+}
+
+fun addFileToLRUCache(
+    incomingContainer: FuzzyContainer, recentFiles: MutableList<FileAccessMetadata>, maxSize: Int
+): MutableList<FileAccessMetadata> {
+    val existingIndex = recentFiles.indexOfFirst { it.filePath == incomingContainer.filePath }
+
+    val existingEntry = if (existingIndex != -1) recentFiles.removeAt(existingIndex) else null
+
+    val newEntry = FileAccessMetadata(
+        filePath = incomingContainer.filePath,
+        lastAccessedAt = System.currentTimeMillis(),
+        accessCount = (existingEntry?.accessCount ?: 0) + 1
+    )
+
+    recentFiles.add(0, newEntry)
+
+    while (recentFiles.size > maxSize) {
+        recentFiles.removeLast()
+    }
+
+    return recentFiles
 }

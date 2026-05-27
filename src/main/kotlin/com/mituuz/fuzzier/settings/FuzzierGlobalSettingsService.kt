@@ -61,6 +61,7 @@ class FuzzierGlobalSettingsService : PersistentStateComponent<FuzzierGlobalSetti
         var debouncePeriod: Int = 80
         var resetWindow = false
         var fileListLimit: Int = 50
+        val fileMetadataCacheSize = 100
 
         var globalExclusionSet: Set<String> = emptySet()
 
