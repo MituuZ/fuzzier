@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test
 class ScoreCalculatorTest {
     @Test
     fun `Search string contained same index`() {
-        val sc = ScoreCalculator("test", MatchConfig())
+        val sc = ScoreCalculator("test", MatchConfig(), mapOf())
         sc.searchStringIndex = 0
         sc.searchStringLength = 4
 
@@ -41,7 +41,7 @@ class ScoreCalculatorTest {
 
     @Test
     fun `Search string contained different index`() {
-        val sc = ScoreCalculator("test", MatchConfig())
+        val sc = ScoreCalculator("test", MatchConfig(), mapOf())
         sc.searchStringIndex = 0
         sc.searchStringLength = 4
 
@@ -56,7 +56,7 @@ class ScoreCalculatorTest {
         val matchConfig = MatchConfig(
             matchWeightStreakModifier = 10
         )
-        val sc = ScoreCalculator("test", matchConfig)
+        val sc = ScoreCalculator("test", matchConfig, mapOf())
 
         val fScore = sc.calculateScore("/test")
         assertEquals(4, fScore!!.streakScore)
@@ -67,7 +67,7 @@ class ScoreCalculatorTest {
         val matchConfig = MatchConfig(
             matchWeightStreakModifier = 10
         )
-        val sc = ScoreCalculator("test", matchConfig)
+        val sc = ScoreCalculator("test", matchConfig, mapOf())
 
         val fScore = sc.calculateScore("/te/st")
         assertEquals(2, fScore!!.streakScore)
@@ -78,7 +78,7 @@ class ScoreCalculatorTest {
         val matchConfig = MatchConfig(
             matchWeightStreakModifier = 10
         )
-        val sc = ScoreCalculator("test", matchConfig)
+        val sc = ScoreCalculator("test", matchConfig, mapOf())
 
         val fScore = sc.calculateScore("/te")
         assertNull(fScore)
@@ -89,7 +89,7 @@ class ScoreCalculatorTest {
         val matchConfig = MatchConfig(
             matchWeightSingleChar = 10, multiMatch = true
         )
-        val sc = ScoreCalculator("test", matchConfig)
+        val sc = ScoreCalculator("test", matchConfig, mapOf())
 
         val fScore = sc.calculateScore("/test")
         assertEquals(4, fScore!!.multiMatchScore)
@@ -100,7 +100,7 @@ class ScoreCalculatorTest {
         val matchConfig = MatchConfig(
             matchWeightSingleChar = 10, multiMatch = true
         )
-        val sc = ScoreCalculator("test", matchConfig)
+        val sc = ScoreCalculator("test", matchConfig, mapOf())
         val fScore = sc.calculateScore("/testtest")
         assertEquals(8, fScore!!.multiMatchScore)
     }
@@ -110,7 +110,7 @@ class ScoreCalculatorTest {
         val matchConfig = MatchConfig(
             matchWeightSingleChar = 10, multiMatch = true
         )
-        val sc = ScoreCalculator("test test", matchConfig)
+        val sc = ScoreCalculator("test test", matchConfig, mapOf())
         val fScore = sc.calculateScore("/testtest")
         assertEquals(8, fScore!!.multiMatchScore)
     }
@@ -120,7 +120,7 @@ class ScoreCalculatorTest {
         val matchConfig = MatchConfig(
             matchWeightPartialPath = 1
         )
-        val sc = ScoreCalculator("test", matchConfig)
+        val sc = ScoreCalculator("test", matchConfig, mapOf())
         val fScore = sc.calculateScore("/test.kt")
         assertEquals(1, fScore!!.partialPathScore)
     }
@@ -130,14 +130,14 @@ class ScoreCalculatorTest {
         val matchConfig = MatchConfig(
             matchWeightFilename = 10
         )
-        val sc = ScoreCalculator("test", matchConfig)
+        val sc = ScoreCalculator("test", matchConfig, mapOf())
         val fScore = sc.calculateScore("/test.kt")
         assertEquals(4, fScore!!.filenameScore)
     }
 
     @Test
     fun `Empty ss and fp`() {
-        val sc = ScoreCalculator("", MatchConfig())
+        val sc = ScoreCalculator("", MatchConfig(), mapOf())
 
         val fScore = sc.calculateScore("")
         assertEquals(0, fScore!!.getTotalScore())
@@ -149,7 +149,7 @@ class ScoreCalculatorTest {
         val matchConfig = MatchConfig(
             matchWeightStreakModifier = 10, multiMatch = true, matchWeightSingleChar = 10, matchWeightFilename = 10
         )
-        val sc = ScoreCalculator("kif", matchConfig)
+        val sc = ScoreCalculator("kif", matchConfig, mapOf())
 
         val fScore = sc.calculateScore("/KotlinIsFun")
 
@@ -164,7 +164,7 @@ class ScoreCalculatorTest {
         val matchConfig = MatchConfig(
             matchWeightStreakModifier = 10, multiMatch = true, matchWeightSingleChar = 10, matchWeightFilename = 10
         )
-        val sc = ScoreCalculator("kot", matchConfig)
+        val sc = ScoreCalculator("kot", matchConfig, mapOf())
 
         val fScore = sc.calculateScore("/KotlinIsFun")
 
@@ -176,21 +176,21 @@ class ScoreCalculatorTest {
 
     @Test
     fun `Too long ss`() {
-        val sc = ScoreCalculator("TooLongSearchString", MatchConfig())
+        val sc = ScoreCalculator("TooLongSearchString", MatchConfig(), mapOf())
         val fScore = sc.calculateScore("/KIF")
         assertNull(fScore)
     }
 
     @Test
     fun `No possible match`() {
-        val sc = ScoreCalculator("A", MatchConfig())
+        val sc = ScoreCalculator("A", MatchConfig(), mapOf())
         val fScore = sc.calculateScore("/KIF")
         assertNull(fScore)
     }
 
     @Test
     fun `Empty ss`() {
-        val sc = ScoreCalculator("", MatchConfig())
+        val sc = ScoreCalculator("", MatchConfig(), mapOf())
 
         val fScore = sc.calculateScore("/KIF")
         assertEquals(0, fScore!!.getTotalScore())
@@ -198,14 +198,14 @@ class ScoreCalculatorTest {
 
     @Test
     fun `No possible match split`() {
-        val sc = ScoreCalculator("A A B", MatchConfig())
+        val sc = ScoreCalculator("A A B", MatchConfig(), mapOf())
         val fScore = sc.calculateScore("/Kotlin/Is/Fun/kif.kt")
         assertNull(fScore)
     }
 
     @Test
     fun `Partial match split`() {
-        val sc = ScoreCalculator("A A K", MatchConfig())
+        val sc = ScoreCalculator("A A K", MatchConfig(), mapOf())
         val fScore = sc.calculateScore("/Kotlin/Is/Fun/kif.kt")
         assertNull(fScore)
     }
@@ -215,7 +215,7 @@ class ScoreCalculatorTest {
         val matchConfig = MatchConfig(
             matchWeightStreakModifier = 10, multiMatch = true, matchWeightSingleChar = 10, matchWeightFilename = 10
         )
-        val sc = ScoreCalculator("fun kotlin", matchConfig)
+        val sc = ScoreCalculator("fun kotlin", matchConfig, mapOf())
 
         val fScore = sc.calculateScore("/Kotlin/Is/Fun/kif.kt")
 
@@ -230,7 +230,7 @@ class ScoreCalculatorTest {
         val matchConfig = MatchConfig(
             matchWeightStreakModifier = 10, multiMatch = true, matchWeightSingleChar = 10, matchWeightFilename = 10
         )
-        val sc = ScoreCalculator("kif", matchConfig)
+        val sc = ScoreCalculator("kif", matchConfig, mapOf())
 
         val fScore = sc.calculateScore("/Kotlin/Is/Fun/kif.kt")
 
@@ -245,7 +245,7 @@ class ScoreCalculatorTest {
         val matchConfig = MatchConfig(
             matchWeightStreakModifier = 10, multiMatch = true, matchWeightSingleChar = 10, matchWeightFilename = 10
         )
-        val sc = ScoreCalculator("kif", matchConfig)
+        val sc = ScoreCalculator("kif", matchConfig, mapOf())
 
         val fScore = sc.calculateScore("/Kiffer/Is/Fun/kiffer.kt")
 
@@ -260,7 +260,7 @@ class ScoreCalculatorTest {
         val matchConfig = MatchConfig(
             matchWeightStreakModifier = 10, multiMatch = true, matchWeightSingleChar = 10, matchWeightFilename = 10
         )
-        val sc = ScoreCalculator("kif", matchConfig)
+        val sc = ScoreCalculator("kif", matchConfig, mapOf())
 
         val fScore = sc.calculateScore("/Kif/Is/Fun/kif.kt")
 
@@ -275,7 +275,7 @@ class ScoreCalculatorTest {
         val matchConfig = MatchConfig(
             matchWeightStreakModifier = 10, multiMatch = true, matchWeightSingleChar = 10, matchWeightFilename = 10
         )
-        val sc = ScoreCalculator("kif fun kotlin", matchConfig)
+        val sc = ScoreCalculator("kif fun kotlin", matchConfig, mapOf())
 
         val fScore = sc.calculateScore("/Kotlin/Is/Fun/kif.kt")
 
@@ -290,7 +290,7 @@ class ScoreCalculatorTest {
         val matchConfig = MatchConfig(
             tolerance = 5,
         )
-        val sc = ScoreCalculator("kotlin", matchConfig)
+        val sc = ScoreCalculator("kotlin", matchConfig, mapOf())
 
         assertNotNull(sc.calculateScore("/Kotlin"))
     }
@@ -300,7 +300,7 @@ class ScoreCalculatorTest {
         val matchConfig = MatchConfig(
             tolerance = 5,
         )
-        val sc = ScoreCalculator("korlin", matchConfig)
+        val sc = ScoreCalculator("korlin", matchConfig, mapOf())
 
         assertNotNull(sc.calculateScore("/Kotlin"))
     }
@@ -310,7 +310,7 @@ class ScoreCalculatorTest {
         val matchConfig = MatchConfig(
             tolerance = 1,
         )
-        val sc = ScoreCalculator("korlin", matchConfig)
+        val sc = ScoreCalculator("korlin", matchConfig, mapOf())
 
         assertNotNull(sc.calculateScore("/Kotlin"))
     }
@@ -320,7 +320,7 @@ class ScoreCalculatorTest {
         val matchConfig = MatchConfig(
             tolerance = 1,
         )
-        val sc = ScoreCalculator("korlnn", matchConfig)
+        val sc = ScoreCalculator("korlnn", matchConfig, mapOf())
 
         assertNull(sc.calculateScore("/Kotlin"))
     }
@@ -330,7 +330,7 @@ class ScoreCalculatorTest {
         val matchConfig = MatchConfig(
             tolerance = 1,
         )
-        val sc = ScoreCalculator("korlin", matchConfig)
+        val sc = ScoreCalculator("korlin", matchConfig, mapOf())
 
         assertNotNull(sc.calculateScore("/Kot/lin"))
     }
@@ -340,7 +340,7 @@ class ScoreCalculatorTest {
         val matchConfig = MatchConfig(
             tolerance = 1,
         )
-        val sc = ScoreCalculator("korlin", matchConfig)
+        val sc = ScoreCalculator("korlin", matchConfig, mapOf())
 
         assertNull(sc.calculateScore("/Kot/sin"))
     }
@@ -350,7 +350,7 @@ class ScoreCalculatorTest {
         val matchConfig = MatchConfig(
             tolerance = 2,
         )
-        val sc = ScoreCalculator("korlin", matchConfig)
+        val sc = ScoreCalculator("korlin", matchConfig, mapOf())
 
         assertNotNull(sc.calculateScore("/Kot/sin"))
     }
@@ -360,7 +360,7 @@ class ScoreCalculatorTest {
         val matchConfig = MatchConfig(
             tolerance = 5,
         )
-        val sc = ScoreCalculator("kotlin12345", matchConfig)
+        val sc = ScoreCalculator("kotlin12345", matchConfig, mapOf())
 
         assertNull(sc.calculateScore("/Kotlin"))
     }
