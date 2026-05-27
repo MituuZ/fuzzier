@@ -27,8 +27,8 @@ package com.mituuz.fuzzier.entities
 data class MatchConfig(
     val tolerance: Int = 0,
     val multiMatch: Boolean = false,
-    val matchWeightSingleChar: Int = 1,
-    val matchWeightStreakModifier: Int = 5,
+    val matchWeightSingleChar: Int = 5,
+    val matchWeightStreakModifier: Int = 10,
     val matchWeightPartialPath: Int = 10,
     val matchWeightFilename: Int = 20,
 )

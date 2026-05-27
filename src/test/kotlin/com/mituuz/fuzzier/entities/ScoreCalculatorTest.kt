@@ -375,25 +375,25 @@ class ScoreCalculatorTest {
     @Test
     fun `Usage boost with recent index 0`() {
         val sc = ScoreCalculator("", MatchConfig(), mapOf())
-        assertEquals(12, sc.calculateUsageBoost(FileUsageStats(0, 0)))
+        assertEquals(10, sc.calculateUsageBoost(FileUsageStats(0, 0)))
     }
 
     @Test
     fun `Usage boost with recent index 10`() {
         val sc = ScoreCalculator("", MatchConfig(), mapOf())
-        assertEquals(0, sc.calculateUsageBoost(FileUsageStats(10, 0)))
+        assertEquals(5, sc.calculateUsageBoost(FileUsageStats(10, 0)))
     }
 
     @Test
     fun `Usage boost with recent index 20`() {
         val sc = ScoreCalculator("", MatchConfig(), mapOf())
-        assertEquals(-12, sc.calculateUsageBoost(FileUsageStats(20, 0)))
+        assertEquals(0, sc.calculateUsageBoost(FileUsageStats(20, 0)))
     }
 
     @Test
     fun `Usage boost with access count`() {
         val sc = ScoreCalculator("", MatchConfig(), mapOf())
-        assertEquals(17, sc.calculateUsageBoost(FileUsageStats(0, 5)))
+        assertEquals(11, sc.calculateUsageBoost(FileUsageStats(0, 5)))
     }
 
     @Test
@@ -402,11 +402,40 @@ class ScoreCalculatorTest {
         val sc = ScoreCalculator("test", MatchConfig(), fileUsageStats)
         val fScore = sc.calculateScore("/test.kt")
         assertNotNull(fScore)
-        assertEquals(17, fScore!!.fileUsageScore)
-        // streakScore = (4 * 5) / 10 = 2
+        assertEquals(11, fScore!!.fileUsageScore)
+        // streakScore = (4 * 10) / 10 = 4
         // filenameScore = (4 * 20) / 10 = 8
         // partialPathScore = 10 (default weight)
-        // total = 17 + 2 + 8 + 10 = 37
-        assertEquals(37, fScore.getTotalScore())
+        // total = 11 + 4 + 8 + 10 = 33
+        assertEquals(33, fScore.getTotalScore())
+    }
+
+    @Test
+    fun `Recency boost is smooth`() {
+        val sc = ScoreCalculator("", MatchConfig(), mapOf())
+        assertEquals(10, sc.calculateUsageBoost(FileUsageStats(0, 0)))
+        assertEquals(9, sc.calculateUsageBoost(FileUsageStats(2, 0)))
+        assertEquals(8, sc.calculateUsageBoost(FileUsageStats(4, 0)))
+        assertEquals(5, sc.calculateUsageBoost(FileUsageStats(10, 0)))
+        assertEquals(0, sc.calculateUsageBoost(FileUsageStats(20, 0)))
+        assertEquals(0, sc.calculateUsageBoost(FileUsageStats(30, 0)))
+    }
+
+    @Test
+    fun `Not in recent list is not better than late in recent list`() {
+        val sc = ScoreCalculator("", MatchConfig(), mapOf())
+        
+        val notInListBoost = sc.calculateUsageBoost(null) // 0
+        val lateInListBoost = sc.calculateUsageBoost(FileUsageStats(20, 0)) // 0
+        
+        assertEquals(notInListBoost, lateInListBoost, "File NOT in list should be equal to a file that is very old in the list")
+    }
+
+    @Test
+    fun `Frequency boost is capped`() {
+        val sc = ScoreCalculator("", MatchConfig(), mapOf())
+        // 100 accesses gives 10 points (capped)
+        // index 10 gives 5 points
+        assertEquals(15, sc.calculateUsageBoost(FileUsageStats(10, 100)))
     }
 }

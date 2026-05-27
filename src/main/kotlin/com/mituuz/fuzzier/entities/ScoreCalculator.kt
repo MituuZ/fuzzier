@@ -93,13 +93,16 @@ class ScoreCalculator(
         if (fileStats == null) {
             return 0
         }
-        val recencyWeight = 12
-        val frequencyWeight = 1
 
-        val recencyBoost = recencyWeight * (1 - fileStats.recentIndex / 10)
-        val frequencyBoost = frequencyWeight * fileStats.accessCount
+        // Recency boost: Start at 10 and decrease by 1 for every 2 positions in the recent list.
+        // This provides a smooth, non-negative boost for the top 20 recent files.
+        val recencyBoost = (10 - fileStats.recentIndex / 2).coerceAtLeast(0)
 
-        return (recencyBoost + frequencyBoost)
+        // Frequency boost: 1 point for every 5 accesses, capped at 10 points.
+        // This ensures frequent use is rewarded but doesn't overpower the search matches.
+        val frequencyBoost = (fileStats.accessCount / 5).coerceAtMost(10)
+
+        return recencyBoost + frequencyBoost
     }
 
     /**
