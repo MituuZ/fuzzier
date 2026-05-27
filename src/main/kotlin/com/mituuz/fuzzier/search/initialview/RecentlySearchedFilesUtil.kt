@@ -30,31 +30,39 @@ import com.mituuz.fuzzier.entities.FuzzyMatchContainer.SerializedMatchContainer.
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 
+/**
+ * Adds a file to the list of recently searched files, maintaining the limit set by global settings.
+ * If the file already exists in the list, it is removed and re-added to ensure it appears as the most recent.
+ *
+ * @param incomingContainer The container holding information about the file being added to the list.
+ * @param projectState The state of the current project, containing the project's recently searched files.
+ * @param globalState The global settings state, including configuration like the file list limit.
+ */
 fun addFileToRecentlySearchedFiles(
-    fuzzyContainer: FuzzyContainer,
+    incomingContainer: FuzzyContainer,
     projectState: FuzzierSettingsService.State,
     globalState: FuzzierGlobalSettingsService.State
 ) {
-    val fuzzyContainers: MutableList<FuzzyMatchContainer> =
+    val recentFiles: MutableList<FuzzyMatchContainer> =
         projectState.recentlySearchedFiles?.mapNotNull { it.toFuzzyMatchContainer() }?.toMutableList()
             ?: mutableListOf()
 
     var i = 0
-    while (i < fuzzyContainers.size) {
-        if (fuzzyContainers[i].filePath == fuzzyContainer.filePath) {
-            fuzzyContainers.removeAt(i)
+    while (i < recentFiles.size) {
+        if (recentFiles[i].filePath == incomingContainer.filePath) {
+            recentFiles.removeAt(i)
         } else {
             i++
         }
     }
 
-    while (fuzzyContainers.size > globalState.fileListLimit - 1) {
-        fuzzyContainers.removeAt(fuzzyContainers.size - 1)
+    while (recentFiles.size > globalState.fileListLimit - 1) {
+        recentFiles.removeAt(recentFiles.size - 1)
     }
 
-    if (fuzzyContainer is FuzzyMatchContainer) {
-        fuzzyContainers.add(fuzzyContainer)
+    if (incomingContainer is FuzzyMatchContainer) {
+        recentFiles.add(incomingContainer)
 
-        projectState.recentlySearchedFiles = fuzzyContainers.map { fromFuzzyMatchContainer(it) }
+        projectState.recentlySearchedFiles = recentFiles.map { fromFuzzyMatchContainer(it) }
     }
 }
