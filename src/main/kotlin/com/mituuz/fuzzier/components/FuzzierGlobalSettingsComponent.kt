@@ -311,6 +311,24 @@ class FuzzierGlobalSettingsComponent(
         false
     )
 
+    val matchWeightFrequency = SettingsComponent(
+        JBIntSpinner(10, 0, 100), "Match weight: Frequency boost",
+        """
+            How much score should a frequency boost give.<br><br>
+            Frequency boost is based on how many times a file has been accessed.
+        """.trimIndent(),
+        false
+    )
+
+    val matchWeightRecency = SettingsComponent(
+        JBIntSpinner(10, 0, 100), "Match weight: Recency boost",
+        """
+            How much score should a recency boost give.<br><br>
+            Recency boost is based on how recently a file has been accessed.
+        """.trimIndent(),
+        false
+    )
+
     /////////////////////////////////////////////////////////////////
     // Test bench
     /////////////////////////////////////////////////////////////////
@@ -362,6 +380,8 @@ class FuzzierGlobalSettingsComponent(
             .addComponent(matchWeightPartialPath)
             .addComponent(matchWeightStreakModifier)
             .addComponent(matchWeightFilename)
+            .addComponent(matchWeightFrequency)
+            .addComponent(matchWeightRecency)
 
             .addSeparator()
             .addComponent(JBLabel("<html><h2>Test bench</h2></html>"))

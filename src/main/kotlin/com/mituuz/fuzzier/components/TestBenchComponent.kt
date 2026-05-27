@@ -53,7 +53,7 @@ import javax.swing.table.DefaultTableModel
 
 class TestBenchComponent : JPanel(), Disposable {
     private val columnNames =
-        arrayOf("Filename", "Filepath", "Streak", "MultiMatch", "PartialPath", "Filename", "Total")
+        arrayOf("Filename", "Filepath", "Streak", "MultiMatch", "PartialPath", "Filename", "Freq", "Recency", "Total")
     private val table = JBTable()
     private var searchField = EditorTextField()
     private var debounceJob: Job? = null
@@ -186,6 +186,8 @@ class TestBenchComponent : JPanel(), Disposable {
                         it.score.multiMatchScore as Any,
                         it.score.partialPathScore as Any,
                         it.score.filenameScore as Any,
+                        it.score.frequencyScore as Any,
+                        it.score.recencyScore as Any,
                         it.score.getTotalScore() as Any
                     )
                 }.toTypedArray()
@@ -260,7 +262,9 @@ class TestBenchComponent : JPanel(), Disposable {
                             liveSettingsComponent.matchWeightSingleChar.getIntSpinner().value as Int,
                             liveSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int,
                             liveSettingsComponent.matchWeightPartialPath.getIntSpinner().value as Int,
-                            liveSettingsComponent.matchWeightFilename.getIntSpinner().value as Int
+                            liveSettingsComponent.matchWeightFilename.getIntSpinner().value as Int,
+                            liveSettingsComponent.matchWeightFrequency.getIntSpinner().value as Int,
+                            liveSettingsComponent.matchWeightRecency.getIntSpinner().value as Int
                         )
 
                         val container = stringEvaluator.evaluateIteratorEntry(iterationFile, ss, matchConfig)

@@ -110,11 +110,12 @@ class FuzzyMatchContainer(
         var multiMatchScore = 0
         var partialPathScore = 0
         var filenameScore = 0
-        var fileUsageScore = 0
+        var frequencyScore = 0
+        var recencyScore = 0
         val highlightCharacters: MutableSet<Int> = HashSet()
 
         fun getTotalScore(): Int {
-            return streakScore + multiMatchScore + partialPathScore + filenameScore + fileUsageScore
+            return streakScore + multiMatchScore + partialPathScore + filenameScore + frequencyScore + recencyScore
         }
     }
 

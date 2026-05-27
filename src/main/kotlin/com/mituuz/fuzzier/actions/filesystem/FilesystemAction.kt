@@ -108,7 +108,9 @@ abstract class FilesystemAction : FuzzyAction() {
             globalState.matchWeightSingleChar,
             globalState.matchWeightStreakModifier,
             globalState.matchWeightPartialPath,
-            globalState.matchWeightFilename
+            globalState.matchWeightFilename,
+            globalState.matchWeightFrequency,
+            globalState.matchWeightRecency
         )
 
         coroutineScope {

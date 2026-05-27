@@ -62,6 +62,8 @@ class FuzzierGlobalSettingsConfigurableTest {
         state.matchWeightSingleChar = 6
         state.matchWeightStreakModifier = 20
         state.matchWeightFilename = 15
+        state.matchWeightFrequency = 12
+        state.matchWeightRecency = 13
     }
 
     @Test
@@ -267,6 +269,20 @@ class FuzzierGlobalSettingsConfigurableTest {
     fun matchWeightFilename() {
         pre()
         state.matchWeightFilename = 16
+        assertTrue(settingsConfigurable.isModified)
+    }
+
+    @Test
+    fun matchWeightFrequency() {
+        pre()
+        state.matchWeightFrequency = 13
+        assertTrue(settingsConfigurable.isModified)
+    }
+
+    @Test
+    fun matchWeightRecency() {
+        pre()
+        state.matchWeightRecency = 14
         assertTrue(settingsConfigurable.isModified)
     }
 

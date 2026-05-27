@@ -402,12 +402,31 @@ class ScoreCalculatorTest {
         val sc = ScoreCalculator("test", MatchConfig(), fileUsageStats)
         val fScore = sc.calculateScore("/test.kt")
         assertNotNull(fScore)
-        assertEquals(11, fScore!!.fileUsageScore)
+        assertEquals(1, fScore!!.frequencyScore)
+        assertEquals(10, fScore.recencyScore)
         // streakScore = (4 * 10) / 10 = 4
         // filenameScore = (4 * 20) / 10 = 8
         // partialPathScore = 10 (default weight)
-        // total = 11 + 4 + 8 + 10 = 33
+        // total = 1 + 10 + 4 + 8 + 10 = 33
         assertEquals(33, fScore.getTotalScore())
+    }
+
+    @Test
+    fun `Usage boost affects total score with weights`() {
+        val fileUsageStats = mapOf("/test.kt" to FileUsageStats(0, 5))
+        val matchConfig = MatchConfig(matchWeightFrequency = 20, matchWeightRecency = 5)
+        val sc = ScoreCalculator("test", matchConfig, fileUsageStats)
+        val fScore = sc.calculateScore("/test.kt")
+        assertNotNull(fScore)
+        // Frequency boost: (1 * 20) / 10 = 2
+        // Recency boost: (10 * 5) / 10 = 5
+        assertEquals(2, fScore!!.frequencyScore)
+        assertEquals(5, fScore.recencyScore)
+        // streakScore = (4 * 10) / 10 = 4
+        // filenameScore = (4 * 20) / 10 = 8
+        // partialPathScore = 10 (default weight)
+        // total = 2 + 5 + 4 + 8 + 10 = 29
+        assertEquals(29, fScore.getTotalScore())
     }
 
     @Test
@@ -437,5 +456,55 @@ class ScoreCalculatorTest {
         // 100 accesses gives 10 points (capped)
         // index 10 gives 5 points
         assertEquals(15, sc.calculateUsageBoost(FileUsageStats(10, 100)))
+    }
+
+    @Test
+    fun `Usage boost with weights set to 0`() {
+        val matchConfig = MatchConfig(matchWeightFrequency = 0, matchWeightRecency = 0)
+        val sc = ScoreCalculator("", matchConfig, mapOf())
+        assertEquals(0, sc.calculateUsageBoost(FileUsageStats(0, 100)))
+    }
+
+    @Test
+    fun `Multi match weight affects total score`() {
+        val matchConfig = MatchConfig(
+            multiMatch = true,
+            matchWeightSingleChar = 20
+        )
+        val sc = ScoreCalculator("test", matchConfig, mapOf())
+        val fScore = sc.calculateScore("/test.kt")
+        assertNotNull(fScore)
+
+        // "test.kt" contains 't', 'e', 's', 't', 't' -> 5 matches.
+        // weight 20. (5 * 20) / 10 = 10.
+        assertEquals(10, fScore!!.multiMatchScore)
+    }
+
+    @Test
+    fun `All weights affect total score`() {
+        val fileUsageStats = mapOf("/test.kt" to FileUsageStats(0, 5))
+        val matchConfig = MatchConfig(
+            matchWeightStreakModifier = 20,
+            matchWeightFilename = 30,
+            matchWeightPartialPath = 5,
+            matchWeightFrequency = 20,
+            matchWeightRecency = 5
+        )
+        val sc = ScoreCalculator("test", matchConfig, fileUsageStats)
+        val fScore = sc.calculateScore("/test.kt")
+        assertNotNull(fScore)
+
+        // streakScore: longestStreak=4, weight=20. (4 * 20) / 10 = 8
+        // filenameScore: longestFilenameStreak=4, weight=30. (4 * 30) / 10 = 12
+        // partialPathScore: weight=5. 5
+        // frequencyScore: access=5, weight=20. (1 * 20) / 10 = 2
+        // recencyScore: index=0, weight=5. (10 * 5) / 10 = 5
+
+        assertEquals(8, fScore!!.streakScore)
+        assertEquals(12, fScore.filenameScore)
+        assertEquals(5, fScore.partialPathScore)
+        assertEquals(2, fScore.frequencyScore)
+        assertEquals(5, fScore.recencyScore)
+        assertEquals(8 + 12 + 5 + 2 + 5, fScore.getTotalScore()) // 32
     }
 }

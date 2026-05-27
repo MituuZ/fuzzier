@@ -84,7 +84,7 @@ class ScoreCalculator(
         fuzzyScore.filenameScore = (longestFilenameStreak * config.matchWeightFilename) / 10
 
         val fileStats = fileUsageStats[currentFilePath]
-        fuzzyScore.fileUsageScore = calculateUsageBoost(fileStats)
+        calculateUsageBoost(fileStats)
 
         return fuzzyScore
     }
@@ -94,13 +94,13 @@ class ScoreCalculator(
             return 0
         }
 
-        // Recency boost: Start at 10 and decrease by 1 for every 2 positions in the recent list.
-        // This provides a smooth, non-negative boost for the top 20 recent files.
-        val recencyBoost = (10 - fileStats.recentIndex / 2).coerceAtLeast(0)
+        val recencyBoost = ((10 - fileStats.recentIndex / 2).coerceAtLeast(0) * config.matchWeightRecency) / 10
+        val frequencyBoost = ((fileStats.accessCount / 5).coerceAtMost(10) * config.matchWeightFrequency) / 10
 
-        // Frequency boost: 1 point for every 5 accesses, capped at 10 points.
-        // This ensures frequent use is rewarded but doesn't overpower the search matches.
-        val frequencyBoost = (fileStats.accessCount / 5).coerceAtMost(10)
+        if (this::fuzzyScore.isInitialized) {
+            fuzzyScore.recencyScore = recencyBoost
+            fuzzyScore.frequencyScore = frequencyBoost
+        }
 
         return recencyBoost + frequencyBoost
     }
@@ -168,7 +168,7 @@ class ScoreCalculator(
         longestFilenameStreak = 0
 
         filePathIndex = filenameIndex
-        while (searchStringIndex < searchStringLength && filePathIndex < currentFilePath.length) {
+        while (searchStringIndex < lowerSearchString.length && filePathIndex < currentFilePath.length) {
             processFilenameChar(lowerSearchString[searchStringIndex])
         }
     }

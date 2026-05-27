@@ -31,4 +31,6 @@ data class MatchConfig(
     val matchWeightStreakModifier: Int = 10,
     val matchWeightPartialPath: Int = 10,
     val matchWeightFilename: Int = 20,
+    val matchWeightFrequency: Int = 10,
+    val matchWeightRecency: Int = 10,
 )

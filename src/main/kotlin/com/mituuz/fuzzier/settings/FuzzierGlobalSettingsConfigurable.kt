@@ -84,6 +84,8 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
         component.matchWeightSingleChar.getIntSpinner().isEnabled = state.multiMatch
         component.matchWeightStreakModifier.getIntSpinner().value = state.matchWeightStreakModifier
         component.matchWeightFilename.getIntSpinner().value = state.matchWeightFilename
+        component.matchWeightFrequency.getIntSpinner().value = state.matchWeightFrequency
+        component.matchWeightRecency.getIntSpinner().value = state.matchWeightRecency
         return component.jPanel
     }
 
@@ -129,6 +131,8 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
                 || state.matchWeightSingleChar != component.matchWeightSingleChar.getIntSpinner().value
                 || state.matchWeightStreakModifier != component.matchWeightStreakModifier.getIntSpinner().value
                 || state.matchWeightFilename != component.matchWeightFilename.getIntSpinner().value
+                || state.matchWeightFrequency != component.matchWeightFrequency.getIntSpinner().value
+                || state.matchWeightRecency != component.matchWeightRecency.getIntSpinner().value
                 || state.globalExclusionSet != newGlobalSet
                 || state.grepBackend != component.grepBackendSelector.getGrepBackendComboBox().selectedItem
     }
@@ -176,6 +180,8 @@ class FuzzierGlobalSettingsConfigurable : Configurable {
         state.matchWeightSingleChar = component.matchWeightSingleChar.getIntSpinner().value as Int
         state.matchWeightStreakModifier = component.matchWeightStreakModifier.getIntSpinner().value as Int
         state.matchWeightFilename = component.matchWeightFilename.getIntSpinner().value as Int
+        state.matchWeightFrequency = component.matchWeightFrequency.getIntSpinner().value as Int
+        state.matchWeightRecency = component.matchWeightRecency.getIntSpinner().value as Int
 
         val newGlobalSet = component.globalExclusionTextArea.text
             .lines()
