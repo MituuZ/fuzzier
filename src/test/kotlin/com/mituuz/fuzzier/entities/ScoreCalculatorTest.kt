@@ -364,4 +364,49 @@ class ScoreCalculatorTest {
 
         assertNull(sc.calculateScore("/Kotlin"))
     }
+
+
+    @Test
+    fun `Usage boost with null stats`() {
+        val sc = ScoreCalculator("", MatchConfig(), mapOf())
+        assertEquals(0, sc.calculateUsageBoost(null))
+    }
+
+    @Test
+    fun `Usage boost with recent index 0`() {
+        val sc = ScoreCalculator("", MatchConfig(), mapOf())
+        assertEquals(12, sc.calculateUsageBoost(FileUsageStats(0, 0)))
+    }
+
+    @Test
+    fun `Usage boost with recent index 10`() {
+        val sc = ScoreCalculator("", MatchConfig(), mapOf())
+        assertEquals(0, sc.calculateUsageBoost(FileUsageStats(10, 0)))
+    }
+
+    @Test
+    fun `Usage boost with recent index 20`() {
+        val sc = ScoreCalculator("", MatchConfig(), mapOf())
+        assertEquals(-12, sc.calculateUsageBoost(FileUsageStats(20, 0)))
+    }
+
+    @Test
+    fun `Usage boost with access count`() {
+        val sc = ScoreCalculator("", MatchConfig(), mapOf())
+        assertEquals(17, sc.calculateUsageBoost(FileUsageStats(0, 5)))
+    }
+
+    @Test
+    fun `Usage boost affects total score`() {
+        val fileUsageStats = mapOf("/test.kt" to FileUsageStats(0, 5))
+        val sc = ScoreCalculator("test", MatchConfig(), fileUsageStats)
+        val fScore = sc.calculateScore("/test.kt")
+        assertNotNull(fScore)
+        assertEquals(17, fScore!!.fileUsageScore)
+        // streakScore = (4 * 5) / 10 = 2
+        // filenameScore = (4 * 20) / 10 = 8
+        // partialPathScore = 10 (default weight)
+        // total = 17 + 2 + 8 + 10 = 37
+        assertEquals(37, fScore.getTotalScore())
+    }
 }

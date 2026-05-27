@@ -89,7 +89,7 @@ class ScoreCalculator(
         return fuzzyScore
     }
 
-    private fun calculateUsageBoost(fileStats: FileUsageStats?): Int {
+    internal fun calculateUsageBoost(fileStats: FileUsageStats?): Int {
         if (fileStats == null) {
             return 0
         }
