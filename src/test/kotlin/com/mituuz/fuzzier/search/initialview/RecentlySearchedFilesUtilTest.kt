@@ -79,7 +79,7 @@ class RecentlySearchedFilesUtilTest {
         fgss.fileListLimit = fileListLimit
 
         fuzzierSettingsServiceInstance.state.recentlySearchedFiles =
-            FuzzyMatchContainer.SerializedMatchContainer.fromListModel(largeList)
+            FuzzyMatchContainer.SerializedMatchContainer.fromList(largeList)
         addFileToRecentlySearchedFiles(
             container,
             fuzzierSettingsServiceInstance.state,
@@ -107,7 +107,7 @@ class RecentlySearchedFilesUtilTest {
         fgss.fileListLimit = fileListLimit
 
         fuzzierSettingsServiceInstance.state.recentlySearchedFiles =
-            FuzzyMatchContainer.SerializedMatchContainer.fromListModel(largeList)
+            FuzzyMatchContainer.SerializedMatchContainer.fromList(largeList)
         addFileToRecentlySearchedFiles(
             container,
             fuzzierSettingsServiceInstance.state,

@@ -137,22 +137,6 @@ class FuzzyMatchContainer(
                 serialized.moduleBasePath = container.basePath
                 return serialized
             }
-
-            fun fromListModel(listModel: DefaultListModel<FuzzyMatchContainer>): DefaultListModel<SerializedMatchContainer> {
-                val serializedList = DefaultListModel<SerializedMatchContainer>()
-                for (i in 0 until listModel.size) {
-                    serializedList.addElement(fromFuzzyMatchContainer(listModel[i]))
-                }
-                return serializedList
-            }
-
-            fun toListModel(serializedList: DefaultListModel<SerializedMatchContainer>): DefaultListModel<FuzzyMatchContainer> {
-                val listModel = DefaultListModel<FuzzyMatchContainer>()
-                for (i in 0 until serializedList.size) {
-                    listModel.addElement(serializedList[i].toFuzzyMatchContainer())
-                }
-                return listModel
-            }
         }
 
         fun toFuzzyMatchContainer(): FuzzyMatchContainer {

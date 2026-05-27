@@ -118,7 +118,7 @@ class FuzzyMatchContainerTest {
         list.addElement(container)
 
         val converter = FuzzyMatchContainer.SerializedMatchContainerConverter()
-        val stringRep = converter.toString(FuzzyMatchContainer.SerializedMatchContainer.fromListModel(list))
+        val stringRep = converter.toString(FuzzyMatchContainer.SerializedMatchContainer.fromList(list))
 
         val deserialized: DefaultListModel<FuzzyMatchContainer.SerializedMatchContainer> =
             converter.fromString(stringRep)

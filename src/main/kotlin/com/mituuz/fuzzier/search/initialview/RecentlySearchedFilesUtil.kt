@@ -26,34 +26,35 @@ package com.mituuz.fuzzier.search.initialview
 
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
+import com.mituuz.fuzzier.entities.FuzzyMatchContainer.SerializedMatchContainer.Companion.fromFuzzyMatchContainer
 import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
-import javax.swing.DefaultListModel
 
 fun addFileToRecentlySearchedFiles(
     fuzzyContainer: FuzzyContainer,
     projectState: FuzzierSettingsService.State,
     globalState: FuzzierGlobalSettingsService.State
 ) {
-    val listModel: DefaultListModel<FuzzyMatchContainer> =
+    val fuzzyContainers: MutableList<FuzzyMatchContainer> =
         projectState.getRecentlySearchedFilesAsFuzzyMatchContainer()
 
     var i = 0
-    while (i < listModel.size) {
-        if (listModel[i].filePath == fuzzyContainer.filePath) {
-            listModel.remove(i)
+    while (i < fuzzyContainers.size) {
+        if (fuzzyContainers[i].filePath == fuzzyContainer.filePath) {
+            fuzzyContainers.removeAt(i)
         } else {
             i++
         }
     }
 
-    while (listModel.size > globalState.fileListLimit - 1) {
-        listModel.remove(listModel.size - 1)
+    while (fuzzyContainers.size > globalState.fileListLimit - 1) {
+        fuzzyContainers.removeAt(fuzzyContainers.size - 1)
     }
 
     if (fuzzyContainer is FuzzyMatchContainer) {
-        listModel.addElement(fuzzyContainer)
+        fuzzyContainers.add(fuzzyContainer)
+
         projectState.recentlySearchedFiles =
-            FuzzyMatchContainer.SerializedMatchContainer.fromListModel(listModel)
+            fuzzyContainers.map { fromFuzzyMatchContainer(it) }
     }
 }

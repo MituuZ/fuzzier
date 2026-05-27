@@ -45,7 +45,7 @@ class DefaultInitialListModelProvider(
             }
 
             FuzzierGlobalSettingsService.RecentFilesMode.RECENTLY_SEARCHED_FILES -> {
-                getRecentlySearchedFiles()
+                getRecentlySearchedFiles(projectState)
             }
 
             else -> {
@@ -82,16 +82,11 @@ class DefaultInitialListModelProvider(
         return listModel
     }
 
-    fun getRecentlySearchedFiles(): DefaultListModel<FuzzyContainer> {
+    fun getRecentlySearchedFiles(state: FuzzierSettingsService.State): DefaultListModel<FuzzyContainer> {
         val result = DefaultListModel<FuzzyContainer>()
-        projectState.getRecentlySearchedFilesAsFuzzyMatchContainer()
-            .elements()
-            .toList()
-            .filterNotNull()
-            .reversed()
-            .let {
-                result.addAll(it)
-            }
+        state.getRecentlySearchedFilesAsFuzzyMatchContainer()
+            .asReversed()
+            .forEach { result.addElement(it) }
         return result
     }
 }
