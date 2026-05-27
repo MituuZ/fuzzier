@@ -30,6 +30,9 @@ import com.intellij.openapi.components.Storage
 import com.intellij.util.xmlb.annotations.OptionTag
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 
+/**
+ * Service responsible for managing the project-specific settings and state for the Fuzzier plugin.
+ */
 @State(
     name = "com.mituuz.fuzzier.FuzzierSettings",
     storages = [Storage("FuzzierSettings.xml")],
@@ -38,13 +41,20 @@ import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 @Service(Service.Level.PROJECT)
 class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.State> {
     class State {
+        /** Map of module identifiers and base paths. */
         var modules: Map<String, String> = HashMap()
+
+        /** Flag indicating if we should use ProjectFileIndex or modules for file iteration. */
         var isProject = false
 
+        /** List of recently searched files. */
         @OptionTag(converter = FuzzyMatchContainer.SerializedMatchContainerConverter::class)
         var recentlySearchedFiles: List<FuzzyMatchContainer.SerializedMatchContainer>? = listOf()
 
+        /** Set of file patterns to be excluded from searches. */
         var exclusionSet: Set<String> = setOf("/.idea/*", "/.git/*", "/target/*", "/build/*", "/.gradle/*", "/.run/*")
+
+        /** Characters to ignore during text matching. */
         var ignoredCharacters: String = ""
     }
 
