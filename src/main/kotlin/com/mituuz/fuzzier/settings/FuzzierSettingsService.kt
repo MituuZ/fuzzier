@@ -46,10 +46,6 @@ class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.S
 
         var exclusionSet: Set<String> = setOf("/.idea/*", "/.git/*", "/target/*", "/build/*", "/.gradle/*", "/.run/*")
         var ignoredCharacters: String = ""
-
-        fun getRecentlySearchedFilesAsFuzzyMatchContainer(): MutableList<FuzzyMatchContainer> {
-            return recentlySearchedFiles?.map { it.toFuzzyMatchContainer() }?.toMutableList() ?: mutableListOf()
-        }
     }
 
     private var state = State()

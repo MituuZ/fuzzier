@@ -34,7 +34,6 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
-import javax.swing.DefaultListModel
 
 class FuzzyMatchContainerTest {
     @Suppress("unused")
@@ -109,28 +108,27 @@ class FuzzyMatchContainerTest {
 
     @Test
     fun `Test default list serialization`() {
-        val list = DefaultListModel<FuzzyMatchContainer>()
         val score = FuzzyScore()
         val container = FuzzyMatchContainer(
             score, "", "FuzzyMatchContainerTest.kt", "",
             FILE
         )
-        list.addElement(container)
+        val list = listOf(FuzzyMatchContainer.SerializedMatchContainer.fromFuzzyMatchContainer(container))
 
         val converter = FuzzyMatchContainer.SerializedMatchContainerConverter()
-        val stringRep = converter.toString(FuzzyMatchContainer.SerializedMatchContainer.fromList(list))
+        val stringRep = converter.toString(list)
 
-        val deserialized: DefaultListModel<FuzzyMatchContainer.SerializedMatchContainer> =
+        val deserialized: List<FuzzyMatchContainer.SerializedMatchContainer> =
             converter.fromString(stringRep)
         assertEquals(1, deserialized.size)
-        assertEquals("", deserialized.get(0).filePath)
-        assertEquals("FuzzyMatchContainerTest.kt", deserialized.get(0).filename)
+        assertEquals("", deserialized[0].filePath)
+        assertEquals("FuzzyMatchContainerTest.kt", deserialized[0].filename)
     }
 
     @Test
     fun `Deserialization fails`() {
         val converter = FuzzyMatchContainer.SerializedMatchContainerConverter()
-        val deserialized: DefaultListModel<FuzzyMatchContainer.SerializedMatchContainer> =
+        val deserialized: List<FuzzyMatchContainer.SerializedMatchContainer> =
             converter.fromString("This should not work")
         assertEquals(0, deserialized.size)
     }

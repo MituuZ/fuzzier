@@ -35,7 +35,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
-import javax.swing.DefaultListModel
 
 class RecentlySearchedFilesUtilTest {
     @Suppress("unused") // Required for add to recently used files (fuzzierSettingsServiceInstance)
@@ -59,8 +58,8 @@ class RecentlySearchedFilesUtilTest {
             fuzzierSettingsServiceInstance.state,
             fgss
         )
-        assertNotNull(fuzzierSettingsServiceInstance.state.getRecentlySearchedFilesAsFuzzyMatchContainer())
-        assertEquals(1, fuzzierSettingsServiceInstance.state.getRecentlySearchedFilesAsFuzzyMatchContainer().size)
+        assertNotNull(fuzzierSettingsServiceInstance.state.recentlySearchedFiles)
+        assertEquals(1, fuzzierSettingsServiceInstance.state.recentlySearchedFiles?.size)
     }
 
     @Test
@@ -71,15 +70,15 @@ class RecentlySearchedFilesUtilTest {
         val score = FuzzyMatchContainer.FuzzyScore()
         val container = FuzzyMatchContainer(score, "", "", "", FILE)
 
-        val largeList: DefaultListModel<FuzzyMatchContainer> = DefaultListModel()
+        val largeList: MutableList<FuzzyMatchContainer> = mutableListOf()
         for (i in 0..25) {
-            largeList.addElement(FuzzyMatchContainer(score, "" + i, "" + i, "", FILE))
+            largeList.add(FuzzyMatchContainer(score, "" + i, "" + i, "", FILE))
         }
 
         fgss.fileListLimit = fileListLimit
 
         fuzzierSettingsServiceInstance.state.recentlySearchedFiles =
-            FuzzyMatchContainer.SerializedMatchContainer.fromList(largeList)
+            largeList.map { FuzzyMatchContainer.SerializedMatchContainer.fromFuzzyMatchContainer(it) }
         addFileToRecentlySearchedFiles(
             container,
             fuzzierSettingsServiceInstance.state,
@@ -87,7 +86,7 @@ class RecentlySearchedFilesUtilTest {
         )
         assertEquals(
             fileListLimit,
-            fuzzierSettingsServiceInstance.state.getRecentlySearchedFilesAsFuzzyMatchContainer().size
+            fuzzierSettingsServiceInstance.state.recentlySearchedFiles?.size
         )
     }
 
@@ -99,20 +98,20 @@ class RecentlySearchedFilesUtilTest {
         val score = FuzzyMatchContainer.FuzzyScore()
         val container = FuzzyMatchContainer(score, "", "", "", FILE)
 
-        val largeList: DefaultListModel<FuzzyMatchContainer> = DefaultListModel()
+        val largeList: MutableList<FuzzyMatchContainer> = mutableListOf()
         repeat(26) {
-            largeList.addElement(FuzzyMatchContainer(score, "", "", "", FILE))
+            largeList.add(FuzzyMatchContainer(score, "", "", "", FILE))
         }
 
         fgss.fileListLimit = fileListLimit
 
         fuzzierSettingsServiceInstance.state.recentlySearchedFiles =
-            FuzzyMatchContainer.SerializedMatchContainer.fromList(largeList)
+            largeList.map { FuzzyMatchContainer.SerializedMatchContainer.fromFuzzyMatchContainer(it) }
         addFileToRecentlySearchedFiles(
             container,
             fuzzierSettingsServiceInstance.state,
             fgss
         )
-        assertEquals(1, fuzzierSettingsServiceInstance.state.getRecentlySearchedFilesAsFuzzyMatchContainer().size)
+        assertEquals(1, fuzzierSettingsServiceInstance.state.recentlySearchedFiles?.size)
     }
 }

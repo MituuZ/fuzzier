@@ -36,7 +36,8 @@ fun addFileToRecentlySearchedFiles(
     globalState: FuzzierGlobalSettingsService.State
 ) {
     val fuzzyContainers: MutableList<FuzzyMatchContainer> =
-        projectState.getRecentlySearchedFilesAsFuzzyMatchContainer()
+        projectState.recentlySearchedFiles?.mapNotNull { it.toFuzzyMatchContainer() }?.toMutableList()
+            ?: mutableListOf()
 
     var i = 0
     while (i < fuzzyContainers.size) {
@@ -54,7 +55,6 @@ fun addFileToRecentlySearchedFiles(
     if (fuzzyContainer is FuzzyMatchContainer) {
         fuzzyContainers.add(fuzzyContainer)
 
-        projectState.recentlySearchedFiles =
-            fuzzyContainers.map { fromFuzzyMatchContainer(it) }
+        projectState.recentlySearchedFiles = fuzzyContainers.map { fromFuzzyMatchContainer(it) }
     }
 }
