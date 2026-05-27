@@ -84,7 +84,6 @@ fun addFileToLRUCache(
 
     val newEntry = FileAccessMetadata(
         filePath = incomingContainer.filePath,
-        lastAccessedAt = System.currentTimeMillis(),
         accessCount = (existingEntry?.accessCount ?: 0) + 1
     )
 

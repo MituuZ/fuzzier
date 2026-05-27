@@ -32,10 +32,9 @@ import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FileType.FILE
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import io.mockk.unmockkAll
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class RecentlySearchedFilesUtilTest {
@@ -128,7 +127,7 @@ class RecentlySearchedFilesUtilTest {
     @Test
     fun `addFileToLRUCache - Add new file to non-empty cache`() {
         val recentFiles = mutableListOf(
-            FileAccessMetadata("path1", 100L, 1)
+            FileAccessMetadata("path1", 1)
         )
         val container = createContainer("path2")
         val result = addFileToLRUCache(container, recentFiles, 5)
@@ -142,8 +141,8 @@ class RecentlySearchedFilesUtilTest {
     @Test
     fun `addFileToLRUCache - Add existing file`() {
         val recentFiles = mutableListOf(
-            FileAccessMetadata("path1", 100L, 1),
-            FileAccessMetadata("path2", 200L, 1)
+            FileAccessMetadata("path1", 1),
+            FileAccessMetadata("path2", 1)
         )
         val container = createContainer("path2")
         val result = addFileToLRUCache(container, recentFiles, 5)
@@ -157,8 +156,8 @@ class RecentlySearchedFilesUtilTest {
     @Test
     fun `addFileToLRUCache - Exceeding max size`() {
         val recentFiles = mutableListOf(
-            FileAccessMetadata("path2", 200L, 1),
-            FileAccessMetadata("path1", 100L, 1)
+            FileAccessMetadata("path2", 1),
+            FileAccessMetadata("path1", 1)
         )
         val container = createContainer("path3")
         val result = addFileToLRUCache(container, recentFiles, 2)
@@ -166,17 +165,6 @@ class RecentlySearchedFilesUtilTest {
         assertEquals(2, result.size)
         assertEquals("path3", result[0].filePath)
         assertEquals("path2", result[1].filePath)
-    }
-
-    @Test
-    fun `addFileToLRUCache - Last accessed at is updated`() {
-        val recentFiles = mutableListOf<FileAccessMetadata>()
-        val container = createContainer("path1")
-        val startTime = System.currentTimeMillis()
-        val result = addFileToLRUCache(container, recentFiles, 5)
-        val endTime = System.currentTimeMillis()
-
-        assertTrue(result[0].lastAccessedAt in startTime..endTime)
     }
 
     @Test
