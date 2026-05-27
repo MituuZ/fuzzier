@@ -102,8 +102,8 @@ class FuzzyMatchContainerTest {
         val deserialized =
             ObjectInputStream(byteArrayInputStream).use { it.readObject() as FuzzyMatchContainer.SerializedMatchContainer }
         val fmc = deserialized.toFuzzyMatchContainer()
-        assertEquals("", fmc.filePath)
-        assertEquals("FuzzyMatchContainerTest.kt", fmc.filename)
+        assertEquals("", fmc?.filePath)
+        assertEquals("FuzzyMatchContainerTest.kt", fmc?.filename)
     }
 
     @Test
