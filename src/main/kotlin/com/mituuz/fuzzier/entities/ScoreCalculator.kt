@@ -28,7 +28,8 @@ import org.apache.commons.lang3.StringUtils
 
 class ScoreCalculator(
     searchString: String,
-    private val config: MatchConfig
+    private val config: MatchConfig,
+    private val fileUsageStats: Map<String, FileUsageStats>
 ) {
     private val lowerSearchString: String = searchString.lowercase()
     private val searchStringParts = lowerSearchString.split(" ")
@@ -82,7 +83,23 @@ class ScoreCalculator(
         fuzzyScore.streakScore = (longestStreak * config.matchWeightStreakModifier) / 10
         fuzzyScore.filenameScore = (longestFilenameStreak * config.matchWeightFilename) / 10
 
+        val fileStats = fileUsageStats[currentFilePath]
+        fuzzyScore.fileUsageScore = calculateUsageBoost(fileStats)
+
         return fuzzyScore
+    }
+
+    private fun calculateUsageBoost(fileStats: FileUsageStats?): Int {
+        if (fileStats == null) {
+            return 0
+        }
+        val recencyWeight = 12
+        val frequencyWeight = 1
+
+        val recencyBoost = recencyWeight * (1 - fileStats.recentIndex / 10)
+        val frequencyBoost = frequencyWeight * fileStats.accessCount
+
+        return (recencyBoost + frequencyBoost)
     }
 
     /**

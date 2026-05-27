@@ -24,7 +24,7 @@
 
 package com.mituuz.fuzzier.search.initialview
 
-import com.mituuz.fuzzier.entities.FileAccessMetadata
+import com.mituuz.fuzzier.entities.FileAccessData
 import com.mituuz.fuzzier.entities.FuzzyContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.SerializedMatchContainer.Companion.fromFuzzyMatchContainer
@@ -76,13 +76,13 @@ fun addFileToRecentlySearchedFiles(
 }
 
 fun addFileToLRUCache(
-    incomingContainer: FuzzyContainer, recentFiles: MutableList<FileAccessMetadata>, maxSize: Int
-): MutableList<FileAccessMetadata> {
+    incomingContainer: FuzzyContainer, recentFiles: MutableList<FileAccessData>, maxSize: Int
+): MutableList<FileAccessData> {
     val existingIndex = recentFiles.indexOfFirst { it.filePath == incomingContainer.filePath }
 
     val existingEntry = if (existingIndex != -1) recentFiles.removeAt(existingIndex) else null
 
-    val newEntry = FileAccessMetadata(
+    val newEntry = FileAccessData(
         filePath = incomingContainer.filePath,
         accessCount = (existingEntry?.accessCount ?: 0) + 1
     )

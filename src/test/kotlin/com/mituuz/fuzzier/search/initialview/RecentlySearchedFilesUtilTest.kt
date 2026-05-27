@@ -26,7 +26,7 @@ package com.mituuz.fuzzier.search.initialview
 
 import com.intellij.openapi.components.service
 import com.intellij.testFramework.TestApplicationManager
-import com.mituuz.fuzzier.entities.FileAccessMetadata
+import com.mituuz.fuzzier.entities.FileAccessData
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FileType.FILE
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
@@ -115,7 +115,7 @@ class RecentlySearchedFilesUtilTest {
 
     @Test
     fun `addFileToLRUCache - Add new file to empty cache`() {
-        val recentFiles = mutableListOf<FileAccessMetadata>()
+        val recentFiles = mutableListOf<FileAccessData>()
         val container = createContainer("path1")
         val result = addFileToLRUCache(container, recentFiles, 5)
 
@@ -127,7 +127,7 @@ class RecentlySearchedFilesUtilTest {
     @Test
     fun `addFileToLRUCache - Add new file to non-empty cache`() {
         val recentFiles = mutableListOf(
-            FileAccessMetadata("path1", 1)
+            FileAccessData("path1", 1)
         )
         val container = createContainer("path2")
         val result = addFileToLRUCache(container, recentFiles, 5)
@@ -141,8 +141,8 @@ class RecentlySearchedFilesUtilTest {
     @Test
     fun `addFileToLRUCache - Add existing file`() {
         val recentFiles = mutableListOf(
-            FileAccessMetadata("path1", 1),
-            FileAccessMetadata("path2", 1)
+            FileAccessData("path1", 1),
+            FileAccessData("path2", 1)
         )
         val container = createContainer("path2")
         val result = addFileToLRUCache(container, recentFiles, 5)
@@ -156,8 +156,8 @@ class RecentlySearchedFilesUtilTest {
     @Test
     fun `addFileToLRUCache - Exceeding max size`() {
         val recentFiles = mutableListOf(
-            FileAccessMetadata("path2", 1),
-            FileAccessMetadata("path1", 1)
+            FileAccessData("path2", 1),
+            FileAccessData("path1", 1)
         )
         val container = createContainer("path3")
         val result = addFileToLRUCache(container, recentFiles, 2)
@@ -169,7 +169,7 @@ class RecentlySearchedFilesUtilTest {
 
     @Test
     fun `addFileToLRUCache - Max size 0`() {
-        val recentFiles = mutableListOf<FileAccessMetadata>()
+        val recentFiles = mutableListOf<FileAccessData>()
         val container = createContainer("path1")
         val result = addFileToLRUCache(container, recentFiles, 0)
 

@@ -144,6 +144,11 @@ class TestBenchComponent : JPanel(), Disposable {
             addAll(projectState.exclusionSet)
             addAll(liveGlobalExclusions)
         }
+        val fileUsageMap = buildMap<String, FileUsageStats> {
+            projectState.recentFiles.withIndex().associate { (recentIndex, stats) ->
+                stats.filePath to FileUsageStats(recentIndex, stats.accessCount)
+            }
+        }
 
         currentUpdateListContentJob?.cancel()
         currentUpdateListContentJob = actionScope.launch {
@@ -151,7 +156,9 @@ class TestBenchComponent : JPanel(), Disposable {
 
             try {
                 val stringEvaluator = StringEvaluator(
-                    combinedExclusions, project.service<FuzzierSettingsService>().state.modules
+                    combinedExclusions,
+                    project.service<FuzzierSettingsService>().state.modules,
+                    fileUsageMap
                 )
 
                 val iterationEntries = withContext(Dispatchers.Default) {
@@ -169,9 +176,8 @@ class TestBenchComponent : JPanel(), Disposable {
                     )
                 }
 
-                val sortedList =
-                    listModel.elements().toList()
-                        .sortedByDescending { (it as FuzzyMatchContainer).getScore(prioritizeShorterDirPaths) }
+                val sortedList = listModel.elements().toList()
+                    .sortedByDescending { (it as FuzzyMatchContainer).getScore(prioritizeShorterDirPaths) }
                 val data: Array<Array<Any>> = sortedList.map {
                     arrayOf(
                         (it as FuzzyMatchContainer).filename as Any,
@@ -234,8 +240,7 @@ class TestBenchComponent : JPanel(), Disposable {
         val ss = FuzzierUtil.cleanSearchString(searchString, projectState.ignoredCharacters)
         val processedFiles = ConcurrentHashMap.newKeySet<String>()
         val priorityQueue = PriorityQueue(
-            fileListLimit + 1,
-            compareBy<FuzzyMatchContainer> { it.getScore(prioritizeShorterDirPaths) })
+            fileListLimit + 1, compareBy<FuzzyMatchContainer> { it.getScore(prioritizeShorterDirPaths) })
 
         val queueLock = Any()
         var minimumScore: Int? = null

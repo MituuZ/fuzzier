@@ -28,7 +28,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.util.xmlb.annotations.OptionTag
-import com.mituuz.fuzzier.entities.FileAccessMetadata
+import com.mituuz.fuzzier.entities.FileAccessData
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 
 /**
@@ -53,7 +53,7 @@ class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.S
         var recentlySearchedFiles: List<FuzzyMatchContainer.SerializedMatchContainer>? = listOf()
 
         /** Map of recently searched files. */
-        var recentFiles: MutableList<FileAccessMetadata> = mutableListOf()
+        var recentFiles: MutableList<FileAccessData> = mutableListOf()
 
         /** Set of file patterns to be excluded from searches. */
         var exclusionSet: Set<String> = setOf("/.idea/*", "/.git/*", "/target/*", "/build/*", "/.gradle/*", "/.run/*")

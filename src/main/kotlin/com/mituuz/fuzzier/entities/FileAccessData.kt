@@ -24,7 +24,12 @@
 
 package com.mituuz.fuzzier.entities
 
-data class FileAccessMetadata(
+data class FileAccessData(
     val filePath: String,
+    val accessCount: Int,
+)
+
+data class FileUsageStats(
+    val recentIndex: Int,
     val accessCount: Int,
 )
