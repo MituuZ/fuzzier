@@ -52,7 +52,7 @@ class FuzzierSettingsService : PersistentStateComponent<FuzzierSettingsService.S
         @OptionTag(converter = FuzzyMatchContainer.SerializedMatchContainerConverter::class)
         var recentlySearchedFiles: List<FuzzyMatchContainer.SerializedMatchContainer>? = listOf()
 
-        /** Map of recently searched files. */
+        /** List of recently searched files. */
         var recentFiles: MutableList<FileAccessData> = mutableListOf()
 
         /** Set of file patterns to be excluded from searches. */
