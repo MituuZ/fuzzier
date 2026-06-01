@@ -78,7 +78,8 @@ fun addFileToRecentlySearchedFiles(
 fun addFileToLRUCache(
     incomingContainer: FuzzyContainer, recentFiles: MutableList<FileAccessData>, maxSize: Int
 ): MutableList<FileAccessData> {
-    val existingIndex = recentFiles.indexOfFirst { it.filePath == incomingContainer.filePath }
+    val lower = incomingContainer.filePath.lowercase()
+    val existingIndex = recentFiles.indexOfFirst { it.filePath.lowercase() == lower }
 
     val existingEntry = if (existingIndex != -1) recentFiles.removeAt(existingIndex) else null
 
