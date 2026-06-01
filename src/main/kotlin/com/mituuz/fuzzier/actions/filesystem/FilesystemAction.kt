@@ -74,7 +74,7 @@ abstract class FilesystemAction : FuzzyAction() {
     }
 
     fun getFileUsageMap(state: FuzzierSettingsService.State): Map<String, FileUsageStats> =
-        state.recentFiles.withIndex().associate { (recentIndex, stats) ->
+        state.recentFiles.filter { it.filePath.isNotBlank() }.withIndex().associate { (recentIndex, stats) ->
             stats.filePath to FileUsageStats(recentIndex, stats.accessCount)
         }
 

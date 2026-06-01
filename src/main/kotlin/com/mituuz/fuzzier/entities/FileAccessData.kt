@@ -25,8 +25,8 @@
 package com.mituuz.fuzzier.entities
 
 data class FileAccessData(
-    val filePath: String,
-    val accessCount: Int,
+    val filePath: String = "",
+    val accessCount: Int = 0,
 )
 
 data class FileUsageStats(
