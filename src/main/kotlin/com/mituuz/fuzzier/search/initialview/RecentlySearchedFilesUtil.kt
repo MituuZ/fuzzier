@@ -67,12 +67,12 @@ fun addFileToRecentlySearchedFiles(
 
     if (incomingContainer is FuzzyMatchContainer) {
         recentFiles.add(incomingContainer)
-        projectState.recentFiles = addFileToLRUCache(
-            incomingContainer, projectState.recentFiles, fileMetadataCacheSize
-        )
-
         projectState.recentlySearchedFiles = recentFiles.map { fromFuzzyMatchContainer(it) }
     }
+
+    projectState.recentFiles = addFileToLRUCache(
+        incomingContainer, projectState.recentFiles, fileMetadataCacheSize
+    )
 }
 
 fun addFileToLRUCache(
@@ -84,7 +84,7 @@ fun addFileToLRUCache(
     val existingEntry = if (existingIndex != -1) recentFiles.removeAt(existingIndex) else null
 
     val newEntry = FileAccessData(
-        filePath = incomingContainer.filePath,
+        filePath = lower,
         accessCount = (existingEntry?.accessCount ?: 0) + 1
     )
 

@@ -24,10 +24,19 @@
 
 package com.mituuz.fuzzier.entities
 
-data class FileAccessData(
-    val filePath: String = "",
-    val accessCount: Int = 0,
-)
+import java.io.Serializable
+
+class FileAccessData : Serializable {
+    var filePath: String = ""
+    var accessCount: Int = 0
+
+    constructor()
+
+    constructor(filePath: String, accessCount: Int) {
+        this.filePath = filePath
+        this.accessCount = accessCount
+    }
+}
 
 data class FileUsageStats(
     val recentIndex: Int,
