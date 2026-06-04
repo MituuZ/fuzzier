@@ -26,93 +26,153 @@ package com.mituuz.fuzzier.search.initialview
 
 import com.intellij.openapi.components.service
 import com.intellij.testFramework.TestApplicationManager
+import com.mituuz.fuzzier.entities.FileAccessData
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer
 import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FileType.FILE
-import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import io.mockk.unmockkAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import javax.swing.DefaultListModel
 
 class RecentlySearchedFilesUtilTest {
     @Suppress("unused") // Required for add to recently used files (fuzzierSettingsServiceInstance)
     private var testApplicationManager: TestApplicationManager = TestApplicationManager.getInstance()
+    private lateinit var fuzzierSettingsServiceInstance: FuzzierSettingsService
+
+    @BeforeEach
+    fun setUp() {
+        fuzzierSettingsServiceInstance = service<FuzzierSettingsService>()
+        fuzzierSettingsServiceInstance.state.recentlySearchedFiles = mutableListOf()
+    }
 
     @AfterEach
     fun tearDown() {
         unmockkAll()
     }
 
+    private fun createContainer(path: String = ""): FuzzyMatchContainer {
+        return FuzzyMatchContainer(FuzzyMatchContainer.FuzzyScore(), path, path, path, FILE)
+    }
+
     @Test
     fun `Add file to recently used files - Null list should default to empty`() {
-        val fuzzierSettingsServiceInstance: FuzzierSettingsService = service<FuzzierSettingsService>()
-        val fgss = service<FuzzierGlobalSettingsService>().state
-        val score = FuzzyMatchContainer.FuzzyScore()
-        val container = FuzzyMatchContainer(score, "", "", "", FILE)
+        val container = createContainer()
 
         fuzzierSettingsServiceInstance.state.recentlySearchedFiles = null
         addFileToRecentlySearchedFiles(
             container,
             fuzzierSettingsServiceInstance.state,
-            fgss
+            20, 100
         )
-        assertNotNull(fuzzierSettingsServiceInstance.state.getRecentlySearchedFilesAsFuzzyMatchContainer())
-        assertEquals(1, fuzzierSettingsServiceInstance.state.getRecentlySearchedFilesAsFuzzyMatchContainer().size)
+        assertNotNull(fuzzierSettingsServiceInstance.state.recentlySearchedFiles)
+        assertEquals(1, fuzzierSettingsServiceInstance.state.recentlySearchedFiles?.size)
     }
 
     @Test
     fun `Add file to recently used files - Too large list is truncated`() {
-        val fuzzierSettingsServiceInstance: FuzzierSettingsService = service<FuzzierSettingsService>()
-        val fgss = service<FuzzierGlobalSettingsService>().state
         val fileListLimit = 2
-        val score = FuzzyMatchContainer.FuzzyScore()
-        val container = FuzzyMatchContainer(score, "", "", "", FILE)
+        val container = createContainer()
 
-        val largeList: DefaultListModel<FuzzyMatchContainer> = DefaultListModel()
+        val largeList: MutableList<FuzzyMatchContainer> = mutableListOf()
         for (i in 0..25) {
-            largeList.addElement(FuzzyMatchContainer(score, "" + i, "" + i, "", FILE))
+            largeList.add(createContainer("" + i))
         }
 
-        fgss.fileListLimit = fileListLimit
-
         fuzzierSettingsServiceInstance.state.recentlySearchedFiles =
-            FuzzyMatchContainer.SerializedMatchContainer.fromListModel(largeList)
+            largeList.map { FuzzyMatchContainer.SerializedMatchContainer.fromFuzzyMatchContainer(it) }
         addFileToRecentlySearchedFiles(
             container,
             fuzzierSettingsServiceInstance.state,
-            fgss
+            fileListLimit, 100
         )
         assertEquals(
             fileListLimit,
-            fuzzierSettingsServiceInstance.state.getRecentlySearchedFilesAsFuzzyMatchContainer().size
+            fuzzierSettingsServiceInstance.state.recentlySearchedFiles?.size
         )
     }
 
     @Test
     fun `Add file to recently used files - Duplicate filenames are removed`() {
-        val fuzzierSettingsServiceInstance: FuzzierSettingsService = service<FuzzierSettingsService>()
-        val fgss = service<FuzzierGlobalSettingsService>().state
-        val fileListLimit = 20
-        val score = FuzzyMatchContainer.FuzzyScore()
-        val container = FuzzyMatchContainer(score, "", "", "", FILE)
+        val container = createContainer()
 
-        val largeList: DefaultListModel<FuzzyMatchContainer> = DefaultListModel()
+        val largeList: MutableList<FuzzyMatchContainer> = mutableListOf()
         repeat(26) {
-            largeList.addElement(FuzzyMatchContainer(score, "", "", "", FILE))
+            largeList.add(createContainer())
         }
 
-        fgss.fileListLimit = fileListLimit
-
         fuzzierSettingsServiceInstance.state.recentlySearchedFiles =
-            FuzzyMatchContainer.SerializedMatchContainer.fromListModel(largeList)
+            largeList.map { FuzzyMatchContainer.SerializedMatchContainer.fromFuzzyMatchContainer(it) }
         addFileToRecentlySearchedFiles(
             container,
             fuzzierSettingsServiceInstance.state,
-            fgss
+            20, 100
         )
-        assertEquals(1, fuzzierSettingsServiceInstance.state.getRecentlySearchedFilesAsFuzzyMatchContainer().size)
+        assertEquals(1, fuzzierSettingsServiceInstance.state.recentlySearchedFiles?.size)
+    }
+
+    @Test
+    fun `addFileToLRUCache - Add new file to empty cache`() {
+        val recentFiles = mutableListOf<FileAccessData>()
+        val container = createContainer("path1")
+        val result = addFileToLRUCache(container, recentFiles, 5)
+
+        assertEquals(1, result.size)
+        assertEquals("path1", result[0].filePath)
+        assertEquals(1, result[0].accessCount)
+    }
+
+    @Test
+    fun `addFileToLRUCache - Add new file to non-empty cache`() {
+        val recentFiles = mutableListOf(
+            FileAccessData("path1", 1)
+        )
+        val container = createContainer("path2")
+        val result = addFileToLRUCache(container, recentFiles, 5)
+
+        assertEquals(2, result.size)
+        assertEquals("path2", result[0].filePath)
+        assertEquals(1, result[0].accessCount)
+        assertEquals("path1", result[1].filePath)
+    }
+
+    @Test
+    fun `addFileToLRUCache - Add existing file`() {
+        val recentFiles = mutableListOf(
+            FileAccessData("path1", 1),
+            FileAccessData("path2", 1)
+        )
+        val container = createContainer("path2")
+        val result = addFileToLRUCache(container, recentFiles, 5)
+
+        assertEquals(2, result.size)
+        assertEquals("path2", result[0].filePath)
+        assertEquals(2, result[0].accessCount)
+        assertEquals("path1", result[1].filePath)
+    }
+
+    @Test
+    fun `addFileToLRUCache - Exceeding max size`() {
+        val recentFiles = mutableListOf(
+            FileAccessData("path2", 1),
+            FileAccessData("path1", 1)
+        )
+        val container = createContainer("path3")
+        val result = addFileToLRUCache(container, recentFiles, 2)
+
+        assertEquals(2, result.size)
+        assertEquals("path3", result[0].filePath)
+        assertEquals("path2", result[1].filePath)
+    }
+
+    @Test
+    fun `addFileToLRUCache - Max size 0`() {
+        val recentFiles = mutableListOf<FileAccessData>()
+        val container = createContainer("path1")
+        val result = addFileToLRUCache(container, recentFiles, 0)
+
+        assertEquals(0, result.size)
     }
 }

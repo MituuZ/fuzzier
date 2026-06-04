@@ -144,7 +144,8 @@ open class Fuzzier : FilesystemAction() {
                     addFileToRecentlySearchedFiles(
                         selectedValue,
                         projectState,
-                        globalState
+                        globalState.fileListLimit,
+                        globalState.fileMetadataCacheSize
                     )
                 }
                 popup.cancel()

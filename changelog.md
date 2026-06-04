@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 2.4.0
+
+- Add file recency scoring
+  - LRU cache for file paths
+  - Scoring is based on the recency of the file access and the frequency of the file access
+
 ## Version 2.3.0
 
 - Update dependencies

@@ -24,13 +24,21 @@
 
 package com.mituuz.fuzzier.entities
 
-data class MatchConfig(
-    val tolerance: Int = 0,
-    val multiMatch: Boolean = false,
-    val matchWeightSingleChar: Int = 5,
-    val matchWeightStreakModifier: Int = 10,
-    val matchWeightPartialPath: Int = 10,
-    val matchWeightFilename: Int = 20,
-    val matchWeightFrequency: Int = 10,
-    val matchWeightRecency: Int = 10,
+import java.io.Serializable
+
+class FileAccessData : Serializable {
+    var filePath: String = ""
+    var accessCount: Int = 0
+
+    constructor()
+
+    constructor(filePath: String, accessCount: Int) {
+        this.filePath = filePath
+        this.accessCount = accessCount
+    }
+}
+
+data class FileUsageStats(
+    val recentIndex: Int,
+    val accessCount: Int,
 )

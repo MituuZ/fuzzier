@@ -30,7 +30,6 @@ import com.mituuz.fuzzier.settings.FuzzierGlobalSettingsService
 import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import java.io.*
 import java.util.*
-import javax.swing.DefaultListModel
 
 class FuzzyMatchContainer(
     val score: FuzzyScore,
@@ -111,10 +110,12 @@ class FuzzyMatchContainer(
         var multiMatchScore = 0
         var partialPathScore = 0
         var filenameScore = 0
+        var frequencyScore = 0
+        var recencyScore = 0
         val highlightCharacters: MutableSet<Int> = HashSet()
 
         fun getTotalScore(): Int {
-            return streakScore + multiMatchScore + partialPathScore + filenameScore
+            return streakScore + multiMatchScore + partialPathScore + filenameScore + frequencyScore + recencyScore
         }
     }
 
@@ -137,26 +138,15 @@ class FuzzyMatchContainer(
                 serialized.moduleBasePath = container.basePath
                 return serialized
             }
-
-            fun fromListModel(listModel: DefaultListModel<FuzzyMatchContainer>): DefaultListModel<SerializedMatchContainer> {
-                val serializedList = DefaultListModel<SerializedMatchContainer>()
-                for (i in 0 until listModel.size) {
-                    serializedList.addElement(fromFuzzyMatchContainer(listModel[i]))
-                }
-                return serializedList
-            }
-
-            fun toListModel(serializedList: DefaultListModel<SerializedMatchContainer>): DefaultListModel<FuzzyMatchContainer> {
-                val listModel = DefaultListModel<FuzzyMatchContainer>()
-                for (i in 0 until serializedList.size) {
-                    listModel.addElement(serializedList[i].toFuzzyMatchContainer())
-                }
-                return listModel
-            }
         }
 
-        fun toFuzzyMatchContainer(): FuzzyMatchContainer {
-            return FuzzyMatchContainer(score!!, filePath!!, filename!!, moduleBasePath!!, FileType.FILE)
+        fun toFuzzyMatchContainer(): FuzzyMatchContainer? {
+            val score = score ?: return null
+            val filePath = filePath ?: return null
+            val filename = filename ?: return null
+            val moduleBasePath = moduleBasePath ?: return null
+
+            return FuzzyMatchContainer(score, filePath, filename, moduleBasePath, FileType.FILE)
         }
 
         var score: FuzzyScore? = null
@@ -177,21 +167,21 @@ class FuzzyMatchContainer(
      *
      * @see FuzzierSettingsService
      */
-    class SerializedMatchContainerConverter : Converter<DefaultListModel<SerializedMatchContainer>>() {
-        override fun fromString(value: String): DefaultListModel<SerializedMatchContainer> {
+    class SerializedMatchContainerConverter : Converter<List<SerializedMatchContainer>>() {
+        override fun fromString(value: String): List<SerializedMatchContainer> {
             // Fallback to an empty list if deserialization fails
             try {
                 val data = Base64.getDecoder().decode(value)
                 val byteArrayInputStream = ByteArrayInputStream(data)
 
                 @Suppress("UNCHECKED_CAST")
-                return ObjectInputStream(byteArrayInputStream).use { it.readObject() as DefaultListModel<SerializedMatchContainer> }
+                return ObjectInputStream(byteArrayInputStream).use { it.readObject() as List<SerializedMatchContainer> }
             } catch (_: Exception) {
-                return DefaultListModel<SerializedMatchContainer>()
+                return listOf()
             }
         }
 
-        override fun toString(value: DefaultListModel<SerializedMatchContainer>): String {
+        override fun toString(value: List<SerializedMatchContainer>): String {
             val byteArrayOutputStream = ByteArrayOutputStream()
             ObjectOutputStream(byteArrayOutputStream).use { it.writeObject(value) }
             return Base64.getEncoder().encodeToString(byteArrayOutputStream.toByteArray())

@@ -27,7 +27,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 // Use the same version and group for the jar and the plugin
-val currentVersion = "2.3.0"
+val currentVersion = "2.4.0"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -41,16 +41,15 @@ intellijPlatform {
     <h2>Version $currentVersion</h2>
         <ul>
             <li>
-                Update dependencies
-            </li>
-            <li>
-                Fix ETD errors
-            </li>
-            <li>
-                Update minimum version to 2026.1
-            </li>
-            <li>
-                Add fallback for finding rg with wsl2
+                Add file recency scoring
+                <ul>
+                    <li>
+                        LRU cache for file paths
+                    </li>
+                    <li>
+                        Scoring is based on the recency of the file access and the frequency of the file access
+                    </li>
+                </ul>
             </li>
         </ul>
     """.trimIndent()

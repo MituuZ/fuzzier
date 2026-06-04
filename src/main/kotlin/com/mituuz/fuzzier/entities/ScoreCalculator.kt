@@ -28,7 +28,8 @@ import org.apache.commons.lang3.StringUtils
 
 class ScoreCalculator(
     searchString: String,
-    private val config: MatchConfig
+    private val config: MatchConfig,
+    private val fileUsageStats: Map<String, FileUsageStats>
 ) {
     private val lowerSearchString: String = searchString.lowercase()
     private val searchStringParts = lowerSearchString.split(" ")
@@ -82,7 +83,26 @@ class ScoreCalculator(
         fuzzyScore.streakScore = (longestStreak * config.matchWeightStreakModifier) / 10
         fuzzyScore.filenameScore = (longestFilenameStreak * config.matchWeightFilename) / 10
 
+        val fileStats = fileUsageStats[currentFilePath]
+        calculateUsageBoost(fileStats)
+
         return fuzzyScore
+    }
+
+    internal fun calculateUsageBoost(fileStats: FileUsageStats?): Int {
+        if (fileStats == null) {
+            return 0
+        }
+
+        val recencyBoost = ((10 - fileStats.recentIndex / 2).coerceAtLeast(0) * config.matchWeightRecency) / 10
+        val frequencyBoost = ((fileStats.accessCount / 5).coerceAtMost(10) * config.matchWeightFrequency) / 10
+
+        if (this::fuzzyScore.isInitialized) {
+            fuzzyScore.recencyScore = recencyBoost
+            fuzzyScore.frequencyScore = frequencyBoost
+        }
+
+        return recencyBoost + frequencyBoost
     }
 
     /**
@@ -148,7 +168,7 @@ class ScoreCalculator(
         longestFilenameStreak = 0
 
         filePathIndex = filenameIndex
-        while (searchStringIndex < searchStringLength && filePathIndex < currentFilePath.length) {
+        while (searchStringIndex < lowerSearchString.length && filePathIndex < currentFilePath.length) {
             processFilenameChar(lowerSearchString[searchStringIndex])
         }
     }

@@ -61,6 +61,7 @@ class FuzzierGlobalSettingsService : PersistentStateComponent<FuzzierGlobalSetti
         var debouncePeriod: Int = 80
         var resetWindow = false
         var fileListLimit: Int = 50
+        val fileMetadataCacheSize = 100
 
         var globalExclusionSet: Set<String> = emptySet()
 
@@ -70,6 +71,8 @@ class FuzzierGlobalSettingsService : PersistentStateComponent<FuzzierGlobalSetti
         var matchWeightSingleChar = 5
         var matchWeightStreakModifier = 10
         var matchWeightFilename = 10
+        var matchWeightFrequency = 10
+        var matchWeightRecency = 10
 
         var grepBackend: GrepBackend = GrepBackend.DYNAMIC
     }

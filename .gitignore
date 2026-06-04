@@ -6,6 +6,7 @@ libs/
 !**/src/main/**/build/
 !**/src/test/**/build/
 .aider*
+.junie/
 
 ### IntelliJ IDEA ###
 .intellijPlatform

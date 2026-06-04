@@ -53,7 +53,7 @@ import javax.swing.table.DefaultTableModel
 
 class TestBenchComponent : JPanel(), Disposable {
     private val columnNames =
-        arrayOf("Filename", "Filepath", "Streak", "MultiMatch", "PartialPath", "Filename", "Total")
+        arrayOf("Filename", "Filepath", "Streak", "MultiMatch", "PartialPath", "Filename", "Freq", "Recency", "Total")
     private val table = JBTable()
     private var searchField = EditorTextField()
     private var debounceJob: Job? = null
@@ -145,13 +145,18 @@ class TestBenchComponent : JPanel(), Disposable {
             addAll(liveGlobalExclusions)
         }
 
+        val fileUsageMap =
+            projectState.recentFiles.filter { it.filePath.isNotBlank() }.withIndex().associate { (recentIndex, stats) ->
+                stats.filePath to FileUsageStats(recentIndex, stats.accessCount)
+            }
+
         currentUpdateListContentJob?.cancel()
         currentUpdateListContentJob = actionScope.launch {
             table.setPaintBusy(true)
 
             try {
                 val stringEvaluator = StringEvaluator(
-                    combinedExclusions, project.service<FuzzierSettingsService>().state.modules
+                    combinedExclusions, project.service<FuzzierSettingsService>().state.modules, fileUsageMap
                 )
 
                 val iterationEntries = withContext(Dispatchers.Default) {
@@ -169,9 +174,8 @@ class TestBenchComponent : JPanel(), Disposable {
                     )
                 }
 
-                val sortedList =
-                    listModel.elements().toList()
-                        .sortedByDescending { (it as FuzzyMatchContainer).getScore(prioritizeShorterDirPaths) }
+                val sortedList = listModel.elements().toList()
+                    .sortedByDescending { (it as FuzzyMatchContainer).getScore(prioritizeShorterDirPaths) }
                 val data: Array<Array<Any>> = sortedList.map {
                     arrayOf(
                         (it as FuzzyMatchContainer).filename as Any,
@@ -180,6 +184,8 @@ class TestBenchComponent : JPanel(), Disposable {
                         it.score.multiMatchScore as Any,
                         it.score.partialPathScore as Any,
                         it.score.filenameScore as Any,
+                        it.score.frequencyScore as Any,
+                        it.score.recencyScore as Any,
                         it.score.getTotalScore() as Any
                     )
                 }.toTypedArray()
@@ -234,8 +240,7 @@ class TestBenchComponent : JPanel(), Disposable {
         val ss = FuzzierUtil.cleanSearchString(searchString, projectState.ignoredCharacters)
         val processedFiles = ConcurrentHashMap.newKeySet<String>()
         val priorityQueue = PriorityQueue(
-            fileListLimit + 1,
-            compareBy<FuzzyMatchContainer> { it.getScore(prioritizeShorterDirPaths) })
+            fileListLimit + 1, compareBy<FuzzyMatchContainer> { it.getScore(prioritizeShorterDirPaths) })
 
         val queueLock = Any()
         var minimumScore: Int? = null
@@ -255,7 +260,9 @@ class TestBenchComponent : JPanel(), Disposable {
                             liveSettingsComponent.matchWeightSingleChar.getIntSpinner().value as Int,
                             liveSettingsComponent.matchWeightStreakModifier.getIntSpinner().value as Int,
                             liveSettingsComponent.matchWeightPartialPath.getIntSpinner().value as Int,
-                            liveSettingsComponent.matchWeightFilename.getIntSpinner().value as Int
+                            liveSettingsComponent.matchWeightFilename.getIntSpinner().value as Int,
+                            liveSettingsComponent.matchWeightFrequency.getIntSpinner().value as Int,
+                            liveSettingsComponent.matchWeightRecency.getIntSpinner().value as Int
                         )
 
                         val container = stringEvaluator.evaluateIteratorEntry(iterationFile, ss, matchConfig)

@@ -38,7 +38,7 @@ class StringEvaluatorTest {
     private val moduleBasePath = "/m1/src"
 
     private fun evaluate(filePaths: List<String>, exclusionList: Set<String>): List<String> {
-        val evaluator = StringEvaluator(exclusionList, mapOf(moduleName to moduleBasePath))
+        val evaluator = StringEvaluator(exclusionList, mapOf(moduleName to moduleBasePath), mapOf())
 
         return filePaths.mapNotNull { fp ->
             // Build absolute path under a fake module root so that removePrefix(moduleBasePath) works like in production

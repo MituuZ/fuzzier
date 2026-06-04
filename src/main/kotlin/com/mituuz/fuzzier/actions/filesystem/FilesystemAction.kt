@@ -31,6 +31,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.mituuz.fuzzier.actions.FuzzyAction
 import com.mituuz.fuzzier.entities.*
 import com.mituuz.fuzzier.intellij.iteration.IterationFileCollector
+import com.mituuz.fuzzier.settings.FuzzierSettingsService
 import com.mituuz.fuzzier.util.FuzzierUtil
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -64,11 +65,18 @@ abstract class FilesystemAction : FuzzyAction() {
             addAll(projectState.exclusionSet)
             addAll(globalState.globalExclusionSet)
         }
+        val fileUsageStats = getFileUsageMap(projectState)
         return StringEvaluator(
             combinedExclusions,
             projectState.modules,
+            fileUsageStats
         )
     }
+
+    fun getFileUsageMap(state: FuzzierSettingsService.State): Map<String, FileUsageStats> =
+        state.recentFiles.filter { it.filePath.isNotBlank() }.withIndex().associate { (recentIndex, stats) ->
+            stats.filePath to FileUsageStats(recentIndex, stats.accessCount)
+        }
 
     /**
      * Processes a set of IterationFiles concurrently
@@ -100,7 +108,9 @@ abstract class FilesystemAction : FuzzyAction() {
             globalState.matchWeightSingleChar,
             globalState.matchWeightStreakModifier,
             globalState.matchWeightPartialPath,
-            globalState.matchWeightFilename
+            globalState.matchWeightFilename,
+            globalState.matchWeightFrequency,
+            globalState.matchWeightRecency
         )
 
         coroutineScope {

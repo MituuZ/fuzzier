@@ -32,13 +32,14 @@ import com.mituuz.fuzzier.entities.FuzzyMatchContainer.FileType
 class StringEvaluator(
     private var exclusionList: Set<String>,
     private var modules: Map<String, String>,
+    private val fileUsageStats: Map<String, FileUsageStats>
 ) {
     fun evaluateIteratorEntry(
         iteratorEntry: IterationEntry,
         searchString: String,
         matchConfig: MatchConfig
     ): FuzzyMatchContainer? {
-        val scoreCalculator = ScoreCalculator(searchString, matchConfig)
+        val scoreCalculator = ScoreCalculator(searchString, matchConfig, fileUsageStats)
         val moduleName = iteratorEntry.module
 
         val moduleBasePath = modules[moduleName] ?: return null
