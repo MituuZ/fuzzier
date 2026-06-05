@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 2.5.0
+
+- Add list rollover support
+
 ## Version 2.4.0
 
 - Add file recency scoring
