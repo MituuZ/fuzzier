@@ -59,6 +59,7 @@ import java.awt.Font
 import java.awt.event.ActionEvent
 import java.util.concurrent.ConcurrentHashMap
 import javax.swing.*
+import kotlin.time.Duration.Companion.milliseconds
 
 abstract class FuzzyAction : AnAction() {
     companion object {
@@ -160,7 +161,7 @@ abstract class FuzzyAction : AnAction() {
                 debounceJob?.cancel()
                 val debouncePeriod = globalState.debouncePeriod
                 debounceJob = actionScope?.launch {
-                    delay(debouncePeriod.toLong())
+                    delay(debouncePeriod.toLong().milliseconds)
                     updateListContents(project, component.searchField.text)
                 }
             }
@@ -225,20 +226,37 @@ abstract class FuzzyAction : AnAction() {
     }
 
     fun moveListUp() {
-        val selectedIndex = component.fileList.selectedIndex
-        if (selectedIndex > 0) {
-            component.fileList.selectedIndex = selectedIndex - 1
-            component.fileList.ensureIndexIsVisible(selectedIndex - 1)
+        val fileList = component.fileList
+        val listSize = fileList.model.size
+
+        if (listSize == 0) return
+
+        val currentIndex = fileList.selectedIndex
+        val newIndex = if (currentIndex in 1 until listSize) {
+            currentIndex - 1
+        } else {
+            listSize - 1
         }
+
+        fileList.selectedIndex = newIndex
+        fileList.ensureIndexIsVisible(newIndex)
     }
 
     fun moveListDown() {
-        val selectedIndex = component.fileList.selectedIndex
-        val length = component.fileList.model.size
-        if (selectedIndex < length - 1) {
-            component.fileList.selectedIndex = selectedIndex + 1
-            component.fileList.ensureIndexIsVisible(selectedIndex + 1)
+        val fileList = component.fileList
+        val listSize = fileList.model.size
+
+        if (listSize == 0) return
+
+        val currentIndex = fileList.selectedIndex
+        val newIndex = if (currentIndex < listSize - 1) {
+            currentIndex + 1
+        } else {
+            0
         }
+
+        fileList.selectedIndex = newIndex
+        fileList.ensureIndexIsVisible(newIndex)
     }
 
     fun getCellRenderer(): ListCellRenderer<Any?> {
