@@ -27,7 +27,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 // Use the same version and group for the jar and the plugin
-val currentVersion = "2.5.0"
+val currentVersion = "2.4.1"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -42,6 +42,20 @@ intellijPlatform {
         <ul>
             <li>
                 Add list rollover support
+            </li>
+        </ul>
+    <h2>Version 2.4.0</h2>
+        <ul>
+            <li>
+                Add file recency scoring
+                <ul>
+                    <li>
+                        LRU cache for file paths
+                    </li>
+                    <li>
+                        Scoring is based on the recency of the file access and the frequency of the file access
+                    </li>
+                </ul>
             </li>
         </ul>
     """.trimIndent()

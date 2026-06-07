@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 2.5.0
+## Version 2.4.1
 
 - Add list rollover support
 
