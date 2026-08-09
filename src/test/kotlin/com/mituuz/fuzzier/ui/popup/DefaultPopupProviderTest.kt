@@ -1,7 +1,7 @@
 /*
  *  MIT License
  *
- *  Copyright (c) 2025 Mitja Leino
+ *  Copyright (c) 2026 Mitja Leino
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -27,13 +27,14 @@ package com.mituuz.fuzzier.ui.popup
 import com.intellij.openapi.ui.popup.LightweightWindow
 import com.intellij.openapi.ui.popup.LightweightWindowEvent
 import com.intellij.testFramework.TestApplicationManager
-import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import com.intellij.testFramework.fixtures.IdeaProjectTestFixture
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
+import com.intellij.testFramework.runInEdtAndWait
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertNotNull
 import java.awt.Dimension
 import javax.swing.JLabel
 import javax.swing.JPanel
@@ -44,7 +45,6 @@ class DefaultPopupProviderTest {
 
     private lateinit var provider: DefaultPopupProvider
     private lateinit var fixture: IdeaProjectTestFixture
-    private lateinit var codeFixture: CodeInsightTestFixture
 
     @BeforeEach
     fun setUp() {
@@ -54,30 +54,33 @@ class DefaultPopupProviderTest {
     @Test
     fun `show returns null and exits when no IDE frame is available`() {
         // Set up a lightweight project fixture to get a Project instance
-        val factory = IdeaTestFixtureFactory.getFixtureFactory()
-        fixture = factory.createLightFixtureBuilder(null, "Test").fixture
-        codeFixture = IdeaTestFixtureFactory.getFixtureFactory().createCodeInsightFixture(fixture)
-        codeFixture.setUp()
-        val project = fixture.project
-        val content = JPanel()
-        val focus = JLabel("focus")
-        var cleared = false
-        val cfg = PopupConfig(
-            title = "Test",
-            dimensionKey = "fuzzier.test",
-            preferredSizeProvider = Dimension(800, 600),
-            resetWindow = { true },
-            clearResetWindowFlag = { cleared = true }
-        )
+        runInEdtAndWait {
+            val factory = IdeaTestFixtureFactory.getFixtureFactory()
+            fixture = factory.createLightFixtureBuilder(null, "Test").fixture
+            fixture.setUp()
 
-        try {
-            val popup = provider.show(project, content, focus, cfg) { /* cleanup */ }
-            // Should return null and not throw
-            assertNull(popup)
-            // Since we exit early due to missing IDE frame, ensure no side-effects were triggered
-            assertEquals(false, cleared)
-        } finally {
-            codeFixture.tearDown()
+            val project = fixture.project
+            val content = JPanel()
+            val focus = JLabel("focus")
+            var cleared = false
+            val cfg = PopupConfig(
+                title = "Test",
+                dimensionKey = "fuzzier.test",
+                preferredSizeProvider = Dimension(800, 600),
+                resetWindow = { true },
+                clearResetWindowFlag = { cleared = true })
+
+            assertNotNull(project, "Project should not be null")
+
+            try {
+                val popup = provider.show(project, content, focus, cfg) { /* cleanup */ }
+                // Should return null and not throw
+                assertNull(popup)
+                // Since we exit early due to missing IDE frame, ensure no side-effects were triggered
+                assertEquals(false, cleared)
+            } finally {
+                fixture.tearDown()
+            }
         }
     }
 

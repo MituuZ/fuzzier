@@ -1,7 +1,7 @@
 /*
  *  MIT License
  *
- *  Copyright (c) 2025 Mitja Leino
+ *  Copyright (c) 2026 Mitja Leino
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 // Use the same version and group for the jar and the plugin
-val currentVersion = "2.4.1"
+val currentVersion = "2.4.2"
 val myGroup = "com.mituuz"
 version = currentVersion
 group = myGroup
@@ -39,6 +39,12 @@ intellijPlatform {
 
         changeNotes = """
     <h2>Version $currentVersion</h2>
+        <ul>
+            <li>
+                Update dependencies
+            </li>
+        </ul>
+    <h2>Version 2.4.1</h2>
         <ul>
             <li>
                 Add list rollover support
