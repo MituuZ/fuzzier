@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 2.4.3
+
+- Update dependencies
+- Update deprecated method calls
+
 ## Version 2.4.2
 
 - Update dependencies
