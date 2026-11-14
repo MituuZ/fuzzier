@@ -25,7 +25,6 @@
 package com.mituuz.fuzzier.intellij.iteration
 
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.testFramework.TestApplicationManager
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
@@ -64,8 +63,8 @@ class OpenTabsCollectorTest {
 
         runInEdtAndWait {
             ApplicationManager.getApplication().runReadAction {
-                fileEditorManager.openFile(file1, true)
-                fileEditorManager.openFile(file2, true)
+                fileEditorManager.requestOpenFile(file1)
+                fileEditorManager.requestOpenFile(file2)
             }
         }
 
@@ -87,8 +86,8 @@ class OpenTabsCollectorTest {
 
         runInEdtAndWait {
             ApplicationManager.getApplication().runReadAction {
-                fileEditorManager.openFile(file1, true)
-                fileEditorManager.openFile(file2, true)
+                fileEditorManager.requestOpenFile(file1)
+                fileEditorManager.requestOpenFile(file2)
             }
         }
 
@@ -107,8 +106,8 @@ class OpenTabsCollectorTest {
 
         runInEdtAndWait {
             ApplicationManager.getApplication().runReadAction {
-                fileEditorManager.openFile(file1, true)
-                fileEditorManager.openFile(file2, true)
+                fileEditorManager.requestOpenFile(file1)
+                fileEditorManager.requestOpenFile(file2)
             }
         }
 
