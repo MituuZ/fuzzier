@@ -38,9 +38,9 @@ object FileOpeningUtil {
         val previousFile = currentEditor?.virtualFile
 
         if (fileEditorManager.isFileOpen(virtualFile)) {
-            fileEditorManager.openFile(virtualFile, true)
+            fileEditorManager.openFile(virtualFile)
         } else {
-            fileEditorManager.openFile(virtualFile, true)
+            fileEditorManager.openFile(virtualFile)
             if (currentEditor != null && !newTab) {
                 fileEditorManager.selectedEditor?.let {
                     if (previousFile != null) {
